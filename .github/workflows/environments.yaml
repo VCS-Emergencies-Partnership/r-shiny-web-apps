@@ -1,0 +1,98 @@
+name: Environment Infrastructure
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - infrastructure/**/*
+      - .github/workflows/environments.yaml
+
+defaults:
+  run:
+    working-directory: infrastructure/environments
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  TF_CLI_ARGS: -no-color
+  TF_INPUT: false
+  TF_IN_AUTOMATION: 1
+  TF_VAR_container_registry_name: ${{ secrets.CONTAINER_REGISTRY_NAME }}
+  TF_VAR_container_registry_rg_name: ${{ secrets.CONTAINER_REGISTRY_RG_NAME }}
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    if: "! contains(toJSON(github.event.commits.*.message), '[ci skip]')"
+    strategy:
+      max-parallel: 5
+      matrix:
+        environment:
+          - prod
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: |
+            {
+              "clientId": "${{ secrets.ARM_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}",
+              "subscriptionId": "${{ secrets.ARM_SUBSCRIPTION_ID }}",
+              "tenantId": "${{ secrets.ARM_TENANT_ID }}"
+            }
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 0.14.0
+          terraform_wrapper: false
+
+      - name: "Terraform environment: ${{ matrix.environment }}"
+        run: echo ${{ matrix.environment }}
+
+      - name: Terraform Init
+        run: |
+          terraform init
+          terraform workspace new "${{ matrix.environment }}" || true
+          terraform workspace select "${{ matrix.environment }}"
+
+      - name: Get Terraform variables
+        id: vars
+        run: |
+          VARS_FILE="../clusters/${{ matrix.environment }}.tfvars"
+
+          # Don't fail if file doesn't exist
+          touch ${VARS_FILE}
+
+          # Output variables
+          cat ${VARS_FILE}
+
+          echo "::set-output name=tfvars::$VARS_FILE"
+
+      - name: Terraform Plan
+        run: terraform plan
+          -var-file="${{ steps.vars.outputs.tfvars }}"
+          -out tfplan
+
+      - name: Unlock resources
+        run: bash ../scripts/lockResourceGroups.sh
+          unlock
+          "$(terraform workspace show)"
+          "$(terraform output -json app-name | jq -r .)"
+
+      - name: Terraform Apply
+        run: terraform apply tfplan
+
+      - name: Lock resources
+        if: ${{ always() }}
+        run: bash ../scripts/lockResourceGroups.sh
+          lock
+          "$(terraform workspace show)"
+          "$(terraform output -json app-name | jq -r .)"

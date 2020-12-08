@@ -1,6 +1,26 @@
 # R Shiny Apps
 
-A simplified workflow for deploying R Shiny applications 
+A simplified workflow for deploying R Shiny applications
+
+## Deployment
+
+> These instructions are for the `prod` environment. Additional environments can be configured by
+> adding a new cluster into `/infrastructure/clusters` and adding the environment in
+> the `/.github/workflows/environments.yaml` file and adding to the `jobs.provision.strategy.matrix.environment`
+> key.
+
+Deployments are controlled automatically using [Terraform](https://www.terraform.io).
+
+To configure the deployed web apps, go to `/infrastructure/clusters/prod.tfvars` to configure the
+`prod` environment. The `web_apps` is a list of objects that takes the following parameters - all
+are required.
+
+ - **always_on** (boolean) - decides whether the web app turns off automatically or remains alive.
+ - **img** (string) - the Docker image name. Typically, will be the same as the folder names in `/packages`. 
+ - **name** (string) - the name of the web app, which will be displayed in the URL. Typically, this
+will be the same as `img`.
+ - **tag** (string) - the tag to deploy. A webhook is configured in the container registry to watch
+for changes. Typically, this will be `latest`.
 
 ## Development Mode
 
