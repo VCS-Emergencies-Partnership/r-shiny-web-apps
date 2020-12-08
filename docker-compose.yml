@@ -3,4 +3,11 @@
 # the apps running quickly.
 
 version: "3.7"
-services: {}
+services:
+  hello-world:
+    build:
+      context: ./packages/hello-world
+    ports:
+      - 3000:3838
+    volumes:
+      - ./packages/hello-world:/srv/shiny-server
