@@ -1,0 +1,61 @@
+# This is an example for building the Docker image. This
+# can be copy/pasted to create new applications, changing
+# values where appropriate (look for "CHANGE")
+#
+# Even though environment variables are used, they cannot be
+# used in all sections of the workflow configuration.
+
+name: Dashboard
+
+env:
+  IMAGE_NAME: dashboard
+
+on:
+  push:
+    paths:
+      - packages/dashboard/**/*
+      - .github/workflows/dashboard.yaml
+
+defaults:
+  run:
+    working-directory: packages/dashboard
+
+## No changes required from here
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "! contains(toJSON(github.event.commits.*.message), '[ci skip]')"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Login to Docker registry
+        run: docker login
+          ${{ secrets.CONTAINER_REGISTRY_SERVER }}
+          --username=${{ secrets.CONTAINER_REGISTRY_USERNAME }}
+          --password=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+
+      - name: Generate image tag
+        id: tag
+        run: |
+          BRANCH=${GITHUB_REF#refs/heads/}
+          echo "::set-output name=branch::$BRANCH"
+
+          CLEAN_TAG=$(echo $BRANCH | tr "/" "-")
+          DOCKER_TAG=$CLEAN_TAG
+          [ "$CLEAN_TAG" == "main" ] && DOCKER_TAG=latest
+
+          echo "::set-output name=docker_tag::$DOCKER_TAG"
+
+      - name: Tag name
+        run: echo ${{ steps.tag.outputs.docker_tag }}
+
+      - name: Build Docker image
+        run: docker build -t
+          ${{ secrets.CONTAINER_REGISTRY_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.docker_tag }}
+          .
+
+      - name: Publish Docker image
+        run: docker push
+          ${{ secrets.CONTAINER_REGISTRY_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.docker_tag }}
