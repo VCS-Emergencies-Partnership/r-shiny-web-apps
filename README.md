@@ -76,6 +76,16 @@ A list of packages, and the local URLs in the Docker Compose stack.
  - [dashboard](http://localhost:3000)
  - [hello-world](http://localhost:3001)
 
+### Adding A New R Application
+
+In order to create a new application in the repo, will need to make the following changes (use the
+`hello-world` as the example).
+
+ - Add a new service in `/docker-compose.yml`
+ - Create a new workflow file in `/.github/workflows`
+ - Add the web app configuration in `/infrastructure/clusters/prod.tfvars`
+ - Create the application in `/packages`
+
 ## Dependency Management
 
 When Dockerising an R application, you will need to install your dependencies during the build
