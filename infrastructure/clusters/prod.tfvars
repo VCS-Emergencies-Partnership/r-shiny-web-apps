@@ -4,7 +4,7 @@ web_apps = [{
   name = "dashboard",
   tag = "latest"
 }, {
-  always_on = true,
+  always_on = false,
   img = "hello-world",
   name = "hello-world",
   tag = "latest"
