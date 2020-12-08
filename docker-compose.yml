@@ -1,0 +1,6 @@
+# Each of these represents a single R Shiny application and
+# acts as a convenience for getting a development version of
+# the apps running quickly.
+
+version: "3.7"
+services: {}
