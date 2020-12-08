@@ -73,7 +73,8 @@ indicates the package to build.
 
 A list of packages, and the local URLs in the Docker Compose stack.
 
- - [hello-world](http://localhost:3000)
+ - [dashboard](http://localhost:3000)
+ - [hello-world](http://localhost:3001)
 
 ## Dependency Management
 

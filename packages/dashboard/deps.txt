@@ -1,0 +1,10 @@
+DT
+echarts4r
+httr
+jsonlite
+leaflet
+sf
+shinydashboard
+shinydashboardPlus
+tidyverse
+viridis

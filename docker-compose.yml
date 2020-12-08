@@ -4,10 +4,18 @@
 
 version: "3.7"
 services:
+  dashboard:
+    build:
+      context: ./packages/dashboard
+    ports:
+      - 3000:3838
+    volumes:
+      - ./packages/dashboard:/srv/shiny-server
+
   hello-world:
     build:
       context: ./packages/hello-world
     ports:
-      - 3000:3838
+      - 3001:3838
     volumes:
       - ./packages/hello-world:/srv/shiny-server
