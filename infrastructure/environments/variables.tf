@@ -40,6 +40,7 @@ variable "web_apps" {
     img = string
     name = string
     tag = string
+    url = string
   }))
   default = []
 }
@@ -52,4 +53,13 @@ variable "web_apps_size" {
 variable "web_apps_tier" {
   description = "Web app plan tier"
   default = "Standard"
+}
+
+variable "web_apps_dns_resource_group" {
+  description = "Resource group name for the global DNS resource group"
+  type = string
+}
+
+variable "web_app_domain" {
+  description = "Domain for the web apps"
 }

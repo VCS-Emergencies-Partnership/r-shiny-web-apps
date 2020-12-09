@@ -21,6 +21,8 @@ are required.
 will be the same as `img`.
  - **tag** (string) - the tag to deploy. A webhook is configured in the container registry to watch
 for changes. Typically, this will be `latest`.
+ - **url** (string) - the url subdomain that this will appear under. This will be combined with the
+`domain` (typically, this will be `vcsep.org.uk`).
 
 ## Development Mode
 

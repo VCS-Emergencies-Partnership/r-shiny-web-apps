@@ -16,7 +16,7 @@ output "web-apps" {
   value = try([ for item in var.web_apps :
     {
       name = item.name
-      url = "http://${azurerm_app_service.web-apps[item.name].default_site_hostname}"
+      url = "https://${item.url}.${var.web_app_domain}"
     }
   ], [])
 }

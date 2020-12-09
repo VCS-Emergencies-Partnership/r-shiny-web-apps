@@ -20,7 +20,9 @@ No requirements.
 | container\_registry\_rg\_name | Name of the registry's resource group | `string` | n/a | yes |
 | location | Default location for resources | `string` | `"uksouth"` | no |
 | prefix | Resource prefix | `string` | `"vcsep-wa"` | no |
-| web\_apps | Web app configuration | <pre>list(object({<br>    always_on = bool<br>    img = string<br>    name = string<br>    tag = string<br>  }))</pre> | <pre>[<br>  {<br>    "always_on": true,<br>    "img": "hello-world",<br>    "name": "hello-world",<br>    "tag": "latest"<br>  }<br>]</pre> | no |
+| web\_app\_domain | Domain for the web apps | `any` | n/a | yes |
+| web\_apps | Web app configuration | <pre>list(object({<br>    always_on = bool<br>    img = string<br>    name = string<br>    tag = string<br>    url = string<br>  }))</pre> | `[]` | no |
+| web\_apps\_dns\_resource\_group | Resource group name for the global DNS resource group | `string` | n/a | yes |
 | web\_apps\_size | Web app plan size | `string` | `"S1"` | no |
 | web\_apps\_tier | Web app plan tier | `string` | `"Standard"` | no |
 
