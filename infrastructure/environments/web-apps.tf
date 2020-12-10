@@ -125,7 +125,21 @@ resource "azurerm_frontdoor" "web-apps" {
   }
 
   routing_rule {
-    accepted_protocols = ["Http", "Https"]
+    accepted_protocols = ["Http"]
+    frontend_endpoints = [
+      format(local.name_format, "webapps-${each.value.img}"),
+      format(local.name_format, "webapps-custom-${each.value.img}")
+    ]
+    name = format(local.name_format, "webapps-httpredirect${each.value.img}")
+    patterns_to_match = ["/*"]
+    redirect_configuration {
+      redirect_protocol = "HttpsOnly"
+      redirect_type = "Found"
+    }
+  }
+
+  routing_rule {
+    accepted_protocols = ["Https"]
     frontend_endpoints = [
       format(local.name_format, "webapps-${each.value.img}"),
       format(local.name_format, "webapps-custom-${each.value.img}")
