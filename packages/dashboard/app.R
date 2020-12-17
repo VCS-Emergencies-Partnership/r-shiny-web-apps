@@ -184,6 +184,22 @@ par_table_tc_avg <- par_table %>%
 
 # --- areas to focus
 covid_area2focus <- read_csv('data/areas_to_focus/areas2focus_covid.csv')
+
+# covid name for table
+covid_week = tail(names(covid_area2focus),1)
+covid_week = strsplit(covid_week, " ")
+covid_week = paste('Week', covid_week[[1]][2],'\n')
+
+covid_area2focus <- covid_area2focus %>%
+  # for now removing (don't think this data has data for these areas anyway)
+  filter(TacticalCell != "Northern Ireland and the Isle of Man",
+             TacticalCell != "Scotland",
+             TacticalCell != "Wales") %>%
+  rename('covid cases per 100,000'=tail(names(.),1))
+  
+
+
+
 # -- vcs indicators
 requests <- read_csv('data/vcs_indicators/requests_this_week_and_last.csv')
 volunteers <- read_csv('data/vcs_indicators/volunteer-capacity-lad19CD-tc.csv')
@@ -382,9 +398,9 @@ body <- dashboardBody(
                     column(width = 12,
                   # - row 2 (action areas) -
                   box( width = NULL,  collapsible = T, collapsed=F,
-                    title = "Areas to focus", height='400px',
-                      DT::dataTableOutput('areas2focus'),
-                      #style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
+                    title = "Areas to focus", #height='400px',
+                      DT::dataTableOutput('areas2focus', height='325px'),
+                      style = "height:400px; overflow-y: scroll;overflow-x: scroll;"
                       )
              )),
 
@@ -755,16 +771,16 @@ server = function(input, output) {
   # -- covid
   filtered_covid_areas <- reactive({
     if(input$tactical_cell == '-- England --') {
-      covid_lads_in_tc <- covid_area2focus %>% arrange(-`Vulnerability quintile`, -`week 46`) %>%
-        select('Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, 'Latest covid cases'=tail(names(.),1), 'LAD19CD')
-      print(covid_lads_in_tc)
+      covid_lads_in_tc <- covid_area2focus %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
+        select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`)
+      #print(covid_lads_in_tc)
     }
     else {
 
     lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell)
     # order descending by quintile and covid cases
-    covid_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`week 46`) %>%
-      select('Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, 'Latest covid cases'=tail(names(.),1), 'LAD19CD')
+    covid_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
+      select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`)
     }
 
   })
@@ -2439,6 +2455,7 @@ server = function(input, output) {
       if (input$theme == 'Covid-19') {
         # get current covid data for selected tactical cell - done in reactive -
         curr_covid_list <-filtered_covid_areas()
+        
         # get volunteer data (not filtered by tactical cell)
         volunteers_available <- volunteers
 
@@ -2448,11 +2465,19 @@ server = function(input, output) {
                                                 mean_score >= 2.5 ~ 'Low',
                                                 (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
                                                 is.na(mean_score) ~ 'Data unavailable')) %>%
-        select('Local Authority', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `Latest covid cases`)
+        select('Local Authority', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `covid cases per 100,000`)
 
+        print(covid_cases2volunteers)
         # - order
-        covid_cases2volunteers <- covid_cases2volunteers %>% arrange(-`Overall vulnerability`, -`Latest covid cases`, -Score) %>%
-          select(-Score) %>% rename(`Volunteer presence`=`Volunteer capacity`)
+        covid_cases2volunteers <- covid_cases2volunteers %>% arrange(-`Overall vulnerability`, -`covid cases per 100,000`, -Score) %>%
+          select(-Score) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
+          mutate_at(vars(`covid cases per 100,000`), replace_na, 'NA') %>%
+          # renaming coivd cases to show week - hate format
+          rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .))
+         
+        
+        
+        # append covid week to column name
 
 
        # -- if want to show whole of the UK --
@@ -2470,9 +2495,9 @@ server = function(input, output) {
                        "function(settings, json) {",
                        paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                        "}")
-                   )) #%>%
-            
-                #formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
+                   ))
+        
+          #%>%#formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
               })
 
             }
