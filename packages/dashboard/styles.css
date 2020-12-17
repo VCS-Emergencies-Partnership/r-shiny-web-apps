@@ -58,3 +58,8 @@ h1, h2, h3, h4 { font-weight: 400; }
   opacity: 0.95;
   transition-delay: 0;
 }
+
+
+.sidebar-menu > li {
+    white-space: normal;
+}

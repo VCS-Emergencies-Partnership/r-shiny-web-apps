@@ -10,6 +10,10 @@ library(viridis)
 library(DT)
 library(shiny)
 library(echarts4r)
+library(feather)
+library(scales)
+library(htmlwidgets)
+library(magrittr)
 
 
 # --- read in vulnerablity indices ---
@@ -77,7 +81,7 @@ lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>% filter(!is.na(fill))
 # tactical cells
 tactical_cells <- area_lookup_tc2lad %>% filter(TacticalCell != 'Wales' & TacticalCell != 'Northern Ireland and the Isle of Man' & TacticalCell != 'Scotland')
 tactical_cells <- unique(tactical_cells$TacticalCell)
-tactical_cells <- c('--All UK--', tactical_cells)
+tactical_cells <- c('-- England --', tactical_cells)
 
 #vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
 
@@ -86,25 +90,97 @@ tactical_cells <- c('--All UK--', tactical_cells)
 
 # --- Metadata ----
 # --- people at risk data ---
-par_table <- read_csv('data/people_at_risk/people_at_risk_table.csv')
+par_table <- read_feather('data/people_at_risk/people-at-risk.feather')
 
-# calculate eng averages
+# temp fix of typo 
+par_table <- par_table %>% rename('lad_prop_recieving_section_95_support'=lad_prop_receving_section95_support,
+                                  'lad_prop_unemployed_on_ucred' = 'lad_prop_upemployed_on_ucred') 
+
+# just working with engalnd for now
+england_regions = c("North", "Central", "London", "South and the Channel Islands", "South East")
+
+# calculate averages for all local authorities across england - to me this is the avg across england
+# need to select 
 par_table_lad_avg <- par_table %>%
-  summarise(across(c(`LAD_int_Proportion of neighbourhoods in 20% most digitally excluded`:`LAD_perc_People receiving Section 95 support`), ~ mean(.x, na.rm=T))) %>%
-  #rename columns
-  mutate('LAD19CD'='England avg') %>%
-  mutate('TacticalCell'='England') %>%
+  select(
+         'Proportion of neighbourhoods in 20% most digitally excluded',
+         'percent_digitally_excluded',
+         'People receiving Section 95 support',
+         'lad_prop_recieving_section_95_support',
+         `Percentage of population who are ethnic minority`,
+         `week 49`,
+         `Number of households in fuel poverty1`,
+         `Proportion of households fuel poor (%)`,
+         `Homelessness (rate per 1000)`,
+         `lad_total_homeless`,
+         'lad_prop_homeless',
+         `Not in employment`,
+         'lad_prop_unemployed_on_ucred',
+         `Clinically extremely vulnerable`,
+         `Proportion Clinically extremely vulnerable`
+         ) %>%
+  summarise_all(., list(mean), na.rm=T) %>%
+  mutate('LAD19CD'='lad_avg', 'TacticalCell'='lad_avg') %>%
   select('LAD19CD', 'TacticalCell', everything())
 
-# add england avg to par table as a row
-par_table_tc_avg <- par_table %>% select(`tc_int_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_perc_People receiving Section 95 support`) %>%
+# calculate the tactical cell average.
+par_table_tc_avg <- par_table %>% 
+  select(
+    `tc_Proportion of neighbourhoods in 20% most digitally excluded`,
+    `tc_percent_digitally_excluded`,
+    `tc_People receiving Section 95 support`,
+    `tc_prop_people_recieving_section_95_support`,
+    `tc_proportion`,
+    `tc_cases_per_10000_for_current_week`,
+    `tc_Number of households in fuel poverty1`,
+    'tc_prop_households_fuel_poor',
+    'tc_total_homeless',
+    `Homelessness per 1000 in tc`,
+    'tc_prop_homeless',
+    `tc_Not in employment`,
+    `tc_prop_unemployed_on_universal_credit`,
+    `tc_Clinically extremely vulnerable`,
+    `tc_Clinically vulnerable proportion of population`
+    ) %>%
   unique() %>%
-  mutate(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1)) %>%
-  summarise(across(c(`tc_int_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_perc_People receiving Section 95 support`), ~ mean(.x, na.rm=T))) %>%
-  #rename columns
-  mutate('LAD19CD'='TC avg') %>%
-  mutate('TacticalCell'='TC avg') %>%
+  summarise_all(., list(mean), na.rm=T) %>%
+  summarise_all(., list(round), 2) %>%
+  mutate('LAD19CD'='tc_avg', 'TacticalCell'='tc_avg') %>%
   select('LAD19CD', 'TacticalCell', everything())
+
+
+
+
+#par_table_lad_avg <- par_table %>% filter(TacticalCell %in% england_regions) %>%
+#  mutate(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1)) %>%
+#  summarise(across(c(`LAD_int_Proportion of neighbourhoods in 20% most digitally excluded`:`LAD_perc_People receiving Section 95 support`), ~ mean(.x, na.rm=T))) %>%
+  #rename columns
+#  mutate('LAD19CD'='All LADs in England avg') %>%
+#  mutate('TacticalCell'='All LADs in England avg') %>%
+#  select('LAD19CD', 'TacticalCell', everything())
+
+
+# calculate averages for local authorities within a region 
+#par_table_avg_per_region <- area_avg %>% filter(TacticalCell %in% england_regions) %>%
+#  select('LAD19CD', 'TacticalCell',`LAD_int_Proportion of neighbourhoods in 20% most digitally excluded`:`LAD_perc_People receiving Section 95 support`) %>%
+#  mutate(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1))
+
+#par_table_avg_per_region <- aggregate(par_table_avg_per_region[,3:18], list(par_table_avg_per_region$TacticalCell), mean, na.rm=TRUE, na.action=NULL)
+
+#par_table_avg_per_region <- par_table_avg_per_region %>% rename('TacticalCell'=Group.1)
+
+# avg for tactical cells
+#par_table_tc_avg <- par_table %>% filter(TacticalCell %in% england_regions) %>%
+#  select(`tc_int_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_perc_People receiving Section 95 support`) %>%
+#  unique() %>%
+#  mutate(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1)) %>%
+#  summarise(across(c(`tc_int_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_perc_People receiving Section 95 support`), ~ mean(.x, na.rm=T))) %>%
+#  #rename columns
+#  mutate('LAD19CD'='TC avg') %>%
+#  mutate('TacticalCell'='TC avg') %>%
+#  select('LAD19CD', 'TacticalCell', everything())
+
+
 
 # --- areas to focus
 covid_area2focus <- read_csv('data/areas_to_focus/areas2focus_covid.csv')
@@ -113,11 +189,9 @@ requests <- read_csv('data/vcs_indicators/requests_this_week_and_last.csv')
 volunteers <- read_csv('data/vcs_indicators/volunteer-capacity-lad19CD-tc.csv')
 
 
-
-
 # ---  dashboard --- #
 # --- header --- #
-header <- dashboardHeaderPlus(title = "VCSEP Insights Platform", titleWidth = "300px",
+header <- dashboardHeaderPlus(title = "VCSEP Insights", titleWidth = "300px",
                               dropdownMenu(
                                 type = "notifications",
                                 icon = icon("question-circle"),
@@ -209,31 +283,29 @@ sidebar <- dashboardSidebar(
                        menuSubItem(HTML("Areas at risk in an emergency"), tabName="unmetneed", icon=icon("hands-helping"))),
               # -- trying conditional panel ---
               conditionalPanel(condition = "input.sidebar_id == 'unmetneed'",
-                               br(),
-                               p(style="text-align: justify;",
-                                 "Choose an Area and Theme", tags$br(), "to find places in need"),
-                               br(),
+                               div(style="text-align: justify;",
+                                   br(),
+                               p("This dashboard is to help answer the",tags$br(), "question of what",
+                                 tags$strong("areas and people"), tags$br(), "would be/are at risk should the", tags$br(),
+                                tags$strong("emergency"), "scenario selected occur")),
                                selectInput("tactical_cell",
                                            label = "Choose Region",
                                            choices = sort(tactical_cells),
-                                            selected = "--All UK--"
+                                            selected = "-- England --"
 
                                ),
-                               br(),
                                uiOutput("secondSelection"),
 
-                               br(),
-
                                selectInput("theme",
-                                    label="Select a Theme",
+                                    label="Select an emergency",
                                     choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
                                     selected="Covid-19")
               ),
 
-              menuItem(HTML("Emergencies Partnership<br/>Statistics"), tabName='vcs_usage', startExpanded = F, icon=icon('balance-scale-right'),
-                       menuSubItem("Requests", tabName='request_data'),
-                       menuSubItem("Pulse Check", tabName="pulse_check"),
-                       menuSubItem("Volunteer Capacity", tabName="vol_capacity")),
+              #menuItem(HTML("Emergencies Partnership<br/>Statistics"), tabName='vcs_usage', startExpanded = F, icon=icon('balance-scale-right'),
+              #         menuSubItem("Requests", tabName='request_data'),
+              #         menuSubItem("Pulse Check", tabName="pulse_check"),
+              #         menuSubItem("Volunteer Capacity", tabName="vol_capacity")),
 
               menuItem("References", tabName='references', icon=icon('feather-alt')),
 
@@ -310,9 +382,9 @@ body <- dashboardBody(
                     column(width = 12,
                   # - row 2 (action areas) -
                   box( width = NULL,  collapsible = T, collapsed=F,
-                    title = "Areas to focus",
+                    title = "Areas to focus", height='400px',
                       DT::dataTableOutput('areas2focus'),
-                      style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
+                      #style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
                       )
              )),
 
@@ -323,33 +395,99 @@ body <- dashboardBody(
                           width = 12,
                           box(
                             width = NULL, collapsible = T, collapsed=F,#solidHeader = TRUE, status='primary',
-                            title = "People at Risk", align = "center", #height = "600px"
-                            #DT::dataTableOutput('people_at_risk'),
-                            #uiOutput('Population'),
-                            #echarts4rOutput('total_population',height='60px'),
-                            uiOutput('bame_population_text'),
-                            echarts4rOutput('bame_population', height='60px'),
-                            uiOutput('section95_text'),
-                            echarts4rOutput('section95', height='60px'),
-                            uiOutput('homeless_text'),
-                            echarts4rOutput('homeless', height='60px'),
-                            uiOutput('fuelp_text'),
-                            echarts4rOutput('fuelp',height='60px'),
-                            uiOutput('unemployment_text'),
-                            echarts4rOutput('unemployment',height='60px'),
-                            uiOutput('digital_text'),
-                            echarts4rOutput('digital',height='60px'),
-                            uiOutput('shielding_text'),
-                            echarts4rOutput('shielding_f',height='60px'),
-                            style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
+                            title = "People at risk", align = "center", style = "height:300px; overflow-y: scroll;overflow-x: scroll;",
+                            
+                            # multi columned box
+                            fluidRow(
+                              column(
+                                width = 6,
+                                  uiOutput('bame_population_text'),
+                                  echarts4rOutput('bame_population', height='40px'),
+                                  rightBorder=T,
+                                  marginBottom=T
+                              ),
+                              
+                              column(
+                                width = 6,
+                                  uiOutput('section95_text'),
+                                  echarts4rOutput('section95', height='40px'),
+                                  rightBorder=T,
+                                  marginBottom =T
+                                )
+                              ),
+                            
+                            fluidRow(
+                              column(
+                                width = 6,
+                                uiOutput('homeless_text'),
+                                echarts4rOutput('homeless', height='40px'),
+                                rightBorder=T,
+                                marginBottom=T
+                              ),
+                              
+                              column(
+                                width = 6,
+                                uiOutput('fuelp_text'),
+                                echarts4rOutput('fuelp',height='40px'),
+                                rightBorder=T,
+                                marginBottom =T
+                              )
+                            ),
+                            fluidRow(
+                              column(
+                                width = 6,
+                                uiOutput('unemployment_text'),
+                                echarts4rOutput('unemployment',height='40px'),
+                                rightBorder=T,
+                                marginBottom=T
+                              ),
+                              
+                              column(
+                                width = 6,
+                                uiOutput('digital_text'),
+                                echarts4rOutput('digital',height='40px'),
+                                rightBorder=T,
+                                marginBottom =T
+                              )
+                            ),
+                            fluidRow(
+                              column(
+                                width = 6,
+                                uiOutput('shielding_text'),
+                                echarts4rOutput('shielding_f',height='40px'),
+                                rightBorder=T,
+                                marginBottom=T
+                              )
+                            )
                           )
                         )
-                        ),
+                      ),
+                            
+                            #echarts4rOutput('total_population',height='60px'),
+                            #uiOutput('bame_population_text'),
+                            #echarts4rOutput('bame_population', height='40px'),
+                        #     uiOutput('section95_text'),
+                        #     echarts4rOutput('section95', height='40px'),
+                        #     uiOutput('homeless_text'),
+                        #     echarts4rOutput('homeless', height='40px'),
+                        #     uiOutput('fuelp_text'),
+                        #     echarts4rOutput('fuelp',height='40px'),
+                        #     uiOutput('unemployment_text'),
+                        #     echarts4rOutput('unemployment',height='40px'),
+                        #     uiOutput('digital_text'),
+                        #     echarts4rOutput('digital',height='40px'),
+                        #     uiOutput('shielding_text'),
+                        #     echarts4rOutput('shielding_f',height='40px'),
+                        #     style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
+                        #   )
+                        # )
+                        # ),
+
                         fluidRow(
                         column(width = 12,
-                               box(
-                                 width = NULL, collapsible = T, collapsed=F,#solidHeader = TRUE, status='primary',
-                                 title = "People in Need", align = "center", #height = "600px"
+                             box(
+                                width = NULL, collapsible = T, collapsed=F,#solidHeader = TRUE, status='primary',
+                                 title = "People in need", align = "center", #height = "600px"
                                  uiOutput('people_in_Need'),
                                  style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
                                )
@@ -361,12 +499,10 @@ body <- dashboardBody(
               # column - 2
               column( width = 6,
                     # - row 1 -
-                    tabBox(
-                      title = "Map", side = "right",
-                      id = 'tabset2', width= NULL,
-                    # bivariate
-                    tabPanel(title = "Vulnerability vs Capacity to cope",
-                      width = NULL, height = "675px", #solidHeader = TRUE, status='primary',
+                    box(
+                      # bivariate
+                      title = "Areas at risk",
+                      width = NULL, height = "750px", #solidHeader = TRUE, status='primary',
                       leafletOutput("map", height = "650px"),
 
                     absolutePanel(
@@ -375,19 +511,18 @@ body <- dashboardBody(
                       draggable = FALSE, height = "auto",
                       img(src = "bivar-legend.png", width = 250)
                     )
-                  )
                 )
-            )
+              )
         )
     ),
 
   # - Request
-  tabItem(tabName = 'request_data',
-          h2("Request stats")),
-  tabItem(tabName = 'pulse_check',
-          h2("Pulse stats")),
-  tabItem(tabName = 'vol_capacity',
-          h2("volunteer capacity analysis")),
+  # tabItem(tabName = 'request_data',
+  #        h2("Request stats")),
+  #tabItem(tabName = 'pulse_check',
+  #        h2("Pulse stats")),
+  #tabItem(tabName = 'vol_capacity',
+  #        h2("volunteer capacity analysis")),
   tabItem(tabName = 'references',
           fluidRow(style="padding-right:120px;padding-left:120px;padding-top:40px;padding-bottom:40px",
                    # column 1
@@ -427,7 +562,7 @@ server = function(input, output) {
       output$welcome <- renderUI({
 
         div(
-          h2(tags$strong('The Emergencies Partnership Insights Platform')),
+          h2(tags$strong('Insights from the Emergencies Partnership')),
           hr(),
           h4('Bringing together data to', tags$strong('improve collaboration'), 'across the voluntary and community sector,',
              tags$strong('before,'), tags$strong('during,'), "and", tags$strong('after'), "an", tags$strong("emergency"), ""),
@@ -549,8 +684,8 @@ server = function(input, output) {
   # ---- Adjust LAD options based on tactical cell ---
   output$secondSelection <- renderUI({
     lads2select <- unique(filteredLA()$Name)
-    lads2select <- c('-- all LADs in TC --',lads2select)
-    selectInput("lad_selected", "Local Authority", choices = sort(lads2select), selected='-- all LADs in TC --')
+    lads2select <- c('All local authorities in region',lads2select)
+    selectInput("lad_selected", "Local Authority", choices = sort(lads2select), selected='All local authorities in region')
   })
 })
 
@@ -575,6 +710,8 @@ server = function(input, output) {
 
 
   filterpar_tab <- reactive({
+    
+    for_tc <- par_table %>% filter(TacticalCell == input$tactical_cell)
 
     # --- tactical cells ---
     # -- integers
@@ -590,15 +727,15 @@ server = function(input, output) {
 
     #names(for_tc_perc) = gsub(pattern = "tc_perc_", replacement = "perc_", x = names(for_tc_perc))
 
-    tc_table <-  par_table %>% filter(TacticalCell == input$tactical_cell) %>%
-      select('TacticalCell', `tc_int_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_perc_People receiving Section 95 support`) %>%
-      mutate(`tc_int_Fuel Poor Households`= round(`tc_int_Fuel Poor Households`, 1)) %>%
-      mutate(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1)) %>%
-        unique()
+    #tc_table <-  par_table %>% filter(TacticalCell == input$tactical_cell) %>%
+    #  select('TacticalCell', `tc_int_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_perc_People receiving Section 95 support`) %>%
+    #  mutate(`tc_int_Fuel Poor Households`= round(`tc_int_Fuel Poor Households`, 1)) %>%
+    #  mutate(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1)) %>%
+    #    unique()
 
-    names(tc_table) = gsub(pattern = "tc_int_", replacement = "int_", x = names(tc_table))
-    names(tc_table) = gsub(pattern = "tc_perc_", replacement = "perc_", x = names(tc_table))
-    print(tc_table)
+    #names(tc_table) = gsub(pattern = "tc_int_", replacement = "int_", x = names(tc_table))
+    #names(tc_table) = gsub(pattern = "tc_perc_", replacement = "perc_", x = names(tc_table))
+    #print(tc_table)
 
 
 
@@ -617,7 +754,7 @@ server = function(input, output) {
   # --- Areas to focus ----
   # -- covid
   filtered_covid_areas <- reactive({
-    if(input$tactical_cell == '--All UK--') {
+    if(input$tactical_cell == '-- England --') {
       covid_lads_in_tc <- covid_area2focus %>% arrange(-`Vulnerability quintile`, -`week 46`) %>%
         select('Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, 'Latest covid cases'=tail(names(.),1), 'LAD19CD')
       print(covid_lads_in_tc)
@@ -656,7 +793,7 @@ server = function(input, output) {
     if (input$sidebar_id == 'unmetneed') {
 
       # -- if showing whole of UK --
-      if(input$tactical_cell == '--All UK--') {
+      if(input$tactical_cell == '-- England --') {
 
         # vulnerable colurs
         # High income, High inequality --> #3F2949
@@ -714,7 +851,7 @@ server = function(input, output) {
 
         else{
 
-          if (input$lad_selected == '-- all LADs in TC --') {
+          if (input$lad_selected == 'All local authorities in region') {
 
             # get all local authorities in tc
             curr_LA <- lad_uk2vuln_resilience %>% filter(TacticalCell == input$tactical_cell)
@@ -915,66 +1052,323 @@ server = function(input, output) {
       print(curr_table)
 
       # -- Don't have stats for the whole uk at the moment --
-      if (input$tactical_cell == '--All UK--') {
+      if (input$tactical_cell == '-- England --') {
+        
+        # select england level figures 
+        eng_table <- par_table %>% 
+          select('eng_people_recieving_section_95_support',
+                 'prop_eng_receiving_section_95_support',
+                 'england_proportion_bame',
+                 'eng_case_per_100000',
+                 'total_las_in_eng_with_data',
+                 'eng_total_fuel_poor_households',
+                 'eng_prop_households_fuel_poor',
+                 'eng_total_homeless',
+                 'proprotion_homeless',
+                 'eng_total_unemployed_on_ucred',
+                 'prop_eng_pop_unemployed_on_ucred',
+                 'total_shielding_eng',
+                 'proportion_total_shielding_Eng') 
+        
+        # --- England BAME stats ---
+        bame_to_plot  <- eng_table %>% select('england_proportion_bame') %>%
+          pivot_longer(`england_proportion_bame`, names_to = "Indicator", values_to = "proportion")
+        
+        bame_to_plot <- bame_to_plot %>% filter(!is.na(proportion)) %>%
+          unique() %>% mutate('proportion'=round(proportion,0))
 
-        tc = input$tactical_cell
-        title_needed <- paste0('People at risk in: ', tc)
-
+        bame_to_show <- paste0(round(bame_to_plot$proportion,0), "%")
+        
         output$bame_population_text <- renderUI({
-          div(style= " text-align: left;",
+          div(style= " text-align: center;",
             hr(),
-            h4(tags$strong('Proportion of population who are BAME:')),
-            p('Data not currently available at UK level')
+            p(bame_to_show, tags$br(),
+            "of the population are BAME"
+          )
           )
 
         })
+        
+        output$bame_population <- renderEcharts4r({
+        # # Plot population statistics
+        bame <- bame_to_plot %>%
+              e_charts(x = Indicator) %>%
+              e_bar(proportion, bar_width=0.1, showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
+              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+              #e_mark_line(data=eng_avg_bame, symbol = "none", lineStyle = list(color = "black")) %>%
+              e_hide_grid_lines() %>%
+              e_flip_coords() %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
 
+              #e_rm_axis(axis="x") %>%
+              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+              e_y_axis(show=F) %>%
+              e_legend(FALSE)
+
+                  })
+
+        # --- Section 95 Support ---
+        eng_sec95_to_write <- eng_table %>% select('eng_people_recieving_section_95_support','prop_eng_receiving_section_95_support') %>%
+          unique()
+        
+        eng_sec95_to_plot <- eng_sec95_to_write %>% select('prop_eng_receiving_section_95_support') %>%
+          pivot_longer('prop_eng_receiving_section_95_support', names_to = "Indicator", values_to = "proportion")
+        
+        eng_sec95_to_plot <- eng_sec95_to_plot %>% filter(!is.na(proportion)) %>%
+          unique()
+        
+        eng_sec95_to_write <- eng_sec95_to_write %>% filter(!is.na(eng_people_recieving_section_95_support) & !is.na('prop_eng_receiving_section_95_support'))
+        
+        write_eng_sec95 <- paste0("(",eng_sec95_to_write$prop_eng_receiving_section_95_support,"% of the population)")
+        
         output$section95_text <- renderUI({
-          div(style= " text-align: left;",
+          div(style= " text-align: center;",
               hr(),
-              h4(tags$strong('No. of people receiving Section 95 support:')),
-              p('Data not currently uavailable at UK level')
+              p(format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), tags$br(),
+                "people receiving Section 95 support")
+              #p(tags$strong('No. of people receiving Section 95 support:'), format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), "people", tags$br(), write_eng_sec95)
           )
         })
+        
+        output$section95 <- renderEcharts4r({
+                      # # Plot population statistics
+                      sec95 <- eng_sec95_to_plot %>%
+                        e_charts(x = Indicator) %>%
+                        e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+                        e_labels(position = "right", color='black') %>%
+                        e_color(c('purple')) %>%
+                        #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+                        #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+                        #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
+                        e_hide_grid_lines() %>%
+                        e_flip_coords() %>%
+                        e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
+
+                        #e_rm_axis(axis="x") %>%
+                        #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+                        e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+                        e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+                        e_y_axis(show=F) %>%
+                        e_legend(FALSE)
+
+                    })
+        
+        # --- homelessness ---
+        eng_homeless_to_write <- eng_table %>% select('eng_total_homeless','proprotion_homeless') %>%
+          unique()
+        
+        eng_homeless_to_plot <- eng_homeless_to_write %>% select('proprotion_homeless') %>%
+          pivot_longer('proprotion_homeless', names_to = "Indicator", values_to = "proportion")
+        
+        eng_homeless_to_plot <- eng_homeless_to_plot %>% filter(!is.na(proportion)) %>%
+          unique()
+        
+        eng_homeless_to_write <- eng_homeless_to_write %>% filter(!is.na(eng_total_homeless) & !is.na('proprotion_homeless'))
+        
+        write_eng_homeless <- paste0("(",eng_homeless_to_write$proprotion_homeless,"% of the population)")
+        
 
         output$homeless_text <- renderUI({
-          div(style= " text-align: left;",
+          div(style= " text-align: center;",
               hr(),
-              h4(tags$strong('Homelessness (rate per 1000):')),
-              p('Data not currently uavailable at UK level')
+              p(format(eng_homeless_to_write$eng_total_homeless, big.mark=',', scientific = F), tags$br(),
+                'homeless people')
+              #p(tags$strong('No. of people homeless:'), format(eng_homeless_to_write$eng_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_eng_homeless),
           )
         })
+        
+        output$homeless <- renderEcharts4r({
+          # # Plot population statistics
+          sec95 <- eng_homeless_to_plot %>%
+            e_charts(x = Indicator) %>%
+            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+            e_labels(position = "right", color='black') %>%
+            e_color(c('purple')) %>%
+            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
+            e_hide_grid_lines() %>%
+            e_flip_coords() %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
+            
+            #e_rm_axis(axis="x") %>%
+            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+            e_y_axis(show=F) %>%
+            e_legend(FALSE)
+          
+        })
+        
+        
+        # --- fuel poverty ---
+        
+        eng_fuelp_to_write <- eng_table %>% select('eng_total_fuel_poor_households','eng_prop_households_fuel_poor') %>%
+          unique()
+        
+        eng_fuelp_to_plot <- eng_fuelp_to_write %>% select('eng_prop_households_fuel_poor') %>%
+          pivot_longer('eng_prop_households_fuel_poor', names_to = "Indicator", values_to = "proportion")
+        
+        eng_fuelp_to_plot <- eng_fuelp_to_plot %>% filter(!is.na(proportion)) %>%
+          unique() %>%
+          mutate('proportion'=round(proportion,0))
+        
+        eng_fuelp_to_write <- eng_fuelp_to_write %>% filter(!is.na(eng_total_fuel_poor_households) & !is.na('eng_prop_households_fuel_poor'))
+        
+        write_eng_fuelp <- paste0("(",eng_fuelp_to_write$eng_prop_households_fuel_poor,"% of households)")
+        
 
         output$fuelp_text <- renderUI({
-          div(style= " text-align: left;",
+          div(style= " text-align: center;",
               hr(),
-              h4(tags$strong('Fuel Poverty:')),
-              p('Data not currently uavailable at UK level')
+              p(format(eng_fuelp_to_write$eng_total_fuel_poor_households, big.mark=',', scientific = F),
+                tags$br(),
+                "households in fuel poverty"
+              )
+              #p(tags$strong('No. of households in fuel poverty:'), format(eng_fuelp_to_write$eng_total_fuel_poor_households, big.mark=',', scientific = F), "households", tags$br(), write_eng_fuelp),
           )
         })
+        
+        output$fuelp <- renderEcharts4r({
+          # # Plot population statistics
+          fuelp_t <- eng_fuelp_to_plot %>%
+            e_charts(x = Indicator) %>%
+            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+            e_labels(position = "right", color='black') %>%
+            e_color(c('purple')) %>%
+            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
+            e_hide_grid_lines() %>%
+            e_flip_coords() %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
+            
+            #e_rm_axis(axis="x") %>%
+            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+            e_y_axis(show=F) %>%
+            e_legend(FALSE)
+          
+        })
 
+        # ---- unemployed ---
+        
+        eng_unem_to_write <- eng_table %>% select('eng_total_unemployed_on_ucred','prop_eng_pop_unemployed_on_ucred') %>%
+          unique()
+        
+        eng_unem_to_plot <- eng_unem_to_write %>% select('prop_eng_pop_unemployed_on_ucred') %>%
+          pivot_longer('prop_eng_pop_unemployed_on_ucred', names_to = "Indicator", values_to = "proportion")
+        
+        eng_unem_to_plot <- eng_unem_to_plot %>% filter(!is.na(proportion)) %>%
+          unique() %>%
+          mutate('proportion'=round(proportion,0))
+        
+        eng_unem_to_write <- eng_unem_to_write %>% filter(!is.na(eng_total_unemployed_on_ucred) & !is.na('prop_eng_pop_unemployed_on_ucred'))
+        
+        write_eng_unem <- paste0("(",eng_unem_to_write$prop_eng_pop_unemployed_on_ucred,"% of people)")
+        
+        
+        
         output$unemployment_text <- renderUI({
-          div(style= " text-align: left;",
+          div(style= " text-align: center;",
               hr(),
-              h4(tags$strong('Unemployed receiving Universal Credit:')),
-              p('Data not currently uavailable at UK level')
+              p(format(eng_unem_to_write$eng_total_unemployed_on_ucred, big.mark=',', scientific = F),
+                tags$br(),
+                "people unemployed on universal credit"
+              )
+              #p(tags$strong('No. of people unemployed receiving universal credit:'), format(eng_unem_to_write$eng_total_unemployed_on_ucred, big.mark=',', scientific = F), "people", tags$br(), write_eng_unem)
           )
+        })
+        
+        output$unemployment <- renderEcharts4r({
+          # # Plot population statistics
+          unem_t <- eng_unem_to_plot %>%
+            e_charts(x = Indicator) %>%
+            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+            e_labels(position = "right", color='black') %>%
+            e_color(c('purple')) %>%
+            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
+            e_hide_grid_lines() %>%
+            e_flip_coords() %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
+            
+            #e_rm_axis(axis="x") %>%
+            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+            e_y_axis(show=F) %>%
+            e_legend(FALSE)
+          
         })
 
         output$digital_text <- renderUI({
-          div(style= " text-align: left;",
+          div(style= " text-align: center;",
               hr(),
-              h4(tags$strong('Percentage of neighbourhoods in 20% most digitally excluded:')),
-              p('Data not currently uavailable at UK level')
+              p(tags$strong('Data not currently available at national level for digital exclusion'))
           )
         })
+        
+        # clear plot nothing
+        output$digital <- renderEcharts4r({
+          
+        })
+        
+        # --- people shielding ---
+        
+        eng_shielding_to_write <- eng_table %>% select('total_shielding_eng','proportion_total_shielding_Eng') %>%
+          unique()
+        
+        eng_shielding_to_plot <- eng_shielding_to_write %>% select('proportion_total_shielding_Eng') %>%
+          pivot_longer('proportion_total_shielding_Eng', names_to = "Indicator", values_to = "proportion")
+        
+        eng_shielding_to_plot <- eng_shielding_to_plot %>% filter(!is.na(proportion)) %>%
+          unique()
+        
+        eng_shielding_to_write <- eng_shielding_to_write %>% filter(!is.na(total_shielding_eng) & !is.na('proportion_total_shielding_Eng'))
+        
+        write_eng_shielding <- paste0("(",eng_shielding_to_write$proportion_total_shielding_Eng,"% of people)")
+        
+        
 
         output$shielding_text <- renderUI({
-          div(style= " text-align: left;",
+          div(style= " text-align: center;",
               hr(),
-              h4(tags$strong('No. people clinically extremely vulnerable:')),
-              p('Data not currently uavailable at UK level')
+              p(format(eng_shielding_to_write$total_shielding_eng, big.mark=',', scientific = F),
+                tags$br(),
+                "people clinically extremely vulnerable")
+              #p(tags$strong('No. of people clinically extremely vulnerable:'), format(eng_shielding_to_write$total_shielding_eng, big.mark=',', scientific = F), "people", tags$br(), write_eng_shielding)
           )
+        })
+        
+        output$shielding_f <- renderEcharts4r({
+          # # Plot population statistics
+          shielding_t <- eng_shielding_to_plot %>%
+            e_charts(x = Indicator) %>%
+            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+            e_labels(position = "right", color='black') %>%
+            e_color(c('purple')) %>%
+            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
+            e_hide_grid_lines() %>%
+            e_flip_coords() %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
+            
+            #e_rm_axis(axis="x") %>%
+            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+            e_y_axis(show=F) %>%
+            e_legend(FALSE)
+          
         })
 
 
@@ -991,369 +1385,975 @@ server = function(input, output) {
 
       else {
         # summary for tactical cell
-        if (input$lad_selected == '-- all LADs in TC --') {
+        if (input$lad_selected == 'All local authorities in region') {
           #Tactical cell
           tc = input$tactical_cell
           title_needed <- paste0('People at risk in Tactical Cell: ', tc)
-
+          print('tactical cell test')
 
           # --- people at risk ----
 
           # --- population demographics ---
           #bame <- curr_table %>% select('TacticalCell',`int_Fuel Poor Households`,`perc_Fuel Poor Households`)
-          bame_to_plot <- curr_table %>% select('TacticalCell',`perc_Percentage of population who are ethnic minority`)
+          bame_to_plot <- curr_table %>% select(`tc_proportion`)
 
           # transpose dataframe
-          bame_to_plot  <- bame_to_plot %>% pivot_longer(`perc_Percentage of population who are ethnic minority`, names_to = "Indicator", values_to = "proportion")
-
-          # add in england avg
-          #bame_to_plot <- bame_to_plot %>% mutate(england_avg = par_table_tc_avg$`LAD_perc_Percentage of population who are ethnic minority`)
+          bame_to_plot  <- bame_to_plot %>% pivot_longer(`tc_proportion`, names_to = "Indicator", values_to = "proportion") %>%
+            unique() %>% filter(!is.na(proportion)) %>% 
+            mutate('proportion'=round(proportion,0))
 
           # for echarts
-          eng_avg_bame <- par_table_tc_avg %>% select(`tc_perc_Percentage of population who are ethnic minority`) %>%
-            select('xAxis' = `tc_perc_Percentage of population who are ethnic minority`) %>%
+          tc_avg_bame <- par_table_tc_avg %>% select(`tc_proportion`) %>%
+            mutate(`tc_proportion`=round(`tc_proportion`,0)) %>%
+            select('xAxis' = `tc_proportion`) %>%
             as.list()
+          
+          # to format percentage
+          bame_to_show <- paste0(round(bame_to_plot$proportion,0), "%")
 
+          # label to sho
+          label_to_show <- paste(round(par_table_tc_avg$`tc_proportion`,0), '%', '\n','(regional avg)')
+          
           output$bame_population_text <- renderUI({
-            div(style= " text-align: left;",
+            div(style= " text-align: center;",
                 hr(),
-                h4(tags$strong('Proportion of population who are BAME:')),
-                p(curr_table$`perc_Percentage of population who are ethnic minority`, '%', 'of the population are BAME in the', input$tactical_cell, 'region')
+                p(bame_to_show,
+                  tags$br(),
+                  'of the population are BAME')
+                #p(tags$strong('Proportion of population who are BAME:'), bame_to_show)
+                
             )
           })
-          #
+          
           output$bame_population <- renderEcharts4r({
             # # Plot population statistics
-            fuel_p <- bame_to_plot %>%
+            bame <- bame_to_plot %>%
               e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1) %>%
-              e_labels(position = "right") %>%
+              e_bar(proportion, bar_width=0.1, showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=eng_avg_bame, symbol = "none", lineStyle = list(color = "black")) %>%
+              e_mark_line(data=tc_avg_bame, symbol = "none", lineStyle = list(color = "black"), title=label_to_show, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=0, right=100, top=20, bottom=20, height='80%') %>%
-
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(min=0, max=100, show=F) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
-
+            
           })
 
           # --- section 95 support ----
-          section95_to_plot <- curr_table %>% select('TacticalCell',`int_People receiving Section 95 support`)
-
-          # transpose dataframe
-          section95_to_plot  <- section95_to_plot %>% pivot_longer(`int_People receiving Section 95 support`, names_to = "Indicator", values_to = "proportion")
-
-          # add in england avg
-          #section95_to_plot <- section95_to_plot %>% mutate(england_avg = par_table_test$`LAD_perc_Percentage of population who are ethnic minority`)
-
+          tc_sec95_to_write <- curr_table %>% select(`tc_People receiving Section 95 support`,'tc_prop_people_recieving_section_95_support') %>%
+            unique()
+          
+          tc_sec95_to_plot <- tc_sec95_to_write %>% select('tc_prop_people_recieving_section_95_support') %>%
+            pivot_longer('tc_prop_people_recieving_section_95_support', names_to = "Indicator", values_to = "proportion")
+          
+          tc_sec95_to_plot <- tc_sec95_to_plot %>% filter(!is.na(proportion)) %>%
+            unique()
+          
+          tc_sec95_to_write <- tc_sec95_to_write %>% filter(!is.na(`tc_People receiving Section 95 support`) & !is.na('tc_prop_people_recieving_section_95_support'))
+  
+          write_tc_sec95 <- paste0("(",tc_sec95_to_write$tc_prop_people_recieving_section_95_support,"% of the population)")
+  
           # for echarts
-          eng_avg_section95 <- par_table_tc_avg %>% select(`tc_int_People receiving Section 95 support`) %>%
-            mutate('xAxis' = round(`tc_int_People receiving Section 95 support`,0)) %>%
-            select('xAxis') %>%
+          tc_avg_section95 <- par_table_tc_avg %>% select(`tc_prop_people_recieving_section_95_support`) %>%
+            select('xAxis' = `tc_prop_people_recieving_section_95_support`) %>%
             as.list()
-
+          
+          tc_sec95_for_avg = paste0(par_table_tc_avg$tc_prop_people_recieving_section_95_support, '%', '\n','(regional avg)')
+                  
           output$section95_text <- renderUI({
-            div(style= " text-align: left;",
+            div(style= " text-align: center;",
                 hr(),
-                h4(tags$strong('No. of people receiving Section 95 support:')),
-                p(format(section95_to_plot$`proportion`, big.mark=',', scientific = F), 'people in the', input$tactical_cell, 'region are receiving Section 95 support')
+                p(format(tc_sec95_to_write$`tc_People receiving Section 95 support`, big.mark=',', scientific = F),
+                  tags$br(),
+                  'people receiving Section 95 support')
+                #p(tags$strong('No. of people receiving Section 95 support:'), format(tc_sec95_to_write$`tc_People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_tc_sec95)
             )
           })
-          #
+          
           output$section95 <- renderEcharts4r({
             # # Plot population statistics
-            fuel_p <- section95_to_plot %>%
+            sec95 <- tc_sec95_to_plot %>%
               e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1) %>%
-              e_labels(position = "right") %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
+              e_mark_line(data=tc_avg_section95, symbol = "none", lineStyle = list(color = "black"), title=tc_sec95_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=0, right=100, top=20, bottom=20, height='80%') %>%
-
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(min=0, max=22000, show=F) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
-
+            
           })
-
-          # --- Homelessness ----
-          #section95_to_plot <- curr_table %>% select('TacticalCell',`int_People receiving Section 95 support`)
-
-          # transpose dataframe
-          #section95_to_plot  <- section95_to_plot %>% pivot_longer(`int_People receiving Section 95 support`, names_to = "Indicator", values_to = "proportion")
-
-          # add in england avg
-          #section95_to_plot <- section95_to_plot %>% mutate(england_avg = par_table_test$`LAD_perc_Percentage of population who are ethnic minority`)
-
+          
+          
+          # --- homeless ----
+          tc_homeless_to_write <- curr_table %>% select(`tc_total_homeless`,'tc_prop_homeless') %>%
+            unique()
+          
+          tc_homeless_to_plot <- tc_homeless_to_write %>% select('tc_prop_homeless') %>%
+            pivot_longer('tc_prop_homeless', names_to = "Indicator", values_to = "proportion")
+          
+          tc_homeless_to_plot <- tc_homeless_to_plot %>% filter(!is.na(proportion)) %>%
+            unique() %>% mutate('proportion'=round(proportion,1))
+          
+          tc_homeless_to_write <- tc_homeless_to_write %>% filter(!is.na(`tc_total_homeless`) & !is.na('tc_prop_homeless'))
+          
+          write_tc_homeless <- paste0("(",tc_homeless_to_write$tc_prop_homeless,"% of the population)")
+          
           # for echarts
-          #eng_avg_section95 <- par_table_tc_avg %>% select(`tc_int_People receiving Section 95 support`) %>%
-          #  mutate('xAxis' = round(`tc_int_People receiving Section 95 support`,0)) %>%
-          #  select('xAxis') %>%
-          #  as.list()
-
+          tc_avg_homeless <- par_table_tc_avg %>% select(`tc_prop_homeless`) %>%
+            select('xAxis' = `tc_prop_homeless`) %>%
+            as.list()
+          print(tc_avg_homeless)
+          tc_homeless_for_avg = paste0(par_table_tc_avg$tc_prop_homeless, '%', '\n','(regional avg)')
+          
           output$homeless_text <- renderUI({
-            div(style= " text-align: left;",
+            div(style= " text-align: center;",
                 hr(),
-                h4(tags$strong('Homelessness (rate per 1000):')),
-                p('This is currently unavailable at tactical cell level'),
-                p('Please choose a local authority')
+                p(format(tc_homeless_to_write$tc_total_homeless, big.mark=',', scientific = F),
+                  tags$br(),
+                  "homeless people")
+                #p(tags$strong('No. of homeless people:'), format(tc_homeless_to_write$tc_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_tc_homeless)
             )
           })
+          
+          output$homeless <- renderEcharts4r({
+            # # Plot population statistics
+            sec95 <- tc_homeless_to_plot %>%
+              e_charts(x = Indicator) %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
+              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+              e_mark_line(data=tc_avg_homeless, symbol = "none", lineStyle = list(color = "black"), title=tc_homeless_for_avg, label=list(formatter='label',fontSize=10)) %>%
+              e_hide_grid_lines() %>%
+              e_flip_coords() %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
+              #e_rm_axis(axis="x") %>%
+              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+              e_y_axis(show=F) %>%
+              e_legend(FALSE)
+            
+          })
+          
 
-
-          # --- fuel_poverty ---
-          # -- select columns --
-          fuelp <- curr_table %>% select('TacticalCell',`int_Fuel Poor Households`,`perc_Fuel Poor Households`)
-          fuelp_to_plot <- fuelp %>% select('TacticalCell',`perc_Fuel Poor Households`)
-
-          # transpose dataframe
-          fuelp_to_plot <- fuelp_to_plot %>% pivot_longer(`perc_Fuel Poor Households`, names_to = "Indicator", values_to = "proportion")
-
-          # add in england avg
-          #fuelp_to_plot <- fuelp_to_plot %>% mutate(england_avg = par_table_tc_avg$`LAD_perc_Fuel Poor Households`)
-
+#           # --- fuel_poverty ---
+          
+          tc_fuelp_to_write <- curr_table %>% select(`tc_Number of households in fuel poverty1`,'tc_prop_households_fuel_poor') %>%
+            unique()
+          
+          tc_fuelp_to_plot <- tc_fuelp_to_write %>% select('tc_prop_households_fuel_poor') %>%
+            pivot_longer('tc_prop_households_fuel_poor', names_to = "Indicator", values_to = "proportion") 
+          
+          tc_fuelp_to_plot <- tc_fuelp_to_plot %>% filter(!is.na(proportion)) %>%
+            unique() %>%
+            mutate('proportion'=round(proportion,0))
+          
+          tc_fuelp_to_write <- tc_fuelp_to_write %>% 
+            filter(!is.na(`tc_Number of households in fuel poverty1`) & !is.na('tc_prop_households_fuel_poor')) %>%
+            mutate(`tc_Number of households in fuel poverty1`=round(`tc_Number of households in fuel poverty1`,0))
+          
+          write_tc_fuelp <- paste0("(",tc_fuelp_to_write$tc_prop_households_fuel_poor,"% of households)")
+          
           # for echarts
-          eng_avg <- par_table_tc_avg %>% select(`tc_perc_Fuel Poor Households`) %>%
-            select('xAxis' = `tc_perc_Fuel Poor Households`) %>%
+          tc_avg_fuelp <- par_table_tc_avg %>% select(`tc_prop_households_fuel_poor`) %>%
+            mutate(`tc_prop_households_fuel_poor`=round(`tc_prop_households_fuel_poor`,0)) %>%
+            select('xAxis' = `tc_prop_households_fuel_poor`) %>%
             as.list()
-
+          
+          tc_fuelp_for_avg = paste0(round(par_table_tc_avg$tc_prop_households_fuel_poor,0), '%', '\n','(regional avg)')
+          
           output$fuelp_text <- renderUI({
-            div(style= " text-align: left;",
-              hr(),
-              h4(tags$strong('Fuel Poverty:')),
-              p(fuelp$`perc_Fuel Poor Households`, '%', "(", format(fuelp$`int_Fuel Poor Households`, big.mark=',', scientific=F), ")", 'of households are classified as fuel poor in the', input$tactical_cell, 'region')
-            )
-          })
-          #
-          output$fuelp <- renderEcharts4r({
-          # # Plot population statistics
-           fuel_p <- fuelp_to_plot %>%
-            e_charts(x = Indicator) %>%
-            e_bar(proportion, bar_width=0.1) %>%
-             e_labels(position = "right") %>%
-             #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-             #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-             e_mark_line(data=eng_avg, symbol = "none", lineStyle = list(color = "black")) %>%
-             e_hide_grid_lines() %>%
-             e_flip_coords() %>%
-             e_grid(containLabel = TRUE, left=0, right=100, top=20, bottom=20, height='80%') %>%
-
-             #e_rm_axis(axis="x") %>%
-             #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-             e_x_axis(min=0, max=100, show=F) %>%
-             e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-             e_y_axis(show=F) %>%
-             #e_tooltip() %>%
-             e_legend(FALSE)
-
-           })
-
-          # --- Unemployment ---
-          # -- select columns --
-          unemployment <- curr_table %>% select('TacticalCell',`int_Unemployed receiving Universal Credit`,`perc_Unemployed receiving Universal Credit`)
-          unemployment_to_plot <- unemployment %>% select('TacticalCell',`perc_Unemployed receiving Universal Credit`)
-
-          # transpose dataframe
-          unemployment_to_plot <- unemployment_to_plot %>% pivot_longer(`perc_Unemployed receiving Universal Credit`, names_to = "Indicator", values_to = "proportion")
-
-          # add in england avg
-          #fuelp_to_plot <- fuelp_to_plot %>% mutate(england_avg = par_table_tc_avg$`LAD_perc_Fuel Poor Households`)
-
-          # for echarts
-          eng_avg_unemployment <- par_table_tc_avg %>% select(`tc_perc_Unemployed receiving Universal Credit`) %>%
-            select('xAxis' = `tc_perc_Unemployed receiving Universal Credit`) %>%
-            as.list()
-
-          output$unemployment_text <- renderUI({
-            div(style= " text-align: left;",
+            div(style= " text-align: center;",
                 hr(),
-                h4(tags$strong('Unemployed receiving Universal Credit:')),
-                p(unemployment$`perc_Unemployed receiving Universal Credit`, '%', "(", format(unemployment$`int_Unemployed receiving Universal Credit`, big.mark=',', scientific=F), ")", 'of people are unemployed and receiving Universal Credit in the', input$tactical_cell, 'region')
+                p(format(tc_fuelp_to_write$`tc_Number of households in fuel poverty1`, big.mark=',', scientific = F),
+                  tags$br(),
+                  'households in fuel poverty')
+                #p(tags$strong('No. of households in fuel poverty:'), format(tc_fuelp_to_write$`tc_Number of households in fuel poverty1`, big.mark=',', scientific = F), "households", tags$br(), write_tc_fuelp)
             )
           })
-          #
+          
+          output$fuelp <- renderEcharts4r({
+            # # Plot population statistics
+            sec95 <- tc_fuelp_to_plot %>%
+              e_charts(x = Indicator) %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
+              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+              e_mark_line(data=tc_avg_fuelp, symbol = "none", lineStyle = list(color = "black"), title=tc_fuelp_for_avg, label=list(formatter='label',fontSize=10)) %>%
+              e_hide_grid_lines() %>%
+              e_flip_coords() %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
+              #e_rm_axis(axis="x") %>%
+              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+              e_y_axis(show=F) %>%
+              e_legend(FALSE)
+            
+          })
+
+#           # --- Unemployment ---
+          tc_unem_to_write <- curr_table %>% select(`tc_Not in employment`,'tc_prop_unemployed_on_universal_credit') %>%
+            unique()
+          
+          tc_unem_to_plot <- tc_unem_to_write %>% select('tc_prop_unemployed_on_universal_credit') %>%
+            pivot_longer('tc_prop_unemployed_on_universal_credit', names_to = "Indicator", values_to = "proportion") 
+          
+          tc_unem_to_plot <- tc_unem_to_plot %>% filter(!is.na(proportion)) %>%
+            unique() %>%
+            mutate('proportion'=round(proportion,0))
+          
+          tc_unem_to_write <- tc_unem_to_write %>% filter(!is.na(`tc_Not in employment`) & !is.na('tc_prop_unemployed_on_universal_credit'))
+          
+          write_tc_unem <- paste0("(",tc_unem_to_write$tc_prop_unemployed_on_universal_credit,"% of people)")
+          
+          # for echarts
+          tc_avg_unem <- par_table_tc_avg %>% select(`tc_prop_unemployed_on_universal_credit`) %>%
+            select('xAxis' = `tc_prop_unemployed_on_universal_credit`) %>%
+            as.list()
+          
+          tc_unem_for_avg = paste0(round(par_table_tc_avg$tc_prop_unemployed_on_universal_credit,0), '%', '\n','(regional avg)')
+          
+          output$unemployment_text <- renderUI({
+            div(style= " text-align: center;",
+                hr(),
+                p(format(tc_unem_to_write$`tc_Not in employment`, big.mark=',', scientific = F),
+                  tags$br(),
+                  "people unemployed on universal credit")
+                #p(tags$strong('No. of people unemployed receiving universal credit:'), format(tc_unem_to_write$`tc_Not in employment`, big.mark=',', scientific = F), "people", tags$br(), write_tc_unem)
+            )
+          })
+          
           output$unemployment <- renderEcharts4r({
             # # Plot population statistics
-            fuel_p <- unemployment_to_plot %>%
+            sec95 <- tc_unem_to_plot %>%
               e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1) %>%
-              e_labels(position = "right") %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=eng_avg_unemployment, symbol = "none", lineStyle = list(color = "black")) %>%
+              e_mark_line(data=tc_avg_unem, symbol = "none", lineStyle = list(color = "black"), title=tc_unem_for_avg,label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=0, right=100, top=20, bottom=20, height='80%') %>%
-
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(min=0, max=100, show=F) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
-              #e_tooltip() %>%
               e_legend(FALSE)
-
+            
           })
-
+          
+          
           # --- Digital exclusion ---
-          # -- select columns --
-          #digital <- curr_table %>% select('TacticalCell',`int_Unemployed receiving Universal Credit`,`perc_Unemployed receiving Universal Credit`)
-          digital_to_plot <- curr_table %>% select('TacticalCell',`perc_Proportion of neighbourhoods in 20% most digitally excluded`)
-
-          # transpose dataframe
-          digital_to_plot <- digital_to_plot %>% pivot_longer(`perc_Proportion of neighbourhoods in 20% most digitally excluded`, names_to = "Indicator", values_to = "proportion")
-
-          # add in england avg
-          #fuelp_to_plot <- fuelp_to_plot %>% mutate(england_avg = par_table_tc_avg$`LAD_perc_Fuel Poor Households`)
-
+          tc_de_to_write <- curr_table %>% select('tc_percent_digitally_excluded') %>%
+            unique()
+          
+          tc_de_to_plot <- tc_de_to_write %>% select('tc_percent_digitally_excluded') %>%
+            pivot_longer('tc_percent_digitally_excluded', names_to = "Indicator", values_to = "proportion")
+          
+          tc_de_to_plot <- tc_de_to_plot %>% filter(!is.na(proportion)) %>%
+            unique() %>%
+            mutate('proportion'=round(proportion,0))
+          
+          tc_de_to_write <- tc_de_to_write %>% filter(!is.na(tc_percent_digitally_excluded))
+          
+          write_tc_de <- paste0(round(tc_de_to_write$tc_percent_digitally_excluded,0), "%")
+          
+         
           # for echarts
-          eng_avg_digital <- par_table_tc_avg %>% select(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`) %>%
-            select('xAxis' = `tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`) %>%
+          tc_avg_de <- par_table_tc_avg %>% select('tc_percent_digitally_excluded') %>%
+            #mutate('tc_percent_digitally_excluded'=round(tc_percent_digitally_excluded,0))
+            select('xAxis' = `tc_percent_digitally_excluded`) %>%
+            mutate('xAxis' = round(xAxis,0)) %>%
             as.list()
-
+          
+          tc_de_for_avg = paste0(round(par_table_tc_avg$tc_percent_digitally_excluded,0), '%', '\n','(regional avg)')
+          
           output$digital_text <- renderUI({
-            div(style= " text-align: left;",
+            div(style= " text-align: center;",
                 hr(),
-                h4(tags$strong('Percentage of neighbourhoods in 20% most digitally excluded:')),
-                p(digital_to_plot$`proportion`, '%', 'of neighbourhoods in the', input$tactical_cell, 'region, are in the 20% most digitally excluded')
+                p(write_tc_de,
+                  tags$br(),
+                  "neighbourhoods in 20% most digitally excluded")
+                #p(tags$strong('Proportion of neighbourhoods in the 20% most digitally excluded:'), write_tc_de)
             )
           })
-          #
+          
           output$digital <- renderEcharts4r({
             # # Plot population statistics
-            fuel_p <- digital_to_plot %>%
+            sec95 <- tc_de_to_plot %>%
               e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1) %>%
-              e_labels(position = "right") %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=eng_avg_digital, symbol = "none", lineStyle = list(color = "black")) %>%
+              e_mark_line(data=tc_avg_de, symbol = "none", lineStyle = list(color = "black"), title=tc_de_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=0, right=100, top=20, bottom=20, height='80%') %>%
-
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(min=0, max=100, show=F) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
-              #e_tooltip() %>%
               e_legend(FALSE)
-
+            
           })
+          
 
-              # --- Shielding ---
-          # -- select columns --
-          shielding <- curr_table %>% select('TacticalCell',`int_Clinically extremely vulnerable`,`perc_Clinically extremely vulnerable`)
-          shielding_to_plot <- shielding %>% select('TacticalCell',`perc_Clinically extremely vulnerable`)
-
-          # transpose dataframe
-          shielding_to_plot <- shielding_to_plot %>% pivot_longer(`perc_Clinically extremely vulnerable`, names_to = "Indicator", values_to = "proportion")
-
-          # add in england avg
-          #fuelp_to_plot <- fuelp_to_plot %>% mutate(england_avg = par_table_tc_avg$`LAD_perc_Fuel Poor Households`)
-
+          # --- Shielding ---
+          tc_shielding_to_write <- curr_table %>% select(`tc_Clinically extremely vulnerable`,`tc_Clinically vulnerable proportion of population`) %>%
+            unique()
+          
+          tc_shielding_to_plot <- tc_shielding_to_write %>% select(`tc_Clinically vulnerable proportion of population`) %>%
+            pivot_longer(`tc_Clinically vulnerable proportion of population`, names_to = "Indicator", values_to = "proportion")
+          
+          tc_shielding_to_plot <- tc_shielding_to_plot %>% filter(!is.na(proportion)) %>%
+            unique() %>%
+            mutate('proportion'=round(proportion,0))
+          
+          tc_shielding_to_write <- tc_shielding_to_write %>% filter(!is.na(`tc_Clinically extremely vulnerable`) & !is.na(`tc_Clinically vulnerable proportion of population`))
+          
+          write_tc_shielding <- paste0("(",tc_shielding_to_write$`tc_Clinically vulnerable proportion of population`,"% of the population)")
+          
           # for echarts
-          eng_avg_shielding <- par_table_tc_avg %>% select(`tc_perc_Clinically extremely vulnerable`) %>%
-            select('xAxis' = `tc_perc_Clinically extremely vulnerable`) %>%
+          tc_avg_shielding <- par_table_tc_avg %>% 
+            select(`tc_Clinically vulnerable proportion of population`) %>%
+            select('xAxis' = `tc_Clinically vulnerable proportion of population`) %>%
+            mutate('xAxis' = round(xAxis,0)) %>%
             as.list()
-
+          
+         
+          tc_shielding_for_avg = paste0(round(par_table_tc_avg$`tc_Clinically vulnerable proportion of population`,0), '%', '\n','(regional avg)')
+          
           output$shielding_text <- renderUI({
-            div(style= " text-align: left;",
+            div(style= " text-align: center;",
                 hr(),
-                h4(tags$strong('No. people clinically extremely vulnerable:')),
-                p(shielding$`perc_Clinically extremely vulnerable`, '%', "(", format(shielding$`int_Clinically extremely vulnerable`, big.mark=',', scientific=F), ")", 'of people are clinically extremely vulnerable in the', input$tactical_cell, 'region')
+                p(format(tc_shielding_to_write$`tc_Clinically extremely vulnerable`, big.mark=',', scientific = F),
+                  tags$br(),
+                  'people clinically extremely vulnerable')
+                #p(tags$strong('No. of people clinically extremely vulnerable:'), format(tc_shielding_to_write$`tc_Clinically extremely vulnerable`, big.mark=',', scientific = F), "people", tags$br(), write_tc_shielding)
             )
           })
-          #
+          
           output$shielding_f <- renderEcharts4r({
             # # Plot population statistics
-            shielding_to <- shielding_to_plot %>%
+            sec95 <- tc_shielding_to_plot %>%
               e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1) %>%
-              e_labels(position = "right") %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=eng_avg_shielding, symbol = "none", lineStyle = list(color = "black")) %>%
+              e_mark_line(data=tc_avg_shielding, symbol = "none", lineStyle = list(color = "black"), title=tc_shielding_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=0, right=100, top=20, bottom=20, height='80%') %>%
-
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(min=0, max=100, show=F) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
-              #e_tooltip() %>%
               e_legend(FALSE)
-
+            
           })
+          
 
-
-
-
-        }
-
-
-          # --- set up data table output ----
-          # output$people_at_risk <- DT::renderDataTable({
-          #   DT::datatable(curr_table,
-          #               #caption = htmltools::tags$caption( style = 'caption-side: top; text-align: left; color:black; font-size:125% ;',title_needed),
-          #               options = list(
-          #                 paging=FALSE
-          #               ))
-          #           })
-          #         }
-        # -- just local authority --
+         }
+  
+        # -------------------------- #
+        # -- just local authority -- #
+        # -------------------------- #
         else {
+          print('lad section')
+          
           lad_of_interest <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% st_drop_geometry()
-
-          for_lad_int <- par_table %>% filter(LAD19CD == lad_of_interest$LAD19CD) %>% select(`LAD_int_Proportion of neighbourhoods in 20% most digitally excluded`:`LAD_int_People receiving Section 95 support`)  %>% mutate(`LAD_int_Fuel Poor Households` = round(`LAD_int_Fuel Poor Households`, 1))
-            #print(for_lad_int)
-          # rename stuff again
-            names(for_lad_int) = gsub(pattern = "LAD_int_", replacement = "", x = names(for_lad_int))
-          # pivot
-          lad_int <- pivot_longer(for_lad_int, cols=c(`Proportion of neighbourhoods in 20% most digitally excluded`:`People receiving Section 95 support`), names_to='Indicator', values_to='Total') %>% unique()
-
-          for_lad_perc <- par_table %>% filter(LAD19CD == lad_of_interest$LAD19CD) %>% select(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`:`LAD_perc_People receiving Section 95 support`) %>%
-                        mutate(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded` = round(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100, 2))
-
-          names(for_lad_perc) = gsub(pattern = "LAD_perc_", replacement = "", x = names(for_lad_perc))
-
-          lad_perc <- pivot_longer(for_lad_perc, cols=c(`Proportion of neighbourhoods in 20% most digitally excluded`:`People receiving Section 95 support`), names_to='Indicator', values_to='Percentage (%)') %>%
-          unique()
-
-          lad_int_perc <- left_join(lad_int, lad_perc, by='Indicator', keep=F)
-
-          no_nas_lad_table <- lad_int_perc[!with(lad_int_perc, is.na(`Total`) & is.na(`Percentage (%)`)),]
-          #print(no_nas_lad_table)
-
-          # LAD title
-          lad_name <- input$lad_selected
-          title_needed <- paste0("People at risk in LAD: ", lad_name)
-
-          # --- set up data table output ----
-          # output$people_at_risk <- DT::renderDataTable({
-          #   DT::datatable(no_nas_lad_table,
-          #               #caption = htmltools::tags$caption( style = 'caption-side: top; text-align: left; color:black; font-size:125% ;',title_needed),
-          #               options = list(
-          #                 paging=FALSE
-          #               ))
-          #
-          #  })
+          print(lad_of_interest$LAD19CD)
+          
+          # --- population demographics ---
+          #bame <- curr_table %>% select('TacticalCell',`int_Fuel Poor Households`,`perc_Fuel Poor Households`)
+          lad_bame_to_plot <- curr_table %>% select('LAD19CD',`Percentage of population who are ethnic minority`) %>%
+            filter(LAD19CD == lad_of_interest$LAD19CD)
+          
+          
+          # transpose dataframe
+          lad_bame_to_plot  <- lad_bame_to_plot %>% pivot_longer(`Percentage of population who are ethnic minority`, names_to = "Indicator", values_to = "proportion") %>%
+            unique() %>% filter(!is.na(proportion)) %>%
+            mutate('proportion'=round(proportion,0))
+          
+          #print(lad_bame_to_plot)
+          
+          # for echarts
+          lad_avg_bame <- par_table_lad_avg %>% select(`Percentage of population who are ethnic minority`) %>%
+            select('xAxis' = `Percentage of population who are ethnic minority`) %>%
+            mutate('xAxis'= round(xAxis,0)) %>%
+            as.list()
+          
+          # to format percentage
+          lad_bame_to_show <- paste0(round(lad_bame_to_plot$proportion,0), "%")
+          
+          # label to sho
+          lad_label_to_show <- paste0(round(par_table_lad_avg$`Percentage of population who are ethnic minority`,0), '%', '\n','(eng avg)')
+          
+        
+          
+          if (dim(lad_bame_to_plot)[1] != 0) {
+          
+          output$bame_population_text <- renderUI({
+            div(style= "text-align: center;",
+                hr(),
+                p(lad_bame_to_show,
+                  tags$br(),
+                  'of the population are BAME')
+                #p(tags$strong('Proportion of population who are BAME:'), lad_bame_to_show)
+                
+            )
+          })
+          
+          output$bame_population <- renderEcharts4r({
+            # # Plot population statistics
+            bame <- lad_bame_to_plot %>%
+              e_charts(x = Indicator) %>%
+              e_bar(proportion, bar_width=0.1, showBackground=T, label=list(show=T, color='black', position='right')) %>%
+              #e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
+              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+              e_mark_line(data=lad_avg_bame, symbol = "none", lineStyle = list(color = "black"), title=lad_label_to_show, label=list(formatter='label',fontSize=10)) %>%
+              e_hide_grid_lines() %>%
+              e_flip_coords() %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
+              #e_rm_axis(axis="x") %>%
+              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+              e_y_axis(show=F) %>%
+              e_legend(FALSE)
+            
+          })
+          
+          }
+          
+          else {
+            
+            lad_bame_to_show <- "Data unavailable"
+            
+            # -- no data --
+            output$bame_population_text <- renderUI({
+              div(style= "text-align: center;",
+                  hr(),
+                  p(lad_bame_to_show,
+                    tags$br(),
+                    'for % of the population who are BAME')
+                  #p(tags$strong('Proportion of population who are BAME:'), lad_bame_to_show)
+                  
+              )
+            })
+            
+            output$bame_population <- renderEcharts4r({
+              # remove other plot but don't plot anything
+            })
+            
+          }
+          
+          # --- section 95 support ----
+          lad_sec95_to_write <- curr_table %>% select('LAD19CD',`People receiving Section 95 support`,'lad_prop_recieving_section_95_support') %>%
+            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
+            unique()
+          
+          lad_sec95_to_plot <- lad_sec95_to_write %>% select('lad_prop_recieving_section_95_support') %>%
+            pivot_longer('lad_prop_recieving_section_95_support', names_to = "Indicator", values_to = "proportion")
+          
+          lad_sec95_to_plot <- lad_sec95_to_plot %>% filter(!is.na(proportion)) %>%
+            unique() 
+          
+          lad_sec95_to_write <- lad_sec95_to_write %>% filter(!is.na(`People receiving Section 95 support`) & !is.na('lad_prop_recieving_section_95_support'))
+          
+          write_lad_sec95 <- paste0("(",lad_sec95_to_write$lad_prop_recieving_section_95_support,"% of the population)")
+          
+          # for echarts
+          lad_avg_section95 <- par_table_lad_avg %>% select(`lad_prop_recieving_section_95_support`) %>%
+            select('xAxis' = `lad_prop_recieving_section_95_support`) %>%
+            as.list()
+          
+          lad_sec95_for_avg = paste0(round(par_table_lad_avg$lad_prop_recieving_section_95_support,2), '%', '\n','(eng avg)')
+          
+          if(dim(lad_sec95_to_plot)[1] != 0) {
+          
+          output$section95_text <- renderUI({
+            div(style= " text-align: center;",
+                hr(),
+                p(format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F),
+                  tags$br(),
+                  'people receiving Section 95 support')
+                #p(tags$strong('No. of people receiving Section 95 support:'), format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_lad_sec95)
+            )
+          })
+          
+          output$section95 <- renderEcharts4r({
+            # # Plot population statistics
+            sec95 <- lad_sec95_to_plot %>%
+              e_charts(x = Indicator) %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
+              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+              e_mark_line(data=lad_avg_section95, symbol = "none", lineStyle = list(color = "black"), title=lad_sec95_for_avg,label=list(formatter='label',fontSize=10)) %>%
+              e_hide_grid_lines() %>%
+              e_flip_coords() %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
+              #e_rm_axis(axis="x") %>%
+              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+              e_y_axis(show=F) %>%
+              e_legend(FALSE)
+            
+          })
+          }
+          
+          else {
+            output$section95_text <- renderUI({
+              div(style= " text-align: center;",
+                  hr(),
+                  p("Data unavailable",
+                    tags$br(),
+                    'for people recieving Section 95 support')
+                  #p(tags$strong('No. of people receiving Section 95 support:'), format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_lad_sec95)
+              )
+            })
+            
+            output$section95 <- renderEcharts4r({
+              
+            })
+            
+          }
+          
+          
+          # --- homeless ----
+          lad_homeless_to_write <- curr_table %>% select('LAD19CD',`lad_total_homeless`,'lad_prop_homeless') %>%
+            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
+            unique()
+          
+          lad_homeless_to_plot <- lad_homeless_to_write %>% select('lad_prop_homeless') %>%
+            pivot_longer('lad_prop_homeless', names_to = "Indicator", values_to = "proportion")
+          
+          lad_homeless_to_plot <- lad_homeless_to_plot %>% filter(!is.na(proportion)) %>%
+            unique()
+          
+          lad_homeless_to_write <- lad_homeless_to_write %>% filter(!is.na(`lad_total_homeless`) & !is.na('lad_prop_homeless'))
+          
+          write_lad_homeless <- paste0("(",lad_homeless_to_write$lad_prop_homeless,"% of the population)")
+          
+          # for echarts
+          lad_avg_homeless <- par_table_lad_avg %>% select(`lad_prop_homeless`) %>%
+            select('xAxis' = `lad_prop_homeless`) %>%
+            as.list()
+          
+          lad_homeless_for_avg = paste0(round(par_table_lad_avg$lad_prop_homeless,2), '%', '\n','(eng avg)')
+          
+          
+          if(dim(lad_homeless_to_plot)[1] != 0) {
+          
+          output$homeless_text <- renderUI({
+            div(style= " text-align: center;",
+                hr(),
+                p(format(lad_homeless_to_write$lad_total_homeless, big.mark=',', scientific = F),
+                  tags$br(),
+                  'homeless people')
+                #p(tags$strong('No. of homeless people:'), format(lad_homeless_to_write$lad_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_lad_homeless)
+            )
+          })
+          
+          output$homeless <- renderEcharts4r({
+            # # Plot population statistics
+            sec95 <- lad_homeless_to_plot %>%
+              e_charts(x = Indicator) %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
+              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+              e_mark_line(data=lad_avg_homeless, symbol = "none", lineStyle = list(color = "black"), title=lad_homeless_for_avg, label=list(formatter='label',fontSize=10)) %>%
+              e_hide_grid_lines() %>%
+              e_flip_coords() %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
+              #e_rm_axis(axis="x") %>%
+              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+              e_y_axis(show=F) %>%
+              e_legend(FALSE)
+            
+          })
+          
+          }
+          
+          else {
+            
+            output$homeless_text <- renderUI({
+              div(style= " text-align: center;",
+                  hr(),
+                  p("Data unavailable",
+                    tags$br(),
+                    'for homeless people')
+                  #p(tags$strong('No. of homeless people:'), format(lad_homeless_to_write$lad_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_lad_homeless)
+              )
+            })
+            
+            output$homeless <- renderEcharts4r({
+          
+            })
+            
+          }
+          
+          # --- fuel_poverty ---
+          
+          lad_fuelp_to_write <- curr_table %>% select('LAD19CD',`Number of households in fuel poverty1`,`Proportion of households fuel poor (%)`) %>%
+            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
+            unique()
+          
+          lad_fuelp_to_plot <- lad_fuelp_to_write %>% select(`Proportion of households fuel poor (%)`) %>%
+            pivot_longer(`Proportion of households fuel poor (%)`, names_to = "Indicator", values_to = "proportion")
+          
+          lad_fuelp_to_plot <- lad_fuelp_to_plot %>% filter(!is.na(proportion)) %>%
+            unique() %>%
+            mutate('proportion'=round(proportion,0))
+          
+          
+          lad_fuelp_to_write <- lad_fuelp_to_write %>% filter(!is.na(`Number of households in fuel poverty1`) & !is.na(`Proportion of households fuel poor (%)`))
+            
+          
+          write_lad_fuelp <- paste0("(",lad_fuelp_to_write$`Proportion of households fuel poor (%)`,"% of households)")
+          
+          # for echarts
+          lad_avg_fuelp <- par_table_lad_avg %>% select(`Proportion of households fuel poor (%)`) %>%
+            select('xAxis' = `Proportion of households fuel poor (%)`) %>%
+            mutate('xAxis'=round(xAxis,0)) %>%
+            as.list()
+          
+          lad_fuelp_for_avg = paste0(round(par_table_lad_avg$`Proportion of households fuel poor (%)`,0), '%', '\n','(eng avg)')
+          
+          if (dim(lad_fuelp_to_plot)[1] != 0) {
+          output$fuelp_text <- renderUI({
+            div(style= " text-align: center;",
+                hr(),
+                p(format(round(lad_fuelp_to_write$`Number of households in fuel poverty1`,0), big.mark=',', scientific = F),
+                  tags$br(),
+                  "households in fuel poverty")
+                #p(tags$strong('No. of households in fuel poverty:'), format(lad_fuelp_to_write$`Number of households in fuel poverty1`, big.mark=',', scientific = F), "households", tags$br(), write_lad_fuelp)
+            )
+          })
+          
+          output$fuelp <- renderEcharts4r({
+            # # Plot population statistics
+            lad_fuelp <-  lad_fuelp_to_plot %>%
+              e_charts(x = Indicator) %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
+              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+              e_mark_line(data=lad_avg_fuelp, symbol = "none", lineStyle = list(color = "black"), title=lad_fuelp_for_avg, label=list(formatter='label',fontSize=10)) %>%
+              e_hide_grid_lines() %>%
+              e_flip_coords() %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
+              #e_rm_axis(axis="x") %>%
+              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+              e_y_axis(show=F) %>%
+              e_legend(FALSE)
+            
+          })
+          }
+          
+          else {
+            
+            output$fuelp_text <- renderUI({
+              div(style= " text-align: center;",
+                  hr(),
+                  p("Data unavailable",
+                    tags$br(),
+                    "for households in fuel poverty")
+                  #p(tags$strong('No. of households in fuel poverty:'), format(lad_fuelp_to_write$`Number of households in fuel poverty1`, big.mark=',', scientific = F), "households", tags$br(), write_lad_fuelp)
+              )
+            })
+            
+            output$fuelp <- renderEcharts4r({
+              
+            })
+            
+          }
+          
+          #--- Unemployment ---
+          lad_unem_to_write <- curr_table %>% select('LAD19CD',`Not in employment`,'lad_prop_unemployed_on_ucred') %>%
+            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
+            unique()
+          
+          lad_unem_to_plot <- lad_unem_to_write %>% select('lad_prop_unemployed_on_ucred') %>%
+            pivot_longer('lad_prop_unemployed_on_ucred', names_to = "Indicator", values_to = "proportion")
+          
+          lad_unem_to_plot <- lad_unem_to_plot %>% filter(!is.na(proportion)) %>%
+            unique() %>%
+            mutate('proportion'=round(proportion,0))
+          
+          lad_unem_to_write <- lad_unem_to_write %>% filter(!is.na(`Not in employment`) & !is.na('lad_prop_unemployed_on_ucred'))
+          
+          write_lad_unem <- paste0("(",lad_unem_to_write$lad_prop_unemployed_on_ucred,"% of people)")
+          
+          # for echarts
+          lad_avg_unem <- par_table_lad_avg %>% select(`lad_prop_unemployed_on_ucred`) %>%
+            select('xAxis' = `lad_prop_unemployed_on_ucred`) %>%
+            mutate('xAxis'=round(xAxis,0)) %>%
+            as.list()
+          
+          lad_unem_for_avg = paste0(round(par_table_lad_avg$lad_prop_unemployed_on_ucred,0), '%', '\n','(eng avg)')
+          
+          if (dim(lad_unem_to_plot)[1] != 0) {
+          
+          output$unemployment_text <- renderUI({
+            div(style= " text-align: center;",
+                hr(),
+                p(format(lad_unem_to_write$`Not in employment`, big.mark=',', scientific = F),
+                  tags$br(),
+                  'people unemployed on universal credit')
+                #p(tags$strong('No. of people unemployed receiving universal credit:'), format(lad_unem_to_write$`Not in employment`, big.mark=',', scientific = F), "people", tags$br(), write_lad_unem)
+            )
+          })
+          
+          output$unemployment <- renderEcharts4r({
+            # # Plot population statistics
+            lad_unem <- lad_unem_to_plot %>%
+              e_charts(x = Indicator) %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
+              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+              e_mark_line(data=lad_avg_unem, symbol = "none", lineStyle = list(color = "black"), title=lad_unem_for_avg, label=list(formatter='label',fontSize=10)) %>%
+              e_hide_grid_lines() %>%
+              e_flip_coords() %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
+              #e_rm_axis(axis="x") %>%
+              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+              e_y_axis(show=F) %>%
+              e_legend(FALSE)
+            
+          })
+          
+          }
+          
+          else {
+            output$unemployment_text <- renderUI({
+              div(style= " text-align: center;",
+                  hr(),
+                  p('Data unavailable',
+                    tags$br(),
+                    'for people unemployed on universal credit')
+                  #p(tags$strong('No. of people unemployed receiving universal credit:'), format(lad_unem_to_write$`Not in employment`, big.mark=',', scientific = F), "people", tags$br(), write_lad_unem)
+              )
+            })
+            
+            output$unemployment <- renderEcharts4r({
+              
+            })
+          }
+          
+          # --- Digital exclusion ---
+          lad_de_to_write <- curr_table %>% select('LAD19CD','percent_digitally_excluded') %>%
+            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
+            unique()
+          
+          lad_de_to_plot <- lad_de_to_write %>% select('percent_digitally_excluded') %>%
+            pivot_longer('percent_digitally_excluded', names_to = "Indicator", values_to = "proportion")
+          
+          lad_de_to_plot <- lad_de_to_plot %>% filter(!is.na(proportion)) %>%
+            unique() %>% 
+            mutate('proportion'=round(proportion,0))
+          
+          lad_de_to_write <- lad_de_to_write %>% filter(!is.na('percent_digitally_excluded'))
+          
+          write_lad_de <- paste0(round(lad_de_to_write$percent_digitally_excluded,0), "%")
+          
+          # for echarts
+          lad_avg_de <- par_table_lad_avg %>% select(`percent_digitally_excluded`) %>%
+            select('xAxis' = `percent_digitally_excluded`) %>%
+            mutate('xAxis'=round(xAxis,0)) %>%
+            as.list()
+          
+          lad_de_for_avg = paste0(round(par_table_lad_avg$percent_digitally_excluded,0), '%', '\n','(eng avg)')
+        
+          if (dim(lad_de_to_plot)[1] != 0) {
+          
+          output$digital_text <- renderUI({
+            div(style= " text-align: center;",
+                hr(),
+                p(write_lad_de,
+                  tags$br(),
+                  'neighbourhoods in the 20% most digitally excluded')
+                #p(tags$strong('Proportion of neighbourhoods in the 20% most digitally excluded:'), write_lad_de)
+            )
+          })
+          
+          output$digital <- renderEcharts4r({
+            # # Plot population statistics
+            lad_de <- lad_de_to_plot %>%
+              e_charts(x = Indicator) %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
+              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+              e_mark_line(data=lad_avg_de, symbol = "none", lineStyle = list(color = "black"), title=lad_de_for_avg, label=list(formatter='label',fontSize=10)) %>%
+              e_hide_grid_lines() %>%
+              e_flip_coords() %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
+              #e_rm_axis(axis="x") %>%
+              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+              e_y_axis(show=F) %>%
+              e_legend(FALSE)
+            
+          })
+          
+          }
+          
+          else{
+            output$digital_text <- renderUI({
+              div(style= " text-align: center;",
+                  hr(),
+                  p("Data unavailable",
+                    tags$br(),
+                    'for neighbourhoods in the 20% most digitally excluded')
+                  #p(tags$strong('Proportion of neighbourhoods in the 20% most digitally excluded:'), write_lad_de)
+              )
+            })
+            
+            output$digital <- renderEcharts4r({
+              
+            })
+          }
+          
+          
+          # --- Shielding ---
+          lad_shielding_to_write <- curr_table %>% select('LAD19CD',`Clinically extremely vulnerable`,`Proportion Clinically extremely vulnerable`) %>%
+            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
+            unique()
+          
+          lad_shielding_to_plot <- lad_shielding_to_write %>% select(`Proportion Clinically extremely vulnerable`) %>%
+            pivot_longer(`Proportion Clinically extremely vulnerable`, names_to = "Indicator", values_to = "proportion")
+          
+          lad_shielding_to_plot <- lad_shielding_to_plot %>% filter(!is.na(proportion)) %>%
+            unique() %>%
+            mutate('proportion'=round(proportion,0))
+          
+          lad_shielding_to_write <- lad_shielding_to_write %>% filter(!is.na(`Clinically extremely vulnerable`) & !is.na(`Proportion Clinically extremely vulnerable`))
+          
+          write_lad_shielding <- paste0("(",lad_shielding_to_write$`Proportion Clinically extremely vulnerable`,"% of the population)")
+          
+          # for echarts
+          lad_avg_shielding <- par_table_lad_avg %>% select(`Proportion Clinically extremely vulnerable`) %>%
+            select('xAxis' = `Proportion Clinically extremely vulnerable`) %>%
+            mutate('xAxis'=round(xAxis,0)) %>%
+            as.list()
+          
+          lad_sheilding_for_avg = paste0(round(par_table_lad_avg$`Proportion Clinically extremely vulnerable`,0), '%', '\n','(eng avg)')
+          
+          if (dim(lad_shielding_to_plot)[1] != 0) {
+          
+          output$shielding_text <- renderUI({
+            div(style= " text-align: center;",
+                hr(),
+                p(format(lad_shielding_to_write$`Clinically extremely vulnerable`, big.mark=',', scientific = F),
+                  tags$br(),
+                  'people clinically extremely vulnerable')
+                #p(tags$strong('No. of people clinically extremely vulnerable:'), format(lad_shielding_to_write$`Clinically extremely vulnerable`, big.mark=',', scientific = F), "people", tags$br(), write_lad_shielding)
+            )
+          })
+          
+          output$shielding_f <- renderEcharts4r({
+            # # Plot population statistics
+            sec95 <- lad_shielding_to_plot %>%
+              e_charts(x = Indicator) %>%
+              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
+              e_labels(position = "right", color='black') %>%
+              e_color(c('purple')) %>%
+              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
+              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
+              e_mark_line(data=lad_avg_shielding, symbol = "none", lineStyle = list(color = "black"), title=lad_sheilding_for_avg, label=list(formatter='label',fontSize=10)) %>%
+              e_hide_grid_lines() %>%
+              e_flip_coords() %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              
+              #e_rm_axis(axis="x") %>%
+              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
+              e_y_axis(show=F) %>%
+              e_legend(FALSE)
+            
+          })
+          
+          }
+          
+          else {
+            output$shielding_text <- renderUI({
+              div(style= " text-align: center;",
+                  hr(),
+                  p('Data unavailable',
+                    tags$br(),
+                    'for people clinically extremely vulnerable')
+                  #p(tags$strong('No. of people clinically extremely vulnerable:'), format(lad_shielding_to_write$`Clinically extremely vulnerable`, big.mark=',', scientific = F), "people", tags$br(), write_lad_shielding)
+              )
+            })
+            
+            output$shielding_f <- renderEcharts4r({
+            })
+          }
+      
         }
       }
     }
@@ -1452,30 +2452,50 @@ server = function(input, output) {
 
         # - order
         covid_cases2volunteers <- covid_cases2volunteers %>% arrange(-`Overall vulnerability`, -`Latest covid cases`, -Score) %>%
-          select(-Score)
+          select(-Score) %>% rename(`Volunteer presence`=`Volunteer capacity`)
 
 
        # -- if want to show whole of the UK --
-        if ( input$tactical_cell == '--All UK--') {
+        if ( input$tactical_cell == '-- England --') {
         # all lads in tcs wanted
         output$areas2focus <- DT::renderDataTable({
-         DT::datatable(covid_cases2volunteers,
-                   options = list(
-                     paging =FALSE
-                   ))
+         DT::datatable(covid_cases2volunteers, filter=list(position='top'),
+                   options = list(dom='tp', #should remove top search box the p includes paging
+                     paging = T,
+                     pageLength=5,
+                     scrollX=T,
+                     scrollY='200px',
+                     autoWidth = TRUE,
+                     initComplete = htmlwidgets::JS(
+                       "function(settings, json) {",
+                       paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                       "}")
+                   )) #%>%
+            
+                #formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
               })
 
             }
 
           else {
             # show just tactical cell
-            if (input$theme == 'Covid-19' & input$lad_selected == '-- all LADs in TC --') {
+            if (input$theme == 'Covid-19' & input$lad_selected == 'All local authorities in region') {
               output$areas2focus <- DT::renderDataTable({
-              DT::datatable(covid_cases2volunteers,
-                          options = list(
-                            paging =FALSE
-                          ))
-                        })
+                DT::datatable(covid_cases2volunteers, filter=list(position='top'),
+                              options = list(dom='tp', #should remove top search box the p includes paging
+                                             paging = T,
+                                             pageLength=5,
+                                             scrollX=T,
+                                             scrollY='200px',
+                                             autoWidth = TRUE,
+                                             initComplete = htmlwidgets::JS(
+                                               "function(settings, json) {",
+                                               paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                               "}")
+                              )) #%>%
+                
+                #formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
+              })
                 }
               # move la to top
             else {
@@ -1485,10 +2505,18 @@ server = function(input, output) {
               lad_covid_cases2volunteers <- rbind(covid_cases2volunteers[wanted,], covid_cases2volunteers[!wanted,])
 
               output$areas2focus <- DT::renderDataTable({
-                DT::datatable(lad_covid_cases2volunteers,
-                          options = list(
-                            paging =FALSE
-                          )) %>%
+                DT::datatable(lad_covid_cases2volunteers, filter=list(position='top'),
+                          options = list(dom='tp', #should remove top search box the p includes paging
+                                         paging = T,
+                                         pageLength=5,
+                                         scrollX=T,
+                                         scrollY='200px',
+                                         autoWidth = TRUE,
+                                         initComplete = htmlwidgets::JS(
+                                           "function(settings, json) {",
+                                           paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                           "}")
+                          ))  %>%
                 formatStyle('Local Authority',
                           target='row',
                           backgroundColor = styleEqual(c(input$lad_selected), c('yellow')))
@@ -1558,7 +2586,7 @@ server = function(input, output) {
 
       else {
 
-         if (input$tactical_cell == '--All UK--') {
+         if (input$tactical_cell == '-- England --') {
 
             # tactical cell total
             total_requests_this_week <- requests %>%
@@ -1592,7 +2620,7 @@ server = function(input, output) {
 
         else {
 
-          if (input$lad_selected == '-- all LADs in TC --') {
+          if (input$lad_selected == 'All local authorities in region') {
 
           # tactical cell total
           total_requests_this_week <- requests_status %>%
@@ -1680,7 +2708,7 @@ server = function(input, output) {
 
       else {
 
-        if (input$tactical_cell == '--All UK--') {
+        if (input$tactical_cell == '-- England --') {
 
           avg_score <- volunteers %>%
             mutate(avg_over_area = round(mean(mean_score, na.rm=TRUE),1)) %>% select('avg_over_area') %>%
@@ -1699,7 +2727,7 @@ server = function(input, output) {
 
           output$vols <- renderInfoBox({
             infoBox(
-              "Volunteer capacity", avg_score$`Volunteer capacity`,
+              "Volunteer presence", avg_score$`Volunteer capacity`,
               color = avg_score$colour, fill = TRUE
                 )
               })
@@ -1708,7 +2736,7 @@ server = function(input, output) {
         else {
 
         # -- Tactical cell level --
-          if (input$lad_selected == '-- all LADs in TC --') {
+          if (input$lad_selected == 'All local authorities in region') {
 
             #print(volunteer_capacity)
 
@@ -1730,7 +2758,7 @@ server = function(input, output) {
 
             output$vols <- renderInfoBox({
             infoBox(
-            "Volunteer capacity", avg_score$`Volunteer capacity`,
+            "Volunteer presence", avg_score$`Volunteer capacity`,
               color = avg_score$colour, fill = TRUE
                 )
               })
@@ -1765,7 +2793,7 @@ server = function(input, output) {
 
               output$vols <- renderInfoBox({
                 infoBox(
-                  "Volunteer capacity", avg_score$`Volunteer capacity`,
+                  "Volunteer presence", avg_score$`Volunteer capacity`,
                     color = avg_score$colour, fill = TRUE
                   )
                 })
