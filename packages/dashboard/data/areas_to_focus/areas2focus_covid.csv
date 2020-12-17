@@ -1,60 +1,60 @@
-LAD19CD,Name,Vulnerability quintile,TacticalCell,week 46
-E06000001,Hartlepool,5,North,561.59
-E06000002,Middlesbrough,5,North,439.78
-E06000003,Redcar and Cleveland,4,North,478.31
-E06000004,Stockton-on-Tees,5,North,430.2
-E06000005,Darlington,5,North,352.99
-E06000006,Halton,5,North,238.78
-E06000007,Warrington,4,North,259.51
-E06000008,Blackburn with Darwen,4,North,509.7
-E06000009,Blackpool,5,North,287.57
-E06000010,"Kingston upon Hull, City of",5,North,736.78
-E06000011,East Riding of Yorkshire,3,North,427.94
-E06000012,North East Lincolnshire,5,Central,495.1
-E06000013,North Lincolnshire,4,Central,468.97
-E06000014,York,1,North,171.4
-E06000015,Derby,5,Central,382.43
-E06000016,Leicester,4,Central,494.32
-E06000017,Rutland,2,Central,120.22
-E06000018,Nottingham,5,Central,245.72
-E06000019,"Herefordshire, County of",2,Central,183.09
-E06000020,Telford and Wrekin,3,Central,330.27
-E06000021,Stoke-on-Trent,5,Central,538.27
-E06000022,Bath and North East Somerset,1,South and the Channel Islands,233.34
-E06000023,"Bristol, City of",2,South and the Channel Islands,459.67
-E06000024,North Somerset,2,South and the Channel Islands,284.12
-E06000025,South Gloucestershire,3,South and the Channel Islands,332.17
-E06000026,Plymouth,4,South and the Channel Islands,208.7
-E06000027,Torbay,5,South and the Channel Islands,202.55
-E06000030,Swindon,4,South and the Channel Islands,192.63
-E06000031,Peterborough,3,Central,204.19
-E06000032,Luton,4,South East,280.68
-E06000033,Southend-on-Sea,4,South East,174.74
-E06000034,Thurrock,4,South East,204.2
-E06000035,Medway,3,South East,299.04
-E06000036,Bracknell Forest,1,South and the Channel Islands,128.93
-E06000037,West Berkshire,1,South and the Channel Islands,119.91
-E06000038,Reading,1,South and the Channel Islands,151.44
-E06000039,Slough,5,South and the Channel Islands,338.37
-E06000040,Windsor and Maidenhead,1,South and the Channel Islands,182.27
-E06000041,Wokingham,1,South and the Channel Islands,133.82
-E06000042,Milton Keynes,3,South and the Channel Islands,188.53
-E06000043,Brighton and Hove,1,South East,151.61
-E06000044,Portsmouth,4,South East,291.76
-E06000045,Southampton,4,South East,215.03
-E06000046,Isle of Wight,4,South East,76.88
-E06000047,County Durham,4,North,375.59
-E06000049,Cheshire East,3,North,215.8
-E06000050,Cheshire West and Chester,2,North,285.07
-E06000051,Shropshire,3,Central,221.27
-E06000052,Cornwall,2,South and the Channel Islands,84.29
+LAD19CD,Name,Vulnerability quintile,TacticalCell,week 49
+E06000001,Hartlepool,5,North,202.85
+E06000002,Middlesbrough,5,North,180.17
+E06000003,Redcar and Cleveland,4,North,139.26
+E06000004,Stockton-on-Tees,5,North,143.91
+E06000005,Darlington,5,North,200.37
+E06000006,Halton,5,North,129.05
+E06000007,Warrington,4,North,113.33
+E06000008,Blackburn with Darwen,4,North,254.52
+E06000009,Blackpool,5,North,139.12
+E06000010,"Kingston upon Hull, City of",5,North,196.32
+E06000011,East Riding of Yorkshire,3,North,142.16
+E06000012,North East Lincolnshire,5,Central,139.13
+E06000013,North Lincolnshire,4,Central,174.7
+E06000014,York,1,North,62.67
+E06000015,Derby,5,Central,147.3
+E06000016,Leicester,4,Central,254.92
+E06000017,Rutland,2,Central,85.16
+E06000018,Nottingham,5,Central,145.09
+E06000019,"Herefordshire, County of",2,Central,44.09
+E06000020,Telford and Wrekin,3,Central,112.87
+E06000021,Stoke-on-Trent,5,Central,316.72
+E06000022,Bath and North East Somerset,1,South and the Channel Islands,106.58
+E06000023,"Bristol, City of",2,South and the Channel Islands,118.05
+E06000024,North Somerset,2,South and the Channel Islands,114.39
+E06000025,South Gloucestershire,3,South and the Channel Islands,129.43
+E06000026,Plymouth,4,South and the Channel Islands,55.7
+E06000027,Torbay,5,South and the Channel Islands,35.23
+E06000030,Swindon,4,South and the Channel Islands,106.66
+E06000031,Peterborough,3,Central,207.65
+E06000032,Luton,4,South East,294.29
+E06000033,Southend-on-Sea,4,South East,204.78
+E06000034,Thurrock,4,South East,268.44
+E06000035,Medway,3,South East,576.19
+E06000036,Bracknell Forest,1,South and the Channel Islands,165.65
+E06000037,West Berkshire,1,South and the Channel Islands,61.22
+E06000038,Reading,1,South and the Channel Islands,167.51
+E06000039,Slough,5,South and the Channel Islands,246.76
+E06000040,Windsor and Maidenhead,1,South and the Channel Islands,103.68
+E06000041,Wokingham,1,South and the Channel Islands,142.59
+E06000042,Milton Keynes,3,South and the Channel Islands,191.13
+E06000043,Brighton and Hove,1,South East,59.13
+E06000044,Portsmouth,4,South East,148.44
+E06000045,Southampton,4,South East,70.49
+E06000046,Isle of Wight,4,South East,16.22
+E06000047,County Durham,4,North,134.13
+E06000049,Cheshire East,3,North,98.92
+E06000050,Cheshire West and Chester,2,North,100.27
+E06000051,Shropshire,3,Central,68.08
+E06000052,Cornwall,2,South and the Channel Islands,20.11
 E06000053,Isles of Scilly,1,South and the Channel Islands,NA
-E06000054,Wiltshire,2,South and the Channel Islands,121.79
-E06000055,Bedford,1,South East,166.19
-E06000056,Central Bedfordshire,2,South East,117.79
-E06000057,Northumberland,5,North,285.95
-E06000058,"Bournemouth, Christchurch and Poole",2,South and the Channel Islands,221.59
-E06000059,Dorset,4,South and the Channel Islands,105.15
+E06000054,Wiltshire,2,South and the Channel Islands,71
+E06000055,Bedford,1,South East,127.53
+E06000056,Central Bedfordshire,2,South East,119.52
+E06000057,Northumberland,5,North,151.66
+E06000058,"Bournemouth, Christchurch and Poole",2,South and the Channel Islands,63.24
+E06000059,Dorset,4,South and the Channel Islands,40.69
 E07000004,Aylesbury Vale,2,South and the Channel Islands,NA
 E07000005,Chiltern,1,South and the Channel Islands,NA
 E07000006,South Bucks,2,South and the Channel Islands,NA
@@ -71,7 +71,7 @@ E07000029,Copeland,5,North,NA
 E07000030,Eden,3,North,NA
 E07000031,South Lakeland,2,North,NA
 E07000032,Amber Valley,3,Central,NA
-E07000033,Bolsover,4,Central,NA
+E07000033,Bolsover,5,Central,NA
 E07000034,Chesterfield,5,Central,NA
 E07000035,Derbyshire Dales,2,Central,NA
 E07000036,Erewash,4,Central,NA
@@ -204,7 +204,7 @@ E07000192,Cannock Chase,4,Central,NA
 E07000193,East Staffordshire,4,Central,NA
 E07000194,Lichfield,2,Central,NA
 E07000195,Newcastle-under-Lyme,4,Central,NA
-E07000196,South Staffordshire,5,Central,NA
+E07000196,South Staffordshire,4,Central,NA
 E07000197,Stafford,2,Central,NA
 E07000198,Staffordshire Moorlands,4,Central,NA
 E07000199,Tamworth,4,Central,NA
@@ -247,77 +247,77 @@ E07000243,Stevenage,3,South East,NA
 E07000244,East Suffolk,4,Central,NA
 E07000245,West Suffolk,2,Central,NA
 E07000246,Somerset West and Taunton,3,South and the Channel Islands,NA
-E08000001,Bolton,5,North,421.14
-E08000002,Bury,5,North,433.01
-E08000003,Manchester,5,North,351.99
-E08000004,Oldham,5,North,519.17
-E08000005,Rochdale,5,North,478.84
-E08000006,Salford,5,North,413.01
-E08000007,Stockport,2,North,309.11
-E08000008,Tameside,5,North,369.11
-E08000009,Trafford,2,North,307.14
-E08000010,Wigan,5,North,403.15
-E08000011,Knowsley,5,North,247.91
-E08000012,Liverpool,5,North,255.6
-E08000013,St. Helens,5,North,268.57
-E08000014,Sefton,5,North,254.33
-E08000015,Wirral,4,North,166.66
-E08000016,Barnsley,5,North,372.67
-E08000017,Doncaster,5,North,336.02
-E08000018,Rotherham,5,North,354.92
-E08000019,Sheffield,4,North,266.22
-E08000021,Newcastle upon Tyne,4,North,435.24
-E08000022,North Tyneside,4,North,418.44
-E08000023,South Tyneside,5,North,406.02
-E08000024,Sunderland,5,North,393.94
-E08000025,Birmingham,5,Central,364.07
-E08000026,Coventry,5,Central,270.24
-E08000027,Dudley,5,Central,537.01
-E08000028,Sandwell,5,Central,478
-E08000029,Solihull,4,Central,301.33
-E08000030,Walsall,5,Central,386.37
-E08000031,Wolverhampton,5,Central,353.51
-E08000032,Bradford,5,North,494.83
-E08000033,Calderdale,3,North,472.91
-E08000034,Kirklees,4,North,538.67
-E08000035,Leeds,4,North,413.42
-E08000036,Wakefield,5,North,451.61
-E08000037,Gateshead,5,North,386.53
-E09000001,City of London,1,London,163.66
-E09000002,Barking and Dagenham,5,London,240.01
-E09000003,Barnet,2,London,174.05
-E09000004,Bexley,3,London,271.86
-E09000005,Brent,2,London,205.6
-E09000006,Bromley,2,London,154.96
-E09000007,Camden,1,London,133.32
-E09000008,Croydon,3,London,156.45
-E09000009,Ealing,3,London,252.48
-E09000010,Enfield,3,London,210.31
-E09000011,Greenwich,3,London,176.08
-E09000012,Hackney,2,London,163.66
-E09000013,Hammersmith and Fulham,1,London,207.95
-E09000014,Haringey,2,London,140.71
-E09000015,Harrow,2,London,183.55
-E09000016,Havering,4,London,357.15
-E09000017,Hillingdon,3,London,230.06
-E09000018,Hounslow,4,London,183.78
-E09000019,Islington,1,London,159.61
-E09000020,Kensington and Chelsea,1,London,140.91
-E09000021,Kingston upon Thames,1,London,184.22
-E09000022,Lambeth,2,London,151.21
-E09000023,Lewisham,3,London,125.88
-E09000024,Merton,1,London,168
-E09000025,Newham,4,London,199.36
-E09000026,Redbridge,3,London,263.09
-E09000027,Richmond upon Thames,1,London,119.69
-E09000028,Southwark,2,London,117.62
-E09000029,Sutton,1,London,178.34
-E09000030,Tower Hamlets,2,London,254.35
-E09000031,Waltham Forest,3,London,215.18
-E09000032,Wandsworth,1,London,175.93
-E09000033,Westminster,1,London,151.92
-N09000001,Antrim and Newtownabbey,1,Northern Ireland and the Isle of Man,NA
-N09000002,"Armagh City, Banbridge and Craigavon",2,Northern Ireland and the Isle of Man,NA
+E08000001,Bolton,5,North,159.97
+E08000002,Bury,5,North,225.67
+E08000003,Manchester,5,North,166.23
+E08000004,Oldham,5,North,159
+E08000005,Rochdale,5,North,198.73
+E08000006,Salford,5,North,129.04
+E08000007,Stockport,2,North,118.26
+E08000008,Tameside,5,North,108.17
+E08000009,Trafford,2,North,85.1
+E08000010,Wigan,5,North,186.82
+E08000011,Knowsley,5,North,98.77
+E08000012,Liverpool,5,North,85.74
+E08000013,St. Helens,5,North,124.6
+E08000014,Sefton,5,North,64.76
+E08000015,Wirral,4,North,58.64
+E08000016,Barnsley,5,North,128.41
+E08000017,Doncaster,5,North,205.2
+E08000018,Rotherham,5,North,183.49
+E08000019,Sheffield,4,North,124.82
+E08000021,Newcastle upon Tyne,4,North,113.6
+E08000022,North Tyneside,4,North,138.52
+E08000023,South Tyneside,5,North,207.32
+E08000024,Sunderland,5,North,164.92
+E08000025,Birmingham,5,Central,189.44
+E08000026,Coventry,5,Central,125.97
+E08000027,Dudley,5,Central,194.97
+E08000028,Sandwell,5,Central,203.38
+E08000029,Solihull,4,Central,148.35
+E08000030,Walsall,5,Central,177.6
+E08000031,Wolverhampton,5,Central,240.36
+E08000032,Bradford,5,North,177.67
+E08000033,Calderdale,3,North,189.17
+E08000034,Kirklees,4,North,173.27
+E08000035,Leeds,4,North,132.51
+E08000036,Wakefield,5,North,166.52
+E08000037,Gateshead,5,North,82.65
+E09000001,City of London,1,London,195.98
+E09000002,Barking and Dagenham,5,London,319.86
+E09000003,Barnet,2,London,172.78
+E09000004,Bexley,3,London,269.04
+E09000005,Brent,2,London,151.92
+E09000006,Bromley,2,London,198.29
+E09000007,Camden,1,London,97.77
+E09000008,Croydon,3,London,165.24
+E09000009,Ealing,3,London,170.27
+E09000010,Enfield,3,London,243.56
+E09000011,Greenwich,3,London,197.96
+E09000012,Hackney,2,London,195.98
+E09000013,Hammersmith and Fulham,1,London,104.78
+E09000014,Haringey,2,London,208.82
+E09000015,Harrow,2,London,216.59
+E09000016,Havering,4,London,389.13
+E09000017,Hillingdon,3,London,181.18
+E09000018,Hounslow,4,London,159.1
+E09000019,Islington,1,London,131.98
+E09000020,Kensington and Chelsea,1,London,122.33
+E09000021,Kingston upon Thames,1,London,224.78
+E09000022,Lambeth,2,London,127.9
+E09000023,Lewisham,3,London,129.81
+E09000024,Merton,1,London,179.62
+E09000025,Newham,4,London,271.57
+E09000026,Redbridge,3,London,302.4
+E09000027,Richmond upon Thames,1,London,90.9
+E09000028,Southwark,2,London,132.36
+E09000029,Sutton,1,London,176.88
+E09000030,Tower Hamlets,2,London,247.27
+E09000031,Waltham Forest,3,London,313.74
+E09000032,Wandsworth,1,London,123.45
+E09000033,Westminster,1,London,91.08
+N09000001,Antrim and Newtownabbey,2,Northern Ireland and the Isle of Man,NA
+N09000002,"Armagh City, Banbridge and Craigavon",1,Northern Ireland and the Isle of Man,NA
 N09000003,Belfast,4,Northern Ireland and the Isle of Man,NA
 N09000004,Causeway Coast and Glens,2,Northern Ireland and the Isle of Man,NA
 N09000005,Derry City and Strabane,5,Northern Ireland and the Isle of Man,NA
