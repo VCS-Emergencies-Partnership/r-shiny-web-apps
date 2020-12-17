@@ -347,9 +347,94 @@ body <- dashboardBody(
               column(width = 8,
                      box(width=NULL,
                        uiOutput('welcome'),
-                       style = "height:700px; overflow-y: scroll;overflow-x: scroll;"
-                       #style = 'overflow-y:scroll; height: calc(100vh - 200px) !important;'
-                     )),
+                       style = "height:620px; overflow-y: scroll;overflow-x: scroll;", footer=div(
+                         p(tags$strong(tags$i("This platform is still in the early stages of development. 
+                               Some features may not work properly, but are coming soon.")), 
+                           style="color:blue")),
+                       accordion(inputId='accordion1',
+                         accordionItem(
+                           id=1,
+                           title='About',
+                           collapse=T,
+                           div(
+                             p(tags$strong('Purpose:')),
+                             p('In times of an emergency, this platform seeks to answer the key question of "where is the need greatest?"'),
+                             p('It helps responders who want to target their limited resource in areas of greatest risk and least capacity to respond.
+              The tools is also useful for those wanting estimates of people at risk and in need to support their
+              influencing and advocacy efforts across a range of themes.'),
+                             #br(),
+                             br(),
+                             p(tags$strong('Scope:')),
+                             p('The platform attempts to provide a fuller picture of unmet need before,
+              during and after an emergency. To do this, we highlight areas of high vulnerability
+              and least resilience based on the British Red Cross’ and show this alongside service reach.'),
+                             p('Our hope is that by combining data from across the sector, we get a fuller picture of where there
+              is unmet need. For example, where requests for support have come through to our partners that haven’t
+              been met. This could be through support line calls that have been signposted elsewhere, or requests
+              for hardship support that have not been met.'),
+                             br(),
+                             p(tags$strong('About the data:')),
+                             p('We use open source and private data from our contributing partners to answer key
+            questions that inform emergency preparedness, response and recovery.
+            This includes numbers and rates of people at risk, reach of services by activity or support
+            type, and area ranks by vulnerability or capacity.'),
+                             p('We prioritize data that can be either mapped geographically or shown over time to highlight
+            areas at risk and changes in unmet need. Where the data allows, we aim to show this to as
+            granular level as possible without including personally identifiable information.
+            At present, we show data by region, local authority and middle super output area.')
+                           )
+                         ),
+                         accordionItem(
+                           id=2,
+                           title='View insight',
+                           collapsed=F,
+                           div(
+                             p("View the latest insight", tags$strong('underneath the insights tab'), 'in the sidebar')
+                           )
+                           #uiOutput('welcome_insight')
+                           ),
+                         accordionItem(
+                           id=3,
+                           title='Get involved',
+                           collapsed=T,
+                           div(p("Our", tags$strong("Data Working Group"), "meets fortnightly on a Thursday at 11am to help us prioritise
+                             what data and analysis to focus on next."),
+                               p(tags$strong("Join us"), "to lend your voice to the conversation.")
+                           )
+                           #uiOutput('welcome_get_involved')
+                         ),
+                         accordionItem(
+                           id=4,
+                           title='Share data',
+                           collapsed=T,
+                           div(
+                             p("Use our", tags$a(href="https://ingest.vcsep.org.uk/", target="_blank","Data App"), "or get in touch with
+             our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk"))
+                           )
+                          ),
+                    
+                         accordionItem(
+                           id=5,
+                           title='Feedback or make a request',
+                           collapsed=T,
+                           div(
+                           p("We welcome your thoughts on what data would be useful to help shape your support to those in need.
+                                  To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk")
+                                 )
+                         )
+                        ),
+                         accordionItem(
+                           id=6,
+                           title='Find out more',
+                           collapsed=T,
+                           div(p("To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")
+                                 )
+                          
+                              )
+                          )
+                       )
+                      )
+                     ),
 
               # column 2
               column(width = 4,
@@ -389,9 +474,10 @@ body <- dashboardBody(
       # - column 1 -
       column(width = 6,
               box(width = NULL, collapsible=T, collapsed=T,
-                  title='About this dashboard',
+                  title='About this dashboard', 
                   uiOutput('about_needs'),
-                  style = "height:100px; overflow-y: scroll;overflow-x: scroll;"),
+                  style = "height:200px; overflow-y: scroll;overflow-x: scroll;"),
+             
               # row  -
                   fluidRow(
                     # column 1
@@ -582,29 +668,63 @@ server = function(input, output) {
           hr(),
           h4('Bringing together data to', tags$strong('improve collaboration'), 'across the voluntary and community sector,',
              tags$strong('before,'), tags$strong('during,'), "and", tags$strong('after'), "an", tags$strong("emergency"), ""),
-
-          br(),
-          h3(tags$strong('Get involved')),
-          p("Our Data Working Group meets fortnightly on a Thursday at 11am to help us prioritise
-            what data and analysis to focus on next. Join us to lend your voice to the conversation."),
-          br(),
-          h3(tags$strong('Share data')),
-          p("Use our", tags$a(href="https://ingest.vcsep.org.uk/", target="_blank","Data App"), "or get in touch with
-            our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk")),
-          br(),
-          h3(tags$strong('Feedback or make a request')),
-          p("We welcome your thoughts on what data would be useful to help shape your support to those in need.
-            To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk")),
-          br(),
-          h3(tags$strong('Find out more')),
-          p("To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")),
-
-          br(),
-          br(),
-          p(tags$strong(tags$i("This platform is still in the early stages of development. Some features may not work properly, but are coming soon.")), style="color:blue")
-
+          br()
         )
       })
+      
+        
+        # output$welcome_about <- renderUI({
+        #   div(
+        #     p(tags$strong('Purpose:')),
+        #     p('In times of an emergency, this platform seeks to answer the key question of "where is the need greatest?"'),
+        #     p('It helps responders who want to target their limited resource in areas of greatest risk and least capacity to respond. 
+        #       The tools is also useful for those wanting estimates of people at risk and in need to support their 
+        #       influencing and advocacy efforts across a range of themes.'),
+        #     #br(),
+        #     br(),
+        #     p(tags$strong('Scope:')),
+        #     p('The platform attempts to provide a fuller picture of unmet need before, 
+        #       during and after an emergency. To do this, we highlight areas of high vulnerability 
+        #       and least resilience based on the British Red Cross’ and show this alongside service reach.'),
+        #     p('Our hope is that by combining data from across the sector, we get a fuller picture of where there 
+        #       is unmet need. For example, where requests for support have come through to our partners that haven’t
+        #       been met. This could be through support line calls that have been signposted elsewhere, or requests 
+        #       for hardship support that have not been met.'),
+        #     br(),
+        #     p(tags$strong('About the data:')),
+        #     p('We use open source and private data from our contributing partners to answer key 
+        #     questions that inform emergency preparedness, response and recovery. 
+        #     This includes numbers and rates of people at risk, reach of services by activity or support 
+        #     type, and area ranks by vulnerability or capacity.'),
+        #     p('We prioritize data that can be either mapped geographically or shown over time to highlight
+        #     areas at risk and changes in unmet need. Where the data allows, we aim to show this to as 
+        #     granular level as possible without including personally identifiable information. 
+        #     At present, we show data by region, local authority and middle super output area.')
+        #   )
+        # })
+
+        #   br(),
+        #   h3(tags$strong('Get involved')),
+        #   p("Our Data Working Group meets fortnightly on a Thursday at 11am to help us prioritise
+        #     what data and analysis to focus on next. Join us to lend your voice to the conversation."),
+        #   br(),
+        #   h3(tags$strong('Share data')),
+        #   p("Use our", tags$a(href="https://ingest.vcsep.org.uk/", target="_blank","Data App"), "or get in touch with
+        #     our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk")),
+        #   br(),
+        #   h3(tags$strong('Feedback or make a request')),
+        #   p("We welcome your thoughts on what data would be useful to help shape your support to those in need.
+        #     To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk")),
+        #   br(),
+        #   h3(tags$strong('Find out more')),
+        #   p("To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")),
+        # 
+        #   br(),
+        #   br(),
+        #   p(tags$strong(tags$i("This platform is still in the early stages of development. Some features may not work properly, but are coming soon.")), style="color:blue")
+        # 
+        # )
+      
 
       # --- plot list of contributors ---
       output$members <- renderUI({
@@ -672,6 +792,36 @@ server = function(input, output) {
       })
 
     }
+  })
+  
+  
+  # --- help for about needs dashboard ---
+  observe({
+    
+    req(input$sidebar_id)
+    if (input$sidebar_id == 'unmetneed') {
+      
+      output$about_needs <- renderUI({
+        div(
+          hr(),
+          p("This dashboard helps responders who wish to", tags$strong("target their efforts in areas of highest
+            risk and least capacity to cope with an emergency."), "It also provides estimates of “People at risk”
+              based on different characteristics, to support influencing and advocacy efforts around emergencies."),
+          tags$br(),
+          p("Users are able to", tags$strong("select the type of emergency"), "they are responding to and 
+            the",  tags$strong("“Areas at risk” map"), "and", tags$strong("“Areas to focus” list"), "will update", tags$strong("to show those 
+            areas least resilient to the emergency."), "For information on what indicators 
+            are used to make these assessments, see the", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", 'British Red Cross Vulnerability')), 
+            "and", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "Resilience")), "Indices."),
+          tags$br(),
+          p("As more organisations contribute their data, over time", tags$strong("we will build a better 
+            understanding of “People in need” during an emergency, and where such needs may be going unmet."))
+          
+        )
+      })
+      
+    }
+    
   })
 
 
