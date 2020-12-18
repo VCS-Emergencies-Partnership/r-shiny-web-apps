@@ -448,8 +448,50 @@ body <- dashboardBody(
                 ),
                 # - Row 2 -
                 fluidRow(
-                  box(title='Data store', height='220px', width=NULL,
-                      uiOutput('how_much_data'))
+                  box(title='Data store', width=NULL,
+                      style = "height:175px; overflow-y: scroll;overflow-x: scroll;",
+                      marginTop=T,
+                      fluidRow(
+                        column(width=12, height='110px',
+                               #box 
+                                 descriptionBlock(
+                                  #number = div("26"), 
+                                  #numberColor = "green", 
+                                  #numberIcon = "fas fa-caret-up",
+                                  header= '26',
+                                  #header_icon = "fa fa-caret-up",
+                                  text = 'datasets',
+                                  rightBorder = F,
+                                  marginBottom = T
+                               )
+                            
+                        )
+                      ),
+                      fluidRow(
+                        column(width=6, height='110px',
+                               descriptionBlock(
+                                 number="46%",
+                                 numberColor = 'green',
+                                 numberIcon = "fas fa-caret-up",
+                                 header='12',
+                                 text = 'VCS sources',
+                                 rightBorder = F,
+                                 marginBottom = F
+                               )
+                            ),
+                        column(width=6, height='110px',
+                               descriptionBlock(
+                                 number="54%",
+                                 #numberColor = 'green',
+                                 #numberIcon = "fas fa-caret-up",
+                                 header='14',
+                                 text = 'Open sources',
+                                 rightBorder = F,
+                                 marginBottom = F
+                               )
+                        )
+                      )
+                  )
                 ),
                 # - Row 3 -
                 fluidRow(
