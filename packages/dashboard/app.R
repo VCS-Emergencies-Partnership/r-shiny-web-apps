@@ -217,78 +217,6 @@ header <- dashboardHeaderPlus(title = "VCSEP Insights", titleWidth = "300px",
 
 # --- side bar --- #
 sidebar <- dashboardSidebar(
-  # width = "300px",
-  #
-  # # - always display region and vulnerability index to display -
-  # br(),
-  # p(style="text-align: justify;",
-  #   "Identify areas in need in your region"),
-  # br(),
-  # selectInput("tactical_cell",
-  #             label = "Choose Region",
-  #             choices = sort(tactical_cells),
-  #             selected = "--All UK--"
-  # ),
-  # br(),
-  # uiOutput("secondSelection"),
-  #
-  # br(),
-  # selectInput("theme",
-  #             label="Select a Theme",
-  #             choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
-  #             selected="Covid-19"),
-  #
-  #selectInput("vi",
-  #            label = "Vulnerability Index",
-  #            choices = c("Socioeconomic vulnerability", "Clinical vulnerability", "Overall vulnerability", 'Health/Wellbeing vulnerability', 'Economic vulnerability', 'Social vulnerability'),
-  #            selected = "Overall vulnerability"
-  #),
-
-  # br(),
-  # selectInput("res_index",
-  #             label="Resilience Index",
-  #             choices = c("Overall", "Floods", "Dwelling fires"),
-  #             selected = "Overall"),
-  #
-  # p('--- MAP View ---'),
-  # selectInput("maptype",
-  #             label="View indicies together (bivariate) or seperately (single layer)",
-  #             choices = c("Bivariate", "Single Layer")),
-
-
-  #sidebarMenu( id = 'tabs',
-    # -- overall unmet needs for your area -- #
-    # menuItem("Unmet Needs", expandedName = "needs", icon = icon("dashboard"), selected=TRUE, startExpanded = TRUE,
-    #          #expandedName = "unmetneeds",
-    #          br(),
-    #          p(style="text-align: justify;",
-    #            "Select a region to focus in on"),
-    #          # - select tactical cell
-    #          selectInput("tactical_cell",
-    #                      label = "Choose Region",
-    #                      choices = sort(unique(vuln_index$TacticalCell)),
-    #                      selected = "North"
-    #          ),
-    #          br(),
-    #          # - select type of vulnerability index to display -
-    #          p(style='text-align: justify;',
-    #            "Select a vulnerability index to display"),
-    #          selectInput("vi",
-    #                      label = "Type of vulnerability",
-    #                      choices = c("Socioeconomic vulnerability", "Clinical vulnerability", "Overall vulnerability")
-    #          ),
-    #
-    #          br(),
-    #          br()
-    #     ),
-
-  #   menuItem("Themes", icon = icon("th"), tabName = "themes", selected=F, newTab = TRUE, startExpanded = F,
-  #            # - list themes -
-  #            menuSubItem("Flooding", tabName = 'flooding'),
-  #            menuSubItem("Mental Health", tabName='mh'),
-  #            menuSubItem("Winter Pressures", tabName='winter_pressures'))
-   #),
-
   width = "300px",
   tags$style(HTML(".sidebar-menu li a { font-size: 16px; }")),
   sidebarMenu(id="sidebar_id",
@@ -296,9 +224,9 @@ sidebar <- dashboardSidebar(
               menuItem('Home', tabName='home', icon=icon("home")),
               # -- Unmet need insight -- binoculars
               menuItem("Insight", icon = icon("binoculars"), tabName = "insight", startExpanded = T,
-                       menuSubItem(HTML("Areas at risk in an emergency"), tabName="unmetneed", icon=icon("hands-helping"))),
+                       menuSubItem(HTML("Areas at risk in an emergency"), tabName="unmetneed", icon=icon("fas fa-map-signs"))),
               # -- trying conditional panel ---
-              conditionalPanel(condition = "input.sidebar_id == 'unmetneed'",
+              conditionalPanel(condition = "input.sidebar_id == 'unmetneed'", 
                                div(style="text-align: justify;",
                                    br(),
                                p("This dashboard is to help answer the",tags$br(), "question of what",
@@ -334,7 +262,8 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
 
-  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
+  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),#,
+            #HTML('.info-box {min-height: 45px;} .info-box-icon {height: 45px; line-height: 45px;} .info-box-content {padding-top: 0px; padding-bottom: 0px;}')),
   tags$head(includeCSS("styles.css")),
   #tags$head(HTML("<title> VCSEP Unmet needs platform </title>")),
 
@@ -2796,7 +2725,7 @@ server = function(input, output) {
         output$requests <- renderInfoBox({
           infoBox(
             "Requests",
-              color = "navy", fill = TRUE
+              color = "navy", fill = F, icon=icon("fas fa-hand-point-up")
              )
             })
           }
@@ -2829,8 +2758,12 @@ server = function(input, output) {
 
             output$requests <- renderInfoBox({
             infoBox(
-              "Requests", unique(to_print),
-                color = "olive", fill = TRUE
+              "Requests for support", 
+              div(p(tags$strong(unique(total_requests_this_week$total_this_week), style="font-size:24pt"), 
+                             "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
+                  p(unique(difference), "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;")),
+              #"Requests", unique(to_print),
+                color = "purple", fill = F, icon=icon("fas fa-hand-point-up")
               )
             })
            }
@@ -2860,8 +2793,13 @@ server = function(input, output) {
 
           output$requests <- renderInfoBox({
           infoBox(
-            "Requests", to_print,
-            color = "olive", fill = TRUE
+            "Requests for support", 
+            div(p(tags$strong(total_requests_this_week$total_this_week, style="font-size:24pt"), 
+                  "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
+                p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;")),
+            #div(p("Previous 7 days:", total_requests_this_week$total_this_week, style = "font-size:12pt;margin-top:5px;"),
+            #    p("Difference to last week:", difference, style = "font-size:10pt;color:#808080;margin-top:-10px;")),
+            color = "purple", fill = F, icon=icon("fas fa-hand-point-up")
                 )
           })
 
@@ -2894,8 +2832,14 @@ server = function(input, output) {
 
           output$requests <- renderInfoBox({
             infoBox(
-              "Requests", to_print,
-              color = "olive", fill = TRUE
+              #"Requests", to_print,
+              "Requests for support",
+              div(p(tags$strong(total_requests_this_week$total_this_week, style="font-size:24pt"), 
+                    "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
+                  p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;")),
+              #div(p("Previous 7 days:", total_requests_this_week$total_this_week, style = "font-size:12pt;margin-top:5px;"),
+              #    p("Difference to last week:", difference, style = "font-size:10pt;color:#808080;margin-top:-10px;")),
+              color = "purple", fill = F, icon=icon("fas fa-hand-point-up")
                 )
             })
           }
@@ -2917,8 +2861,8 @@ server = function(input, output) {
       if(is.null(input$lad_selected)) {
         output$vols <- renderInfoBox({
          infoBox(
-            "Volunteer Capacity",
-            color = "navy", fill = TRUE
+            "Volunteer Presence",
+            color = "navy", fill = F,
             )
           })
         }
@@ -2944,8 +2888,9 @@ server = function(input, output) {
 
           output$vols <- renderInfoBox({
             infoBox(
-              "Volunteer presence", avg_score$`Volunteer capacity`,
-              color = avg_score$colour, fill = TRUE
+              "Volunteer presence", 
+              div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
+              color = avg_score$colour, fill = F, icon=icon('hands-helping')
                 )
               })
             }
@@ -2975,8 +2920,9 @@ server = function(input, output) {
 
             output$vols <- renderInfoBox({
             infoBox(
-            "Volunteer presence", avg_score$`Volunteer capacity`,
-              color = avg_score$colour, fill = TRUE
+            "Volunteer presence", 
+            div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
+              color = avg_score$colour, fill = F, icon=icon('hands-helping')
                 )
               })
              }
@@ -3010,8 +2956,9 @@ server = function(input, output) {
 
               output$vols <- renderInfoBox({
                 infoBox(
-                  "Volunteer presence", avg_score$`Volunteer capacity`,
-                    color = avg_score$colour, fill = TRUE
+                  "Volunteer presence", 
+                  div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
+                    color = avg_score$colour, fill = F, icon=icon('hands-helping')
                   )
                 })
               }
@@ -3028,8 +2975,9 @@ server = function(input, output) {
 
       output$pulse <- renderInfoBox({
       infoBox(
-        "Pulse", 'Coming Soon',
-        color = "navy", fill = TRUE
+        "Pulse", 
+        div(p('Coming Soon', style = "font-size:12pt;margin-top:5px;")),
+        color = "navy", fill = F, icon = icon("fas fa-wave-square")
         )
       })
     }
