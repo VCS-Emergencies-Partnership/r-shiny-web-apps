@@ -1,3 +1,6 @@
+htmlwidgets
+scales
+feather
 DT
 echarts4r
 httr
