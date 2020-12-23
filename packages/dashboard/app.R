@@ -1,19 +1,18 @@
-library(shiny)
-library(shinydashboard)
-library(httr)
-library(sf)
-library(tidyverse)
-library(jsonlite)
-library(shinydashboardPlus)
-library(leaflet)
-library(viridis)
-library(DT)
-library(shiny)
-library(echarts4r)
+library(shiny) # - not in Docker 
+library(shinydashboard) # - Docker
+library(httr) # - Docker
+library(sf) # - Docker
+library(tidyverse) # Docker
+library(jsonlite) # - Docker
+library(shinydashboardPlus) # Docker
+library(leaflet) # Docker
+library(viridis) # Docker
+library(DT) # Docker
+library(echarts4r) # Docker 
 library(feather)
 library(scales)
 library(htmlwidgets)
-library(magrittr)
+
 
 
 # --- read in vulnerablity indices ---
@@ -112,8 +111,8 @@ par_table_lad_avg <- par_table %>%
          `Number of households in fuel poverty1`,
          `Proportion of households fuel poor (%)`,
          `Homelessness (rate per 1000)`,
-         `lad_total_homeless`,
-         'lad_prop_homeless',
+         #`lad_total_homeless`,
+         #'lad_prop_homeless',
          `Not in employment`,
          'lad_prop_unemployed_on_ucred',
          `Clinically extremely vulnerable`,
@@ -134,9 +133,9 @@ par_table_tc_avg <- par_table %>%
     `tc_cases_per_10000_for_current_week`,
     `tc_Number of households in fuel poverty1`,
     'tc_prop_households_fuel_poor',
-    'tc_total_homeless',
-    `Homelessness per 1000 in tc`,
-    'tc_prop_homeless',
+    #'tc_total_homeless',
+    `tc_Homelessness (rate per 1000)`,
+    #'tc_prop_homeless',
     `tc_Not in employment`,
     `tc_prop_unemployed_on_universal_credit`,
     `tc_Clinically extremely vulnerable`,
@@ -148,54 +147,16 @@ par_table_tc_avg <- par_table %>%
   mutate('LAD19CD'='tc_avg', 'TacticalCell'='tc_avg') %>%
   select('LAD19CD', 'TacticalCell', everything())
 
-
-
-
-#par_table_lad_avg <- par_table %>% filter(TacticalCell %in% england_regions) %>%
-#  mutate(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1)) %>%
-#  summarise(across(c(`LAD_int_Proportion of neighbourhoods in 20% most digitally excluded`:`LAD_perc_People receiving Section 95 support`), ~ mean(.x, na.rm=T))) %>%
-  #rename columns
-#  mutate('LAD19CD'='All LADs in England avg') %>%
-#  mutate('TacticalCell'='All LADs in England avg') %>%
-#  select('LAD19CD', 'TacticalCell', everything())
-
-
-# calculate averages for local authorities within a region 
-#par_table_avg_per_region <- area_avg %>% filter(TacticalCell %in% england_regions) %>%
-#  select('LAD19CD', 'TacticalCell',`LAD_int_Proportion of neighbourhoods in 20% most digitally excluded`:`LAD_perc_People receiving Section 95 support`) %>%
-#  mutate(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1))
-
-#par_table_avg_per_region <- aggregate(par_table_avg_per_region[,3:18], list(par_table_avg_per_region$TacticalCell), mean, na.rm=TRUE, na.action=NULL)
-
-#par_table_avg_per_region <- par_table_avg_per_region %>% rename('TacticalCell'=Group.1)
-
-# avg for tactical cells
-#par_table_tc_avg <- par_table %>% filter(TacticalCell %in% england_regions) %>%
-#  select(`tc_int_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_perc_People receiving Section 95 support`) %>%
-#  unique() %>%
-#  mutate(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1)) %>%
-#  summarise(across(c(`tc_int_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_perc_People receiving Section 95 support`), ~ mean(.x, na.rm=T))) %>%
-#  #rename columns
-#  mutate('LAD19CD'='TC avg') %>%
-#  mutate('TacticalCell'='TC avg') %>%
-#  select('LAD19CD', 'TacticalCell', everything())
-
-
-
 # --- areas to focus
 covid_area2focus <- read_csv('data/areas_to_focus/areas2focus_covid.csv')
 
-# covid name for table
-covid_week = tail(names(covid_area2focus),1)
+# covid prefix for name for table
+covid_week = colnames(covid_area2focus)[6]
 covid_week = strsplit(covid_week, " ")
 covid_week = paste('Week', covid_week[[1]][2],'\n')
-
+# rename with suffix for time being. 
 covid_area2focus <- covid_area2focus %>%
-  # for now removing (don't think this data has data for these areas anyway)
-  filter(TacticalCell != "Northern Ireland and the Isle of Man",
-             TacticalCell != "Scotland",
-             TacticalCell != "Wales") %>%
-  rename('covid cases per 100,000'=tail(names(.),1))
+  rename('covid cases per 100,000'=colnames(covid_area2focus)[6])
   
 
 
@@ -262,8 +223,7 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
 
-  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),#,
-            #HTML('.info-box {min-height: 45px;} .info-box-icon {height: 45px; line-height: 45px;} .info-box-content {padding-top: 0px; padding-bottom: 0px;}')),
+  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
   tags$head(includeCSS("styles.css")),
   #tags$head(HTML("<title> VCSEP Unmet needs platform </title>")),
 
@@ -462,7 +422,7 @@ body <- dashboardBody(
              )),
 
                       # - row 3 -
-                      fluidRow(
+                      fluidRow( 
                         # - column 1 -
                         column(
                           width = 12,
@@ -470,96 +430,159 @@ body <- dashboardBody(
                             width = NULL, collapsible = T, collapsed=F,#solidHeader = TRUE, status='primary',
                             title = "People at risk", align = "center", style = "height:300px; overflow-y: scroll;overflow-x: scroll;",
                             
-                            # multi columned box
-                            fluidRow(
+                          # multi columned box - bame row
+                            fluidRow(style = "border-top: 1px solid #D3D3D3;",
                               column(
                                 width = 6,
-                                  uiOutput('bame_population_text'),
-                                  echarts4rOutput('bame_population', height='40px'),
-                                  rightBorder=T,
+                                  uiOutput('bame_population_text', height='40px'),
+                                  #echarts4rOutput('bame_population', height='40px'),
+                                  rightBorder=F,
                                   marginBottom=T
                               ),
-                              
+
                               column(
                                 width = 6,
-                                  uiOutput('section95_text'),
-                                  echarts4rOutput('section95', height='40px'),
-                                  rightBorder=T,
+                                  echarts4rOutput('bame_population', height='40px'),
+                                  rightBorder=F,
                                   marginBottom =T
                                 )
                               ),
                             
-                            fluidRow(
+                            # -- section 95 row ---
+                            fluidRow(style = "border-top: 1px solid #D3D3D3;",
                               column(
                                 width = 6,
-                                uiOutput('homeless_text'),
-                                echarts4rOutput('homeless', height='40px'),
+                                uiOutput('section95_text'),
+                                #uiOutput('homeless_text', height='40px'),
+                                #echarts4rOutput('homeless', height='40px'),
                                 rightBorder=T,
                                 marginBottom=T
                               ),
-                              
+
                               column(
                                 width = 6,
-                                uiOutput('fuelp_text'),
-                                echarts4rOutput('fuelp',height='40px'),
-                                rightBorder=T,
+                                echarts4rOutput('section95', height='40px'),
+                                #uiOutput('fuelp_text'),
+                                #echarts4rOutput('fuelp',height='40px'),
+                                #echarts4rOutput('homeless', height='40px'),
+                                rightBorder=F,
                                 marginBottom =T
                               )
                             ),
-                            fluidRow(
-                              column(
-                                width = 6,
-                                uiOutput('unemployment_text'),
-                                echarts4rOutput('unemployment',height='40px'),
-                                rightBorder=T,
-                                marginBottom=T
-                              ),
-                              
-                              column(
-                                width = 6,
-                                uiOutput('digital_text'),
-                                echarts4rOutput('digital',height='40px'),
-                                rightBorder=T,
-                                marginBottom =T
-                              )
-                            ),
-                            fluidRow(
-                              column(
-                                width = 6,
-                                uiOutput('shielding_text'),
-                                echarts4rOutput('shielding_f',height='40px'),
-                                rightBorder=T,
-                                marginBottom=T
-                              )
-                            )
+                          
+                          # -- homeless row ---
+                          fluidRow(style = "border-top: 1px solid #D3D3D3;",
+                                   column(
+                                     width = 6,
+                                     uiOutput('homeless_text'),
+                                     rightBorder=T,
+                                     marginBottom=T
+                                   ),
+                                   
+                                   column(
+                                     width = 6,
+                                     echarts4rOutput('homeless', height='40px'),
+                                     rightBorder=F,
+                                     marginBottom =T
+                                   )
+                          ),
+                          
+                          # -- fuel poverty row ---
+                          fluidRow(style = "border-top: 1px solid #D3D3D3;",
+                                   column(
+                                     width = 6,
+                                     uiOutput('fuelp_text'),
+                                     rightBorder=T,
+                                     marginBottom=T
+                                   ),
+                                   
+                                   column(
+                                     width = 6,
+                                     echarts4rOutput('fuelp', height='40px'),
+                                     rightBorder=F,
+                                     marginBottom =T
+                                   )
+                          ),
+                          
+                          # -- universal credit row ---
+                          fluidRow(style = "border-top: 1px solid #D3D3D3;",
+                                   column(
+                                     width = 6,
+                                     uiOutput('unemployment_text'),
+                                     rightBorder=T,
+                                     marginBottom=T
+                                   ),
+                                   
+                                   column(
+                                     width = 6,
+                                     echarts4rOutput('unemployment', height='40px'),
+                                     rightBorder=F,
+                                     marginBottom =T
+                                   )
+                          ),
+                          
+                          # -- digital exclusion row ---
+                          fluidRow(style = "border-top: 1px solid #D3D3D3;",
+                                   column(
+                                     width = 6,
+                                     uiOutput('digital_text'),
+                                     rightBorder=T,
+                                     marginBottom=T
+                                   ),
+                                   
+                                   column(
+                                     width = 6,
+                                     echarts4rOutput('digital', height='40px'),
+                                     rightBorder=F,
+                                     marginBottom =T
+                                   )
+                          ),
+                          
+                          # -- shielding row ---
+                          fluidRow(style = "border-top: 1px solid #D3D3D3;",
+                                   column(
+                                     width = 6,
+                                     uiOutput('shielding_text'),
+                                     rightBorder=T,
+                                     marginBottom=T
+                                   ),
+                                   
+                                   column(
+                                     width = 6,
+                                     echarts4rOutput('shielding_f', height='40px'),
+                                     rightBorder=F,
+                                     marginBottom =T
+                                   )
+                          )
                           )
                         )
-                      ),
-                            
-                            #echarts4rOutput('total_population',height='60px'),
-                            #uiOutput('bame_population_text'),
-                            #echarts4rOutput('bame_population', height='40px'),
-                        #     uiOutput('section95_text'),
-                        #     echarts4rOutput('section95', height='40px'),
-                        #     uiOutput('homeless_text'),
-                        #     echarts4rOutput('homeless', height='40px'),
-                        #     uiOutput('fuelp_text'),
-                        #     echarts4rOutput('fuelp',height='40px'),
-                        #     uiOutput('unemployment_text'),
-                        #     echarts4rOutput('unemployment',height='40px'),
-                        #     uiOutput('digital_text'),
-                        #     echarts4rOutput('digital',height='40px'),
-                        #     uiOutput('shielding_text'),
-                        #     echarts4rOutput('shielding_f',height='40px'),
-                        #     style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
-                        #   )
-                        # )
-                        # ),
+                      #)
+                    ),
 
+                      #echarts4rOutput('total_population',height='60px'),
+                    #   uiOutput('bame_population_text'),
+                    #   echarts4rOutput('bame_population', height='40px'),
+                    #          uiOutput('section95_text'),
+                    #          echarts4rOutput('section95', height='40px'),
+                    #          uiOutput('homeless_text'),
+                    #          echarts4rOutput('homeless', height='40px'),
+                    #          uiOutput('fuelp_text'),
+                    #          echarts4rOutput('fuelp',height='40px'),
+                    #          uiOutput('unemployment_text'),
+                    #          echarts4rOutput('unemployment',height='40px'),
+                    #          uiOutput('digital_text'),
+                    #          echarts4rOutput('digital',height='40px'),
+                    #          uiOutput('shielding_text'),
+                    #          echarts4rOutput('shielding_f',height='40px'),
+                    #          style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
+                    #        )
+                    #      )
+                    #    ),
+                    # 
                         fluidRow(
                         column(width = 12,
                              box(
-                                width = NULL, collapsible = T, collapsed=F,#solidHeader = TRUE, status='primary',
+                                width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
                                  title = "People in need", align = "center", #height = "600px"
                                  uiOutput('people_in_Need'),
                                  style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
@@ -893,7 +916,7 @@ server = function(input, output) {
   filtered_covid_areas <- reactive({
     if(input$tactical_cell == '-- England --') {
       covid_lads_in_tc <- covid_area2focus %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
-        select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`)
+        select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`, `% change in covid cases`)
       #print(covid_lads_in_tc)
     }
     else {
@@ -901,7 +924,7 @@ server = function(input, output) {
     lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell)
     # order descending by quintile and covid cases
     covid_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
-      select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`)
+      select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`,`% change in covid cases`)
     }
 
   })
@@ -1200,8 +1223,9 @@ server = function(input, output) {
                  'total_las_in_eng_with_data',
                  'eng_total_fuel_poor_households',
                  'eng_prop_households_fuel_poor',
-                 'eng_total_homeless',
-                 'proprotion_homeless',
+                 'eng_rate_per_1000',
+                 #'eng_total_homeless',
+                 #'proprotion_homeless',
                  'eng_total_unemployed_on_ucred',
                  'prop_eng_pop_unemployed_on_ucred',
                  'total_shielding_eng',
@@ -1217,9 +1241,10 @@ server = function(input, output) {
         bame_to_show <- paste0(round(bame_to_plot$proportion,0), "%")
         
         output$bame_population_text <- renderUI({
-          div(style= " text-align: center;",
-            hr(),
-            p(bame_to_show, tags$br(),
+          div(style= " text-align: center;margin-top:5px;",
+            #hr(),
+            p(bame_to_show, 
+            tags$br(),
             "of the population are BAME"
           )
           )
@@ -1238,7 +1263,7 @@ server = function(input, output) {
               #e_mark_line(data=eng_avg_bame, symbol = "none", lineStyle = list(color = "black")) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
 
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -1264,8 +1289,8 @@ server = function(input, output) {
         write_eng_sec95 <- paste0("(",eng_sec95_to_write$prop_eng_receiving_section_95_support,"% of the population)")
         
         output$section95_text <- renderUI({
-          div(style= " text-align: center;",
-              hr(),
+          div(style= " text-align: center;margin-top:5px;",
+              #hr(),
               p(format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), tags$br(),
                 "people receiving Section 95 support")
               #p(tags$strong('No. of people receiving Section 95 support:'), format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), "people", tags$br(), write_eng_sec95)
@@ -1284,7 +1309,7 @@ server = function(input, output) {
                         #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
                         e_hide_grid_lines() %>%
                         e_flip_coords() %>%
-                        e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
+                        e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
 
                         #e_rm_axis(axis="x") %>%
                         #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -1296,31 +1321,32 @@ server = function(input, output) {
                     })
         
         # --- homelessness ---
-        eng_homeless_to_write <- eng_table %>% select('eng_total_homeless','proprotion_homeless') %>%
+        eng_homeless_to_write <- eng_table %>% select('eng_rate_per_1000') %>%
           unique()
         
-        eng_homeless_to_plot <- eng_homeless_to_write %>% select('proprotion_homeless') %>%
-          pivot_longer('proprotion_homeless', names_to = "Indicator", values_to = "proportion")
+        eng_homeless_to_plot <- eng_homeless_to_write %>% select('eng_rate_per_1000') %>%
+          pivot_longer('eng_rate_per_1000', names_to = "Indicator", values_to = "proportion")
         
         eng_homeless_to_plot <- eng_homeless_to_plot %>% filter(!is.na(proportion)) %>%
-          unique()
+          unique() %>%
+          mutate('proportion'=round(proportion,2))
         
-        eng_homeless_to_write <- eng_homeless_to_write %>% filter(!is.na(eng_total_homeless) & !is.na('proprotion_homeless'))
+        eng_homeless_to_write <- eng_homeless_to_write %>% filter(!is.na('eng_rate_per_1000'))
         
-        write_eng_homeless <- paste0("(",eng_homeless_to_write$proprotion_homeless,"% of the population)")
+        write_eng_homeless <- paste0("(",eng_homeless_to_write$eng_rate_per_1000," homelessness rate per 1000)")
         
 
         output$homeless_text <- renderUI({
-          div(style= " text-align: center;",
-              hr(),
-              p(format(eng_homeless_to_write$eng_total_homeless, big.mark=',', scientific = F), tags$br(),
-                'homeless people')
+          div(style= " text-align: center;margin-top:5px;",
+              #hr(),
+              p(format(round(eng_homeless_to_write$eng_rate_per_1000,2), big.mark=',', scientific = F), tags$br(),
+                'homeless people per 1000')
               #p(tags$strong('No. of people homeless:'), format(eng_homeless_to_write$eng_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_eng_homeless),
           )
         })
         
         output$homeless <- renderEcharts4r({
-          # # Plot population statistics
+          # Plot population statistics
           sec95 <- eng_homeless_to_plot %>%
             e_charts(x = Indicator) %>%
             e_bar(proportion, bar_width=0.1,showBackground=T) %>%
@@ -1331,11 +1357,11 @@ server = function(input, output) {
             #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
             e_hide_grid_lines() %>%
             e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
-            
+            e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
+
             #e_rm_axis(axis="x") %>%
             #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+            e_x_axis(position='top', axisLabel=list(show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1000, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1000) %>%
             e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
             e_y_axis(show=F) %>%
             e_legend(FALSE)
@@ -1361,8 +1387,8 @@ server = function(input, output) {
         
 
         output$fuelp_text <- renderUI({
-          div(style= " text-align: center;",
-              hr(),
+          div(style= " text-align: center;margin-top:5px;",
+              #hr(),
               p(format(eng_fuelp_to_write$eng_total_fuel_poor_households, big.mark=',', scientific = F),
                 tags$br(),
                 "households in fuel poverty"
@@ -1383,7 +1409,7 @@ server = function(input, output) {
             #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
             e_hide_grid_lines() %>%
             e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
             
             #e_rm_axis(axis="x") %>%
             #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -1413,8 +1439,8 @@ server = function(input, output) {
         
         
         output$unemployment_text <- renderUI({
-          div(style= " text-align: center;",
-              hr(),
+          div(style= " text-align: center;margin-top:5px;",
+              #hr(),
               p(format(eng_unem_to_write$eng_total_unemployed_on_ucred, big.mark=',', scientific = F),
                 tags$br(),
                 "people unemployed on universal credit"
@@ -1435,7 +1461,7 @@ server = function(input, output) {
             #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
             e_hide_grid_lines() %>%
             e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
             
             #e_rm_axis(axis="x") %>%
             #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -1447,8 +1473,8 @@ server = function(input, output) {
         })
 
         output$digital_text <- renderUI({
-          div(style= " text-align: center;",
-              hr(),
+          div(style= " text-align: center;margin-top:5px;",
+              #hr(),
               p(tags$strong('Data not currently available at national level for digital exclusion'))
           )
         })
@@ -1476,8 +1502,8 @@ server = function(input, output) {
         
 
         output$shielding_text <- renderUI({
-          div(style= " text-align: center;",
-              hr(),
+          div(style= " text-align: center;margin-top:5px;",
+              #hr(),
               p(format(eng_shielding_to_write$total_shielding_eng, big.mark=',', scientific = F),
                 tags$br(),
                 "people clinically extremely vulnerable")
@@ -1497,7 +1523,7 @@ server = function(input, output) {
             #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
             e_hide_grid_lines() %>%
             e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=0, height='60%') %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
             
             #e_rm_axis(axis="x") %>%
             #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -1552,8 +1578,8 @@ server = function(input, output) {
           label_to_show <- paste(round(par_table_tc_avg$`tc_proportion`,0), '%', '\n','(regional avg)')
           
           output$bame_population_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(bame_to_show,
                   tags$br(),
                   'of the population are BAME')
@@ -1607,8 +1633,8 @@ server = function(input, output) {
           tc_sec95_for_avg = paste0(par_table_tc_avg$tc_prop_people_recieving_section_95_support, '%', '\n','(regional avg)')
                   
           output$section95_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(format(tc_sec95_to_write$`tc_People receiving Section 95 support`, big.mark=',', scientific = F),
                   tags$br(),
                   'people receiving Section 95 support')
@@ -1641,32 +1667,32 @@ server = function(input, output) {
           
           
           # --- homeless ----
-          tc_homeless_to_write <- curr_table %>% select(`tc_total_homeless`,'tc_prop_homeless') %>%
+          tc_homeless_to_write <- curr_table %>% select(`tc_Homelessness (rate per 1000)`) %>%
             unique()
           
-          tc_homeless_to_plot <- tc_homeless_to_write %>% select('tc_prop_homeless') %>%
-            pivot_longer('tc_prop_homeless', names_to = "Indicator", values_to = "proportion")
+          tc_homeless_to_plot <- tc_homeless_to_write %>% select(`tc_Homelessness (rate per 1000)`) %>%
+            pivot_longer(`tc_Homelessness (rate per 1000)`, names_to = "Indicator", values_to = "proportion")
           
           tc_homeless_to_plot <- tc_homeless_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>% mutate('proportion'=round(proportion,1))
+            unique() %>% mutate('proportion'=round(proportion,2))
           
-          tc_homeless_to_write <- tc_homeless_to_write %>% filter(!is.na(`tc_total_homeless`) & !is.na('tc_prop_homeless'))
+          tc_homeless_to_write <- tc_homeless_to_write %>% filter(!is.na(`tc_Homelessness (rate per 1000)`))
           
-          write_tc_homeless <- paste0("(",tc_homeless_to_write$tc_prop_homeless,"% of the population)")
+          write_tc_homeless <- paste0("(",tc_homeless_to_write$`tc_Homelessness (rate per 1000)`,"homelessness rate per 1000)")
           
           # for echarts
-          tc_avg_homeless <- par_table_tc_avg %>% select(`tc_prop_homeless`) %>%
-            select('xAxis' = `tc_prop_homeless`) %>%
+          tc_avg_homeless <- par_table_tc_avg %>% select(`tc_Homelessness (rate per 1000)`) %>%
+            select('xAxis' = `tc_Homelessness (rate per 1000)`) %>%
             as.list()
-          print(tc_avg_homeless)
-          tc_homeless_for_avg = paste0(par_table_tc_avg$tc_prop_homeless, '%', '\n','(regional avg)')
+         
+          tc_homeless_for_avg = paste0(round(par_table_tc_avg$`tc_Homelessness (rate per 1000)`,2), '\n','(regional avg)')
           
           output$homeless_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
-                p(format(tc_homeless_to_write$tc_total_homeless, big.mark=',', scientific = F),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
+                p(format(round(tc_homeless_to_write$`tc_Homelessness (rate per 1000)`,2), big.mark=',', scientific = F),
                   tags$br(),
-                  "homeless people")
+                  "homeless per 1000")
                 #p(tags$strong('No. of homeless people:'), format(tc_homeless_to_write$tc_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_tc_homeless)
             )
           })
@@ -1687,7 +1713,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_x_axis(position='top', axisLabel=list(show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1000, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1000) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -1722,8 +1748,8 @@ server = function(input, output) {
           tc_fuelp_for_avg = paste0(round(par_table_tc_avg$tc_prop_households_fuel_poor,0), '%', '\n','(regional avg)')
           
           output$fuelp_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(format(tc_fuelp_to_write$`tc_Number of households in fuel poverty1`, big.mark=',', scientific = F),
                   tags$br(),
                   'households in fuel poverty')
@@ -1777,8 +1803,8 @@ server = function(input, output) {
           tc_unem_for_avg = paste0(round(par_table_tc_avg$tc_prop_unemployed_on_universal_credit,0), '%', '\n','(regional avg)')
           
           output$unemployment_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(format(tc_unem_to_write$`tc_Not in employment`, big.mark=',', scientific = F),
                   tags$br(),
                   "people unemployed on universal credit")
@@ -1836,8 +1862,8 @@ server = function(input, output) {
           tc_de_for_avg = paste0(round(par_table_tc_avg$tc_percent_digitally_excluded,0), '%', '\n','(regional avg)')
           
           output$digital_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(write_tc_de,
                   tags$br(),
                   "neighbourhoods in 20% most digitally excluded")
@@ -1895,8 +1921,8 @@ server = function(input, output) {
           tc_shielding_for_avg = paste0(round(par_table_tc_avg$`tc_Clinically vulnerable proportion of population`,0), '%', '\n','(regional avg)')
           
           output$shielding_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(format(tc_shielding_to_write$`tc_Clinically extremely vulnerable`, big.mark=',', scientific = F),
                   tags$br(),
                   'people clinically extremely vulnerable')
@@ -1969,8 +1995,8 @@ server = function(input, output) {
           if (dim(lad_bame_to_plot)[1] != 0) {
           
           output$bame_population_text <- renderUI({
-            div(style= "text-align: center;",
-                hr(),
+            div(style= "text-align: center;margin-top:5px;",
+                #hr(),
                 p(lad_bame_to_show,
                   tags$br(),
                   'of the population are BAME')
@@ -2010,8 +2036,8 @@ server = function(input, output) {
             
             # -- no data --
             output$bame_population_text <- renderUI({
-              div(style= "text-align: center;",
-                  hr(),
+              div(style= "text-align: center;margin-top:5px;",
+                  #hr(),
                   p(lad_bame_to_show,
                     tags$br(),
                     'for % of the population who are BAME')
@@ -2051,8 +2077,8 @@ server = function(input, output) {
           if(dim(lad_sec95_to_plot)[1] != 0) {
           
           output$section95_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F),
                   tags$br(),
                   'people receiving Section 95 support')
@@ -2086,8 +2112,8 @@ server = function(input, output) {
           
           else {
             output$section95_text <- renderUI({
-              div(style= " text-align: center;",
-                  hr(),
+              div(style= " text-align: center;margin-top:5px;",
+                  #hr(),
                   p("Data unavailable",
                     tags$br(),
                     'for people recieving Section 95 support')
@@ -2103,36 +2129,37 @@ server = function(input, output) {
           
           
           # --- homeless ----
-          lad_homeless_to_write <- curr_table %>% select('LAD19CD',`lad_total_homeless`,'lad_prop_homeless') %>%
+          lad_homeless_to_write <- curr_table %>% select('LAD19CD',`Homelessness (rate per 1000)`) %>%
             filter(LAD19CD == lad_of_interest$LAD19CD) %>%
             unique()
           
-          lad_homeless_to_plot <- lad_homeless_to_write %>% select('lad_prop_homeless') %>%
-            pivot_longer('lad_prop_homeless', names_to = "Indicator", values_to = "proportion")
+          lad_homeless_to_plot <- lad_homeless_to_write %>% select(`Homelessness (rate per 1000)`) %>%
+            pivot_longer(`Homelessness (rate per 1000)`, names_to = "Indicator", values_to = "proportion")
           
           lad_homeless_to_plot <- lad_homeless_to_plot %>% filter(!is.na(proportion)) %>%
-            unique()
+            unique() %>%
+            mutate('proportion'=round(proportion,2))
           
-          lad_homeless_to_write <- lad_homeless_to_write %>% filter(!is.na(`lad_total_homeless`) & !is.na('lad_prop_homeless'))
+          lad_homeless_to_write <- lad_homeless_to_write %>% filter(!is.na(`Homelessness (rate per 1000)`))
           
-          write_lad_homeless <- paste0("(",lad_homeless_to_write$lad_prop_homeless,"% of the population)")
+          write_lad_homeless <- paste0("(",lad_homeless_to_write$`Homelessness (rate per 1000)`,"homelessness per 1000)")
           
           # for echarts
-          lad_avg_homeless <- par_table_lad_avg %>% select(`lad_prop_homeless`) %>%
-            select('xAxis' = `lad_prop_homeless`) %>%
+          lad_avg_homeless <- par_table_lad_avg %>% select(`Homelessness (rate per 1000)`) %>%
+            select('xAxis' = `Homelessness (rate per 1000)`) %>%
             as.list()
           
-          lad_homeless_for_avg = paste0(round(par_table_lad_avg$lad_prop_homeless,2), '%', '\n','(eng avg)')
+          lad_homeless_for_avg = paste0(round(par_table_lad_avg$`Homelessness (rate per 1000)`,2), '\n','(eng avg)')
           
           
           if(dim(lad_homeless_to_plot)[1] != 0) {
           
           output$homeless_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
-                p(format(lad_homeless_to_write$lad_total_homeless, big.mark=',', scientific = F),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
+                p(format(round(lad_homeless_to_write$`Homelessness (rate per 1000)`,2), big.mark=',', scientific = F),
                   tags$br(),
-                  'homeless people')
+                  'homeless per 1000')
                 #p(tags$strong('No. of homeless people:'), format(lad_homeless_to_write$lad_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_lad_homeless)
             )
           })
@@ -2153,7 +2180,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_x_axis(position='top', axisLabel=list(show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1000, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1000) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -2165,8 +2192,8 @@ server = function(input, output) {
           else {
             
             output$homeless_text <- renderUI({
-              div(style= " text-align: center;",
-                  hr(),
+              div(style= " text-align: center;margin-top:5px;",
+                  #hr(),
                   p("Data unavailable",
                     tags$br(),
                     'for homeless people')
@@ -2209,8 +2236,8 @@ server = function(input, output) {
           
           if (dim(lad_fuelp_to_plot)[1] != 0) {
           output$fuelp_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(format(round(lad_fuelp_to_write$`Number of households in fuel poverty1`,0), big.mark=',', scientific = F),
                   tags$br(),
                   "households in fuel poverty")
@@ -2245,8 +2272,8 @@ server = function(input, output) {
           else {
             
             output$fuelp_text <- renderUI({
-              div(style= " text-align: center;",
-                  hr(),
+              div(style= " text-align: center;margin-top:5px;",
+                  #hr(),
                   p("Data unavailable",
                     tags$br(),
                     "for households in fuel poverty")
@@ -2287,8 +2314,8 @@ server = function(input, output) {
           if (dim(lad_unem_to_plot)[1] != 0) {
           
           output$unemployment_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(format(lad_unem_to_write$`Not in employment`, big.mark=',', scientific = F),
                   tags$br(),
                   'people unemployed on universal credit')
@@ -2323,8 +2350,8 @@ server = function(input, output) {
           
           else {
             output$unemployment_text <- renderUI({
-              div(style= " text-align: center;",
-                  hr(),
+              div(style= " text-align: center;margin-top:5px;",
+                  #hr(),
                   p('Data unavailable',
                     tags$br(),
                     'for people unemployed on universal credit')
@@ -2364,8 +2391,8 @@ server = function(input, output) {
           if (dim(lad_de_to_plot)[1] != 0) {
           
           output$digital_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(write_lad_de,
                   tags$br(),
                   'neighbourhoods in the 20% most digitally excluded')
@@ -2400,8 +2427,8 @@ server = function(input, output) {
           
           else{
             output$digital_text <- renderUI({
-              div(style= " text-align: center;",
-                  hr(),
+              div(style= " text-align: center;margin-top:5px;",
+                  #hr(),
                   p("Data unavailable",
                     tags$br(),
                     'for neighbourhoods in the 20% most digitally excluded')
@@ -2442,8 +2469,8 @@ server = function(input, output) {
           if (dim(lad_shielding_to_plot)[1] != 0) {
           
           output$shielding_text <- renderUI({
-            div(style= " text-align: center;",
-                hr(),
+            div(style= " text-align: center;margin-top:5px;",
+                #hr(),
                 p(format(lad_shielding_to_write$`Clinically extremely vulnerable`, big.mark=',', scientific = F),
                   tags$br(),
                   'people clinically extremely vulnerable')
@@ -2478,8 +2505,8 @@ server = function(input, output) {
           
           else {
             output$shielding_text <- renderUI({
-              div(style= " text-align: center;",
-                  hr(),
+              div(style= " text-align: center;margin-top:5px;",
+                  #hr(),
                   p('Data unavailable',
                     tags$br(),
                     'for people clinically extremely vulnerable')
@@ -2586,13 +2613,13 @@ server = function(input, output) {
                                                 mean_score >= 2.5 ~ 'Low',
                                                 (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
                                                 is.na(mean_score) ~ 'Data unavailable')) %>%
-        select('Local Authority', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `covid cases per 100,000`)
+        select('Local Authority', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `covid cases per 100,000`, `% change in covid cases`)
 
-        print(covid_cases2volunteers)
+        #print(covid_cases2volunteers)
         # - order
-        covid_cases2volunteers <- covid_cases2volunteers %>% arrange(-`Overall vulnerability`, -`covid cases per 100,000`, -Score) %>%
+        covid_cases2volunteers <- covid_cases2volunteers %>% arrange(-`Overall vulnerability`, -`% change in covid cases`, -`covid cases per 100,000`, -Score) %>%
           select(-Score) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
-          mutate_at(vars(`covid cases per 100,000`), replace_na, 'NA') %>%
+          #mutate_at(vars(`covid cases per 100,000`, `% change`), replace_na, 'NA') %>%
           # renaming coivd cases to show week - hate format
           rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .))
          
@@ -2609,15 +2636,16 @@ server = function(input, output) {
                    options = list(dom='tp', #should remove top search box the p includes paging
                      paging = T,
                      pageLength=5,
+                     lengthMenu = c(5, 10, 15, 20),
                      scrollX=T,
                      scrollY='200px',
-                     autoWidth = TRUE,
+                     autoWidth = T,
+                     #columnDefs = list(list(className = 'dt-center', targets = list(c(2,3,4,5,6)))),
                      initComplete = htmlwidgets::JS(
                        "function(settings, json) {",
                        paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                        "}")
                    ))
-        
           #%>%#formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
               })
 
@@ -2977,7 +3005,7 @@ server = function(input, output) {
       infoBox(
         "Pulse", 
         div(p('Coming Soon', style = "font-size:12pt;margin-top:5px;")),
-        color = "navy", fill = F, icon = icon("fas fa-wave-square")
+        color = "purple", fill = F, icon = icon("fas fa-wave-square")
         )
       })
     }
