@@ -9,10 +9,9 @@ library(leaflet) # Docker
 library(viridis) # Docker
 library(DT) # Docker
 library(echarts4r) # Docker 
-library(feather)
-library(scales)
-library(htmlwidgets)
-
+library(feather) # Docker
+library(scales) # Docker
+library(htmlwidgets) # Docker
 
 
 # --- read in vulnerablity indices ---
@@ -77,15 +76,39 @@ all_msoas2areas2vulnerability <- left_join(all_msoas2areas, msoa_vi, by='MSOA11C
 lad_uk2vuln_resilience <- left_join(unique(lad_uk2areas), LA_res, by='LAD19CD', keep=F)
 lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>% filter(!is.na(fill))
 
+# to prepare labels select 
+#labels4map <- lad_uk2vuln_resilience %>%
+#  select('lad19nm',`Vulnerability quintile`,`Capacity quintile`,
+#         `Clinical Vulnerability quintile`,`Health/Wellbeing Vulnerability quintile`,
+#         `Economic Vulnerability quintile`,
+#         `Social Vulnerability quintile`,
+#         `Socioeconomic Vulnerability quintile`) %>% st_drop_geometry() %>%
+  
+  
+
+# labs <- lapply(seq(nrow(labels4map)), function(i) {
+#   paste0( '<p>', labels4map[i, 'lad19nm'], '<p></p>', 
+#   'Vulnerability quintile: ', labels4map[i, 'Vulnerability quintile'], '</br>',
+#   'Capacity quintile: ', labels4map[i, 'Capacity quintile'], '</br>',
+#   'Clinical vulnerability quintile: ', labels4map[i, '']) 
+#           #labels4map['Capacity quintile:', i],'</p><p>', 
+#           #labels4map['Clinical Vulnerability quintile', i], '</p>',
+#           #labels4map[i, `Health/Wellbeing Vulnerability quintile`], ', ', 
+#           #labels4map[i, `Economic Vulnerability quintile`],'</p><p>', 
+#           #labels4map[i, `Social Vulnerability quintile`], '</p>',
+#           #labels4map[i, `Socioeconomic Vulnerability quintile`]) 
+# })
+
+
+#test_label <- within(lad_uk_most_vuln, HTML(paste(lad19nm, tags$br(), "vulnerability quintile:", `Vulnerability quintile`, tags$br())))
+#print(test_label)
+#lad_uk_most_vuln <- lad_uk_most_vuln %>% mutate(text4label = test_label)
+
 # tactical cells
 tactical_cells <- area_lookup_tc2lad %>% filter(TacticalCell != 'Wales' & TacticalCell != 'Northern Ireland and the Isle of Man' & TacticalCell != 'Scotland')
 tactical_cells <- unique(tactical_cells$TacticalCell)
 tactical_cells <- c('-- England --', tactical_cells)
 
-#vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
-
-# --- filter to just areas most in need ---
-#test <- LA_res %>% filter(fill %in% vuln_cols) %>% select(`LAD19NM`,`Vulnerability quintile`,`Capacity quintile`,`vuln_quantiles`,)
 
 # --- Metadata ----
 # --- people at risk data ---
@@ -965,7 +988,15 @@ server = function(input, output) {
 
         # --- filter to just areas most in need ---
         lad_uk_most_vuln <- lad_uk2vuln_resilience %>% filter(fill %in% vuln_cols)
-
+        
+        labels <-
+          paste0(
+            sprintf("<strong>%s</strong><br/>",  lad_uk_most_vuln$lad19nm),
+            "Vulnerability (5 = highest vulnerability): ",  lad_uk_most_vuln $`Vulnerability quintile`, "<br/>",
+            "Capacity (5 = lowest capacity): ",  lad_uk_most_vuln$`Capacity quintile`
+          ) %>%
+          lapply(htmltools::HTML)
+        
         # -- zoom for uk ---
         curr_bbox <- st_bbox(tc_shp)
 
@@ -995,7 +1026,8 @@ server = function(input, output) {
                     fillOpacity = 0.7,
                     bringToFront = TRUE,
                   ),
-                  label=~lad19nm,
+                  label= labels,
+                  
                   labelOptions = labelOptions(
                     style = list("font-weight" = "normal", padding = "3px 8px"),
                     textsize = "15px",
@@ -1027,6 +1059,13 @@ server = function(input, output) {
             # -- filter local authorith boundaries --
             curr_LA_all_boundaries <- lad_uk2vuln_resilience %>% filter(TacticalCell == input$tactical_cell)
 
+            tc_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  curr_LA$lad19nm),
+                "Vulnerability (5 = highest vulnerability): ",  curr_LA$`Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  curr_LA$`Capacity quintile`
+              ) %>%
+              lapply(htmltools::HTML)
 
             #calculate centres to zoom to appropiate area https://stackoverflow.com/questions/52522872/r-sf-package-centroid-within-polygon
             # get_coords <- st_bbox(curr_TC)
@@ -1063,7 +1102,7 @@ server = function(input, output) {
                           color = "grey",
                           dashArray = "0.1",
                           fill=F,
-                          label=~lad19nm,
+                          label= ~lad19nm,
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
                             textsize = "15px",
@@ -1084,7 +1123,7 @@ server = function(input, output) {
                       fillOpacity = 0.7,
                       bringToFront = TRUE
                     ),
-                    label=~lad19nm,
+                    label=tc_labels,
                     labelOptions = labelOptions(
                       style = list("font-weight" = "normal", padding = "3px 8px"),
                       textsize = "15px",
@@ -1112,6 +1151,21 @@ server = function(input, output) {
 
             # --- all lads ---
             all_LAs <- lad_uk2vuln_resilience %>% filter(TacticalCell == input$tactical_cell)
+            
+            #print('local authority')
+            #print(all_LAs$lad19nm)
+            #print('vulnerability quinitiles')
+            #print(curr_LA)
+            
+            la_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  curr_LA$lad19nm),
+                "Vulnerability (5 = highest vulnerability): ",  curr_LA$`Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  curr_LA$`Capacity quintile`
+              ) %>%
+              lapply(htmltools::HTML)
+            
+            #print(la_labels)
 
             #calculate centres to zoom to appropiate area https://stackoverflow.com/questions/52522872/r-sf-package-centroid-within-polygon
             # get_coords <- st_bbox(curr_LA)
@@ -1147,6 +1201,7 @@ server = function(input, output) {
                           opacity = 0.8,
                           color = "grey",
                           dashArray = "0.1",
+                          label=~lad19nm,
                           fill=F) %>%
               # most deprived
               addPolygons(data=curr_LA, layerId = ~LAD19CD,
@@ -1163,7 +1218,7 @@ server = function(input, output) {
                             fillOpacity = 0.7,
                             bringToFront = TRUE
                           ),
-                          label=~lad19nm,
+                          label=la_labels,
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
                             textsize = "15px",
