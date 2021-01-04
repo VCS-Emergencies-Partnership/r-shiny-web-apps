@@ -116,7 +116,7 @@ LA_res %<>%
   # income value
   left_join(bivariate_color_scale, by = "group")
 
-write.csv(LA_res, 'data/resilience_index_bivar.csv')
+write_csv(LA_res, 'data/resilience_index_bivar.csv')
 
 
 # -- create chart --
