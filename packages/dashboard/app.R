@@ -76,33 +76,6 @@ all_msoas2areas2vulnerability <- left_join(all_msoas2areas, msoa_vi, by='MSOA11C
 lad_uk2vuln_resilience <- left_join(unique(lad_uk2areas), LA_res, by='LAD19CD', keep=F)
 lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>% filter(!is.na(fill))
 
-# to prepare labels select 
-#labels4map <- lad_uk2vuln_resilience %>%
-#  select('lad19nm',`Vulnerability quintile`,`Capacity quintile`,
-#         `Clinical Vulnerability quintile`,`Health/Wellbeing Vulnerability quintile`,
-#         `Economic Vulnerability quintile`,
-#         `Social Vulnerability quintile`,
-#         `Socioeconomic Vulnerability quintile`) %>% st_drop_geometry() %>%
-  
-  
-
-# labs <- lapply(seq(nrow(labels4map)), function(i) {
-#   paste0( '<p>', labels4map[i, 'lad19nm'], '<p></p>', 
-#   'Vulnerability quintile: ', labels4map[i, 'Vulnerability quintile'], '</br>',
-#   'Capacity quintile: ', labels4map[i, 'Capacity quintile'], '</br>',
-#   'Clinical vulnerability quintile: ', labels4map[i, '']) 
-#           #labels4map['Capacity quintile:', i],'</p><p>', 
-#           #labels4map['Clinical Vulnerability quintile', i], '</p>',
-#           #labels4map[i, `Health/Wellbeing Vulnerability quintile`], ', ', 
-#           #labels4map[i, `Economic Vulnerability quintile`],'</p><p>', 
-#           #labels4map[i, `Social Vulnerability quintile`], '</p>',
-#           #labels4map[i, `Socioeconomic Vulnerability quintile`]) 
-# })
-
-
-#test_label <- within(lad_uk_most_vuln, HTML(paste(lad19nm, tags$br(), "vulnerability quintile:", `Vulnerability quintile`, tags$br())))
-#print(test_label)
-#lad_uk_most_vuln <- lad_uk_most_vuln %>% mutate(text4label = test_label)
 
 # tactical cells
 tactical_cells <- area_lookup_tc2lad %>% filter(TacticalCell != 'Wales' & TacticalCell != 'Northern Ireland and the Isle of Man' & TacticalCell != 'Scotland')
@@ -170,7 +143,8 @@ par_table_tc_avg <- par_table %>%
   mutate('LAD19CD'='tc_avg', 'TacticalCell'='tc_avg') %>%
   select('LAD19CD', 'TacticalCell', everything())
 
-# --- areas to focus
+# --- areas to focus ---
+# --- Covid ----
 covid_area2focus <- read_csv('data/areas_to_focus/areas2focus_covid.csv')
 
 # covid prefix for name for table
@@ -181,7 +155,13 @@ covid_week = paste('Week', covid_week[[1]][2],'\n')
 covid_area2focus <- covid_area2focus %>%
   rename('covid cases per 100,000'=colnames(covid_area2focus)[6])
   
-
+# ---- Flooding ---
+# flooding stats within resilience index
+flooding_area2focus <- LA_res %>%
+  select('LAD19CD','LAD19NM',`Vulnerability quintile`, `Total people in flood risk areas`, 
+         `% people in flood risk areas`, `Flood risk quintile`,
+         `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,
+         `Flood incidents quintile`)
 
 
 # -- vcs indicators
@@ -935,7 +915,8 @@ server = function(input, output) {
 
 
   # --- Areas to focus ----
-  # -- covid
+  
+  # -- covid ---
   filtered_covid_areas <- reactive({
     if(input$tactical_cell == '-- England --') {
       covid_lads_in_tc <- covid_area2focus %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
@@ -950,6 +931,26 @@ server = function(input, output) {
       select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`,`% change in covid cases`)
     }
 
+  })
+  
+  
+  # ---- Flooding -----
+  filtered_flooding_areas <- reactive({
+    if(input$tactical_cell == '-- England --') {
+      flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
+        mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+        mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+        select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+      
+    }
+    else {
+      lads_in_tc <- flooding_area2focus %>% filter(TacticalCell == input$tactical_cell)
+      # order descending by quintile and covid cases
+      flooding_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
+        mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+        select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+    }
+    
   })
 
 
@@ -2752,8 +2753,116 @@ server = function(input, output) {
                   })
               }
             }
-        }
+        } # end of covid section
+      
+      # ---- Areas to focus theme: Flooding ---
+      else {
+        
+        if (input$theme == 'Flooding') {
+          
+          # get current covid data for selected tactical cell - done in reactive -
+          curr_flooding_list <-filtered_flooding_areas()
+          
+          # get volunteer data (not filtered by tactical cell)
+          volunteers_available <- volunteers
+          
+          # join data to volunteers
+          flooding_cases2volunteers <- left_join(curr_flooding_list, volunteers_available, by='LAD19CD', keep=F) %>%
+            mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
+                                                    mean_score >= 2.5 ~ 'Low',
+                                                    (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
+                                                    is.na(mean_score) ~ 'Data unavailable')) %>%
+            select('Local Authority', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `Flooding incidents per 10,000 people`,`Total people in flood risk areas`, `% people in flood risk areas`)
+          
+          #print(covid_cases2volunteers)
+          # - order
+          flooding_cases2volunteers <- flooding_cases2volunteers %>% 
+            arrange(-`Overall vulnerability`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`,-`Score`) %>%
+            select(-`Score`) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
+            mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                              TRUE ~ (as.character(.$`% people in flood risk areas`))))
+          
+          
+          
+          
+          
+          # -- if want to show whole of the UK --
+          if ( input$tactical_cell == '-- England --') {
+            # all lads in tcs wanted
+            output$areas2focus <- DT::renderDataTable({
+              DT::datatable(flooding_cases2volunteers, filter=list(position='top'),
+                            options = list(dom='tp', #should remove top search box the p includes paging
+                                           paging = T,
+                                           pageLength=5,
+                                           lengthMenu = c(5, 10, 15, 20),
+                                           scrollX=T,
+                                           scrollY='200px',
+                                           autoWidth = T,
+                                           #columnDefs = list(list(className = 'dt-center', targets = list(c(2,3,4,5,6)))),
+                                           initComplete = htmlwidgets::JS(
+                                             "function(settings, json) {",
+                                             paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                             "}")
+                            ))
+              #%>%#formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
+            })
+            
+          }
+          
+          else {
+            # show just tactical cell
+            if (input$theme == 'Flooding' & input$lad_selected == 'All local authorities in region') {
+              output$areas2focus <- DT::renderDataTable({
+                DT::datatable(flooding_cases2volunteers, filter=list(position='top'),
+                              options = list(dom='tp', #should remove top search box the p includes paging
+                                             paging = T,
+                                             pageLength=5,
+                                             scrollX=T,
+                                             scrollY='200px',
+                                             autoWidth = TRUE,
+                                             initComplete = htmlwidgets::JS(
+                                               "function(settings, json) {",
+                                               paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                               "}")
+                              )) #%>%
+                
+                #formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
+              })
+            }
+            # move la to top
+            else {
+              show_at_top <- as.vector(input$lad_selected)
+              print(covid_cases2volunteers)
+              wanted <- flooding_cases2volunteers$`Local Authority` %in% show_at_top
+              lad_flooding_cases2volunteers <- rbind(flooding_cases2volunteers[wanted,], flooding_cases2volunteers[!wanted,])
+              
+              output$areas2focus <- DT::renderDataTable({
+                DT::datatable(lad_flooding_cases2volunteers, filter=list(position='top'),
+                              options = list(dom='tp', #should remove top search box the p includes paging
+                                             paging = T,
+                                             pageLength=5,
+                                             scrollX=T,
+                                             scrollY='200px',
+                                             autoWidth = TRUE,
+                                             initComplete = htmlwidgets::JS(
+                                               "function(settings, json) {",
+                                               paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                               "}")
+                              ))  %>%
+                  formatStyle('Local Authority',
+                              target='row',
+                              backgroundColor = styleEqual(c(input$lad_selected), c('yellow')))
+              })
+            }
+          }
+          
+        } # end of flooding section
+        
+        
       }
+      
+      
+      } # insight tab end
   })
 
 
