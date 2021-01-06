@@ -157,8 +157,8 @@ covid_area2focus <- covid_area2focus %>%
   
 # ---- Flooding ---
 # flooding stats within resilience index
-flooding_area2focus <- LA_res %>%
-  select('LAD19CD','LAD19NM',`Vulnerability quintile`, `Total people in flood risk areas`, 
+flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
+  select('LAD19CD','LAD19NM','TacticalCell',`Vulnerability quintile`, `Total people in flood risk areas`, 
          `% people in flood risk areas`, `Flood risk quintile`,
          `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,
          `Flood incidents quintile`)
@@ -948,6 +948,7 @@ server = function(input, output) {
       # order descending by quintile and covid cases
       flooding_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
         mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+        mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
         select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
     }
     
@@ -2783,9 +2784,6 @@ server = function(input, output) {
                                                               TRUE ~ (as.character(.$`% people in flood risk areas`))))
           
           
-          
-          
-          
           # -- if want to show whole of the UK --
           if ( input$tactical_cell == '-- England --') {
             # all lads in tcs wanted
@@ -2832,7 +2830,6 @@ server = function(input, output) {
             # move la to top
             else {
               show_at_top <- as.vector(input$lad_selected)
-              print(covid_cases2volunteers)
               wanted <- flooding_cases2volunteers$`Local Authority` %in% show_at_top
               lad_flooding_cases2volunteers <- rbind(flooding_cases2volunteers[wanted,], flooding_cases2volunteers[!wanted,])
               
@@ -2858,8 +2855,10 @@ server = function(input, output) {
           
         } # end of flooding section
         
+        # --- NEXT THEME SHOULD START HERE ---
         
-      }
+        
+      } # of 
       
       
       } # insight tab end
