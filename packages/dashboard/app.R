@@ -76,6 +76,13 @@ all_msoas2areas2vulnerability <- left_join(all_msoas2areas, msoa_vi, by='MSOA11C
 lad_uk2vuln_resilience <- left_join(unique(lad_uk2areas), LA_res, by='LAD19CD', keep=F)
 lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>% filter(!is.na(fill))
 
+# add text for legend
+lad_uk2vuln_resilience_test <- lad_uk2vuln_resilience %>%
+  mutate('forlegend' = case_when(`Socioeconomic Vulnerability quintile` == 1 ~ 'Low',
+                                 `Socioeconomic Vulnerability quintile` == 2 ~ '',
+                                 `Socioeconomic Vulnerability quintile` == 3 ~ '',
+                                 `Socioeconomic Vulnerability quintile` == 4 ~ '',
+                                 `Socioeconomic Vulnerability quintile` == 25 ~ 'High'))
 
 # tactical cells
 tactical_cells <- area_lookup_tc2lad %>% filter(TacticalCell != 'Wales' & TacticalCell != 'Northern Ireland and the Isle of Man' & TacticalCell != 'Scotland')
@@ -162,6 +169,10 @@ flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
          `% people in flood risk areas`, `Flood risk quintile`,
          `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,
          `Flood incidents quintile`)
+
+
+# flood outlines metoffice warnings 
+flood_warnings <- st_read('./data/areas_to_focus/current_live_metoffice_floodwarnings.geojson')
 
 
 # -- vcs indicators
@@ -601,15 +612,15 @@ body <- dashboardBody(
                     box(
                       # bivariate
                       title = "Areas at risk",
-                      width = NULL, height = "750px", #solidHeader = TRUE, status='primary',
-                      leafletOutput("map", height = "650px"),
+                      width = NULL, height = "510px", #solidHeader = TRUE, status='primary',
+                      leafletOutput("map", height = "450px"),
 
-                    absolutePanel(
-                      id = "legend", class = "panel panel-default",
-                      top = "auto", bottom = 10, right = "auto", width = 250, fixed = FALSE,
-                      draggable = FALSE, height = "auto",
-                      img(src = "bivar-legend.png", width = 250)
-                    )
+                    #absolutePanel(
+                    #  id = "legend", class = "panel panel-default",
+                    #  top = "auto", bottom = 5, right = "auto", width = 200, fixed = FALSE,
+                    #  draggable = FALSE, height = "auto",
+                    #  img(src = "bivar-legend.png", width = 200)
+                    #)
                 )
               )
         )
@@ -870,6 +881,10 @@ server = function(input, output) {
       ))
   })
 
+ filteredFlooding <- reactive({
+   flood_warnings %>% 
+     filter(TacticalCell == input$tactical_cell) 
+ })
 
 
   filterpar_tab <- reactive({
@@ -976,11 +991,16 @@ server = function(input, output) {
     # which tab is selected:
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
+      
+      # --- which theme ---
+      if (input$theme == 'Covid-19') {
 
-      # -- if showing whole of UK --
-      if(input$tactical_cell == '-- England --') {
+        # -- if showing whole of UK --
+        if(input$tactical_cell == '-- England --') {
 
-        # vulnerable colurs
+          
+        # --- RESILIENCE index ---  
+        # vulnerable colours
         # High income, High inequality --> #3F2949
         # High income, Medium inequality --> "#435786"
         # Medium income, medium inequality --> #806A8A
@@ -994,16 +1014,75 @@ server = function(input, output) {
         labels <-
           paste0(
             sprintf("<strong>%s</strong><br/>",  lad_uk_most_vuln$lad19nm),
-            "Vulnerability (5 = highest vulnerability): ",  lad_uk_most_vuln $`Vulnerability quintile`, "<br/>",
+            "Vulnerability (5 = highest vulnerability): ",  lad_uk_most_vuln$`Vulnerability quintile`, "<br/>",
             "Capacity (5 = lowest capacity): ",  lad_uk_most_vuln$`Capacity quintile`
           ) %>%
           lapply(htmltools::HTML)
+        
+        print(lad_uk_most_vuln)
+        
+        # --- to display other indicies ---
+        pal <- colorFactor("viridis", c(1:5), reverse = TRUE)
+       
+        # economic
+        econ_vuln <- lad_uk2vuln_resilience %>% filter(`Economic Vulnerability quintile` >= 4)
+        
+        econ_labels <-
+          paste0(
+            sprintf("<strong>%s</strong><br/>",  econ_vuln$lad19nm),
+            "Economic Vulnerability (5 = highest vulnerability): ",  econ_vuln$`Economic Vulnerability quintile`, "<br/>",
+            "Capacity (5 = lowest capacity): ",  econ_vuln$`Capacity quintile`) %>%
+          lapply(htmltools::HTML)
+        
+        #socioeconomic
+        # economic
+        socioecon_vuln <- lad_uk2vuln_resilience %>% filter(`Socioeconomic Vulnerability quintile` >= 4)
+        
+        socioecon_labels <-
+          paste0(
+            sprintf("<strong>%s</strong><br/>",  socioecon_vuln$lad19nm),
+            "Socioeconomic Vulnerability (5 = highest vulnerability): ",  socioecon_vuln$`Socioeconomic Vulnerability quintile`, "<br/>",
+            "Capacity (5 = lowest capacity): ",  socioecon_vuln$`Capacity quintile`) %>%
+          lapply(htmltools::HTML)
+        
+        #social
+        socio_vuln <- lad_uk2vuln_resilience %>% filter(`Social Vulnerability quintile` >= 4)
+        
+        socio_labels <-
+          paste0(
+            sprintf("<strong>%s</strong><br/>",  socio_vuln$lad19nm),
+            "Social Vulnerability (5 = highest vulnerability): ",  socio_vuln$`Social Vulnerability quintile`, "<br/>",
+            "Capacity (5 = lowest capacity): ",  socio_vuln$`Capacity quintile`) %>%
+          lapply(htmltools::HTML)
+        
+        #Health/Wellbeing 
+        health_vuln <- lad_uk2vuln_resilience %>% filter(`Health/Wellbeing Vulnerability quintile` >= 4)
+        
+        health_labels <-
+          paste0(
+            sprintf("<strong>%s</strong><br/>",  health_vuln$lad19nm),
+            "Health/Wellbeing Vulnerability (5 = highest vulnerability): ",  health_vuln$`Health/Wellbeing Vulnerability quintile`, "<br/>",
+            "Capacity (5 = lowest capacity): ",  health_vuln$`Capacity quintile`) %>%
+          lapply(htmltools::HTML)
+        
+        #Clinical 
+        clin_vuln <- lad_uk2vuln_resilience %>% filter(`Clinical Vulnerability quintile` >= 4)
+        
+        clin_labels <-
+          paste0(
+            sprintf("<strong>%s</strong><br/>",  clin_vuln$lad19nm),
+            "Health/Wellbeing Vulnerability (5 = highest vulnerability): ",  clin_vuln$`Clinical Vulnerability quintile`, "<br/>",
+            "Capacity (5 = lowest capacity): ",  clin_vuln$`Capacity quintile`) %>%
+          lapply(htmltools::HTML)
+        
         
         # -- zoom for uk ---
         curr_bbox <- st_bbox(tc_shp)
 
         leafletProxy("map") %>%
           clearShapes() %>%
+          clearMarkerClusters() %>%
+          clearMarkers() %>%
           #
           addPolygons(data=tc_shp, layerId = ~TacticalCell,
                       group='tactical cell boundary',
@@ -1015,7 +1094,7 @@ server = function(input, output) {
                       fill=F) %>%
 
           addPolygons(data=lad_uk_most_vuln, layerId = ~LAD19CD,
-                  group="Vulnerability vs Capacity to cope", fillColor = ~fill,
+                  group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
                   weight = 0.7,
                   opacity = 0.8,
                   color = "black",
@@ -1036,10 +1115,127 @@ server = function(input, output) {
                     direction = "auto"
                   )
                 ) %>%
+          # economic vulnerability layer
+          addPolygons(data=econ_vuln, layerId = ~`Economic Vulnerability quintile`,
+                      group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
+                      weight = 0.7,
+                      opacity = 0.8,
+                      color = "black",
+                      dashArray = "0.1",
+                      fillOpacity = 0.7,
+                      highlight = highlightOptions(
+                        weight = 5,
+                        color = "#666",
+                        dashArray = "",
+                        fillOpacity = 0.7,
+                        bringToFront = TRUE,
+                      ),
+                      label= econ_labels,
+                      
+                      labelOptions = labelOptions(
+                        style = list("font-weight" = "normal", padding = "3px 8px"),
+                        textsize = "15px",
+                        direction = "auto"
+                      )
+          ) %>%
+          # socioeconomic vulnerability layer
+          addPolygons(data=socioecon_vuln, layerId = ~`Socioeconomic Vulnerability quintile`,
+                      group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
+                      weight = 0.7,
+                      opacity = 0.8,
+                      color = "black",
+                      dashArray = "0.1",
+                      fillOpacity = 0.7,
+                      highlight = highlightOptions(
+                        weight = 5,
+                        color = "#666",
+                        dashArray = "",
+                        fillOpacity = 0.7,
+                        bringToFront = TRUE,
+                      ),
+                      label= socioecon_labels,
+                      
+                      labelOptions = labelOptions(
+                        style = list("font-weight" = "normal", padding = "3px 8px"),
+                        textsize = "15px",
+                        direction = "auto"
+                      )
+          ) %>%
+          # social vulnerability layer
+          addPolygons(data=socio_vuln, layerId = ~`Social Vulnerability quintile`,
+                      group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
+                      weight = 0.7,
+                      opacity = 0.8,
+                      color = "black",
+                      dashArray = "0.1",
+                      fillOpacity = 0.7,
+                      highlight = highlightOptions(
+                        weight = 5,
+                        color = "#666",
+                        dashArray = "",
+                        fillOpacity = 0.7,
+                        bringToFront = TRUE,
+                      ),
+                      label= socio_labels,
+                      
+                      labelOptions = labelOptions(
+                        style = list("font-weight" = "normal", padding = "3px 8px"),
+                        textsize = "15px",
+                        direction = "auto"
+                      )
+          ) %>%
+          # Health/wellbeing vulnerability layer
+          addPolygons(data=health_vuln, layerId = ~`Health/Wellbeing Vulnerability quintile`,
+                      group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
+                      weight = 0.7,
+                      opacity = 0.8,
+                      color = "black",
+                      dashArray = "0.1",
+                      fillOpacity = 0.7,
+                      highlight = highlightOptions(
+                        weight = 5,
+                        color = "#666",
+                        dashArray = "",
+                        fillOpacity = 0.7,
+                        bringToFront = TRUE,
+                      ),
+                      label= health_labels,
+                      
+                      labelOptions = labelOptions(
+                        style = list("font-weight" = "normal", padding = "3px 8px"),
+                        textsize = "15px",
+                        direction = "auto"
+                      )
+          ) %>%
+          # Health/wellbeing vulnerability layer
+          addPolygons(data=clin_vuln, layerId = ~`Clinical Vulnerability quintile`,
+                      group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
+                      weight = 0.7,
+                      opacity = 0.8,
+                      color = "black",
+                      dashArray = "0.1",
+                      fillOpacity = 0.7,
+                      highlight = highlightOptions(
+                        weight = 5,
+                        color = "#666",
+                        dashArray = "",
+                        fillOpacity = 0.7,
+                        bringToFront = TRUE,
+                      ),
+                      label= clin_labels,
+                      
+                      labelOptions = labelOptions(
+                        style = list("font-weight" = "normal", padding = "3px 8px"),
+                        textsize = "15px",
+                        direction = "auto"
+                      )
+          ) %>%
           flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                       lat1 = as.numeric(curr_bbox["ymin"]),
                       lng2 = as.numeric(curr_bbox["xmax"]),
-                      lat2 = as.numeric(curr_bbox["ymax"]))
+                      lat2 = as.numeric(curr_bbox["ymax"])) %>%
+          addLayersControl(baseGroups = c("Resilience: vulnerability vs capacity to cope","Economic vulnerability","Socioeconomic vulnerability","Social vulnerability","Health/Wellbeing vulnerability","Clinical vulnerability"),
+                           options= layersControlOptions(collapsed=T))
 
               }
 
@@ -1068,17 +1264,61 @@ server = function(input, output) {
                 "Capacity (5 = lowest capacity): ",  curr_LA$`Capacity quintile`
               ) %>%
               lapply(htmltools::HTML)
-
-            #calculate centres to zoom to appropiate area https://stackoverflow.com/questions/52522872/r-sf-package-centroid-within-polygon
-            # get_coords <- st_bbox(curr_TC)
-            # coord_polygons <- st_as_sfc(get_coords)
-            # centroids = data.frame(NAME='zoom')
-            # st_geometry(centroids) = coord_polygons
-            #
-            # centroids <- centroids %>%
-            # mutate(lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
-            #     lat = map_dbl(geometry, ~st_centroid(.x)[[2]]))
-            #
+            
+            
+            # --- to display other indicies ---
+            pal <- colorFactor("viridis", c(1:5), reverse = TRUE)
+            
+            # economic
+            econ_vuln <- curr_LA %>% filter(`Economic Vulnerability quintile` >= 4)
+            
+            econ_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  econ_vuln$lad19nm),
+                "Economic Vulnerability (5 = highest vulnerability): ",  econ_vuln$`Economic Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  econ_vuln$`Capacity quintile`) %>%
+              lapply(htmltools::HTML)
+            
+            #socioeconomic
+            # economic
+            socioecon_vuln <- curr_LA %>% filter(`Socioeconomic Vulnerability quintile` >= 4)
+            
+            socioecon_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  socioecon_vuln$lad19nm),
+                "Socioeconomic Vulnerability (5 = highest vulnerability): ",  socioecon_vuln$`Socioeconomic Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  socioecon_vuln$`Capacity quintile`) %>%
+              lapply(htmltools::HTML)
+            
+            #social
+            socio_vuln <- curr_LA %>% filter(`Social Vulnerability quintile` >= 4)
+            
+            socio_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  socio_vuln$lad19nm),
+                "Social Vulnerability (5 = highest vulnerability): ",  socio_vuln$`Social Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  socio_vuln$`Capacity quintile`) %>%
+              lapply(htmltools::HTML)
+            
+            #Health/Wellbeing 
+            health_vuln <- curr_LA %>% filter(`Health/Wellbeing Vulnerability quintile` >= 4)
+            
+            health_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  health_vuln$lad19nm),
+                "Health/Wellbeing Vulnerability (5 = highest vulnerability): ",  health_vuln$`Health/Wellbeing Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  health_vuln$`Capacity quintile`) %>%
+              lapply(htmltools::HTML)
+            
+            #Clinical 
+            clin_vuln <- curr_LA %>% filter(`Clinical Vulnerability quintile` >= 4)
+            
+            clin_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  clin_vuln$lad19nm),
+                "Health/Wellbeing Vulnerability (5 = highest vulnerability): ",  clin_vuln$`Clinical Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  clin_vuln$`Capacity quintile`) %>%
+              lapply(htmltools::HTML)
 
             # zoom to tactical cell
             curr_bbox <- st_bbox(curr_TC)
@@ -1086,6 +1326,8 @@ server = function(input, output) {
             # show on map:
             leafletProxy("map") %>%
             clearShapes() %>%
+              clearMarkers() %>%
+              clearMarkerClusters() %>%
               # TC boundary
               addPolygons(data=curr_TC, layerId = ~TacticalCell,
                           group='tactical cell boundary',
@@ -1112,7 +1354,7 @@ server = function(input, output) {
                           )) %>%
               # most deprived
               addPolygons(data=curr_LA, layerId = ~LAD19CD,
-                    group="Vulnerability vs Resilience", fillColor = ~fill,
+                    group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
                     weight = 0.7,
                     opacity = 0.8,
                     color = "black",
@@ -1131,11 +1373,129 @@ server = function(input, output) {
                       textsize = "15px",
                       direction = "auto"
                     )
-                ) %>%
+                ) %>% 
+              # economic vulnerability layer
+              addPolygons(data=econ_vuln, layerId = ~`Economic Vulnerability quintile`,
+                          group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= econ_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )
+              ) %>%
+              # socioeconomic vulnerability layer
+              addPolygons(data=socioecon_vuln, layerId = ~`Socioeconomic Vulnerability quintile`,
+                          group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= socioecon_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )
+              ) %>%
+              # social vulnerability layer
+              addPolygons(data=socio_vuln, layerId = ~`Social Vulnerability quintile`,
+                          group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= socio_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )
+              ) %>%
+              # Health/wellbeing vulnerability layer
+              addPolygons(data=health_vuln, layerId = ~`Health/Wellbeing Vulnerability quintile`,
+                          group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= health_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )
+              ) %>%
+              # Health/wellbeing vulnerability layer
+              addPolygons(data=clin_vuln, layerId = ~`Clinical Vulnerability quintile`,
+                          group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= clin_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )
+              ) %>%
               flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                           lat1 = as.numeric(curr_bbox["ymin"]),
                           lng2 = as.numeric(curr_bbox["xmax"]),
-                          lat2 = as.numeric(curr_bbox["ymax"]))
+                          lat2 = as.numeric(curr_bbox["ymax"])) %>%
+              addLayersControl(baseGroups = c("Resilience: vulnerability vs capacity to cope","Economic vulnerability","Socioeconomic vulnerability","Social vulnerability","Health/Wellbeing vulnerability","Clinical vulnerability"),
+                               options= layersControlOptions(collapsed=T))
+            
           }
 
           else {
@@ -1167,18 +1527,61 @@ server = function(input, output) {
               ) %>%
               lapply(htmltools::HTML)
             
-            #print(la_labels)
-
-            #calculate centres to zoom to appropiate area https://stackoverflow.com/questions/52522872/r-sf-package-centroid-within-polygon
-            # get_coords <- st_bbox(curr_LA)
-            # coord_polygons <- st_as_sfc(get_coords)
-            # centroids = data.frame(NAME='zoom')
-            # st_geometry(centroids) = coord_polygons
-            #
-            # centroids <- centroids %>%
-            #   mutate(lon = map_dbl(geometry, ~st_centroid(.x)[[1]]),
-            #          lat = map_dbl(geometry, ~st_centroid(.x)[[2]]))
-
+            
+            # --- to display other indicies ---
+            pal <- colorFactor("viridis", c(1:5), reverse = TRUE)
+            
+            # economic
+            econ_vuln <- curr_LA 
+            
+            econ_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  econ_vuln$lad19nm),
+                "Economic Vulnerability (5 = highest vulnerability): ",  econ_vuln$`Economic Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  econ_vuln$`Capacity quintile`) %>%
+              lapply(htmltools::HTML)
+            
+            #socioeconomic
+            # economic
+            socioecon_vuln <- curr_LA 
+            
+            socioecon_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  socioecon_vuln$lad19nm),
+                "Socioeconomic Vulnerability (5 = highest vulnerability): ",  socioecon_vuln$`Socioeconomic Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  socioecon_vuln$`Capacity quintile`) %>%
+              lapply(htmltools::HTML)
+            
+            #social
+            socio_vuln <- curr_LA 
+            
+            socio_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  socio_vuln$lad19nm),
+                "Social Vulnerability (5 = highest vulnerability): ",  socio_vuln$`Social Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  socio_vuln$`Capacity quintile`) %>%
+              lapply(htmltools::HTML)
+            
+            #Health/Wellbeing 
+            health_vuln <- curr_LA 
+            
+            health_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  health_vuln$lad19nm),
+                "Health/Wellbeing Vulnerability (5 = highest vulnerability): ",  health_vuln$`Health/Wellbeing Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  health_vuln$`Capacity quintile`) %>%
+              lapply(htmltools::HTML)
+            
+            #Clinical 
+            clin_vuln <- curr_LA 
+            
+            clin_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  clin_vuln$lad19nm),
+                "Health/Wellbeing Vulnerability (5 = highest vulnerability): ",  clin_vuln$`Clinical Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  clin_vuln$`Capacity quintile`) %>%
+              lapply(htmltools::HTML)
+            
             # -- get bounding box of la
             curr_bbox <- st_bbox(curr_LA)
 
@@ -1186,6 +1589,8 @@ server = function(input, output) {
             # show on map:
             leafletProxy("map") %>%
               clearShapes() %>%
+              clearMarkers() %>%
+              clearMarkerClusters() %>%
               # TC boundary
               addPolygons(data=curr_TC, layerId = ~TacticalCell,
                           group='tactical cell boundary',
@@ -1207,7 +1612,7 @@ server = function(input, output) {
                           fill=F) %>%
               # most deprived
               addPolygons(data=curr_LA, layerId = ~LAD19CD,
-                          group="Vulnerability vs Resilience", fillColor = ~fill,
+                          group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
                           weight = 0.7,
                           opacity = 0.8,
                           color = "black",
@@ -1226,34 +1631,1113 @@ server = function(input, output) {
                             textsize = "15px",
                             direction = "auto"
                           )
-                       ) %>%
-                      flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
+                       ) %>% 
+              # economic vulnerability layer
+              addPolygons(data=econ_vuln, layerId = ~`Economic Vulnerability quintile`,
+                          group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= econ_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )
+              ) %>%
+              # socioeconomic vulnerability layer
+              addPolygons(data=socioecon_vuln, layerId = ~`Socioeconomic Vulnerability quintile`,
+                          group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= socioecon_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )
+              ) %>%
+              # social vulnerability layer
+              addPolygons(data=socio_vuln, layerId = ~`Social Vulnerability quintile`,
+                          group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= socio_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )
+              ) %>%
+              # Health/wellbeing vulnerability layer
+              addPolygons(data=health_vuln, layerId = ~`Health/Wellbeing Vulnerability quintile`,
+                          group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= health_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )
+              ) %>%
+              # Health/wellbeing vulnerability layer
+              addPolygons(data=clin_vuln, layerId = ~`Clinical Vulnerability quintile`,
+                          group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= clin_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )
+              ) %>%
+              flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                           lat1 = as.numeric(curr_bbox["ymin"]),
                           lng2 = as.numeric(curr_bbox["xmax"]),
-                          lat2 = as.numeric(curr_bbox["ymax"]))
-
-
+                          lat2 = as.numeric(curr_bbox["ymax"])) %>%
+              addLayersControl(baseGroups = c("Resilience: vulnerability vs capacity to cope","Economic vulnerability","Socioeconomic vulnerability","Social vulnerability","Health/Wellbeing vulnerability","Clinical vulnerability"),
+                               options= layersControlOptions(collapsed=T))
+            
           }
+        }
 
+    } # covid 19 map end
+      
+      else {
+        # ---- Flooding Theme MAP ----
+        if (input$theme=='Flooding') {
+        
+          
+        # -- if showing whole of UK --
+        if(input$tactical_cell == '-- England --') {
+          
+          # --- Vulnerability Layer ----
+          # vulnerable colurs
+          # High income, High inequality --> #3F2949
+          # High income, Medium inequality --> "#435786"
+          # Medium income, medium inequality --> #806A8A
+          # high inequality, medium income  --> "#77324C"
+          # "#3F2949" -->
+          vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+          
+          # --- filter by flooding risk and incidents ---
+          fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
+            filter(`Flood incidents quintile` >= 4 & !is.na(`Flood incidents quintile`)) 
+            
+          fl_risk_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
+            filter(`Flood risk quintile` >= 4 & !is.na(`Flood risk quintile`)) 
+          
+          fl_incd_lad_uk_most_vuln_for_labels <- fl_incd_lad_uk_most_vuln %>%
+            select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+                   `Flooding incidents per 10,000 people`, `Flood incidents quintile`) %>%
+            st_drop_geometry() %>%
+            mutate_all(list(~na_if(.,""))) %>%
+            mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
+          
+          fl_risk_lad_uk_most_vuln_for_labels <- fl_risk_lad_uk_most_vuln %>%
+            select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
+                   `% people in flood risk areas`, `Flood risk quintile`) %>%
+            st_drop_geometry() %>%
+            mutate_all(list(~na_if(.,""))) %>%
+            mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
+            mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                              TRUE ~ (as.character(.$`% people in flood risk areas`))))
+          
+          
+          
+          fl_incd_labels <- paste0(
+              sprintf("<strong>%s</strong><br/>",  fl_incd_lad_uk_most_vuln_for_labels$lad19nm),
+              "Vulnerability (5 = highest vulnerability): ",  fl_incd_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
+              "Capacity (5 = lowest capacity): ",  fl_incd_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
+              "Flood Incidents (5 = most common): ",  fl_incd_lad_uk_most_vuln_for_labels$`Flood incidents quintile`, "<br/>",
+              "Number of historical flooding incidents: ", fl_incd_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
+              "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`) %>%
+            lapply(htmltools::HTML)
 
-    }
+          fl_risk_labels <- paste0(
+              sprintf("<strong>%s</strong><br/>",  fl_risk_lad_uk_most_vuln_for_labels$lad19nm),
+              "Vulnerability (5 = highest vulnerability): ",  fl_risk_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
+              "Capacity (5 = lowest capacity): ",  fl_risk_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
+              "Flood Risk (5 = most risk): ", fl_risk_lad_uk_most_vuln_for_labels$`Flood risk quintile`, "<br/>",
+              "Total people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
+              "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`
+            ) %>%
+            lapply(htmltools::HTML)
+
+          
+          
+          # -- if no flood warnigns -- 
+          if (dim(flood_warnings)[1] == 0) {
+            
+            leafletProxy("map") %>%
+              clearShapes() %>%
+              clearMarkers() %>%
+              clearMarkerClusters() %>%
+              #
+              addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                          group='tactical cell boundary',
+                          stroke=T,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fill=F) %>%
+              
+              addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~LAD19CD,
+                          group="Resilience of high flood incident areas", fillColor = ~fill,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= fl_incd_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "10px",
+                            direction = "auto"
+                          )
+              ) %>%
+              addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~LAD19CD,
+                          group="Resilience of high flood risk areas", fillColor = ~fill,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= fl_risk_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "10px",
+                            direction = "auto"
+                          )
+              ) %>%
+              flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
+                          lat1 = as.numeric(curr_bbox["ymin"]),
+                          lng2 = as.numeric(curr_bbox["xmax"]),
+                          lat2 = as.numeric(curr_bbox["ymax"]))  %>%
+              addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
+                               options= layersControlOptions(collapsed=T))
+            
+          }
+            
+          # flood warnign has occured..   
+          else {
+          
+          # --- Flooding layer ----
+          flood_to_plot <- flood_warnings %>% 
+            select('lad19nm','description','severity','severityLevel', 'alertlevelmeaning','lastupdatetime','lastupdateday','messageurl') %>%
+            unique() %>% 
+            # case colour polgon based on severity
+            mutate('warning_col'=case_when(severityLevel==3 ~ 'orange',
+                                           severityLevel == 2 ~ 'red',
+                                           severityLevel == 1 ~ 'red'))
+          
+          
+          # --- trying to get the centroids propoerly - doesn't work!
+          # get centroids of floods 
+          flood_centroids <- flood_to_plot %>%
+               st_transform(32617) 
+           
+          flood_centroids <- st_centroid(flood_centroids) %>%
+               st_transform(4326)
+            # 
+            # convert long and lat to dataframe columns 
+            flood_centroids <- flood_centroids %>%
+            mutate(long = unlist(map(flood_centroids$geometry,1)),
+                     lat = unlist(map(flood_centroids$geometry,2))) %>%
+             st_drop_geometry()
+           
+          flood_centroids_df <- as.data.frame(flood_centroids)
+          
+          #print(flood_to_plot)
+          #print(flood_centroids_df)
+          
+         # icons = 
+          icons = awesomeIcons(
+            icon = "glyphicon glyphicon-warning-sign", 
+            iconColor = "black",
+            #library = "fa",
+            markerColor = flood_centroids_df$warning_col
+          )
+          
+          flood_labels <-
+            paste0(
+              sprintf("<strong>%s</strong><br/>",  flood_to_plot$description),
+              flood_to_plot$severity, ": ", flood_to_plot$alertlevelmeaning, "<br/>",
+              "last updated (at time dashboard refreshed): ",  flood_to_plot$lastupdateday, " ", flood_to_plot$lastupdatetime) %>%
+            lapply(htmltools::HTML)
+          
+          # -- zoom for uk ---
+          curr_bbox <- st_bbox(tc_shp)
+          
+          leafletProxy("map") %>%
+            clearShapes() %>%
+            clearMarkers() %>%
+            clearMarkerClusters() %>%
+            #
+            addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                        group='tactical cell boundary',
+                        stroke=T,
+                        weight = 0.7,
+                        opacity = 0.8,
+                        color = "black",
+                        dashArray = "0.1",
+                        fill=F) %>%
+            addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~LAD19CD,
+                        group="Resilience of high flood incident areas", fillColor = ~fill,
+                        weight = 0.7,
+                        opacity = 0.8,
+                        color = "black",
+                        dashArray = "0.1",
+                        fillOpacity = 0.7,
+                        highlight = highlightOptions(
+                          weight = 5,
+                          color = "#666",
+                          dashArray = "",
+                          fillOpacity = 0.7,
+                          bringToFront = TRUE,
+                        ),
+                        label= fl_incd_labels,
+                        
+                        labelOptions = labelOptions(
+                          style = list("font-weight" = "normal", padding = "3px 8px"),
+                          textsize = "10px",
+                          direction = "auto"
+                        )
+            ) %>%
+            addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~LAD19CD,
+                        group="Resilience of high flood risk areas", fillColor = ~fill,
+                        weight = 0.7,
+                        opacity = 0.8,
+                        color = "black",
+                        dashArray = "0.1",
+                        fillOpacity = 0.7,
+                        highlight = highlightOptions(
+                          weight = 5,
+                          color = "#666",
+                          dashArray = "",
+                          fillOpacity = 0.7,
+                          bringToFront = TRUE,
+                        ),
+                        label= fl_risk_labels,
+                        
+                        labelOptions = labelOptions(
+                          style = list("font-weight" = "normal", padding = "3px 8px"),
+                          textsize = "10px",
+                          direction = "auto"
+                        )
+            ) %>%
+            addPolygons(data=flood_to_plot, layerId=~`description`,
+                        group="Latest flood warnings", fillColor = ~warning_col,
+                        weight = 0.7,
+                        opacity = 0.8,
+                        color = "black",
+                        dashArray = "0.1",
+                        fillOpacity = 0.7
+              
+            ) %>%
+            addAwesomeMarkers(data=flood_centroids_df, layerId=~`description`,
+                       group="Latest flood warnings", label=~flood_labels, icon=icons,
+                       lng=~long, lat=~lat) %>%
+            flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
+                        lat1 = as.numeric(curr_bbox["ymin"]),
+                        lng2 = as.numeric(curr_bbox["xmax"]),
+                        lat2 = as.numeric(curr_bbox["ymax"])) %>%
+            addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
+                             overlayGroups = c("Latest flood warnings"),
+                             options= layersControlOptions(collapsed=T))
+          
+          } # close else statement
+        } # close england has flood warnings if else
+        
+        # -- to allow user to select region or local authority --
+        else{
+          
+          # if selected region --
+          if (input$lad_selected == 'All local authorities in region') {
+            
+            # get all local authorities in tc
+            curr_LA <- lad_uk2vuln_resilience %>% filter(TacticalCell == input$tactical_cell)
+            
+            # filter for just those most vulnerable and least resilient
+            vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+            # --- filter to just areas most in need ---
+            #curr_LA <- curr_LA %>% filter(fill %in% vuln_cols)
+            
+            # --- filter tactical cell boundary ---
+            curr_TC <- tc_shp %>% filter(TacticalCell == input$tactical_cell)
+            
+            # -- filter local authorith boundaries --
+            curr_LA_all_boundaries <- lad_uk2vuln_resilience %>% filter(TacticalCell == input$tactical_cell)
+            
+            
+            # tc_labels <-
+            #   paste0(
+            #     sprintf("<strong>%s</strong><br/>",  curr_LA$lad19nm),
+            #     "Vulnerability (5 = highest vulnerability): ",  curr_LA$`Vulnerability quintile`, "<br/>",
+            #     "Capacity (5 = lowest capacity): ",  curr_LA$`Capacity quintile`
+            #   ) %>%
+            #   lapply(htmltools::HTML)
+            
+            
+            # --- filter by flooding risk and incidents ---
+            fl_incd_lad_uk_most_vuln <- curr_LA %>% 
+              filter(`Flood incidents quintile` >= 4 & !is.na(`Flood incidents quintile`)) 
+            
+            fl_risk_lad_uk_most_vuln <- curr_LA %>% 
+              filter(`Flood risk quintile` >= 4 & !is.na(`Flood risk quintile`)) 
+            
+            fl_incd_lad_uk_most_vuln_for_labels <- fl_incd_lad_uk_most_vuln %>%
+              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`) %>%
+              st_drop_geometry() %>%
+              mutate_all(list(~na_if(.,""))) %>%
+              mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
+            
+            fl_risk_lad_uk_most_vuln_for_labels <- fl_risk_lad_uk_most_vuln %>%
+              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
+                     `% people in flood risk areas`, `Flood risk quintile`) %>%
+              st_drop_geometry() %>%
+              mutate_all(list(~na_if(.,""))) %>%
+              mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
+              mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                TRUE ~ (as.character(.$`% people in flood risk areas`))))
+            
+            
+            fl_incd_labels <- paste0(
+              sprintf("<strong>%s</strong><br/>",  fl_incd_lad_uk_most_vuln_for_labels$lad19nm),
+              "Vulnerability (5 = highest vulnerability): ",  fl_incd_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
+              "Capacity (5 = lowest capacity): ",  fl_incd_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
+              "Flood Incidents (5 = most common): ",  fl_incd_lad_uk_most_vuln_for_labels$`Flood incidents quintile`, "<br/>",
+              "Number of historical flooding incidents: ", fl_incd_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
+              "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`) %>%
+              lapply(htmltools::HTML)
+            
+            fl_risk_labels <- paste0(
+              sprintf("<strong>%s</strong><br/>",  fl_risk_lad_uk_most_vuln_for_labels$lad19nm),
+              "Vulnerability (5 = highest vulnerability): ",  fl_risk_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
+              "Capacity (5 = lowest capacity): ",  fl_risk_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
+              "Flood Risk (5 = most risk): ", fl_risk_lad_uk_most_vuln_for_labels$`Flood risk quintile`, "<br/>",
+              "Total people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
+              "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`
+            ) %>%
+              lapply(htmltools::HTML)
+            
+            
+            # does regions have an flood regions  - if no
+            if (dim(filteredFlooding())[1]==0) {
+              
+              # zoom to tactical cell
+              curr_bbox <- st_bbox(curr_TC)
+              
+              # show on map:
+              leafletProxy("map") %>%
+                clearShapes() %>%
+                clearMarkers() %>%
+                clearMarkerClusters() %>%
+                # TC boundary
+                addPolygons(data=curr_TC, layerId = ~TacticalCell,
+                            group='tactical cell boundary',
+                            stroke=T,
+                            weight = 0.7,
+                            opacity = 0.8,
+                            color = "black",
+                            dashArray = "0.1",
+                            fill=F) %>%
+                # show lad boundaries
+                addPolygons(data=curr_LA_all_boundaries, layerId = ~lad19nm,
+                            group='lad boundaries',
+                            stroke=T,
+                            weight = 0.7,
+                            opacity = 0.8,
+                            color = "grey",
+                            dashArray = "0.1",
+                            fill=F,
+                            label= ~lad19nm,
+                            labelOptions = labelOptions(
+                              style = list("font-weight" = "normal", padding = "3px 8px"),
+                              textsize = "15px",
+                              direction = "auto")
+                            ) %>% 
+                addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~`Flood incidents quintile`,
+                            group="Resilience of high flood incident areas", fillColor = ~fill,
+                            weight = 0.7,
+                            opacity = 0.8,
+                            color = "black",
+                            dashArray = "0.1",
+                            fillOpacity = 0.7,
+                            highlight = highlightOptions(
+                              weight = 5,
+                              color = "#666",
+                              dashArray = "",
+                              fillOpacity = 0.7,
+                              bringToFront = TRUE,
+                            ),
+                            label= fl_incd_labels,
+                            
+                            labelOptions = labelOptions(
+                              style = list("font-weight" = "normal", padding = "3px 8px"),
+                              textsize = "10px",
+                              direction = "auto"
+                            )
+                ) %>%
+                addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~`Flood risk quintile`,
+                            group="Resilience of high flood risk areas", fillColor = ~fill,
+                            weight = 0.7,
+                            opacity = 0.8,
+                            color = "black",
+                            dashArray = "0.1",
+                            fillOpacity = 0.7,
+                            highlight = highlightOptions(
+                              weight = 5,
+                              color = "#666",
+                              dashArray = "",
+                              fillOpacity = 0.7,
+                              bringToFront = TRUE,
+                            ),
+                            label= fl_risk_labels,
+                            
+                            labelOptions = labelOptions(
+                              style = list("font-weight" = "normal", padding = "3px 8px"),
+                              textsize = "10px",
+                              direction = "auto"
+                            )
+                ) %>%
+                flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
+                            lat1 = as.numeric(curr_bbox["ymin"]),
+                            lng2 = as.numeric(curr_bbox["xmax"]),
+                            lat2 = as.numeric(curr_bbox["ymax"]))  %>%
+                addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
+                                 options= layersControlOptions(collapsed=T))
+                
+            }
+                
+              
+            else {
+            
+            # --- Flooding layer ----
+            flood_to_plot <- filteredFlooding() %>% 
+              select('lad19nm','description','severity','severityLevel', 'message','alertlevelmeaning','lastupdateday','lastupdatetime') %>%
+              unique() %>% 
+              # case colour polgon based on severity
+              mutate('warning_col'=case_when(severityLevel==3 ~ 'orange',
+                                             severityLevel == 2 ~ 'red',
+                                             severityLevel == 1 ~ 'red'))
+            
+            
+            # --- trying to get the centroids propoerly - doesn't work!
+            # get centroids of floods 
+            flood_centroids <- flood_to_plot %>%
+              st_transform(32617) 
+            
+            flood_centroids <- st_centroid(flood_centroids) %>%
+              st_transform(4326)
+            # 
+            # convert long and lat to dataframe columns 
+            flood_centroids <- flood_centroids %>%
+              mutate(long = unlist(map(flood_centroids$geometry,1)),
+                     lat = unlist(map(flood_centroids$geometry,2))) %>%
+              st_drop_geometry()
+            
+            flood_centroids_df <- as.data.frame(flood_centroids)
+            
+            #print(flood_centroids_df)
+            #print(flood_to_plot)
+            
+            # icons = 
+            icons = awesomeIcons(
+              icon = "glyphicon glyphicon-warning-sign", 
+              iconColor = "black",
+              #library = "fa",
+              markerColor = flood_centroids_df$warning_col
+            )
+            
+            
+            flood_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  flood_to_plot$description),
+                flood_to_plot$severity, ": ", flood_to_plot$alertlevelmeaning, "<br/>",
+                "last updated (at time dashboard refreshed): ",  flood_to_plot$lastupdateday, " ", flood_to_plot$lastupdatetime) %>%
+              lapply(htmltools::HTML)
+            
+            
+            # zoom to tactical cell
+            curr_bbox <- st_bbox(curr_TC)
+            
+            # show on map:
+            leafletProxy("map") %>%
+              clearShapes() %>%
+              clearMarkers() %>%
+              clearMarkerClusters() %>%
+              # TC boundary
+              addPolygons(data=curr_TC, layerId = ~TacticalCell,
+                          group='tactical cell boundary',
+                          stroke=T,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fill=F) %>%
+              # show lad boundaries
+              addPolygons(data=curr_LA_all_boundaries, layerId = ~lad19nm,
+                          group='lad_boundaries',
+                          stroke=T,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "grey",
+                          dashArray = "0.1",
+                          fill=F,
+                          label= ~lad19nm,
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "15px",
+                            direction = "auto"
+                          )) %>%
+              addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~`Flood incidents quintile`,
+                          group="Resilience of high flood incident areas", fillColor = ~fill,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= fl_incd_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "10px",
+                            direction = "auto"
+                          )
+              ) %>%
+              addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~`Flood risk quintile`,
+                          group="Resilience of high flood risk areas", fillColor = ~fill,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= fl_risk_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "10px",
+                            direction = "auto"
+                          )
+              ) %>%
+              addPolygons(data=flood_to_plot, layerId=~`description`,
+                          group="Latest flood warnings", fillColor = ~warning_col,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7
+                          
+              ) %>%
+              addAwesomeMarkers(data=flood_centroids_df, layerId=~`description`,
+                                group="Latest flood warnings", label=~flood_labels, icon=icons,
+                                lng=~long, lat=~lat) %>%
+              flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
+                          lat1 = as.numeric(curr_bbox["ymin"]),
+                          lng2 = as.numeric(curr_bbox["xmax"]),
+                          lat2 = as.numeric(curr_bbox["ymax"])) %>%
+              addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
+                               overlayGroups = c("Latest flood warnings"),
+                               options= layersControlOptions(collapsed=T))
+            } # end of else for 
+          } # end of show tactical cell 
+          
+          else {
+            # flood warngins in local authority - flood planes with warning overlapping authority  
+            # get just local authority selected
+            curr_LA <- lad_uk2vuln_resilience %>% filter(lad19nm == input$lad_selected)
+            
+            # filter for just those most vulnerable and least resilient
+            #vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+            # --- filter to just areas most in need ---
+            #curr_LA <- curr_LA %>% filter(fill %in% vuln_cols)
+            
+            # --- filter tactical cell boundary ---
+            curr_TC <- tc_shp %>% filter(TacticalCell == input$tactical_cell)
+            
+            # --- all lads ---
+            all_LAs <- lad_uk2vuln_resilience %>% filter(TacticalCell == input$tactical_cell)
+            
+            la_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  curr_LA$lad19nm),
+                "Vulnerability (5 = highest vulnerability): ",  curr_LA$`Vulnerability quintile`, "<br/>",
+                "Capacity (5 = lowest capacity): ",  curr_LA$`Capacity quintile`
+              ) %>%
+              lapply(htmltools::HTML)
+            
+            #print(la_labels)
+            #print(filteredFlooding)
+            
+            la_filteredFlooding <- filteredFlooding() %>% 
+              filter(lad19nm == input$lad_selected)
+            
+            
+            # --- filter by flooding risk and incidents (don't need to filter showing any LA) ---
+            fl_incd_lad_uk_most_vuln <- curr_LA 
+            fl_risk_lad_uk_most_vuln <- curr_LA 
+            
+            fl_incd_lad_uk_most_vuln_for_labels <- fl_incd_lad_uk_most_vuln %>%
+              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`) %>%
+              st_drop_geometry() %>%
+              mutate_all(list(~na_if(.,""))) %>%
+              mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
+            
+            fl_risk_lad_uk_most_vuln_for_labels <- fl_risk_lad_uk_most_vuln %>%
+              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
+                     `% people in flood risk areas`, `Flood risk quintile`) %>%
+              st_drop_geometry() %>%
+              mutate_all(list(~na_if(.,""))) %>%
+              mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
+              mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                TRUE ~ (as.character(.$`% people in flood risk areas`))))
+            #print(fl_incd_lad_uk_most_vuln_for_labels$`Flood incidents quintile`)
+            #print(fl_risk_lad_uk_most_vuln_for_labels$`Flood risk quintile`)
+            
+            fl_incd_labels <- paste0(
+              sprintf("<strong>%s</strong><br/>",  fl_incd_lad_uk_most_vuln_for_labels$lad19nm),
+              "Vulnerability (5 = highest vulnerability): ",  fl_incd_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
+              "Capacity (5 = lowest capacity): ",  fl_incd_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
+              "Flood Incidents (5 = most common): ",  fl_incd_lad_uk_most_vuln_for_labels$`Flood incidents quintile`, "<br/>",
+              "Number of historical flooding incidents: ", fl_incd_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
+              "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`) %>%
+              lapply(htmltools::HTML)
+            
+            fl_risk_labels <- paste0(
+              sprintf("<strong>%s</strong><br/>",  fl_risk_lad_uk_most_vuln_for_labels$lad19nm),
+              "Vulnerability (5 = highest vulnerability): ",  fl_risk_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
+              "Capacity (5 = lowest capacity): ",  fl_risk_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
+              "Flood Risk (5 = most risk): ", fl_risk_lad_uk_most_vuln_for_labels$`Flood risk quintile`, "<br/>",
+              "Total people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
+              "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`
+            ) %>%
+              lapply(htmltools::HTML)
+            
+            
+            #if no flood warnign in LAD
+            if (dim(la_filteredFlooding)[1] == 0) {
+
+              # -- get bounding box of la
+              curr_bbox <- st_bbox(curr_LA)
+              
+              # show on map:
+              leafletProxy("map") %>%
+                clearShapes() %>%
+                clearMarkers() %>%
+                clearMarkerClusters() %>%
+                # TC boundary
+                addPolygons(data=curr_TC, layerId = ~TacticalCell,
+                            group='tactical cell boundary',
+                            stroke=T,
+                            weight = 0.7,
+                            opacity = 0.8,
+                            color = "black",
+                            dashArray = "0.1",
+                            fill=F) %>%
+                # show lad boundaries
+                addPolygons(data=all_LAs, layerId = ~lad19nm,
+                            group='la_lad_boundaries',
+                            stroke=T,
+                            weight = 0.5,
+                            opacity = 0.8,
+                            color = "grey",
+                            dashArray = "0.1",
+                            label=~lad19nm,
+                            fill=F) %>% 
+                addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~`Flood incidents quintile`,
+                            group="Resilience of high flood incident areas", fillColor = ~fill,
+                            weight = 0.7,
+                            opacity = 0.8,
+                            color = "black",
+                            dashArray = "0.1",
+                            fillOpacity = 0.7,
+                            highlight = highlightOptions(
+                              weight = 5,
+                              color = "#666",
+                              dashArray = "",
+                              fillOpacity = 0.7,
+                              bringToFront = TRUE,
+                            ),
+                            label= fl_incd_labels,
+                            
+                            labelOptions = labelOptions(
+                              style = list("font-weight" = "normal", padding = "3px 8px"),
+                              textsize = "10px",
+                              direction = "auto"
+                            )
+                ) %>%
+                addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~`Flood risk quintile`,
+                            group="Resilience of high flood risk areas", fillColor = ~fill,
+                            weight = 0.7,
+                            opacity = 0.8,
+                            color = "black",
+                            dashArray = "0.1",
+                            fillOpacity = 0.7,
+                            highlight = highlightOptions(
+                              weight = 5,
+                              color = "#666",
+                              dashArray = "",
+                              fillOpacity = 0.7,
+                              bringToFront = TRUE,
+                            ),
+                            label= fl_risk_labels,
+                            labelOptions = labelOptions(
+                              style = list("font-weight" = "normal", padding = "3px 8px"),
+                              textsize = "10px",
+                              direction = "auto"
+                            )
+                ) %>%
+                flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
+                            lat1 = as.numeric(curr_bbox["ymin"]),
+                            lng2 = as.numeric(curr_bbox["xmax"]),
+                            lat2 = as.numeric(curr_bbox["ymax"]))  %>%
+                addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
+                                 options= layersControlOptions(collapsed=T))
+              
+              
+              }
+  
+          else {
+            
+            # --- Flooding layer ----
+            flood_to_plot <- la_filteredFlooding %>%
+              select('lad19nm','description','severity','severityLevel', 'message', 'alertlevelmeaning','lastupdatetime','lastupdateday') %>%
+              unique() %>% 
+              # case colour polgon based on severity
+              mutate('warning_col'=case_when(severityLevel==3 ~ 'orange',
+                                             severityLevel == 2 ~ 'red',
+                                             severityLevel == 1 ~ 'red'))
+            
+            
+            # --- trying to get the centroids propoerly - doesn't work!
+            # get centroids of floods 
+            flood_centroids <- flood_to_plot %>%
+              st_transform(32617) 
+            
+            flood_centroids <- st_centroid(flood_centroids) %>%
+              st_transform(4326)
+            # 
+            # convert long and lat to dataframe columns 
+            flood_centroids <- flood_centroids %>%
+              mutate(long = unlist(map(flood_centroids$geometry,1)),
+                     lat = unlist(map(flood_centroids$geometry,2))) %>%
+              st_drop_geometry()
+            
+            flood_centroids_df <- as.data.frame(flood_centroids) 
+            
+            # icons = 
+            icons = awesomeIcons(
+              icon = "glyphicon glyphicon-warning-sign", 
+              iconColor = "black",
+              #library = "fa",
+              markerColor = flood_centroids_df$warning_col
+            )
+            
+            print(flood_centroids_df)
+            
+            flood_labels <-
+              paste0(
+                sprintf("<strong>%s</strong><br/>",  flood_to_plot$description),
+                flood_to_plot$severity, ": ", flood_to_plot$alertlevelmeaning, "<br/>",
+                "last updated (at time dashboard refreshed): ",  flood_to_plot$lastupdateday, " ", flood_to_plot$lastupdatetime) %>%
+              lapply(htmltools::HTML)
+            
+            
+            # -- get bounding box of la
+            curr_bbox <- st_bbox(curr_LA)
+            
+            
+            # show on map:
+            leafletProxy("map") %>%
+              clearShapes() %>%
+              clearMarkers() %>%
+              clearMarkerClusters() %>%
+              # TC boundary
+              addPolygons(data=curr_TC, layerId = ~TacticalCell,
+                          group='tactical cell boundary',
+                          stroke=T,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fill=F) %>%
+              # show lad boundaries
+              addPolygons(data=all_LAs, layerId = ~lad19nm,
+                          group='la_lad_boundaries',
+                          stroke=T,
+                          weight = 0.5,
+                          opacity = 0.8,
+                          color = "grey",
+                          dashArray = "0.1",
+                          label=~lad19nm,
+                          fill=F) %>%
+              addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~`Flood incidents quintile`,
+                          group="Resilience of high flood incident areas", fillColor = ~fill,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= fl_incd_labels,
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "10px",
+                            direction = "auto"
+                          )
+              ) %>%
+              addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~`Flood risk quintile`,
+                          group="Resilience of high flood risk areas", fillColor = ~fill,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= fl_risk_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "10px",
+                            direction = "auto"
+                          )
+              ) %>%
+              addPolygons(data=flood_to_plot, layerId=~`description`,
+                          group="Latest flood warnings", fillColor = ~warning_col,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7
+                          
+              ) %>%
+              addAwesomeMarkers(data=flood_centroids_df, layerId=~`description`,
+                                group="Latest flood warnings", label=~flood_labels, icon=icons,
+                                lng=~long, lat=~lat) %>%
+              flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
+                          lat1 = as.numeric(curr_bbox["ymin"]),
+                          lng2 = as.numeric(curr_bbox["xmax"]),
+                          lat2 = as.numeric(curr_bbox["ymax"])) %>%
+              addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
+                               overlayGroups = c("Latest flood warnings"),
+                               options= layersControlOptions(collapsed=T))
+            
+            
+          } # end of if flood exists
+  
+          } # end of local authority else
+          
+         } # end of ..
+        
+        }# flooding theme map end 
+        
+        # ---- maps for next themes go here ---
+      }
   }
 })
 
 
-
-  #Use a separate observer to recreate the legend as needed.
-  # observe({
-  #   leafletProxy("map", data = lad_uk2areas2vulnerability) %>%
-  #     clearControls() %>%
-  #     addLegend(
-  #       position = "topright",
-  #       pal = pal,
-  #       values = ~`Socioeconomic Vulnerability quintile`,
-  #       title = paste0("<b>", 'vulnerability score', "</b></br>", '(5 = worst)', "<br/>"),
-  #       opacity = 0.8
-  #     )
-  # })
+#addLayersControl(baseGroups = c("Resilience: vulnerability vs capacity to cope","Economic vulnerability","Socioconomic vulnerability","Social vulnerability","Health/Wellbeing vulnerability","Clinical vulnerability"),
+#Use a separate observer to recreate the legend as needed.
+  observe({
+    # clear current controls
+    map_labels = c('Least','','','','Most')
+    if (input$theme == 'Covid-19') {
+      map <- leafletProxy("map") %>%
+        clearControls()
+    
+      if (any(input$map_groups %in% 'Resilience: vulnerability vs capacity to cope')) {
+      
+        map <- map %>%
+          addControl(html="<img src='bivar-legend.png', width=200>", position="bottomleft",
+                   className = "fieldset {border: 0;}")
+    }
+    
+    if (any(input$map_groups %in% 'Economic vulnerability')) {
+      map <- map %>%
+        addLegend(position = "bottomleft", group='Economic vulnerability',
+                  pal = pal,
+                  values = lad_uk2vuln_resilience$`Socioeconomic Vulnerability quintile`,
+                  #title = paste0("<b>", 'Economic vulnerability score', "</b></br>", '(5 = worst)', "<br/>"),
+                  title = paste0("<b>", 'Economic vulnerability', "</b>"),
+                  labFormat = function(type, cuts, p) {
+                    paste0(map_labels)
+                  },
+                  opacity = 0.8)
+      
+    }
+    
+    if (any(input$map_groups %in% 'Socioeconomic vulnerability')) {
+      map <- map %>%
+        addLegend(position = "bottomleft", group='Socioeconomic vulnerability',
+                  pal = pal,
+                  values = lad_uk2vuln_resilience$`Socioeconomic Vulnerability quintile`,
+                  title = paste0("<b>", 'Socioeconomic vulnerability', "</b></br>"),
+                  opacity = 0.8,
+                  labFormat = function(type, cuts, p) {
+                    paste0(map_labels)
+                  })
+      
+    }
+    
+    if (any(input$map_groups %in% 'Social vulnerability')) {
+      map <- map %>%
+        addLegend(position = "bottomleft", group='Social vulnerability',
+                  pal = pal,
+                  values = lad_uk2vuln_resilience$`Socioeconomic Vulnerability quintile`,
+                  title = paste0("<b>", 'Social vulnerability', "</b></br>"),
+                  opacity = 0.8,
+                  labFormat = function(type, cuts, p) {
+                    paste0(map_labels)
+                  })
+      
+    }
+    
+    if (any(input$map_groups %in% 'Health/Wellbeing vulnerability')) {
+      map <- map %>%
+        addLegend(position = "bottomleft", group='Health/Wellbeing vulnerability',
+                  pal = pal,
+                  values = lad_uk2vuln_resilience$`Socioeconomic Vulnerability quintile`,
+                  title = paste0("<b>", 'Health/wellbeing vulnerability', "</b></br>"),
+                  opacity = 0.8,
+                  labFormat = function(type, cuts, p) {
+                    paste0(map_labels)
+                  })
+      
+    }
+    
+    if (any(input$map_groups %in% 'Clinical vulnerability')) {
+      map <- map %>%
+        addLegend(position = "bottomleft", group='Clinical vulnerability',
+                  pal = pal,
+                  values = lad_uk2vuln_resilience$`Socioeconomic Vulnerability quintile`,
+                  title = paste0("<b>", 'Clinical vulnerability', "</b></br>"),
+                  opacity = 0.8,
+                  labFormat = function(type, cuts, p) {
+                    paste0(map_labels)
+                  })
+      
+    }
+  } # end of covid-19 map theme
+    
+    else {
+      if (input$theme == 'Flooding') {
+        map <- leafletProxy("map") %>%
+          clearControls()
+        
+        if ((any(input$map_groups %in% 'Resilience of high flood incident areas')) | (any(input$map_groups %in% 'Resilience of high flood risk areas'))) {
+          
+          map <- map %>%
+            addControl(html="<img src='bivar-legend.png', width=200>", position="bottomleft",
+                       className = "fieldset {border: 0;}")
+        }
+        
+        
+      }# end of flood theme
+    }
+  })
 
   # ------- People at Risk table -------
   # --- Store click ---
