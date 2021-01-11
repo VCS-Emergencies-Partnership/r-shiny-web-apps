@@ -246,6 +246,7 @@ body <- dashboardBody(
 
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
   tags$head(includeCSS("styles.css")),
+  tags$script(src='socket_timeout.js'),
   #tags$head(HTML("<title> VCSEP Unmet needs platform </title>")),
 
   tabItems(
@@ -257,6 +258,7 @@ body <- dashboardBody(
               column(width = 8,
                      box(width=NULL,
                        uiOutput('welcome'),
+                       textOutput("keep_alive"),
                        style = "height:620px; overflow-y: scroll;overflow-x: scroll;", footer=div(
                          p(tags$strong(tags$i("This platform is still in the early stages of development. 
                                Some features may not work properly, but are coming soon.")), 
@@ -681,6 +683,13 @@ ui <- function(request) {
 # ---- server ---- #
 server = function(input, output) {
 
+  # testing 
+  output$keep_alive <- renderText({
+    req(input$alive_count)
+    input$alive_count
+    test <- input$alive_count
+  })
+  
   # obeserve if first tab is selected
   observe({
 
