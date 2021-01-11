@@ -609,11 +609,22 @@ body <- dashboardBody(
               # column - 2
               column( width = 6,
                     # - row 1 -
-                    box(
+                    boxPlus(
                       # bivariate
                       title = "Areas at risk",
                       width = NULL, height = "510px", #solidHeader = TRUE, status='primary',
-                      leafletOutput("map", height = "450px"),
+                      closable = F,
+                      #enable_sidebar = T,
+                      #sidebar_width = 40,
+                      #sidebar_start_open = F,
+                      #sidebar_content = tagList(
+                      #  div(h4(tags$strong('Help:')),tags$br(),
+                      #      p(tags$strong('Covid-19 theme layers:'), tags$br(),
+                      #        'Resilience: vulnerability vs capacity to cope - this layer displays the areas that are most 
+                      #        vulnerable and least resiliant based on teh BRC developed resilience index', tags$br(),
+                      #        'Economic vulnerability:')
+                      #)),
+                      leafletOutput("map", height = "450px")
 
                     #absolutePanel(
                     #  id = "legend", class = "panel panel-default",
@@ -822,6 +833,17 @@ server = function(input, output) {
             are used to make these assessments, see the", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", 'British Red Cross Vulnerability')), 
             "and", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "Resilience")), "Indices."),
           tags$br(),
+          p(tags$strong("Interpreting the map:"), tags$br(), "Different layers are shown on the map depending on which emergency is selected. It is also possible, by selecting the button in the corner of the map to change what information is displayed", tags$br(),
+                        p(tags$strong("Covid-19 theme:"), tags$br(), tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layers highlights the local authorities that are most vulnerable and have the least capacity to cope based upon the BRC resilience index.", tags$br(),
+                        tags$strong(tags$em("Economic vulnerability:")), "This layer shows the local authorities that are most ecomically vulnerable (scores of 4 or 5) based upon the BRC vulnerability index.", tags$br(),
+                        tags$strong(tags$em("Socioeconomic vulnerability:")), "This layer shows the local authorities that are most socioecomically vulnerable (scores of 4 or 5) based upon the BRC vulnerability index.", tags$br(), 
+                        tags$strong(tags$em("Social vulnerability:")), "This layer shows the local authorities that are most socially vulnerable (scores of 4 or 5) based upon the BRC vulnerability index.", tags$br(),
+                        tags$strong(tags$em("Health/wellbeing vulnerability:")), "This layer shows the local authorities that most vulnerable (scores of 4 or 5) with regards to health and wellbeing based upon the BRC vulnerability index.", tags$br(),
+                        tags$strong(tags$em("Clinical vulnerability:")), "This layer shows the local authorities that are most clinically vulnerable (scores of 4 or 5) based upon the BRC vulnerability index.", tags$br()),
+                        p(tags$strong("Flooding theme:"), tags$br(),
+                        tags$strong(tags$em("Resilience of areas with highest flood incidents:")), "This highlights the resilience (vulnerability vs the capacity to cope) of the areas with the highest number of historical flood incidents per 10,000 people (Flood incidents quintile 4 and 5 - for more information see the BRC resilience index).", tags$br(),
+                        tags$strong(tags$em("Resiliene of areas with highest flood risk:")), "This highlights the areas where the highest proportion of people live in flood risk areas (Flood risk quintile 4, 5 - for more information see the BRC resilience index)", tags$br(),
+                        tags$strong(tags$em("Flood warnings/alerts:")), "The points and polygons displayed show the latest flood warnings and alerts from the Metoffice")),
           p("As more organisations contribute their data, over time", tags$strong("we will build a better 
             understanding of “People in need” during an emergency, and where such needs may be going unmet."))
           
@@ -955,7 +977,7 @@ server = function(input, output) {
       flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
         mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
         mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
-        select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+        select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`,`Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
       
     }
     else {
@@ -964,7 +986,7 @@ server = function(input, output) {
       flooding_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
         mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
         mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
-        select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+        select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
     }
     
   })
@@ -4257,7 +4279,7 @@ server = function(input, output) {
                                                     mean_score >= 2.5 ~ 'Low',
                                                     (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
                                                     is.na(mean_score) ~ 'Data unavailable')) %>%
-            select('Local Authority', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `Flooding incidents per 10,000 people`,`Total people in flood risk areas`, `% people in flood risk areas`)
+            select('Local Authority', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,`Total people in flood risk areas`, `% people in flood risk areas`)
           
           #print(covid_cases2volunteers)
           # - order
