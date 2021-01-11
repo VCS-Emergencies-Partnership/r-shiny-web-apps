@@ -98,8 +98,14 @@ par_table <- read_feather('data/people_at_risk/people-at-risk.feather')
 par_table <- par_table %>% rename('lad_prop_recieving_section_95_support'=lad_prop_receving_section95_support,
                                   'lad_prop_unemployed_on_ucred' = 'lad_prop_upemployed_on_ucred') 
 
+
 # just working with engalnd for now
 england_regions = c("North", "Central", "London", "South and the Channel Islands", "South East")
+
+
+# just working with engalnd for now
+england_regions = c("North", "Central", "London", "South and the Channel Islands", "South East")
+
 
 # calculate averages for all local authorities across england - to me this is the avg across england
 # need to select 
@@ -110,7 +116,6 @@ par_table_lad_avg <- par_table %>%
          'People receiving Section 95 support',
          'lad_prop_recieving_section_95_support',
          `Percentage of population who are ethnic minority`,
-         #starts_with('week'),
          `Number of households in fuel poverty1`,
          `Proportion of households fuel poor (%)`,
          `Homelessness (rate per 1000)`,
@@ -175,6 +180,7 @@ flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
 flood_warnings <- st_read('./data/areas_to_focus/current_live_metoffice_floodwarnings.geojson')
 
 
+
 # -- vcs indicators
 requests <- read_csv('data/vcs_indicators/requests_this_week_and_last.csv')
 volunteers <- read_csv('data/vcs_indicators/volunteer-capacity-lad19CD-tc.csv')
@@ -232,7 +238,7 @@ sidebar <- dashboardSidebar(
 
   # - display vcsep logo -
   div(p("Developed by"), img(src = "vcs-logo-text.png", width = 225),style="position:fixed; bottom:0; padding:15px; text-align: center;")
-
+    
   )
 )
 
@@ -1030,6 +1036,7 @@ server = function(input, output) {
         # -- if showing whole of UK --
         if(input$tactical_cell == '-- England --') {
 
+
           
         # --- RESILIENCE index ---  
         # vulnerable colours
@@ -1051,7 +1058,7 @@ server = function(input, output) {
           ) %>%
           lapply(htmltools::HTML)
         
-        #print(lad_uk_most_vuln)
+       #print(lad_uk_most_vuln)
         
         # --- to display other indicies ---
         pal <- colorFactor("viridis", c(1:5), reverse = TRUE)
@@ -1108,6 +1115,7 @@ server = function(input, output) {
           lapply(htmltools::HTML)
         
         
+
         # -- zoom for uk ---
         curr_bbox <- st_bbox(tc_shp)
 
@@ -1296,7 +1304,7 @@ server = function(input, output) {
                 "Capacity (5 = lowest capacity): ",  curr_LA$`Capacity quintile`
               ) %>%
               lapply(htmltools::HTML)
-            
+           
             
             # --- to display other indicies ---
             pal <- colorFactor("viridis", c(1:5), reverse = TRUE)
@@ -1351,6 +1359,7 @@ server = function(input, output) {
                 "Health/Wellbeing Vulnerability (5 = highest vulnerability): ",  clin_vuln$`Clinical Vulnerability quintile`, "<br/>",
                 "Capacity (5 = lowest capacity): ",  clin_vuln$`Capacity quintile`) %>%
               lapply(htmltools::HTML)
+
 
             # zoom to tactical cell
             curr_bbox <- st_bbox(curr_TC)
@@ -1559,7 +1568,6 @@ server = function(input, output) {
               ) %>%
               lapply(htmltools::HTML)
             
-            
             # --- to display other indicies ---
             pal <- colorFactor("viridis", c(1:5), reverse = TRUE)
             
@@ -1662,8 +1670,7 @@ server = function(input, output) {
                             style = list("font-weight" = "normal", padding = "3px 8px"),
                             textsize = "10px",
                             direction = "auto"
-                          )
-                       ) %>% 
+                          )) %>% 
               # economic vulnerability layer
               addPolygons(data=econ_vuln, layerId = ~`Economic Vulnerability quintile`,
                           group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
@@ -2698,7 +2705,7 @@ server = function(input, output) {
   }
 })
 
-
+  
 #addLayersControl(baseGroups = c("Resilience: vulnerability vs capacity to cope","Economic vulnerability","Socioconomic vulnerability","Social vulnerability","Health/Wellbeing vulnerability","Clinical vulnerability"),
 #Use a separate observer to recreate the legend as needed.
   observe({
@@ -2798,6 +2805,7 @@ server = function(input, output) {
       }# end of flood theme
     }
   })
+
 
   # ------- People at Risk table -------
   # --- Store click ---
@@ -3616,6 +3624,7 @@ server = function(input, output) {
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=lad_avg_bame, symbol = "none", lineStyle = list(color = "black"), title=lad_label_to_show, label=list(formatter='label',fontSize=10)) %>%
+
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
               e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
@@ -3684,12 +3693,14 @@ server = function(input, output) {
                   tags$br(),
                   'people receiving Section 95 support')
                 #p(tags$strong('No. of people receiving Section 95 support:'), format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_lad_sec95)
+
             )
           })
           
           output$section95 <- renderEcharts4r({
             # # Plot population statistics
             sec95 <- lad_sec95_to_plot %>%
+
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
@@ -3709,6 +3720,7 @@ server = function(input, output) {
               e_legend(FALSE)
             
           })
+
           }
           
           else {
@@ -3754,6 +3766,7 @@ server = function(input, output) {
           
           
           if(dim(lad_homeless_to_plot)[1] != 0) {
+
           
           output$homeless_text <- renderUI({
             div(style= " text-align: center;margin-top:5px;",
@@ -3787,7 +3800,6 @@ server = function(input, output) {
               e_legend(FALSE)
             
           })
-          
           }
           
           else {
@@ -3843,6 +3855,7 @@ server = function(input, output) {
                   tags$br(),
                   "households in fuel poverty")
                 #p(tags$strong('No. of households in fuel poverty:'), format(lad_fuelp_to_write$`Number of households in fuel poverty1`, big.mark=',', scientific = F), "households", tags$br(), write_lad_fuelp)
+
             )
           })
           
@@ -3868,6 +3881,7 @@ server = function(input, output) {
               e_legend(FALSE)
             
           })
+
           }
           
           else {
@@ -3917,7 +3931,7 @@ server = function(input, output) {
           output$unemployment_text <- renderUI({
             div(style= " text-align: center;margin-top:5px;",
                 #hr(),
-                p(format(lad_unem_to_write$`Not in employment`, big.mark=',', scientific = F),
+           p(format(lad_unem_to_write$`Not in employment`, big.mark=',', scientific = F),
                   tags$br(),
                   'people unemployed on universal credit')
                 #p(tags$strong('No. of people unemployed receiving universal credit:'), format(lad_unem_to_write$`Not in employment`, big.mark=',', scientific = F), "people", tags$br(), write_lad_unem)
@@ -3990,6 +4004,7 @@ server = function(input, output) {
           lad_de_for_avg = paste0(round(par_table_lad_avg$percent_digitally_excluded,0), '%', '\n','(eng avg)')
         
           if (dim(lad_de_to_plot)[1] != 0) {
+
           
           output$digital_text <- renderUI({
             div(style= " text-align: center;margin-top:5px;",
@@ -4023,7 +4038,6 @@ server = function(input, output) {
               e_legend(FALSE)
             
           })
-          
           }
           
           else{
@@ -4082,6 +4096,7 @@ server = function(input, output) {
           output$shielding_f <- renderEcharts4r({
             # # Plot population statistics
             sec95 <- lad_shielding_to_plot %>%
+
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%

@@ -3,9 +3,7 @@ web_apps = [{
   img = "dashboard",
   name = "dashboard",
   tag = "latest"
-}, {
-  always_on = false,
-  img = "hello-world",
-  name = "hello-world",
-  tag = "latest"
+  url = "insight"
 }]
+web_app_domain = "vcsep.org.uk"
+web_apps_dns_resource_group = "global-uks-dns-default-rg"
