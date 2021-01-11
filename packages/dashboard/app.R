@@ -110,7 +110,7 @@ par_table_lad_avg <- par_table %>%
          'People receiving Section 95 support',
          'lad_prop_recieving_section_95_support',
          `Percentage of population who are ethnic minority`,
-         `week 49`,
+         #starts_with('week'),
          `Number of households in fuel poverty1`,
          `Proportion of households fuel poor (%)`,
          `Homelessness (rate per 1000)`,
@@ -217,7 +217,8 @@ sidebar <- dashboardSidebar(
 
                                selectInput("theme",
                                     label="Select an emergency",
-                                    choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
+                                    #choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
+                                    choices = sort(c("Covid-19","Flooding")),
                                     selected="Covid-19")
               ),
 
@@ -1041,7 +1042,7 @@ server = function(input, output) {
           ) %>%
           lapply(htmltools::HTML)
         
-        print(lad_uk_most_vuln)
+        #print(lad_uk_most_vuln)
         
         # --- to display other indicies ---
         pal <- colorFactor("viridis", c(1:5), reverse = TRUE)
@@ -1133,7 +1134,7 @@ server = function(input, output) {
                   
                   labelOptions = labelOptions(
                     style = list("font-weight" = "normal", padding = "3px 8px"),
-                    textsize = "15px",
+                    textsize = "10px",
                     direction = "auto"
                   )
                 ) %>%
@@ -1156,7 +1157,7 @@ server = function(input, output) {
                       
                       labelOptions = labelOptions(
                         style = list("font-weight" = "normal", padding = "3px 8px"),
-                        textsize = "15px",
+                        textsize = "10px",
                         direction = "auto"
                       )
           ) %>%
@@ -1179,7 +1180,7 @@ server = function(input, output) {
                       
                       labelOptions = labelOptions(
                         style = list("font-weight" = "normal", padding = "3px 8px"),
-                        textsize = "15px",
+                        textsize = "10px",
                         direction = "auto"
                       )
           ) %>%
@@ -1202,7 +1203,7 @@ server = function(input, output) {
                       
                       labelOptions = labelOptions(
                         style = list("font-weight" = "normal", padding = "3px 8px"),
-                        textsize = "15px",
+                        textsize = "10px",
                         direction = "auto"
                       )
           ) %>%
@@ -1225,7 +1226,7 @@ server = function(input, output) {
                       
                       labelOptions = labelOptions(
                         style = list("font-weight" = "normal", padding = "3px 8px"),
-                        textsize = "15px",
+                        textsize = "10px",
                         direction = "auto"
                       )
           ) %>%
@@ -1248,7 +1249,7 @@ server = function(input, output) {
                       
                       labelOptions = labelOptions(
                         style = list("font-weight" = "normal", padding = "3px 8px"),
-                        textsize = "15px",
+                        textsize = "10px",
                         direction = "auto"
                       )
           ) %>%
@@ -1371,7 +1372,7 @@ server = function(input, output) {
                           label= ~lad19nm,
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )) %>%
               # most deprived
@@ -1392,7 +1393,7 @@ server = function(input, output) {
                     label=tc_labels,
                     labelOptions = labelOptions(
                       style = list("font-weight" = "normal", padding = "3px 8px"),
-                      textsize = "15px",
+                      textsize = "10px",
                       direction = "auto"
                     )
                 ) %>% 
@@ -1415,7 +1416,7 @@ server = function(input, output) {
                           
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
               ) %>%
@@ -1438,7 +1439,7 @@ server = function(input, output) {
                           
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
               ) %>%
@@ -1461,7 +1462,7 @@ server = function(input, output) {
                           
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
               ) %>%
@@ -1484,7 +1485,7 @@ server = function(input, output) {
                           
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
               ) %>%
@@ -1507,7 +1508,7 @@ server = function(input, output) {
                           
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
               ) %>%
@@ -1650,7 +1651,7 @@ server = function(input, output) {
                           label=la_labels,
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
                        ) %>% 
@@ -1673,7 +1674,7 @@ server = function(input, output) {
                           
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
               ) %>%
@@ -1696,7 +1697,7 @@ server = function(input, output) {
                           
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
               ) %>%
@@ -1719,7 +1720,7 @@ server = function(input, output) {
                           
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
               ) %>%
@@ -1742,7 +1743,7 @@ server = function(input, output) {
                           
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
               ) %>%
@@ -1765,7 +1766,7 @@ server = function(input, output) {
                           
                           labelOptions = labelOptions(
                             style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
+                            textsize = "10px",
                             direction = "auto"
                           )
               ) %>%
@@ -1807,19 +1808,24 @@ server = function(input, output) {
           
           fl_incd_lad_uk_most_vuln_for_labels <- fl_incd_lad_uk_most_vuln %>%
             select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                   `Flooding incidents per 10,000 people`, `Flood incidents quintile`) %>%
+                   `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`) %>%
             st_drop_geometry() %>%
             mutate_all(list(~na_if(.,""))) %>%
-            mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
+            mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2)) %>%
+            mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
+            mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                              TRUE ~ (as.character(.$`% people in flood risk areas`))))
           
           fl_risk_lad_uk_most_vuln_for_labels <- fl_risk_lad_uk_most_vuln %>%
             select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
-                   `% people in flood risk areas`, `Flood risk quintile`) %>%
+                   `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
+                   `Flooding incidents per 10,000 people`) %>%
             st_drop_geometry() %>%
             mutate_all(list(~na_if(.,""))) %>%
             mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
             mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
-                                                              TRUE ~ (as.character(.$`% people in flood risk areas`))))
+                                                              TRUE ~ (as.character(.$`% people in flood risk areas`)))) %>%
+            mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
           
           
           
@@ -1829,7 +1835,9 @@ server = function(input, output) {
               "Capacity (5 = lowest capacity): ",  fl_incd_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
               "Flood Incidents (5 = most common): ",  fl_incd_lad_uk_most_vuln_for_labels$`Flood incidents quintile`, "<br/>",
               "Number of historical flooding incidents: ", fl_incd_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
-              "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`) %>%
+              "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`, "<br/>",
+              "Total people in flood risk areas: ", fl_incd_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
+              "% people in flood risk areas: ", fl_incd_lad_uk_most_vuln_for_labels$`% people in flood risk areas`) %>%
             lapply(htmltools::HTML)
 
           fl_risk_labels <- paste0(
@@ -1838,7 +1846,9 @@ server = function(input, output) {
               "Capacity (5 = lowest capacity): ",  fl_risk_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
               "Flood Risk (5 = most risk): ", fl_risk_lad_uk_most_vuln_for_labels$`Flood risk quintile`, "<br/>",
               "Total people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
-              "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`
+              "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`, "<br/>",
+              "Number of historical flooding incidents: ", fl_risk_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
+              "Flooding incidents per 10,000 people: ", fl_risk_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`
             ) %>%
             lapply(htmltools::HTML)
 
@@ -1861,7 +1871,7 @@ server = function(input, output) {
                           dashArray = "0.1",
                           fill=F) %>%
               
-              addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~LAD19CD,
+              addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~`Flood incidents quintile`,
                           group="Resilience of high flood incident areas", fillColor = ~fill,
                           weight = 0.7,
                           opacity = 0.8,
@@ -1883,7 +1893,7 @@ server = function(input, output) {
                             direction = "auto"
                           )
               ) %>%
-              addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~LAD19CD,
+              addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~`Flood risk quintile`,
                           group="Resilience of high flood risk areas", fillColor = ~fill,
                           weight = 0.7,
                           opacity = 0.8,
@@ -1977,7 +1987,7 @@ server = function(input, output) {
                         color = "black",
                         dashArray = "0.1",
                         fill=F) %>%
-            addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~LAD19CD,
+            addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~`Flood incidents quintile`,
                         group="Resilience of high flood incident areas", fillColor = ~fill,
                         weight = 0.7,
                         opacity = 0.8,
@@ -1999,7 +2009,7 @@ server = function(input, output) {
                           direction = "auto"
                         )
             ) %>%
-            addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~LAD19CD,
+            addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~`Flood risk quintile`,
                         group="Resilience of high flood risk areas", fillColor = ~fill,
                         weight = 0.7,
                         opacity = 0.8,
@@ -2083,19 +2093,25 @@ server = function(input, output) {
             
             fl_incd_lad_uk_most_vuln_for_labels <- fl_incd_lad_uk_most_vuln %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`) %>%
+                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`) %>%
               st_drop_geometry() %>%
               mutate_all(list(~na_if(.,""))) %>%
-              mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
+              mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2)) %>%
+              mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
+              mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                TRUE ~ (as.character(.$`% people in flood risk areas`))))
             
             fl_risk_lad_uk_most_vuln_for_labels <- fl_risk_lad_uk_most_vuln %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
-                     `% people in flood risk areas`, `Flood risk quintile`) %>%
+                     `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`) %>%
               st_drop_geometry() %>%
               mutate_all(list(~na_if(.,""))) %>%
               mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
               mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
-                                                                TRUE ~ (as.character(.$`% people in flood risk areas`))))
+                                                                TRUE ~ (as.character(.$`% people in flood risk areas`)))) %>%
+              mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
+            
             
             
             fl_incd_labels <- paste0(
@@ -2104,7 +2120,9 @@ server = function(input, output) {
               "Capacity (5 = lowest capacity): ",  fl_incd_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
               "Flood Incidents (5 = most common): ",  fl_incd_lad_uk_most_vuln_for_labels$`Flood incidents quintile`, "<br/>",
               "Number of historical flooding incidents: ", fl_incd_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
-              "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`) %>%
+              "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`, "<br/>",
+              "Total people in flood risk areas: ", fl_incd_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
+              "% people in flood risk areas: ", fl_incd_lad_uk_most_vuln_for_labels$`% people in flood risk areas`) %>%
               lapply(htmltools::HTML)
             
             fl_risk_labels <- paste0(
@@ -2113,7 +2131,9 @@ server = function(input, output) {
               "Capacity (5 = lowest capacity): ",  fl_risk_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
               "Flood Risk (5 = most risk): ", fl_risk_lad_uk_most_vuln_for_labels$`Flood risk quintile`, "<br/>",
               "Total people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
-              "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`
+              "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`, "<br/>",
+              "Number of historical flooding incidents: ", fl_risk_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
+              "Flooding incidents per 10,000 people: ", fl_risk_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`
             ) %>%
               lapply(htmltools::HTML)
             
@@ -2390,21 +2410,26 @@ server = function(input, output) {
             
             fl_incd_lad_uk_most_vuln_for_labels <- fl_incd_lad_uk_most_vuln %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`) %>%
+                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`) %>%
               st_drop_geometry() %>%
               mutate_all(list(~na_if(.,""))) %>%
-              mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
+              mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2)) %>%
+              mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
+              mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                TRUE ~ (as.character(.$`% people in flood risk areas`))))
             
             fl_risk_lad_uk_most_vuln_for_labels <- fl_risk_lad_uk_most_vuln %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
-                     `% people in flood risk areas`, `Flood risk quintile`) %>%
+                     `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`) %>%
               st_drop_geometry() %>%
               mutate_all(list(~na_if(.,""))) %>%
               mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
               mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
-                                                                TRUE ~ (as.character(.$`% people in flood risk areas`))))
-            #print(fl_incd_lad_uk_most_vuln_for_labels$`Flood incidents quintile`)
-            #print(fl_risk_lad_uk_most_vuln_for_labels$`Flood risk quintile`)
+                                                                TRUE ~ (as.character(.$`% people in flood risk areas`)))) %>%
+              mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
+            
+            
             
             fl_incd_labels <- paste0(
               sprintf("<strong>%s</strong><br/>",  fl_incd_lad_uk_most_vuln_for_labels$lad19nm),
@@ -2412,7 +2437,9 @@ server = function(input, output) {
               "Capacity (5 = lowest capacity): ",  fl_incd_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
               "Flood Incidents (5 = most common): ",  fl_incd_lad_uk_most_vuln_for_labels$`Flood incidents quintile`, "<br/>",
               "Number of historical flooding incidents: ", fl_incd_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
-              "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`) %>%
+              "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`, "<br/>",
+              "Total people in flood risk areas: ", fl_incd_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
+              "% people in flood risk areas: ", fl_incd_lad_uk_most_vuln_for_labels$`% people in flood risk areas`) %>%
               lapply(htmltools::HTML)
             
             fl_risk_labels <- paste0(
@@ -2421,7 +2448,9 @@ server = function(input, output) {
               "Capacity (5 = lowest capacity): ",  fl_risk_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
               "Flood Risk (5 = most risk): ", fl_risk_lad_uk_most_vuln_for_labels$`Flood risk quintile`, "<br/>",
               "Total people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
-              "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`
+              "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`, "<br/>",
+              "Number of historical flooding incidents: ", fl_risk_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
+              "Flooding incidents per 10,000 people: ", fl_risk_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`
             ) %>%
               lapply(htmltools::HTML)
             
