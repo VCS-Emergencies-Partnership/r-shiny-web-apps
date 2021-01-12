@@ -177,7 +177,7 @@ flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
 
 
 # flood outlines metoffice warnings 
-flood_warnings <- st_read('./data/areas_to_focus/current_live_metoffice_floodwarnings_V2.geojson')
+flood_warnings <- st_read('./data/areas_to_focus/current_live_metoffice_floodwarnings.geojson')
 
 
 
