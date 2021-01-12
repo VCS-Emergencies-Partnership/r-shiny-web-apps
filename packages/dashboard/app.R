@@ -82,7 +82,7 @@ lad_uk2vuln_resilience_test <- lad_uk2vuln_resilience %>%
                                  `Socioeconomic Vulnerability quintile` == 2 ~ '',
                                  `Socioeconomic Vulnerability quintile` == 3 ~ '',
                                  `Socioeconomic Vulnerability quintile` == 4 ~ '',
-                                 `Socioeconomic Vulnerability quintile` == 25 ~ 'High'))
+                                 `Socioeconomic Vulnerability quintile` == 5 ~ 'High'))
 
 # tactical cells
 tactical_cells <- area_lookup_tc2lad %>% filter(TacticalCell != 'Wales' & TacticalCell != 'Northern Ireland and the Isle of Man' & TacticalCell != 'Scotland')
@@ -177,7 +177,7 @@ flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
 
 
 # flood outlines metoffice warnings 
-flood_warnings <- st_read('./data/areas_to_focus/current_live_metoffice_floodwarnings.geojson')
+flood_warnings <- st_read('./data/areas_to_focus/current_live_metoffice_floodwarnings_V2.geojson')
 
 
 
@@ -2047,15 +2047,15 @@ server = function(input, output) {
                           direction = "auto"
                         )
             ) %>%
-            addPolygons(data=flood_to_plot, layerId=~`description`,
-                        group="Latest flood warnings", fillColor = ~warning_col,
-                        weight = 0.7,
-                        opacity = 0.8,
-                        color = "black",
-                        dashArray = "0.1",
-                        fillOpacity = 0.7
+            #addPolygons(data=flood_to_plot, layerId=~`description`,
+            #            group="Latest flood warnings", fillColor = ~warning_col,
+            #            weight = 0.7,
+            #            opacity = 0.8,
+            #            color = "black",
+            #            dashArray = "0.1",
+            #            fillOpacity = 0.7
               
-            ) %>%
+            #) %>%
             addAwesomeMarkers(data=flood_centroids_df, layerId=~`description`,
                        group="Latest flood warnings", label=~flood_labels, icon=icons,
                        lng=~long, lat=~lat) %>%
