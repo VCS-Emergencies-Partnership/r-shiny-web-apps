@@ -1943,15 +1943,17 @@ server = function(input, output) {
           # flood warnign has occured..   
           else {
           
+          
           # --- Flooding layer ----
           flood_to_plot <- flood_warnings %>% 
             select('lad19nm','description','severity','severityLevel', 'alertlevelmeaning','lastupdatetime','lastupdateday','messageurl') %>%
-            unique() %>% 
+            #unique() %>% 
             # case colour polgon based on severity
             mutate('warning_col'=case_when(severityLevel==3 ~ 'orange',
                                            severityLevel == 2 ~ 'red',
                                            severityLevel == 1 ~ 'red'))
-          
+         
+          print(glimpse(flood_to_plot))
           
           # --- trying to get the centroids propoerly - doesn't work!
           # get centroids of floods 
@@ -2248,13 +2250,14 @@ server = function(input, output) {
             # --- Flooding layer ----
             flood_to_plot <- filteredFlooding() %>% 
               select('lad19nm','description','severity','severityLevel', 'message','alertlevelmeaning','lastupdateday','lastupdatetime') %>%
-              unique() %>% 
+              #unique() %>% 
               # case colour polgon based on severity
               mutate('warning_col'=case_when(severityLevel==3 ~ 'orange',
                                              severityLevel == 2 ~ 'red',
                                              severityLevel == 1 ~ 'red'))
             
             
+            print(flood_to_plot)            
             # --- trying to get the centroids propoerly - doesn't work!
             # get centroids of floods 
             flood_centroids <- flood_to_plot %>%
@@ -2559,7 +2562,7 @@ server = function(input, output) {
             # --- Flooding layer ----
             flood_to_plot <- la_filteredFlooding %>%
               select('lad19nm','description','severity','severityLevel', 'message', 'alertlevelmeaning','lastupdatetime','lastupdateday') %>%
-              unique() %>% 
+              #unique() %>% 
               # case colour polgon based on severity
               mutate('warning_col'=case_when(severityLevel==3 ~ 'orange',
                                              severityLevel == 2 ~ 'red',
