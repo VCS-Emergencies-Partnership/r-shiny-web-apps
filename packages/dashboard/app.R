@@ -1943,7 +1943,6 @@ server = function(input, output) {
           # flood warnign has occured..   
           else {
           
-          
           # --- Flooding layer ----
           flood_to_plot <- flood_warnings %>% 
             select('lad19nm','description','severity','severityLevel', 'alertlevelmeaning','lastupdatetime','lastupdateday','messageurl') %>%
@@ -1953,7 +1952,7 @@ server = function(input, output) {
                                            severityLevel == 2 ~ 'red',
                                            severityLevel == 1 ~ 'red'))
          
-          print(glimpse(flood_to_plot))
+          
           
           # --- trying to get the centroids propoerly - doesn't work!
           # get centroids of floods 
