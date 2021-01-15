@@ -126,7 +126,7 @@ par_table_lad_avg <- par_table %>%
          `Clinically extremely vulnerable`,
          `Proportion Clinically extremely vulnerable`
          ) %>%
-  summarise_all(., list(mean), na.rm=T) %>%
+  summarise_all(., list('mean' = mean, 'stdev'=sd), na.rm=T) %>%
   mutate('LAD19CD'='lad_avg', 'TacticalCell'='lad_avg') %>%
   select('LAD19CD', 'TacticalCell', everything())
 
@@ -1110,7 +1110,7 @@ server = function(input, output) {
         clin_labels <-
           paste0(
             sprintf("<strong>%s</strong><br/>",  clin_vuln$lad19nm),
-            "Health/Wellbeing Vulnerability (5 = highest vulnerability): ",  clin_vuln$`Clinical Vulnerability quintile`, "<br/>",
+            "Clinical Vulnerability (5 = highest vulnerability): ",  clin_vuln$`Clinical Vulnerability quintile`, "<br/>",
             "Capacity (5 = lowest capacity): ",  clin_vuln$`Capacity quintile`) %>%
           lapply(htmltools::HTML)
         
@@ -1356,7 +1356,7 @@ server = function(input, output) {
             clin_labels <-
               paste0(
                 sprintf("<strong>%s</strong><br/>",  clin_vuln$lad19nm),
-                "Health/Wellbeing Vulnerability (5 = highest vulnerability): ",  clin_vuln$`Clinical Vulnerability quintile`, "<br/>",
+                "Clinical Vulnerability (5 = highest vulnerability): ",  clin_vuln$`Clinical Vulnerability quintile`, "<br/>",
                 "Capacity (5 = lowest capacity): ",  clin_vuln$`Capacity quintile`) %>%
               lapply(htmltools::HTML)
 
@@ -1618,7 +1618,7 @@ server = function(input, output) {
             clin_labels <-
               paste0(
                 sprintf("<strong>%s</strong><br/>",  clin_vuln$lad19nm),
-                "Health/Wellbeing Vulnerability (5 = highest vulnerability): ",  clin_vuln$`Clinical Vulnerability quintile`, "<br/>",
+                "Clinical Vulnerability (5 = highest vulnerability): ",  clin_vuln$`Clinical Vulnerability quintile`, "<br/>",
                 "Capacity (5 = lowest capacity): ",  clin_vuln$`Capacity quintile`) %>%
               lapply(htmltools::HTML)
             
@@ -2820,9 +2820,8 @@ server = function(input, output) {
     if (input$sidebar_id == 'unmetneed') {
       # -- this will get tactical cell table --
       curr_table <- filterpar_tab()
-      print(curr_table)
+      #print(curr_table)
 
-      # -- Don't have stats for the whole uk at the moment --
       if (input$tactical_cell == '-- England --') {
         
         # select england level figures 
@@ -3269,7 +3268,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -3324,7 +3323,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1000, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1000) %>%
+              e_x_axis(position='top', axisLabel=list(show=T, fontSize=8, formatter = "{value}\nper 1000",showMinLabel=F, fontWeight='bold', margin=2),min=0, max=20, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=20) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -3384,7 +3383,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=25, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=25) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -3439,7 +3438,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=10, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=10) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -3557,7 +3556,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=25, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=25) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -3590,16 +3589,30 @@ server = function(input, output) {
           #print(lad_bame_to_plot)
           
           # for echarts
-          lad_avg_bame <- par_table_lad_avg %>% select(`Percentage of population who are ethnic minority`) %>%
-            select('xAxis' = `Percentage of population who are ethnic minority`) %>%
+          lad_avg_bame <- par_table_lad_avg %>% select(`Percentage of population who are ethnic minority_mean`) %>%
+            select('xAxis' = `Percentage of population who are ethnic minority_mean`) %>%
             mutate('xAxis'= round(xAxis,0)) %>%
             as.list()
+          
+          # for echarts colour
+          lad_avg_stdev_bame <- par_table_lad_avg %>% 
+            select(`Percentage of population who are ethnic minority_mean`, `Percentage of population who are ethnic minority_stdev`) %>%
+            mutate('plus_stdev'=round(`Percentage of population who are ethnic minority_mean`,1)+round(`Percentage of population who are ethnic minority_stdev`,1)) %>%
+            mutate('minus_stdev'=round(`Percentage of population who are ethnic minority_mean`,1) - round(`Percentage of population who are ethnic minority_stdev`,1)) 
+          
+          
+          bame_plot_colour <- lad_bame_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_bame$plus_stdev & proportion >= lad_avg_stdev_bame$minus_stdev) ~ 'orange',
+                                                                            proportion >= lad_avg_stdev_bame$plus_stdev ~ 'red',
+                                                                            proportion <= lad_avg_stdev_bame$minus_stdev ~ 'green'))
+          
+          #print('colours')
+          #print(glimpse(plot_colour))
           
           # to format percentage
           lad_bame_to_show <- paste0(round(lad_bame_to_plot$proportion,0), "%")
           
           # label to sho
-          lad_label_to_show <- paste0(round(par_table_lad_avg$`Percentage of population who are ethnic minority`,0), '%', '\n','(eng avg)')
+          lad_label_to_show <- paste0(round(par_table_lad_avg$`Percentage of population who are ethnic minority_mean`,0), '%', '\n','(eng avg)')
           
         
           
@@ -3622,7 +3635,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1, showBackground=T, label=list(show=T, color='black', position='right')) %>%
               #e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(bame_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=lad_avg_bame, symbol = "none", lineStyle = list(color = "black"), title=lad_label_to_show, label=list(formatter='label',fontSize=10)) %>%
@@ -3680,11 +3693,22 @@ server = function(input, output) {
           write_lad_sec95 <- paste0("(",lad_sec95_to_write$lad_prop_recieving_section_95_support,"% of the population)")
           
           # for echarts
-          lad_avg_section95 <- par_table_lad_avg %>% select(`lad_prop_recieving_section_95_support`) %>%
-            select('xAxis' = `lad_prop_recieving_section_95_support`) %>%
+          lad_avg_section95 <- par_table_lad_avg %>% select(`lad_prop_recieving_section_95_support_mean`) %>%
+            select('xAxis' = `lad_prop_recieving_section_95_support_mean`) %>%
             as.list()
           
-          lad_sec95_for_avg = paste0(round(par_table_lad_avg$lad_prop_recieving_section_95_support,2), '%', '\n','(eng avg)')
+          lad_avg_stdev_sec95 <- par_table_lad_avg %>% 
+            select(`lad_prop_recieving_section_95_support_mean`, `lad_prop_recieving_section_95_support_stdev`) %>%
+            mutate('plus_stdev'=round(`lad_prop_recieving_section_95_support_mean`,1)+round(`lad_prop_recieving_section_95_support_stdev`,1)) %>%
+            mutate('minus_stdev'=round(`lad_prop_recieving_section_95_support_mean`,1) - round(`lad_prop_recieving_section_95_support_stdev`,1)) 
+          
+          
+          sec95_plot_colour <- lad_sec95_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_sec95$plus_stdev & proportion >= lad_avg_stdev_sec95$minus_stdev) ~ 'orange',
+                                                                            proportion >= lad_avg_stdev_sec95$plus_stdev ~ 'red',
+                                                                            proportion <= lad_avg_stdev_sec95$minus_stdev ~ 'green'))
+          
+          
+          lad_sec95_for_avg = paste0(round(par_table_lad_avg$lad_prop_recieving_section_95_support_mean,2), '%', '\n','(eng avg)')
           
           if(dim(lad_sec95_to_plot)[1] != 0) {
           
@@ -3706,7 +3730,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(sec95_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=lad_avg_section95, symbol = "none", lineStyle = list(color = "black"), title=lad_sec95_for_avg,label=list(formatter='label',fontSize=10)) %>%
@@ -3716,7 +3740,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -3760,11 +3784,23 @@ server = function(input, output) {
           write_lad_homeless <- paste0("(",lad_homeless_to_write$`Homelessness (rate per 1000)`,"homelessness per 1000)")
           
           # for echarts
-          lad_avg_homeless <- par_table_lad_avg %>% select(`Homelessness (rate per 1000)`) %>%
-            select('xAxis' = `Homelessness (rate per 1000)`) %>%
+          lad_avg_homeless <- par_table_lad_avg %>% select(`Homelessness (rate per 1000)_mean`) %>%
+            select('xAxis' = `Homelessness (rate per 1000)_mean`) %>%
             as.list()
           
-          lad_homeless_for_avg = paste0(round(par_table_lad_avg$`Homelessness (rate per 1000)`,2), '\n','(eng avg)')
+          lad_avg_stdev_homeless <- par_table_lad_avg %>% 
+            select(`Homelessness (rate per 1000)_mean`, `Homelessness (rate per 1000)_stdev`) %>%
+            mutate('plus_stdev'=round(`Homelessness (rate per 1000)_mean`,2)+round(`Homelessness (rate per 1000)_stdev`,2)) %>%
+            mutate('minus_stdev'=round(`Homelessness (rate per 1000)_mean`,2) - round(`Homelessness (rate per 1000)_stdev`,2)) 
+          
+          
+          homeless_plot_colour <- lad_homeless_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_homeless$plus_stdev & proportion >= lad_avg_stdev_homeless$minus_stdev) ~ 'orange',
+                                                                             proportion >= lad_avg_stdev_homeless$plus_stdev ~ 'red',
+                                                                             proportion <= lad_avg_stdev_homeless$minus_stdev ~ 'green'))
+          
+          
+          
+          lad_homeless_for_avg = paste0(round(par_table_lad_avg$`Homelessness (rate per 1000)_mean`,2), '\n','(eng avg)')
           
           
           if(dim(lad_homeless_to_plot)[1] != 0) {
@@ -3786,7 +3822,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(homeless_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=lad_avg_homeless, symbol = "none", lineStyle = list(color = "black"), title=lad_homeless_for_avg, label=list(formatter='label',fontSize=10)) %>%
@@ -3796,7 +3832,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1000, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1000) %>%
+              e_x_axis(position='top', axisLabel=list(show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2, suffix='per 1000'),min=0, max=20, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=20) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -3842,12 +3878,25 @@ server = function(input, output) {
           write_lad_fuelp <- paste0("(",lad_fuelp_to_write$`Proportion of households fuel poor (%)`,"% of households)")
           
           # for echarts
-          lad_avg_fuelp <- par_table_lad_avg %>% select(`Proportion of households fuel poor (%)`) %>%
-            select('xAxis' = `Proportion of households fuel poor (%)`) %>%
+          lad_avg_fuelp <- par_table_lad_avg %>% select(`Proportion of households fuel poor (%)_mean`) %>%
+            select('xAxis' = `Proportion of households fuel poor (%)_mean`) %>%
             mutate('xAxis'=round(xAxis,0)) %>%
             as.list()
           
-          lad_fuelp_for_avg = paste0(round(par_table_lad_avg$`Proportion of households fuel poor (%)`,0), '%', '\n','(eng avg)')
+          
+          lad_avg_stdev_fuelp <- par_table_lad_avg %>% 
+            select(`Proportion of households fuel poor (%)_mean`, `Proportion of households fuel poor (%)_stdev`) %>%
+            mutate('plus_stdev'=round(`Proportion of households fuel poor (%)_mean`,1)+round(`Proportion of households fuel poor (%)_stdev`,1)) %>%
+            mutate('minus_stdev'=round(`Proportion of households fuel poor (%)_mean`,1) - round(`Proportion of households fuel poor (%)_stdev`,1)) 
+          
+          
+          fuelp_plot_colour <- lad_fuelp_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_fuelp$plus_stdev & proportion >= lad_avg_stdev_fuelp$minus_stdev) ~ 'orange',
+                                                                                proportion >= lad_avg_stdev_fuelp$plus_stdev ~ 'red',
+                                                                                proportion <= lad_avg_stdev_fuelp$minus_stdev ~ 'green'))
+          
+         
+          
+          lad_fuelp_for_avg = paste0(round(par_table_lad_avg$`Proportion of households fuel poor (%)_mean`,0), '%', '\n','(eng avg)')
           
           if (dim(lad_fuelp_to_plot)[1] != 0) {
           output$fuelp_text <- renderUI({
@@ -3867,7 +3916,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(fuelp_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=lad_avg_fuelp, symbol = "none", lineStyle = list(color = "black"), title=lad_fuelp_for_avg, label=list(formatter='label',fontSize=10)) %>%
@@ -3877,7 +3926,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=25, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=25) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -3921,12 +3970,24 @@ server = function(input, output) {
           write_lad_unem <- paste0("(",lad_unem_to_write$lad_prop_unemployed_on_ucred,"% of people)")
           
           # for echarts
-          lad_avg_unem <- par_table_lad_avg %>% select(`lad_prop_unemployed_on_ucred`) %>%
-            select('xAxis' = `lad_prop_unemployed_on_ucred`) %>%
+          lad_avg_unem <- par_table_lad_avg %>% select(`lad_prop_unemployed_on_ucred_mean`) %>%
+            select('xAxis' = `lad_prop_unemployed_on_ucred_mean`) %>%
             mutate('xAxis'=round(xAxis,0)) %>%
             as.list()
           
-          lad_unem_for_avg = paste0(round(par_table_lad_avg$lad_prop_unemployed_on_ucred,0), '%', '\n','(eng avg)')
+          lad_avg_stdev_unem <- par_table_lad_avg %>% 
+            select(`lad_prop_unemployed_on_ucred_mean`, `lad_prop_unemployed_on_ucred_stdev`) %>%
+            mutate('plus_stdev'=round(`lad_prop_unemployed_on_ucred_mean`,1)+round(`lad_prop_unemployed_on_ucred_stdev`,1)) %>%
+            mutate('minus_stdev'=round(`lad_prop_unemployed_on_ucred_mean`,1) - round(`lad_prop_unemployed_on_ucred_stdev`,1)) 
+          
+          
+          unem_plot_colour <- lad_unem_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_unem$plus_stdev & proportion >= lad_avg_stdev_unem$minus_stdev) ~ 'orange',
+                                                                             proportion >= lad_avg_stdev_unem$plus_stdev ~ 'red',
+                                                                             proportion <= lad_avg_stdev_unem$minus_stdev ~ 'green'))
+          
+          
+          
+          lad_unem_for_avg = paste0(round(par_table_lad_avg$lad_prop_unemployed_on_ucred_mean,0), '%', '\n','(eng avg)')
           
           if (dim(lad_unem_to_plot)[1] != 0) {
           
@@ -3946,7 +4007,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(unem_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=lad_avg_unem, symbol = "none", lineStyle = list(color = "black"), title=lad_unem_for_avg, label=list(formatter='label',fontSize=10)) %>%
@@ -3956,7 +4017,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=10, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=10) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
@@ -3991,19 +4052,31 @@ server = function(input, output) {
           
           lad_de_to_plot <- lad_de_to_plot %>% filter(!is.na(proportion)) %>%
             unique() %>% 
-            mutate('proportion'=round(proportion,0))
+            mutate('proportion'=round(proportion,2))
           
           lad_de_to_write <- lad_de_to_write %>% filter(!is.na('percent_digitally_excluded'))
           
-          write_lad_de <- paste0(round(lad_de_to_write$percent_digitally_excluded,0), "%")
+          write_lad_de <- paste0(round(lad_de_to_write$percent_digitally_excluded,2), "%")
           
           # for echarts
-          lad_avg_de <- par_table_lad_avg %>% select(`percent_digitally_excluded`) %>%
-            select('xAxis' = `percent_digitally_excluded`) %>%
+          lad_avg_de <- par_table_lad_avg %>% select(`percent_digitally_excluded_mean`) %>%
+            select('xAxis' = `percent_digitally_excluded_mean`) %>%
             mutate('xAxis'=round(xAxis,0)) %>%
             as.list()
           
-          lad_de_for_avg = paste0(round(par_table_lad_avg$percent_digitally_excluded,0), '%', '\n','(eng avg)')
+          lad_avg_stdev_de <- par_table_lad_avg %>% 
+            select(`percent_digitally_excluded_mean`, `percent_digitally_excluded_stdev`) %>%
+            mutate('plus_stdev'=round(`percent_digitally_excluded_mean`,1)+round(`percent_digitally_excluded_stdev`,1)) %>%
+            mutate('minus_stdev'=round(`percent_digitally_excluded_mean`,1) - round(`percent_digitally_excluded_stdev`,1)) 
+          
+          
+          de_plot_colour <- lad_de_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_de$plus_stdev & proportion >= lad_avg_stdev_de$minus_stdev) ~ 'orange',
+                                                                            proportion >= lad_avg_stdev_de$plus_stdev ~ 'red',
+                                                                            proportion <= lad_avg_stdev_de$minus_stdev ~ 'green'))
+          
+          
+          
+          lad_de_for_avg = paste0(round(par_table_lad_avg$percent_digitally_excluded_mean,0), '%', '\n','(eng avg)')
         
           if (dim(lad_de_to_plot)[1] != 0) {
 
@@ -4024,7 +4097,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(de_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=lad_avg_de, symbol = "none", lineStyle = list(color = "black"), title=lad_de_for_avg, label=list(formatter='label',fontSize=10)) %>%
@@ -4076,12 +4149,23 @@ server = function(input, output) {
           write_lad_shielding <- paste0("(",lad_shielding_to_write$`Proportion Clinically extremely vulnerable`,"% of the population)")
           
           # for echarts
-          lad_avg_shielding <- par_table_lad_avg %>% select(`Proportion Clinically extremely vulnerable`) %>%
-            select('xAxis' = `Proportion Clinically extremely vulnerable`) %>%
+          lad_avg_shielding <- par_table_lad_avg %>% select(`Proportion Clinically extremely vulnerable_mean`) %>%
+            select('xAxis' = `Proportion Clinically extremely vulnerable_mean`) %>%
             mutate('xAxis'=round(xAxis,0)) %>%
             as.list()
           
-          lad_sheilding_for_avg = paste0(round(par_table_lad_avg$`Proportion Clinically extremely vulnerable`,0), '%', '\n','(eng avg)')
+          lad_avg_stdev_shielding <- par_table_lad_avg %>% 
+            select(`Proportion Clinically extremely vulnerable_mean`, `Proportion Clinically extremely vulnerable_stdev`) %>%
+            mutate('plus_stdev'=round(`Proportion Clinically extremely vulnerable_mean`,1)+round(`Proportion Clinically extremely vulnerable_stdev`,1)) %>%
+            mutate('minus_stdev'=round(`Proportion Clinically extremely vulnerable_mean`,1) - round(`Proportion Clinically extremely vulnerable_stdev`,1)) 
+          
+          
+          shielding_plot_colour <- lad_shielding_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_shielding$plus_stdev & proportion >= lad_avg_stdev_shielding$minus_stdev) ~ 'orange',
+                                                                          proportion >= lad_avg_stdev_shielding$plus_stdev ~ 'red',
+                                                                          proportion <= lad_avg_stdev_shielding$minus_stdev ~ 'green'))
+          
+          
+          lad_sheilding_for_avg = paste0(round(par_table_lad_avg$`Proportion Clinically extremely vulnerable_mean`,0), '%', '\n','(eng avg)')
           
           if (dim(lad_shielding_to_plot)[1] != 0) {
           
@@ -4102,7 +4186,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(shielding_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=lad_avg_shielding, symbol = "none", lineStyle = list(color = "black"), title=lad_sheilding_for_avg, label=list(formatter='label',fontSize=10)) %>%
@@ -4112,7 +4196,7 @@ server = function(input, output) {
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=25, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=25) %>%
               e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
               e_y_axis(show=F) %>%
               e_legend(FALSE)
