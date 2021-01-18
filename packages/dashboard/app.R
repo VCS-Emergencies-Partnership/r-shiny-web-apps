@@ -150,7 +150,7 @@ par_table_tc_avg <- par_table %>%
     `tc_Clinically vulnerable proportion of population`
     ) %>%
   unique() %>%
-  summarise_all(., list(mean), na.rm=T) %>%
+  summarise_all(., list('mean'=mean, 'stdev'=sd), na.rm=T) %>%
   summarise_all(., list(round), 2) %>%
   mutate('LAD19CD'='tc_avg', 'TacticalCell'='tc_avg') %>%
   select('LAD19CD', 'TacticalCell', everything())
@@ -3176,16 +3176,28 @@ server = function(input, output) {
             mutate('proportion'=round(proportion,0))
 
           # for echarts
-          tc_avg_bame <- par_table_tc_avg %>% select(`tc_proportion`) %>%
-            mutate(`tc_proportion`=round(`tc_proportion`,0)) %>%
+          tc_avg_bame <- par_table_tc_avg %>% select(`tc_proportion_mean`) %>%
+            mutate(`tc_proportion`=round(`tc_proportion_mean`,0)) %>%
             select('xAxis' = `tc_proportion`) %>%
             as.list()
+          
+          # for echarts colour
+          tc_avg_stdev_bame <- par_table_tc_avg %>% 
+            select(`tc_proportion_mean`, `tc_proportion_stdev`) %>%
+            mutate('plus_stdev'=round(`tc_proportion_mean`,1)+round(`tc_proportion_stdev`,1)) %>%
+            mutate('minus_stdev'=round(`tc_proportion_mean`,1) - round(`tc_proportion_stdev`,1)) 
+          
+          
+          tc_bame_plot_colour <- bame_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_bame$plus_stdev & proportion >= tc_avg_stdev_bame$minus_stdev) ~ 'orange',
+                                                                                 proportion >= tc_avg_stdev_bame$plus_stdev ~ 'red',
+                                                                                 proportion <= tc_avg_stdev_bame$minus_stdev ~ 'green'))
+          
           
           # to format percentage
           bame_to_show <- paste0(round(bame_to_plot$proportion,0), "%")
 
           # label to sho
-          label_to_show <- paste(round(par_table_tc_avg$`tc_proportion`,0), '%', '\n','(regional avg)')
+          label_to_show <- paste(round(par_table_tc_avg$`tc_proportion_mean`,0), '%', '\n','(regional avg)')
           
           output$bame_population_text <- renderUI({
             div(style= " text-align: center;margin-top:5px;",
@@ -3204,7 +3216,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1, showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(tc_bame_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=tc_avg_bame, symbol = "none", lineStyle = list(color = "black"), title=label_to_show, label=list(formatter='label',fontSize=10)) %>%
@@ -3236,11 +3248,26 @@ server = function(input, output) {
           write_tc_sec95 <- paste0("(",tc_sec95_to_write$tc_prop_people_recieving_section_95_support,"% of the population)")
   
           # for echarts
-          tc_avg_section95 <- par_table_tc_avg %>% select(`tc_prop_people_recieving_section_95_support`) %>%
-            select('xAxis' = `tc_prop_people_recieving_section_95_support`) %>%
+          tc_avg_section95 <- par_table_tc_avg %>% select('tc_prop_people_recieving_section_95_support_mean') %>%
+            select('xAxis' = 'tc_prop_people_recieving_section_95_support_mean') %>%
             as.list()
           
-          tc_sec95_for_avg = paste0(par_table_tc_avg$tc_prop_people_recieving_section_95_support, '%', '\n','(regional avg)')
+        
+          
+          tc_avg_stdev_sec95 <- par_table_tc_avg %>% 
+            select('tc_prop_people_recieving_section_95_support_mean', 'tc_prop_people_recieving_section_95_support_stdev') %>%
+            mutate('plus_stdev'=round(tc_prop_people_recieving_section_95_support_mean,2)+round(tc_prop_people_recieving_section_95_support_stdev,2)) %>%
+            mutate('minus_stdev'=round(tc_prop_people_recieving_section_95_support_mean,2)- round(tc_prop_people_recieving_section_95_support_stdev,2)) 
+          
+          
+          
+          tc_sec95_plot_colour <- tc_sec95_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_sec95$plus_stdev & proportion >= tc_avg_stdev_sec95$minus_stdev) ~ 'orange',
+                                                                                   proportion >= tc_avg_stdev_sec95$plus_stdev ~ 'red',
+                                                                                   proportion <= tc_avg_stdev_sec95$minus_stdev ~ 'green'))
+          
+        
+          
+          tc_sec95_for_avg = paste0(par_table_tc_avg$tc_prop_people_recieving_section_95_support_mean, '%', '\n','(regional avg)')
                   
           output$section95_text <- renderUI({
             div(style= " text-align: center;margin-top:5px;",
@@ -3258,7 +3285,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(tc_sec95_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=tc_avg_section95, symbol = "none", lineStyle = list(color = "black"), title=tc_sec95_for_avg, label=list(formatter='label',fontSize=10)) %>%
@@ -3291,11 +3318,25 @@ server = function(input, output) {
           write_tc_homeless <- paste0("(",tc_homeless_to_write$`tc_Homelessness (rate per 1000)`,"homelessness rate per 1000)")
           
           # for echarts
-          tc_avg_homeless <- par_table_tc_avg %>% select(`tc_Homelessness (rate per 1000)`) %>%
-            select('xAxis' = `tc_Homelessness (rate per 1000)`) %>%
+          tc_avg_homeless <- par_table_tc_avg %>% select(`tc_Homelessness (rate per 1000)_mean`) %>%
+            select('xAxis' = `tc_Homelessness (rate per 1000)_mean`) %>%
             as.list()
-         
-          tc_homeless_for_avg = paste0(round(par_table_tc_avg$`tc_Homelessness (rate per 1000)`,2), '\n','(regional avg)')
+          
+          tc_avg_stdev_homeless <- par_table_tc_avg %>% 
+            select(`tc_Homelessness (rate per 1000)_mean`, `tc_Homelessness (rate per 1000)_stdev`) %>%
+            mutate('plus_stdev'=round(`tc_Homelessness (rate per 1000)_mean`,2)+round(`tc_Homelessness (rate per 1000)_stdev`,2)) %>%
+            mutate('minus_stdev'=round(`tc_Homelessness (rate per 1000)_mean`,2)- round(`tc_Homelessness (rate per 1000)_stdev`,2)) 
+          
+          
+          
+          tc_homeless_plot_colour <- tc_homeless_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_homeless$plus_stdev & proportion >= tc_avg_stdev_homeless$minus_stdev) ~ 'orange',
+                                                                                     proportion >= tc_avg_stdev_homeless$plus_stdev ~ 'red',
+                                                                                     proportion <= tc_avg_stdev_homeless$minus_stdev ~ 'green'))
+          
+          
+        
+          
+          tc_homeless_for_avg = paste0(round(par_table_tc_avg$`tc_Homelessness (rate per 1000)_mean`,2), '\n','(regional avg)')
           
           output$homeless_text <- renderUI({
             div(style= " text-align: center;margin-top:5px;",
@@ -3313,7 +3354,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(tc_homeless_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=tc_avg_homeless, symbol = "none", lineStyle = list(color = "black"), title=tc_homeless_for_avg, label=list(formatter='label',fontSize=10)) %>%
@@ -3350,12 +3391,25 @@ server = function(input, output) {
           write_tc_fuelp <- paste0("(",tc_fuelp_to_write$tc_prop_households_fuel_poor,"% of households)")
           
           # for echarts
-          tc_avg_fuelp <- par_table_tc_avg %>% select(`tc_prop_households_fuel_poor`) %>%
-            mutate(`tc_prop_households_fuel_poor`=round(`tc_prop_households_fuel_poor`,0)) %>%
-            select('xAxis' = `tc_prop_households_fuel_poor`) %>%
+          tc_avg_fuelp <- par_table_tc_avg %>% select(`tc_prop_households_fuel_poor_mean`) %>%
+            mutate(`tc_prop_households_fuel_poor`=round(`tc_prop_households_fuel_poor_mean`,0)) %>%
+            select('xAxis' = `tc_prop_households_fuel_poor_mean`) %>%
             as.list()
           
-          tc_fuelp_for_avg = paste0(round(par_table_tc_avg$tc_prop_households_fuel_poor,0), '%', '\n','(regional avg)')
+          tc_avg_stdev_fuelp <- par_table_tc_avg %>% 
+            select(`tc_prop_households_fuel_poor_mean`, `tc_prop_households_fuel_poor_stdev`) %>%
+            mutate('plus_stdev'=round(`tc_prop_households_fuel_poor_mean`,2)+round(`tc_prop_households_fuel_poor_stdev`,2)) %>%
+            mutate('minus_stdev'=round(`tc_prop_households_fuel_poor_mean`,2)- round(`tc_prop_households_fuel_poor_stdev`,2)) 
+          
+          
+          
+          tc_fuelp_plot_colour <- tc_fuelp_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_fuelp$plus_stdev & proportion >= tc_avg_stdev_fuelp$minus_stdev) ~ 'orange',
+                                                                                           proportion >= tc_avg_stdev_fuelp$plus_stdev ~ 'red',
+                                                                                           proportion <= tc_avg_stdev_fuelp$minus_stdev ~ 'green'))
+          
+          
+          
+          tc_fuelp_for_avg = paste0(round(par_table_tc_avg$tc_prop_households_fuel_poor_mean,0), '%', '\n','(regional avg)')
           
           output$fuelp_text <- renderUI({
             div(style= " text-align: center;margin-top:5px;",
@@ -3373,7 +3427,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(tc_fuelp_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=tc_avg_fuelp, symbol = "none", lineStyle = list(color = "black"), title=tc_fuelp_for_avg, label=list(formatter='label',fontSize=10)) %>%
@@ -3406,11 +3460,24 @@ server = function(input, output) {
           write_tc_unem <- paste0("(",tc_unem_to_write$tc_prop_unemployed_on_universal_credit,"% of people)")
           
           # for echarts
-          tc_avg_unem <- par_table_tc_avg %>% select(`tc_prop_unemployed_on_universal_credit`) %>%
-            select('xAxis' = `tc_prop_unemployed_on_universal_credit`) %>%
+          tc_avg_unem <- par_table_tc_avg %>% select(`tc_prop_unemployed_on_universal_credit_mean`) %>%
+            select('xAxis' = `tc_prop_unemployed_on_universal_credit_mean`) %>%
             as.list()
           
-          tc_unem_for_avg = paste0(round(par_table_tc_avg$tc_prop_unemployed_on_universal_credit,0), '%', '\n','(regional avg)')
+          tc_avg_stdev_unem <- par_table_tc_avg %>% 
+            select(`tc_prop_unemployed_on_universal_credit_mean`, `tc_prop_unemployed_on_universal_credit_stdev`) %>%
+            mutate('plus_stdev'=round(`tc_prop_unemployed_on_universal_credit_mean`,2)+round(`tc_prop_unemployed_on_universal_credit_stdev`,2)) %>%
+            mutate('minus_stdev'=round(`tc_prop_unemployed_on_universal_credit_mean`,2)- round(`tc_prop_unemployed_on_universal_credit_stdev`,2)) 
+          
+          
+          
+          tc_unem_plot_colour <- tc_unem_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_unem$plus_stdev & proportion >= tc_avg_stdev_unem$minus_stdev) ~ 'orange',
+                                                                                     proportion >= tc_avg_stdev_unem$plus_stdev ~ 'red',
+                                                                                     proportion <= tc_avg_stdev_unem$minus_stdev ~ 'green'))
+          
+          print(tc_unem_plot_colour)
+          
+          tc_unem_for_avg = paste0(round(par_table_tc_avg$tc_prop_unemployed_on_universal_credit_mean,0), '%', '\n','(regional avg)')
           
           output$unemployment_text <- renderUI({
             div(style= " text-align: center;margin-top:5px;",
@@ -3428,7 +3495,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(tc_unem_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=tc_avg_unem, symbol = "none", lineStyle = list(color = "black"), title=tc_unem_for_avg,label=list(formatter='label',fontSize=10)) %>%
@@ -3463,13 +3530,32 @@ server = function(input, output) {
           
          
           # for echarts
-          tc_avg_de <- par_table_tc_avg %>% select('tc_percent_digitally_excluded') %>%
+          tc_avg_de <- par_table_tc_avg %>% select('tc_percent_digitally_excluded_mean') %>%
             #mutate('tc_percent_digitally_excluded'=round(tc_percent_digitally_excluded,0))
-            select('xAxis' = `tc_percent_digitally_excluded`) %>%
+            select('xAxis' = `tc_percent_digitally_excluded_mean`) %>%
             mutate('xAxis' = round(xAxis,0)) %>%
             as.list()
           
-          tc_de_for_avg = paste0(round(par_table_tc_avg$tc_percent_digitally_excluded,0), '%', '\n','(regional avg)')
+          tc_avg_de <- par_table_tc_avg %>% select('tc_percent_digitally_excluded_mean') %>%
+            #mutate('tc_percent_digitally_excluded'=round(tc_percent_digitally_excluded,0))
+            select('xAxis' = `tc_percent_digitally_excluded_mean`) %>%
+            mutate('xAxis' = round(xAxis,0)) %>%
+            as.list()
+          
+          tc_avg_stdev_de <- par_table_tc_avg %>% 
+            select(`tc_percent_digitally_excluded_mean`, `tc_percent_digitally_excluded_stdev`) %>%
+            mutate('plus_stdev'=round(`tc_percent_digitally_excluded_mean`,2)+round(`tc_percent_digitally_excluded_stdev`,2)) %>%
+            mutate('minus_stdev'=round(`tc_percent_digitally_excluded_mean`,2)- round(`tc_percent_digitally_excluded_stdev`,2)) 
+          
+          
+          
+          tc_de_plot_colour <- tc_de_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_de$plus_stdev & proportion >= tc_avg_stdev_de$minus_stdev) ~ 'orange',
+                                                                                   proportion >= tc_avg_stdev_de$plus_stdev ~ 'red',
+                                                                                   proportion <= tc_avg_stdev_de$minus_stdev ~ 'green'))
+          
+         
+          
+          tc_de_for_avg = paste0(round(par_table_tc_avg$tc_percent_digitally_excluded_mean,0), '%', '\n','(regional avg)')
           
           output$digital_text <- renderUI({
             div(style= " text-align: center;margin-top:5px;",
@@ -3487,7 +3573,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(tc_de_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=tc_avg_de, symbol = "none", lineStyle = list(color = "black"), title=tc_de_for_avg, label=list(formatter='label',fontSize=10)) %>%
@@ -3522,13 +3608,26 @@ server = function(input, output) {
           
           # for echarts
           tc_avg_shielding <- par_table_tc_avg %>% 
-            select(`tc_Clinically vulnerable proportion of population`) %>%
-            select('xAxis' = `tc_Clinically vulnerable proportion of population`) %>%
+            select(`tc_Clinically vulnerable proportion of population_mean`) %>%
+            select('xAxis' = `tc_Clinically vulnerable proportion of population_mean`) %>%
             mutate('xAxis' = round(xAxis,0)) %>%
             as.list()
           
-         
-          tc_shielding_for_avg = paste0(round(par_table_tc_avg$`tc_Clinically vulnerable proportion of population`,0), '%', '\n','(regional avg)')
+          tc_avg_stdev_shielding <- par_table_tc_avg %>% 
+            select(`tc_Clinically vulnerable proportion of population_mean`, `tc_Clinically vulnerable proportion of population_stdev`) %>%
+            mutate('plus_stdev'=round(`tc_Clinically vulnerable proportion of population_mean`,2)+round(`tc_Clinically vulnerable proportion of population_stdev`,2)) %>%
+            mutate('minus_stdev'=round(`tc_Clinically vulnerable proportion of population_mean`,2)- round(`tc_Clinically vulnerable proportion of population_stdev`,2)) 
+          
+          
+          
+          tc_shielding_plot_colour <- tc_shielding_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_shielding$plus_stdev & proportion >= tc_avg_stdev_shielding$minus_stdev) ~ 'orange',
+                                                                               proportion >= tc_avg_stdev_shielding$plus_stdev ~ 'red',
+                                                                               proportion <= tc_avg_stdev_shielding$minus_stdev ~ 'green'))
+          
+          
+          
+          
+          tc_shielding_for_avg = paste0(round(par_table_tc_avg$`tc_Clinically vulnerable proportion of population_mean`,0), '%', '\n','(regional avg)')
           
           output$shielding_text <- renderUI({
             div(style= " text-align: center;margin-top:5px;",
@@ -3546,7 +3645,7 @@ server = function(input, output) {
               e_charts(x = Indicator) %>%
               e_bar(proportion, bar_width=0.1,showBackground=T) %>%
               e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
+              e_color(c(tc_shielding_plot_colour$rag_rating)) %>%
               #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
               #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
               e_mark_line(data=tc_avg_shielding, symbol = "none", lineStyle = list(color = "black"), title=tc_shielding_for_avg, label=list(formatter='label',fontSize=10)) %>%
