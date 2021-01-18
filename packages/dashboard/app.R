@@ -1247,7 +1247,7 @@ server = function(input, output) {
                         direction = "auto"
                       )
           ) %>%
-          # Health/wellbeing vulnerability layer
+          # clin vulnerability layer
           addPolygons(data=clin_vuln, layerId = ~`Clinical Vulnerability quintile`,
                       group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
                       weight = 0.7,
@@ -1867,6 +1867,8 @@ server = function(input, output) {
               "Flooding incidents per 10,000 people: ", fl_risk_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`
             ) %>%
             lapply(htmltools::HTML)
+          
+          
 
           
           
@@ -2155,6 +2157,30 @@ server = function(input, output) {
               lapply(htmltools::HTML)
             
             
+            curr_LA_for_labels <- curr_LA %>%
+              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
+                     `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`) %>%
+              st_drop_geometry() %>%
+              mutate_all(list(~na_if(.,""))) %>%
+              mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2)) %>%
+              mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
+              mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                TRUE ~ (as.character(.$`% people in flood risk areas`))))
+            
+            curr_LA_labels <- paste0(
+              sprintf("<strong>%s</strong><br/>",   curr_LA_for_labels$lad19nm),
+              "Vulnerability (5 = highest vulnerability): ",   curr_LA_for_labels$`Vulnerability quintile`, "<br/>",
+              "Capacity (5 = lowest capacity): ",   curr_LA_for_labels$`Capacity quintile`, "<br/>",
+              "Flood Risk (5 = most risk): ",  curr_LA_for_labels$`Flood risk quintile`, "<br/>",
+              "Total people in flood risk areas: ",  curr_LA_for_labels$`Total people in flood risk areas`, "<br/>",
+              "% people in flood risk areas: ",  curr_LA_for_labels$`% people in flood risk areas`, "<br/>",
+              "Number of historical flooding incidents: ",  curr_LA_for_labels$`Total historical flooding incidents`, "<br/>",
+              "Flooding incidents per 10,000 people: ",  curr_LA_for_labels$`Flooding incidents per 10,000 people`
+            ) %>%
+              lapply(htmltools::HTML)
+            
+            
             # does regions have an flood regions  - if no
             if (dim(filteredFlooding())[1]==0) {
               
@@ -2255,8 +2281,6 @@ server = function(input, output) {
                                              severityLevel == 2 ~ 'red',
                                              severityLevel == 1 ~ 'red'))
             
-            
-            print(flood_to_plot)            
             # --- trying to get the centroids propoerly - doesn't work!
             # get centroids of floods 
             flood_centroids <- flood_to_plot %>%
@@ -2369,6 +2393,28 @@ server = function(input, output) {
                             direction = "auto"
                           )
               ) %>%
+              addPolygons(data=curr_LA, layerId = ~`Capacity decile`,
+                          group="Resilience of all local authorities", fillColor = ~fill,
+                          weight = 0.7,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "0.1",
+                          fillOpacity = 0.7,
+                          highlight = highlightOptions(
+                            weight = 5,
+                            color = "#666",
+                            dashArray = "",
+                            fillOpacity = 0.7,
+                            bringToFront = TRUE,
+                          ),
+                          label= curr_LA_labels,
+                          
+                          labelOptions = labelOptions(
+                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                            textsize = "10px",
+                            direction = "auto"
+                          )
+              ) %>%
               addPolygons(data=flood_to_plot, layerId=~`description`,
                           group="Latest flood warnings", fillColor = ~warning_col,
                           weight = 0.7,
@@ -2385,7 +2431,7 @@ server = function(input, output) {
                           lat1 = as.numeric(curr_bbox["ymin"]),
                           lng2 = as.numeric(curr_bbox["xmax"]),
                           lat2 = as.numeric(curr_bbox["ymax"])) %>%
-              addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
+              addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas", "Resilience of all local authorities"),
                                overlayGroups = c("Latest flood warnings"),
                                options= layersControlOptions(collapsed=T))
             } # end of else for 
@@ -2504,7 +2550,8 @@ server = function(input, output) {
                             label=~lad19nm,
                             fill=F) %>% 
                 addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~`Flood incidents quintile`,
-                            group="Resilience of high flood incident areas", fillColor = ~fill,
+                            #group="Resilience of high flood incident areas", 
+                            fillColor = ~fill,
                             weight = 0.7,
                             opacity = 0.8,
                             color = "black",
@@ -2525,32 +2572,32 @@ server = function(input, output) {
                               direction = "auto"
                             )
                 ) %>%
-                addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~`Flood risk quintile`,
-                            group="Resilience of high flood risk areas", fillColor = ~fill,
-                            weight = 0.7,
-                            opacity = 0.8,
-                            color = "black",
-                            dashArray = "0.1",
-                            fillOpacity = 0.7,
-                            highlight = highlightOptions(
-                              weight = 5,
-                              color = "#666",
-                              dashArray = "",
-                              fillOpacity = 0.7,
-                              bringToFront = TRUE,
-                            ),
-                            label= fl_risk_labels,
-                            labelOptions = labelOptions(
-                              style = list("font-weight" = "normal", padding = "3px 8px"),
-                              textsize = "10px",
-                              direction = "auto"
-                            )
-                ) %>%
+                # addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~`Flood risk quintile`,
+                #             group="Resilience of high flood risk areas", fillColor = ~fill,
+                #             weight = 0.7,
+                #             opacity = 0.8,
+                #             color = "black",
+                #             dashArray = "0.1",
+                #             fillOpacity = 0.7,
+                #             highlight = highlightOptions(
+                #               weight = 5,
+                #               color = "#666",
+                #               dashArray = "",
+                #               fillOpacity = 0.7,
+                #               bringToFront = TRUE,
+                #             ),
+                #             label= fl_risk_labels,
+                #             labelOptions = labelOptions(
+                #               style = list("font-weight" = "normal", padding = "3px 8px"),
+                #               textsize = "10px",
+                #               direction = "auto"
+                #             )
+                # ) %>%
                 flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                             lat1 = as.numeric(curr_bbox["ymin"]),
                             lng2 = as.numeric(curr_bbox["xmax"]),
                             lat2 = as.numeric(curr_bbox["ymax"]))  %>%
-                addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
+                addLayersControl(#baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
                                  options= layersControlOptions(collapsed=T))
               
               
@@ -2592,7 +2639,7 @@ server = function(input, output) {
               markerColor = flood_centroids_df$warning_col
             )
             
-            print(flood_centroids_df)
+            #print(flood_centroids_df)
             
             flood_labels <-
               paste0(
@@ -2631,7 +2678,8 @@ server = function(input, output) {
                           label=~lad19nm,
                           fill=F) %>%
               addPolygons(data=fl_incd_lad_uk_most_vuln, layerId = ~`Flood incidents quintile`,
-                          group="Resilience of high flood incident areas", fillColor = ~fill,
+                          #group="Resilience of high flood incident areas", 
+                          fillColor = ~fill,
                           weight = 0.7,
                           opacity = 0.8,
                           color = "black",
@@ -2651,28 +2699,28 @@ server = function(input, output) {
                             direction = "auto"
                           )
               ) %>%
-              addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~`Flood risk quintile`,
-                          group="Resilience of high flood risk areas", fillColor = ~fill,
-                          weight = 0.7,
-                          opacity = 0.8,
-                          color = "black",
-                          dashArray = "0.1",
-                          fillOpacity = 0.7,
-                          highlight = highlightOptions(
-                            weight = 5,
-                            color = "#666",
-                            dashArray = "",
-                            fillOpacity = 0.7,
-                            bringToFront = TRUE,
-                          ),
-                          label= fl_risk_labels,
-                          
-                          labelOptions = labelOptions(
-                            style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "10px",
-                            direction = "auto"
-                          )
-              ) %>%
+              # addPolygons(data=fl_risk_lad_uk_most_vuln, layerId = ~`Flood risk quintile`,
+              #             group="Resilience of high flood risk areas", fillColor = ~fill,
+              #             weight = 0.7,
+              #             opacity = 0.8,
+              #             color = "black",
+              #             dashArray = "0.1",
+              #             fillOpacity = 0.7,
+              #             highlight = highlightOptions(
+              #               weight = 5,
+              #               color = "#666",
+              #               dashArray = "",
+              #               fillOpacity = 0.7,
+              #               bringToFront = TRUE,
+              #             ),
+              #             label= fl_risk_labels,
+              #             
+              #             labelOptions = labelOptions(
+              #               style = list("font-weight" = "normal", padding = "3px 8px"),
+              #               textsize = "10px",
+              #               direction = "auto"
+              #             )
+              # ) %>%
               addPolygons(data=flood_to_plot, layerId=~`description`,
                           group="Latest flood warnings", fillColor = ~warning_col,
                           weight = 0.7,
@@ -2689,7 +2737,7 @@ server = function(input, output) {
                           lat1 = as.numeric(curr_bbox["ymin"]),
                           lng2 = as.numeric(curr_bbox["xmax"]),
                           lat2 = as.numeric(curr_bbox["ymax"])) %>%
-              addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
+              addLayersControl(#baseGroups = c("Resilience of high flood incident areas"), #"Resilience of high flood risk areas"
                                overlayGroups = c("Latest flood warnings"),
                                options= layersControlOptions(collapsed=T))
             
@@ -2794,14 +2842,16 @@ server = function(input, output) {
     else {
       if (input$theme == 'Flooding') {
         map <- leafletProxy("map") %>%
-          clearControls()
+          clearControls() %>%
+          addControl(html="<img src='bivar-legend.png', width=200>", position="bottomleft",
+                     className = "fieldset {border: 0;}")
         
-        if ((any(input$map_groups %in% 'Resilience of high flood incident areas')) | (any(input$map_groups %in% 'Resilience of high flood risk areas'))) {
-          
-          map <- map %>%
-            addControl(html="<img src='bivar-legend.png', width=200>", position="bottomleft",
-                       className = "fieldset {border: 0;}")
-        }
+        #if ((any(input$map_groups %in% 'Resilience of high flood incident areas')) | (any(input$map_groups %in% 'Resilience of high flood risk areas'))) {
+        #  
+        #  map <- map %>%
+        #    addControl(html="<img src='bivar-legend.png', width=200>", position="bottomleft",
+        #               className = "fieldset {border: 0;}")
+        #}
         
         
       }# end of flood theme
