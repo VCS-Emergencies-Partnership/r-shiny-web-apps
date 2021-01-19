@@ -12,6 +12,12 @@ library(echarts4r) # Docker
 library(feather) # Docker
 library(scales) # Docker
 library(htmlwidgets) # Docker
+library(shinyjs)
+
+# function for table sorting 
+clearSorting <- function(proxy) {
+  runjs(paste0("$('#' + document.getElementById('", proxy$id,"').getElementsByTagName('table')[0].id).dataTable().fnSort([]);"))
+}
 
 
 # --- read in vulnerablity indices ---
@@ -243,7 +249,7 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
-
+  useShinyjs(),
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
   tags$head(includeCSS("styles.css")),
   tags$script(src='socket_timeout.js'),
@@ -681,7 +687,7 @@ ui <- function(request) {
 
 
 # ---- server ---- #
-server = function(input, output) {
+server = function(input, output, session) {
 
   # testing 
   output$keep_alive <- renderText({
@@ -893,12 +899,45 @@ server = function(input, output) {
   })
 
   observe({
-  # ---- Adjust LAD options based on tactical cell ---
-  output$secondSelection <- renderUI({
-    lads2select <- unique(filteredLA()$Name)
-    lads2select <- c('All local authorities in region',lads2select)
-    selectInput("lad_selected", "Local Authority", choices = sort(lads2select), selected='All local authorities in region')
-  })
+    
+    if (input$tactical_cell == '-- England --') {
+      output$secondSelection <- renderUI({
+        #lads2select <- unique(lad_uk2vuln_resilience$Name)
+        #lads2select <- c('All local authorities in region',sort(lads2select))
+        lads2select <- c('All local authorities in region')
+        selectInput("lad_selected", "Local Authority", choices = lads2select, selected='All local authorities in region')
+      })
+    }
+    
+    else {
+      
+      # has a local authority been selected 
+      if (input$lad_selected != 'All local authorities in region') {
+        output$secondSelection <- renderUI({
+          lads2select <- unique(filteredLA()$Name)
+          lads2select <- c('All local authorities in region',sort(lads2select))
+          #print(dd_areas2focus$l)
+          selectInput("lad_selected", "Local Authority", choices = lads2select, selected=dd_areas2focus$l)
+        })
+        
+      }
+        
+        
+      else {
+      
+      # ---- Adjust LAD options based on tactical cell ---
+      output$secondSelection <- renderUI({
+        lads2select <- unique(filteredLA()$Name)
+        lads2select <- c('All local authorities in region',sort(lads2select))
+        selectInput("lad_selected", "Local Authority", choices = lads2select, selected='All local authorities in region')
+      })
+      
+      }
+      
+      
+      
+    }
+
 })
 
 
@@ -926,86 +965,112 @@ server = function(input, output) {
 
 
   filterpar_tab <- reactive({
-    
     for_tc <- par_table %>% filter(TacticalCell == input$tactical_cell)
 
-    # --- tactical cells ---
-    # -- integers
-    #for_tc_int <- par_table %>% filter(TacticalCell == input$tactical_cell) %>% select(`tc_int_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_int_People receiving Section 95 support`) %>% mutate(`tc_int_Fuel Poor Households`= round(`tc_int_Fuel Poor Households`, 1))
-    # rename stuff again
-    #names(for_tc_int) = gsub(pattern = "tc_int_", replacement = "int_", x = names(for_tc_int))
-    # pivot
-    #tc_int <- pivot_longer(for_tc_int, cols=c(`Proportion of neighbourhoods in 20% most digitally excluded`:`People receiving Section 95 support`), names_to='Indicator', values_to='Total') %>% unique()
-
-    # -- percentages --
-    #for_tc_perc <- par_table %>% filter(TacticalCell == input$tactical_cell) %>% select(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_perc_People receiving Section 95 support`) %>%
-    #  mutate(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1))
-
-    #names(for_tc_perc) = gsub(pattern = "tc_perc_", replacement = "perc_", x = names(for_tc_perc))
-
-    #tc_table <-  par_table %>% filter(TacticalCell == input$tactical_cell) %>%
-    #  select('TacticalCell', `tc_int_Proportion of neighbourhoods in 20% most digitally excluded`:`tc_perc_People receiving Section 95 support`) %>%
-    #  mutate(`tc_int_Fuel Poor Households`= round(`tc_int_Fuel Poor Households`, 1)) %>%
-    #  mutate(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`=round(`tc_perc_Proportion of neighbourhoods in 20% most digitally excluded`*100,1)) %>%
-    #    unique()
-
-    #names(tc_table) = gsub(pattern = "tc_int_", replacement = "int_", x = names(tc_table))
-    #names(tc_table) = gsub(pattern = "tc_perc_", replacement = "perc_", x = names(tc_table))
-    #print(tc_table)
-
-
-
-
-    #tc_perc <- pivot_longer(for_tc_perc, cols=c(`Proportion of neighbourhoods in 20% most digitally excluded`:`People receiving Section 95 support`), names_to='Indicator', values_to='Percentage (%)') %>%
-    #  unique()
-
-    #tc_int_perc <- left_join(tc_int, tc_perc, by='Indicator', keep=F)
-
-    #no_nas_table <- tc_int_perc[!with(tc_int_perc, is.na(`Total`) & is.na(`Percentage (%)`)),]
-    #print(no_nas_table)
-
   })
+  
 
 
   # --- Areas to focus ----
-  
-  # -- covid ---
-  filtered_covid_areas <- reactive({
-    if(input$tactical_cell == '-- England --') {
-      covid_lads_in_tc <- covid_area2focus %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
-        select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`, `% change in covid cases`)
-      #print(covid_lads_in_tc)
-    }
-    else {
-
-    lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell)
-    # order descending by quintile and covid cases
-    covid_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
-      select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`,`% change in covid cases`)
-    }
-
-  })
-  
-  
-  # ---- Flooding -----
-  filtered_flooding_areas <- reactive({
-    if(input$tactical_cell == '-- England --') {
-      flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
-        mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
-        mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
-        select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`,`Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+  filtered_areas2focus <- reactive({
+    
+    volunteers_available <- volunteers
+    
+    # -- covid ---
+    if(input$theme == 'Covid-19') {
+      
+        covid_lads_in_tc <- covid_area2focus %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
+          select('LAD19CD', 'Region'='TacticalCell', 'Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`, `% change in covid cases`)
+      
+        
+        covid_cases2volunteers <- left_join(covid_lads_in_tc, volunteers_available, by='LAD19CD', keep=F) %>%
+          mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
+                                                  mean_score >= 2.5 ~ 'Low',
+                                                  (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
+                                                  is.na(mean_score) ~ 'Data unavailable')) %>%
+          select('Local Authority', 'Region', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `covid cases per 100,000`, `% change in covid cases`)
+        
+       
+        # - order
+        covid_cases2volunteers <- covid_cases2volunteers %>% arrange(-`Overall vulnerability`, -`% change in covid cases`, -`covid cases per 100,000`, -Score) %>%
+          select(-Score) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
+          #mutate_at(vars(`covid cases per 100,000`, `% change`), replace_na, 'NA') %>%
+          # renaming coivd cases to show week - hate format
+          rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .))
+        
+    # }
+    #   else {
+    # 
+    #   lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell)
+    #   # order descending by quintile and covid cases
+    #   covid_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
+    #     select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`,`% change in covid cases`)
+    # }
       
     }
-    else {
-      lads_in_tc <- flooding_area2focus %>% filter(TacticalCell == input$tactical_cell)
-      # order descending by quintile and covid cases
-      flooding_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
-        mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
-        mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
-        select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
-    }
     
+    else{
+      # Flooding 
+      
+      if(input$theme == 'Flooding') {
+        
+          flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
+            mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+            mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+            select('LAD19CD','Region'=TacticalCell,'Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`,`Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+          
+          flooding_cases2volunteers <- left_join(flooding_lads_in_tc, volunteers_available, by='LAD19CD', keep=F) %>%
+            mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
+                                                    mean_score >= 2.5 ~ 'Low',
+                                                    (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
+                                                    is.na(mean_score) ~ 'Data unavailable')) %>%
+            select('Local Authority', 'Region', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,`Total people in flood risk areas`, `% people in flood risk areas`)
+          
+          #print(covid_cases2volunteers)
+          # - order
+          flooding_cases2volunteers <- flooding_cases2volunteers %>% 
+            arrange(-`Overall vulnerability`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`,-`Score`) %>%
+            select(-`Score`) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
+            mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                              TRUE ~ (as.character(.$`% people in flood risk areas`))))
+          
+        
+        
+        # else {
+        #   lads_in_tc <- flooding_area2focus %>% filter(TacticalCell == input$tactical_cell)
+        #   # order descending by quintile and covid cases
+        #   flooding_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
+        #     mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+        #     mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+        #     select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+        # }
+        
+      } 
+      # add new theme here 
+    }
+
   })
+  
+  
+  # # ---- Flooding -----
+  # filtered_flooding_areas <- reactive({
+  #   if(input$tactical_cell == '-- England --') {
+  #     flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
+  #       mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+  #       mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+  #       select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`,`Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+  #     
+  #   }
+  #   else {
+  #     lads_in_tc <- flooding_area2focus %>% filter(TacticalCell == input$tactical_cell)
+  #     # order descending by quintile and covid cases
+  #     flooding_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
+  #       mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+  #       mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+  #       select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+  #   }
+  #   
+  # })
 
 
 
@@ -1021,6 +1086,8 @@ server = function(input, output) {
 
   })
 
+
+  
 
 
   # --- Generate Map ----
@@ -4374,290 +4441,137 @@ server = function(input, output) {
     }
 })
 
-  # # --- Filter People at Risk table on map click ---
-  # # --- Do something with click ----
-  # # https://stackoverflow.com/questions/59342680/can-i-use-in-r-the-leaflet-map-shape-click-event-to-populate-a-box-with-a-da
-  # observeEvent(input$map_shape_click, {
-  #
-  #   data$clickedShape <- input$map_shape_click
-  #
-  #   #capture the info of the clicked polygon
-  #   click <- input$map_shape_click
-  #
-  #   if(!is.null(click$id)){
-  #
-  #   # ------ subset your table with the id of the clicked polygon ----
-  #   # --- look up local authority code ---
-  #   lad_of_interest <- lad_uk2areas2vulnerability %>% filter(Name == click$id) %>% select('LAD19CD') %>% st_drop_geometry()
-  #
-  #   for_lad_int <- par_table %>% filter(LAD19CD == lad_of_interest$LAD19CD) %>% select(`LAD_int_Proportion of neighbourhoods in 20% most digitally excluded`:`LAD_int_People receiving Section 95 support`)  %>% mutate(`LAD_int_Fuel Poor Households` = round(`LAD_int_Fuel Poor Households`, 1))
-  #   print(for_lad_int)
-  #   # rename stuff again
-  #   names(for_lad_int) = gsub(pattern = "LAD_int_", replacement = "", x = names(for_lad_int))
-  #   # pivot
-  #   lad_int <- pivot_longer(for_lad_int, cols=c(`Proportion of neighbourhoods in 20% most digitally excluded`:`People receiving Section 95 support`), names_to='Indicator', values_to='Total') %>% unique()
-  #   print(lad_int)
-  #   for_lad_perc <- par_table %>% filter(LAD19CD == lad_of_interest$LAD19CD) %>% select(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`:`LAD_perc_People receiving Section 95 support`) %>% mutate(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded` = round(`LAD_perc_Proportion of neighbourhoods in 20% most digitally excluded`, 3))
-  #   names(for_lad_perc) = gsub(pattern = "LAD_perc_", replacement = "", x = names(for_lad_perc))
-  #   lad_perc <- pivot_longer(for_lad_perc, cols=c(`Proportion of neighbourhoods in 20% most digitally excluded`:`People receiving Section 95 support`), names_to='Indicator', values_to='Percentage (%)') %>%
-  #     unique()
-  #
-  #   lad_int_perc <- left_join(lad_int, lad_perc, by='Indicator', keep=F)
-  #
-  #   no_nas_lad_table <- lad_int_perc[!with(lad_int_perc, is.na(`Total`) & is.na(`Percentage (%)`)),]
-  #   print(no_nas_lad_table)
-  #
-  #   # LAD title
-  #   lad_name <- click$id
-  #   title_needed <- paste0("People at risk in LAD:", lad_name)
-  #
-  #   output$people_at_risk = DT::renderDataTable({
-  #       DT::datatable(no_nas_lad_table,
-  #                     caption = htmltools::tags$caption( style = 'caption-side: top; text-align: left; color:black; font-size:125% ;',title_needed),
-  #                     options = list(
-  #                       paging=FALSE))
-  #     })
-  #
-  #   }
-  #
-  # })
-  #
-  # # - change back to tactical cell level if clicks off the shape
-  # observeEvent(input$map_click,{
-  #   data$clickedShape <- NULL
-  #
-  #   #Tactical cell
-  #   tc = input$tactical_cell
-  #   title_needed <- paste0('People at risk in Tactical Cell:',tc)
-  #
-  #   curr_table <- filterpar_tab()
-  #   # --- set up data table output ----
-  #   output$people_at_risk <- DT::renderDataTable({
-  #     DT::datatable(curr_table,
-  #                   caption = htmltools::tags$caption( style = 'caption-side: top; text-align: left; color:black; font-size:125% ;',title_needed),
-  #                   options = list(
-  #                     paging=FALSE))
-  #
-  #   })
-  #
-  # })
-  #
 
-  # --- Areas to focus ----
+  # store reactive table so can filter on table click
+  # for if row in table selected:
+  dd_areas2focus=reactiveValues(d=filtered_areas2focus, l='NULL', t='NULL')
+  
+
+  # all lads in tcs wanted
+  output$areas2focus <- DT::renderDataTable({
+      DT::datatable(filtered_areas2focus(), filter=list(position='top'),
+            selection =c('single'),
+            options = list(dom='tp', #should remove top search box the p includes paging
+            paging = T,
+            pageLength=5,
+            lengthMenu = c(5, 10, 15, 20),
+            scrollX=T,
+            scrollY='200px',
+            autoWidth = T,
+            #columnDefs = list(list(className = 'dt-center', targets = list(c(2,3,4,5,6)))),
+            initComplete = htmlwidgets::JS(
+            "function(settings, json) {",
+            paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                "}")
+                )) %>%
+      formatStyle('Local Authority',
+                  target='row',
+                  backgroundColor = styleEqual(c(input$lad_selected), c('yellow')))
+            })
+  
+  
+  #data table proxy
+  proxy <- DT::dataTableProxy('areas2focus')
+  clearSorting(proxy = dataTableProxy(outputId = "areas2focus"))
+  
+  # what are the user selections
   observe({
-
-    # --- If tab selected ---
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
-
-      # what theme is being investigated
-      if (input$theme == 'Covid-19') {
-        # get current covid data for selected tactical cell - done in reactive -
-        curr_covid_list <-filtered_covid_areas()
-        
-        # get volunteer data (not filtered by tactical cell)
-        volunteers_available <- volunteers
-
-        # join data to volunteers
-        covid_cases2volunteers <- left_join(curr_covid_list, volunteers_available, by='LAD19CD', keep=F) %>%
-          mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-                                                mean_score >= 2.5 ~ 'Low',
-                                                (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-                                                is.na(mean_score) ~ 'Data unavailable')) %>%
-        select('Local Authority', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `covid cases per 100,000`, `% change in covid cases`)
-
-        #print(covid_cases2volunteers)
-        # - order
-        covid_cases2volunteers <- covid_cases2volunteers %>% arrange(-`Overall vulnerability`, -`% change in covid cases`, -`covid cases per 100,000`, -Score) %>%
-          select(-Score) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
-          #mutate_at(vars(`covid cases per 100,000`, `% change`), replace_na, 'NA') %>%
-          # renaming coivd cases to show week - hate format
-          rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .))
-         
-        
-        
-        # append covid week to column name
-
-
-       # -- if want to show whole of the UK --
-        if ( input$tactical_cell == '-- England --') {
-        # all lads in tcs wanted
-        output$areas2focus <- DT::renderDataTable({
-         DT::datatable(covid_cases2volunteers, filter=list(position='top'),
-                   options = list(dom='tp', #should remove top search box the p includes paging
-                     paging = T,
-                     pageLength=5,
-                     lengthMenu = c(5, 10, 15, 20),
-                     scrollX=T,
-                     scrollY='200px',
-                     autoWidth = T,
-                     #columnDefs = list(list(className = 'dt-center', targets = list(c(2,3,4,5,6)))),
-                     initComplete = htmlwidgets::JS(
-                       "function(settings, json) {",
-                       paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
-                       "}")
-                   ))
-          #%>%#formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
-              })
-
-            }
-
-          else {
-            # show just tactical cell
-            if (input$theme == 'Covid-19' & input$lad_selected == 'All local authorities in region') {
-              output$areas2focus <- DT::renderDataTable({
-                DT::datatable(covid_cases2volunteers, filter=list(position='top'),
-                              options = list(dom='tp', #should remove top search box the p includes paging
-                                             paging = T,
-                                             pageLength=5,
-                                             scrollX=T,
-                                             scrollY='200px',
-                                             autoWidth = TRUE,
-                                             initComplete = htmlwidgets::JS(
-                                               "function(settings, json) {",
-                                               paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
-                                               "}")
-                              )) #%>%
-                
-                #formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
-              })
-                }
-              # move la to top
-            else {
-              show_at_top <- as.vector(input$lad_selected)
-              print(covid_cases2volunteers)
-              wanted <- covid_cases2volunteers$`Local Authority` %in% show_at_top
-              lad_covid_cases2volunteers <- rbind(covid_cases2volunteers[wanted,], covid_cases2volunteers[!wanted,])
-
-              output$areas2focus <- DT::renderDataTable({
-                DT::datatable(lad_covid_cases2volunteers, filter=list(position='top'),
-                          options = list(dom='tp', #should remove top search box the p includes paging
-                                         paging = T,
-                                         pageLength=5,
-                                         scrollX=T,
-                                         scrollY='200px',
-                                         autoWidth = TRUE,
-                                         initComplete = htmlwidgets::JS(
-                                           "function(settings, json) {",
-                                           paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
-                                           "}")
-                          ))  %>%
-                formatStyle('Local Authority',
-                          target='row',
-                          backgroundColor = styleEqual(c(input$lad_selected), c('yellow')))
-                  })
-              }
-            }
-        } # end of covid section
       
-      # ---- Areas to focus theme: Flooding ---
+      # if user has tactical cell selected
+      if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
+        # update reactive values 
+        #clearSorting(proxy = dataTableProxy(outputId = "areas2focus"))
+        # filter by tactical cell
+        tc_filtered_areas2focus <- filtered_areas2focus() %>% filter(Region == input$tactical_cell)
+        
+        dd_areas2focus$l <- input$lad_selected
+        dd_areas2focus$t <- input$tactical_cell
+        dd_areas2focus$d <- tc_filtered_areas2focus
+        
+        DT::replaceData(proxy, tc_filtered_areas2focus)
+        
+        
+        
+      }
+      
       else {
         
-        if (input$theme == 'Flooding') {
+        if (input$tactical_cell != '-- England --' & input$lad_selected != 'All local authorities in region') {
+          #clearSorting(proxy = dataTableProxy(outputId = "areas2focus"))
           
-          # get current covid data for selected tactical cell - done in reactive -
-          curr_flooding_list <-filtered_flooding_areas()
+          lad_wanted_filtered_areas2focus <- filtered_areas2focus() %>% filter(`Local Authority` == input$lad_selected)
           
-          # get volunteer data (not filtered by tactical cell)
-          volunteers_available <- volunteers
+          lad_filtered_areas2focus <- filtered_areas2focus() %>% filter(Region == input$tactical_cell & `Local Authority` != input$lad_selected)
           
-          # join data to volunteers
-          flooding_cases2volunteers <- left_join(curr_flooding_list, volunteers_available, by='LAD19CD', keep=F) %>%
-            mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-                                                    mean_score >= 2.5 ~ 'Low',
-                                                    (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-                                                    is.na(mean_score) ~ 'Data unavailable')) %>%
-            select('Local Authority', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,`Total people in flood risk areas`, `% people in flood risk areas`)
+          lad_filtered_areas2focus <- rbind(lad_wanted_filtered_areas2focus, lad_filtered_areas2focus)
           
-          #print(covid_cases2volunteers)
-          # - order
-          flooding_cases2volunteers <- flooding_cases2volunteers %>% 
-            arrange(-`Overall vulnerability`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`,-`Score`) %>%
-            select(-`Score`) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
-            mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
-                                                              TRUE ~ (as.character(.$`% people in flood risk areas`))))
+          dd_areas2focus$l <- input$lad_selected
+          dd_areas2focus$t <- input$tactical_cell
+          dd_areas2focus$d <- lad_filtered_areas2focus
           
-          
-          # -- if want to show whole of the UK --
-          if ( input$tactical_cell == '-- England --') {
-            # all lads in tcs wanted
-            output$areas2focus <- DT::renderDataTable({
-              DT::datatable(flooding_cases2volunteers, filter=list(position='top'),
-                            options = list(dom='tp', #should remove top search box the p includes paging
-                                           paging = T,
-                                           pageLength=5,
-                                           lengthMenu = c(5, 10, 15, 20),
-                                           scrollX=T,
-                                           scrollY='200px',
-                                           autoWidth = T,
-                                           #columnDefs = list(list(className = 'dt-center', targets = list(c(2,3,4,5,6)))),
-                                           initComplete = htmlwidgets::JS(
-                                             "function(settings, json) {",
-                                             paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
-                                             "}")
-                            ))
-              #%>%#formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
-            })
-            
-          }
-          
-          else {
-            # show just tactical cell
-            if (input$theme == 'Flooding' & input$lad_selected == 'All local authorities in region') {
-              output$areas2focus <- DT::renderDataTable({
-                DT::datatable(flooding_cases2volunteers, filter=list(position='top'),
-                              options = list(dom='tp', #should remove top search box the p includes paging
-                                             paging = T,
-                                             pageLength=5,
-                                             scrollX=T,
-                                             scrollY='200px',
-                                             autoWidth = TRUE,
-                                             initComplete = htmlwidgets::JS(
-                                               "function(settings, json) {",
-                                               paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
-                                               "}")
-                              )) #%>%
-                
-                #formatStyle(columns=colnames(covid_cases2volunteers), lineHeight='80%')
-              })
-            }
-            # move la to top
-            else {
-              show_at_top <- as.vector(input$lad_selected)
-              wanted <- flooding_cases2volunteers$`Local Authority` %in% show_at_top
-              lad_flooding_cases2volunteers <- rbind(flooding_cases2volunteers[wanted,], flooding_cases2volunteers[!wanted,])
-              
-              output$areas2focus <- DT::renderDataTable({
-                DT::datatable(lad_flooding_cases2volunteers, filter=list(position='top'),
-                              options = list(dom='tp', #should remove top search box the p includes paging
-                                             paging = T,
-                                             pageLength=5,
-                                             scrollX=T,
-                                             scrollY='200px',
-                                             autoWidth = TRUE,
-                                             initComplete = htmlwidgets::JS(
-                                               "function(settings, json) {",
-                                               paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
-                                               "}")
-                              ))  %>%
-                  formatStyle('Local Authority',
-                              target='row',
-                              backgroundColor = styleEqual(c(input$lad_selected), c('yellow')))
-              })
-            }
-          }
-          
-        } # end of flooding section
+          #print('this should be showing')
+          #print(lad_filtered_areas2focus)
         
-        # --- NEXT THEME SHOULD START HERE ---
+          DT::replaceData(proxy, lad_filtered_areas2focus) 
+          
+        }
         
+        else {
+          #clearSorting(proxy = dataTableProxy(outputId = "areas2focus"))
+          dd_areas2focus$l <- input$lad_selected
+          dd_areas2focus$t <- input$tactical_cell
+          dd_areas2focus$d <- filtered_areas2focus()
+          DT::replaceData(proxy, filtered_areas2focus())
+        }
         
-      } # of 
+      }
       
-      
-      } # insight tab end
+    }
+    
   })
+  
+  # IF someone clicks on table filter everything to that local authority 
+  observeEvent(input$areas2focus_rows_selected, {
+    #if (!is.null(input$areas2focus_rows_selected)) {
+      #clearSearch(proxy)
+      #clearSorting(proxy = dataTableProxy(outputId = "areas2focus"))
+    
+      # list of local authorities
+      lad_choices <- sort(dd_areas2focus$d$`Local Authority`)
+      lad_choices <- c('All local authorities in region', lad_choices)
 
+      local_authority_selected <- dd_areas2focus$d[input$areas2focus_rows_selected,1]
+      dd_areas2focus$l <- local_authority_selected
+      #print(dd_areas2focus$l$`Local Authority`)
+
+      # Tactical cell lad in
+      tactical_cell_selected <- lad_uk2vuln_resilience %>%
+      filter(LAD19NM == local_authority_selected$`Local Authority`) %>%
+          select('TacticalCell') %>%
+          st_drop_geometry()
+
+        dd_areas2focus$t <- tactical_cell_selected
+
+        updateSelectInput(
+          session, "tactical_cell",
+          choices = tactical_cells,
+          selected = tactical_cell_selected
+        )
+
+        updateSelectInput(session, "lad_selected",
+                        choices = lad_choices,
+                        selected=dd_areas2focus$l$`Local Authority`)
+
+      
+    #}
+
+  })
+  
+  
+  
+  
 
   # --- show selected LAD at the top ----
 
