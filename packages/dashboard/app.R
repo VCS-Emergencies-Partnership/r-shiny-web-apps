@@ -974,26 +974,34 @@ server = function(input, output, session) {
   # --- Areas to focus ----
   filtered_areas2focus <- reactive({
     
-    volunteers_available <- volunteers
+    #volunteers_available <- volunteers
     
     # -- covid ---
     if(input$theme == 'Covid-19') {
       
         covid_lads_in_tc <- covid_area2focus %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
-          select('LAD19CD', 'Region'='TacticalCell', 'Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`, `% change in covid cases`)
+          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`, `% change in covid cases`)
       
         
-        covid_cases2volunteers <- left_join(covid_lads_in_tc, volunteers_available, by='LAD19CD', keep=F) %>%
-          mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-                                                  mean_score >= 2.5 ~ 'Low',
-                                                  (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-                                                  is.na(mean_score) ~ 'Data unavailable')) %>%
-          select('Local Authority', 'Region', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `covid cases per 100,000`, `% change in covid cases`)
+        #covid_cases2volunteers <- left_join(covid_lads_in_tc, volunteers_available, by='LAD19CD', keep=F) %>%
+        #  mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
+        #                                          mean_score >= 2.5 ~ 'Low',
+        #                                          (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
+        #                                          is.na(mean_score) ~ 'Data unavailable')) %>%
+        #  select('Local Authority', 'Region', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `covid cases per 100,000`, `% change in covid cases`)
         
        
         # - order
-        covid_cases2volunteers <- covid_cases2volunteers %>% arrange(-`Overall vulnerability`, -`% change in covid cases`, -`covid cases per 100,000`, -Score) %>%
-          select(-Score) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
+        # covid_cases2volunteers <- covid_cases2volunteers %>% arrange(-`Overall vulnerability`, -`% change in covid cases`, -`covid cases per 100,000`, -Score) %>%
+        #   select(-Score) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
+        #   #mutate_at(vars(`covid cases per 100,000`, `% change`), replace_na, 'NA') %>%
+        #   # renaming coivd cases to show week - hate format
+        #   rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .))
+        
+        # no volunteer data
+        covid_cases2volunteers <- covid_lads_in_tc %>% arrange(-`Overall vulnerability`, -`% change in covid cases`, -`covid cases per 100,000`) %>%
+          select(-'LAD19CD') %>% 
+          #rename(`Volunteer presence`=`Volunteer capacity`) %>%
           #mutate_at(vars(`covid cases per 100,000`, `% change`), replace_na, 'NA') %>%
           # renaming coivd cases to show week - hate format
           rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .))
@@ -1017,25 +1025,36 @@ server = function(input, output, session) {
           flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
             mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
             mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
-            select('LAD19CD','Region'=TacticalCell,'Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`,`Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+            select('LAD19CD','Local Authority'= LAD19NM, 'Region'=TacticalCell, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`,`Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
           
-          flooding_cases2volunteers <- left_join(flooding_lads_in_tc, volunteers_available, by='LAD19CD', keep=F) %>%
-            mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-                                                    mean_score >= 2.5 ~ 'Low',
-                                                    (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-                                                    is.na(mean_score) ~ 'Data unavailable')) %>%
-            select('Local Authority', 'Region', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,`Total people in flood risk areas`, `% people in flood risk areas`)
+          #flooding_cases2volunteers <- left_join(flooding_lads_in_tc, volunteers_available, by='LAD19CD', keep=F) %>%
+          #  mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
+          #                                          mean_score >= 2.5 ~ 'Low',
+          #                                          (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
+          #                                          is.na(mean_score) ~ 'Data unavailable')) %>%
+          #  select('Local Authority', 'Region', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,`Total people in flood risk areas`, `% people in flood risk areas`)
           
           #print(covid_cases2volunteers)
           # - order
-          flooding_cases2volunteers <- flooding_cases2volunteers %>% 
-            arrange(-`Overall vulnerability`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`,-`Score`) %>%
-            select(-`Score`) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
+          # flooding_cases2volunteers <- flooding_cases2volunteers %>% 
+          #   arrange(-`Overall vulnerability`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`,-`Score`) %>%
+          #   select(-`Score`) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
+          #   mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+          #                                                     TRUE ~ (as.character(.$`% people in flood risk areas`))))
+          # 
+          # 
+          
+          # no volunteer data
+          flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+            arrange(-`Overall vulnerability`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
+            select(-`LAD19CD`) %>% 
+            #rename(`Volunteer presence`=`Volunteer capacity`) %>%
             mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
                                                               TRUE ~ (as.character(.$`% people in flood risk areas`))))
           
+          
         
-        
+          
         # else {
         #   lads_in_tc <- flooding_area2focus %>% filter(TacticalCell == input$tactical_cell)
         #   # order descending by quintile and covid cases
@@ -4753,118 +4772,130 @@ server = function(input, output, session) {
 
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
-
-
-      volunteer_capacity <- filtered_volunteers()
-
-      if(is.null(input$lad_selected)) {
-        output$vols <- renderInfoBox({
-         infoBox(
-            "Volunteer Presence",
-            color = "navy", fill = F,
-            )
-          })
-        }
-
-      else {
-
-        if (input$tactical_cell == '-- England --') {
-
-          avg_score <- volunteers %>%
-            mutate(avg_over_area = round(mean(mean_score, na.rm=TRUE),1)) %>% select('avg_over_area') %>%
-            unique() %>% mutate(colour = case_when(avg_over_area <= 1.5 ~ 'green',
-                                                 avg_over_area >= 2.5 ~ 'red',
-                                                 (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'orange',
-                                                 is.na(avg_over_area) ~ 'navy')) %>%
-            mutate(to_print = case_when(is.na(avg_over_area) ~ 'No data available',
-                                      TRUE ~ as.character(.$avg_over_area))) %>%
-            mutate('Volunteer capacity' = case_when(avg_over_area <= 1.5 ~ 'High',
-                                                  avg_over_area >= 2.5 ~ 'Low',
-                                                  (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'Medium',
-                                                  is.na(avg_over_area) ~ 'Data unavailable'))
-
-
-
-          output$vols <- renderInfoBox({
-            infoBox(
-              "Volunteer presence", 
-              div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
-              color = avg_score$colour, fill = F, icon=icon('hands-helping')
-                )
-              })
-            }
-
-        else {
-
-        # -- Tactical cell level --
-          if (input$lad_selected == 'All local authorities in region') {
-
-            #print(volunteer_capacity)
-
-            # -- calculate average of others
-            avg_score <- volunteer_capacity %>%
-            mutate(avg_over_area = round(mean(mean_score, na.rm=TRUE),1)) %>% select('avg_over_area') %>%
-            unique() %>% mutate(colour = case_when(avg_over_area <= 1.5 ~ 'green',
-                                                 avg_over_area >= 2.5 ~ 'red',
-                                                 (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'orange',
-                                                 is.na(avg_over_area) ~ 'navy')) %>%
-            mutate(to_print = case_when(is.na(avg_over_area) ~ 'No data available',
-                                      TRUE ~ as.character(.$avg_over_area))) %>%
-            mutate('Volunteer capacity' = case_when(avg_over_area <= 1.5 ~ 'High',
-                                                  avg_over_area >= 2.5 ~ 'Low',
-                                                  (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'Medium',
-                                                  is.na(avg_over_area) ~ 'Data unavailable'))
-
-
-
-            output$vols <- renderInfoBox({
-            infoBox(
-            "Volunteer presence", 
-            div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
-              color = avg_score$colour, fill = F, icon=icon('hands-helping')
-                )
-              })
-             }
-
-          else {
-          # --- lad level ---
-
-            # look up lad name
-            lad_name <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% unique()
-
-            # plot lad level
-            lad_volunteers <- volunteer_capacity %>% filter(LAD19CD==lad_name$LAD19CD)
-
-            #print(lad_volunteers)
-
-            # -- calculate average of others
-            avg_score <- lad_volunteers %>%
-             mutate(colour = case_when(mean_score <= 1.5 ~ 'green',
-                                                 mean_score >= 2.5 ~ 'red',
-                                                 (mean_score >1.5 & mean_score < 2.5) ~ 'orange',
-                                    is.na(mean_score) ~ 'navy')) %>%
-              mutate(to_print = case_when(is.na(mean_score) ~ 'No data available',
-                                      TRUE ~ as.character(.$mean_score))) %>%
-              mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-                                                  mean_score >= 2.5 ~ 'Low',
-                                                  (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-                                                  is.na(mean_score) ~ 'Data unavailable'))
-
-
-            #print(avg_score)
-
-              output$vols <- renderInfoBox({
-                infoBox(
-                  "Volunteer presence", 
-                  div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
-                    color = avg_score$colour, fill = F, icon=icon('hands-helping')
-                  )
-                })
-              }
-            }
-        }
+      
+      # -- coming soon -- 
+      output$vols <- renderInfoBox({
+        infoBox(
+          "Volunteer Presence",
+          div(p('Coming Soon', style = "font-size:12pt;margin-top:5px;")),
+          color = "purple", fill = F, icon=icon('hands-helping')
+        )
+      })
     }
+    
   })
+
+# 
+#       volunteer_capacity <- filtered_volunteers()
+# 
+#       if(is.null(input$lad_selected)) {
+#         output$vols <- renderInfoBox({
+#          infoBox(
+#             "Volunteer Presence",
+#             color = "navy", fill = F,
+#             )
+#           })
+#         }
+# 
+#       else {
+# 
+#         if (input$tactical_cell == '-- England --') {
+# 
+#           avg_score <- volunteers %>%
+#             mutate(avg_over_area = round(mean(mean_score, na.rm=TRUE),1)) %>% select('avg_over_area') %>%
+#             unique() %>% mutate(colour = case_when(avg_over_area <= 1.5 ~ 'green',
+#                                                  avg_over_area >= 2.5 ~ 'red',
+#                                                  (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'orange',
+#                                                  is.na(avg_over_area) ~ 'navy')) %>%
+#             mutate(to_print = case_when(is.na(avg_over_area) ~ 'No data available',
+#                                       TRUE ~ as.character(.$avg_over_area))) %>%
+#             mutate('Volunteer capacity' = case_when(avg_over_area <= 1.5 ~ 'High',
+#                                                   avg_over_area >= 2.5 ~ 'Low',
+#                                                   (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'Medium',
+#                                                   is.na(avg_over_area) ~ 'Data unavailable'))
+# 
+# 
+# 
+#           output$vols <- renderInfoBox({
+#             infoBox(
+#               "Volunteer presence", 
+#               div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
+#               color = avg_score$colour, fill = F, icon=icon('hands-helping')
+#                 )
+#               })
+#             }
+# 
+#         else {
+# 
+#         # -- Tactical cell level --
+#           if (input$lad_selected == 'All local authorities in region') {
+# 
+#             #print(volunteer_capacity)
+# 
+#             # -- calculate average of others
+#             avg_score <- volunteer_capacity %>%
+#             mutate(avg_over_area = round(mean(mean_score, na.rm=TRUE),1)) %>% select('avg_over_area') %>%
+#             unique() %>% mutate(colour = case_when(avg_over_area <= 1.5 ~ 'green',
+#                                                  avg_over_area >= 2.5 ~ 'red',
+#                                                  (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'orange',
+#                                                  is.na(avg_over_area) ~ 'navy')) %>%
+#             mutate(to_print = case_when(is.na(avg_over_area) ~ 'No data available',
+#                                       TRUE ~ as.character(.$avg_over_area))) %>%
+#             mutate('Volunteer capacity' = case_when(avg_over_area <= 1.5 ~ 'High',
+#                                                   avg_over_area >= 2.5 ~ 'Low',
+#                                                   (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'Medium',
+#                                                   is.na(avg_over_area) ~ 'Data unavailable'))
+# 
+# 
+# 
+#             output$vols <- renderInfoBox({
+#             infoBox(
+#             "Volunteer presence", 
+#             div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
+#               color = avg_score$colour, fill = F, icon=icon('hands-helping')
+#                 )
+#               })
+#              }
+# 
+#           else {
+#           # --- lad level ---
+# 
+#             # look up lad name
+#             lad_name <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% unique()
+# 
+#             # plot lad level
+#             lad_volunteers <- volunteer_capacity %>% filter(LAD19CD==lad_name$LAD19CD)
+# 
+#             #print(lad_volunteers)
+# 
+#             # -- calculate average of others
+#             avg_score <- lad_volunteers %>%
+#              mutate(colour = case_when(mean_score <= 1.5 ~ 'green',
+#                                                  mean_score >= 2.5 ~ 'red',
+#                                                  (mean_score >1.5 & mean_score < 2.5) ~ 'orange',
+#                                     is.na(mean_score) ~ 'navy')) %>%
+#               mutate(to_print = case_when(is.na(mean_score) ~ 'No data available',
+#                                       TRUE ~ as.character(.$mean_score))) %>%
+#               mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
+#                                                   mean_score >= 2.5 ~ 'Low',
+#                                                   (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
+#                                                   is.na(mean_score) ~ 'Data unavailable'))
+# 
+# 
+#             #print(avg_score)
+# 
+#               output$vols <- renderInfoBox({
+#                 infoBox(
+#                   "Volunteer presence", 
+#                   div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
+#                     color = avg_score$colour, fill = F, icon=icon('hands-helping')
+#                   )
+#                 })
+#               }
+#             }
+#         }
+#     }
+#   })
 
 
   # --- pulse survey ---
