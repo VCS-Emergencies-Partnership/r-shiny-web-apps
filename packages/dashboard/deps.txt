@@ -11,3 +11,4 @@ shinydashboard
 shinydashboardPlus
 tidyverse
 viridis
+shinyjs
