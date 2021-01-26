@@ -877,8 +877,7 @@ server = function(input, output) {
 
 
   # --- preparing base map ---- #
-
-
+  
   #set up polygons
   pal <- colorFactor("viridis", c(1:5), reverse = TRUE)
 
