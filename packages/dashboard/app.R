@@ -22,13 +22,16 @@ clearSorting <- function(proxy) {
 
 # --- read in vulnerablity indices ---
 # # --- local authority level ---
-LA_vi <- read_csv('https://github.com/britishredcrosssociety/covid-19-vulnerability/raw/master/output/vulnerability-LA.csv')
+LA_vi <- read_feather('./data/vulnerability_index/vulnerability-LA.feather')
 LA_vi <- LA_vi %>% rename('LAD19CD'=Code)
+
 # --- Middle super output area level ---
 #msoa_vi <- read_csv('https://github.com/britishredcrosssociety/covid-19-vulnerability/raw/master/output/vulnerability-MSOA-UK.csv')
 #msoa_vi <- msoa_vi %>% rename('MSOA11CD'=Code)
+
 # -- Area lookup table ---
-area_lookup <- read_csv("https://github.com/britishredcrosssociety/covid-19-vulnerability/raw/master/data/lookup%20mosa11%20to%20lad17%20to%20lad19%20to%20tactical%20cell.csv")
+#area_lookup <- read_csv("https://github.com/britishredcrosssociety/covid-19-vulnerability/raw/master/data/lookup%20mosa11%20to%20lad17%20to%20lad19%20to%20tactical%20cell.csv")
+area_lookup <- read_feather('./data/vulnerability_index/lookup_msoa11_to_lad19_to_tactical_cell.feather')
 area_lookup_tc2lad <- area_lookup %>% select('LAD19CD', 'TacticalCell')
 
 
@@ -896,6 +899,57 @@ server = function(input, output, session) {
   })
 
 
+  # --- Respond to users input on location ----
+  # ---- Respond to users tactical cell ----
+  filteredLA <- reactive({
+    lad_uk2areas2vulnerability %>% filter(TacticalCell == input$tactical_cell)
+    
+  })
+  
+  observe({
+    
+    if (input$tactical_cell == '-- England --') {
+      output$secondSelection <- renderUI({
+        #lads2select <- unique(lad_uk2vuln_resilience$Name)
+        #lads2select <- c('All local authorities in region',sort(lads2select))
+        lads2select <- c('All local authorities in region')
+        selectInput("lad_selected", "Local Authority", choices = lads2select, selected='All local authorities in region')
+      })
+    }
+    
+    else {
+      
+      # has a local authority been selected 
+      if (input$lad_selected != 'All local authorities in region') {
+        output$secondSelection <- renderUI({
+          lads2select <- unique(filteredLA()$Name)
+          lads2select <- c('All local authorities in region',sort(lads2select))
+          #print(dd_areas2focus$l)
+          selectInput("lad_selected", "Local Authority", choices = lads2select, selected=dd_areas2focus$l)
+        })
+        
+      }
+      
+      
+      else {
+        
+        # ---- Adjust LAD options based on tactical cell ---
+        output$secondSelection <- renderUI({
+          lads2select <- unique(filteredLA()$Name)
+          lads2select <- c('All local authorities in region',sort(lads2select))
+          selectInput("lad_selected", "Local Authority", choices = lads2select, selected='All local authorities in region')
+        })
+        
+      }
+      
+      
+      
+    }
+    
+  })
+  
+  
+  
   # ---- Respond to users input on location and theme ----
   
   # for zoom
@@ -1442,23 +1496,24 @@ server = function(input, output, session) {
   })
   
   
-  # for second selection
-  filteredLA <- reactive({
-    selected <- lad_uk2vuln_resilience %>% filter(TacticalCell == input$tactical_cell)
-  })
-  
-  # second selection 
-  observe({
-  # ---- Adjust LAD options based on tactical cell ---
-  output$secondSelection <- renderUI({
-    lads2select <- unique(filteredLA()$Name)
-    #print(lads2select)
-    #lads2select <- order(lads2select)
-    #print(lads2select)
-    lads2select <- c('All local authorities in region', sort(lads2select))
-    selectInput("lad_selected", "Local Authority", choices = lads2select, selected='All local authorities in region')
-  })
-})
+#   # for second selection
+#   filteredLA <- reactive({
+#     selected <- lad_uk2vuln_resilience %>% filter(TacticalCell == input$tactical_cell)
+#   })
+#   
+#   
+#   # second selection 
+#   observe({
+#   # ---- Adjust LAD options based on tactical cell ---
+#   output$secondSelection <- renderUI({
+#     lads2select <- unique(filteredLA()$Name)
+#     #print(lads2select)
+#     #lads2select <- order(lads2select)
+#     #print(lads2select)
+#     lads2select <- c('All local authorities in region', sort(lads2select))
+#     selectInput("lad_selected", "Local Authority", choices = lads2select, selected='All local authorities in region')
+#   })
+# })
 
 
   filterpar_tab <- reactive({
@@ -2988,7 +3043,7 @@ server = function(input, output, session) {
           #Tactical cell
           tc = input$tactical_cell
           title_needed <- paste0('People at risk in Tactical Cell: ', tc)
-          print('tactical cell test')
+          #print('tactical cell test')
 
           # --- people at risk ----
 
@@ -3301,7 +3356,7 @@ server = function(input, output, session) {
                                                                                      proportion >= tc_avg_stdev_unem$plus_stdev ~ 'red',
                                                                                      proportion <= tc_avg_stdev_unem$minus_stdev ~ 'green'))
           
-          print(tc_unem_plot_colour)
+          #print(tc_unem_plot_colour)
           
           tc_unem_for_avg = paste0(round(par_table_tc_avg$tc_prop_unemployed_on_universal_credit_mean,0), '%', '\n','(regional avg)')
           
@@ -3495,10 +3550,10 @@ server = function(input, output, session) {
         # -- just local authority -- #
         # -------------------------- #
         else {
-          print('lad section')
+          #print('lad section')
           
           lad_of_interest <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% st_drop_geometry()
-          print(lad_of_interest$LAD19CD)
+          #print(lad_of_interest$LAD19CD)
           
           # --- population demographics ---
           #bame <- curr_table %>% select('TacticalCell',`int_Fuel Poor Households`,`perc_Fuel Poor Households`)
@@ -4155,10 +4210,10 @@ server = function(input, output, session) {
   # for if row in table selected:
   dd_areas2focus=reactiveValues(d=filtered_areas2focus, l='NULL', t='NULL')
   
-
+  #filtered_areas2focus()
   # all lads in tcs wanted
   output$areas2focus <- DT::renderDataTable({
-      DT::datatable(filtered_areas2focus(), filter=list(position='top'),
+      DT::datatable(dd_areas2focus$d, filter=list(position='top'),
             selection =c('single'),
             options = list(dom='tp', #should remove top search box the p includes paging
             paging = T,
