@@ -116,8 +116,8 @@ LA_res %<>%
   # income value
   left_join(bivariate_color_scale, by = "group")
 
-write_csv(LA_res, 'data/resilience_index_bivar.csv')
-
+#write_csv(LA_res, 'data/resilience_index_bivar.csv')
+write_feather(LA_res, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/resilience_index_bivar.feather')
 
 # -- create chart --
 
