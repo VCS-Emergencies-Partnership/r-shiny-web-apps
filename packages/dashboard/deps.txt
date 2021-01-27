@@ -12,3 +12,4 @@ shinydashboardPlus
 tidyverse
 viridis
 shinyjs
+shinycssloaders
