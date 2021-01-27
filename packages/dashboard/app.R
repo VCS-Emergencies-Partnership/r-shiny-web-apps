@@ -202,12 +202,12 @@ volunteers <- read_feather('data/vcs_indicators/volunteer-capacity-lad19CD-tc.fe
 
 # ---  dashboard --- #
 # --- header --- #
-header <- dashboardHeaderPlus(title = "VCSEP Insights", titleWidth = "300px",
-                              dropdownMenu(
-                                type = "notifications",
-                                icon = icon("question-circle"),
-                                badgeStatus = NULL,
-                                headerText = "Help"))
+header <- dashboardHeaderPlus(title = "VCSEP Insights", titleWidth = "300px")#,
+                              #dropdownMenu(
+                              #  type = "notifications",
+                              #  icon = icon("question-circle"),
+                              #  badgeStatus = NULL,
+                              #  headerText = "Help"))
 
 
 # --- side bar --- #
@@ -227,19 +227,22 @@ sidebar <- dashboardSidebar(
                                p("This dashboard is to help answer the",tags$br(), "question of what",
                                  tags$strong("areas and people"), tags$br(), "would be/are at risk should the", tags$br(),
                                 tags$strong("emergency"), "scenario selected occur")),
+                               selectInput("theme",
+                                           label="Select an emergency",
+                                           #choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
+                                           choices = sort(c("Covid-19","Flooding")),
+                                           selected="Covid-19"),
+                               
                                selectInput("tactical_cell",
                                            label = "Choose Region",
                                            choices = sort(tactical_cells),
                                             selected = "-- England --"
 
                                ),
-                               uiOutput("secondSelection"),
+                               
+                               uiOutput("secondSelection")
 
-                               selectInput("theme",
-                                    label="Select an emergency",
-                                    #choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
-                                    choices = sort(c("Covid-19","Flooding")),
-                                    selected="Covid-19")
+                             
               ),
 
               #menuItem(HTML("Emergencies Partnership<br/>Statistics"), tabName='vcs_usage', startExpanded = F, icon=icon('balance-scale-right'),
@@ -271,7 +274,15 @@ body <- dashboardBody(
               # column 1
               column(width = 8,
                      box(width=NULL,
-                       uiOutput('welcome'),
+                       #uiOutput('welcome'),
+                       div(
+                         h2(tags$strong('Insights from the Emergencies Partnership')),
+                         hr(),
+                         h4('Bringing together data to', tags$strong('improve collaboration'), 'across the voluntary and community sector,',
+                            tags$strong('before,'), tags$strong('during,'), "and", tags$strong('after'), "an", tags$strong("emergency"), ""),
+                         br(),
+                         p("View the latest insight", tags$strong('underneath the insights tab'), 'in the sidebar')
+                       ),
                        textOutput("keep_alive"),
                        style = "height:620px; overflow-y: scroll;overflow-x: scroll;", footer=div(
                          p(tags$strong(tags$i("This platform is still in the early stages of development. 
@@ -310,57 +321,66 @@ body <- dashboardBody(
             At present, we show data by region, local authority and middle super output area.')
                            )
                          ),
-                         accordionItem(
-                           id=2,
-                           title='View insight',
-                           collapsed=F,
-                           div(
-                             p("View the latest insight", tags$strong('underneath the insights tab'), 'in the sidebar')
-                           )
-                           #uiOutput('welcome_insight')
-                           ),
+                         # accordionItem(
+                         #   id=2,
+                         #   title='View insight',
+                         #   collapsed=F,
+                         #   div(
+                         #     p("View the latest insight", tags$strong('underneath the insights tab'), 'in the sidebar')
+                         #   )
+                         #   #uiOutput('welcome_insight')
+                         #   ),
                          accordionItem(
                            id=3,
                            title='Get involved',
                            collapsed=T,
-                           div(p("Our", tags$strong("Data Working Group"), "meets fortnightly on a Thursday at 11am to help us prioritise
-                             what data and analysis to focus on next."),
-                               p(tags$strong("Join us"), "to lend your voice to the conversation.")
-                           )
-                           #uiOutput('welcome_get_involved')
-                         ),
-                         accordionItem(
-                           id=4,
-                           title='Share data',
-                           collapsed=T,
-                           div(
-                             p("Use our", tags$a(href="https://ingest.vcsep.org.uk/", target="_blank","Data App"), "or get in touch with
-             our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk"))
-                           )
-                          ),
-                    
-                         accordionItem(
-                           id=5,
-                           title='Feedback or make a request',
-                           collapsed=T,
-                           div(
-                           p("We welcome your thoughts on what data would be useful to help shape your support to those in need.
-                                  To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk")
+                           div(#p("Our", tags$strong("Data Working Group"), "meets fortnightly on a Thursday at 11am to help us prioritise
+                            # what data and analysis to focus on next."),
+                               #p(tags$strong("Join us"), "to lend your voice to the conversation."),
+                               p(tags$strong("Share data:"), tags$br(), "Use our", tags$a(href="https://ingest.vcsep.org.uk/", target="_blank","Data App"), "or get in touch with
+             our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk")),
+                               p(tags$strong("Feedback or make a request:"), tags$br(), "We welcome your thoughts on what data would be useful to help shape your support to those in need.
+                                  To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk"),
+                                p(tags$strong("Find out more:"), tags$br(), "To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")
                                  )
+                               )
+                           )
                          )
-                        ),
-                         accordionItem(
-                           id=6,
-                           title='Find out more',
-                           collapsed=T,
-                           div(p("To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")
-                                 )
-                          
-                              )
-                          )
+                        )
                        )
-                      )
                      ),
+             #             accordionItem(
+             #               id=4,
+             #               title='Share data',
+             #               collapsed=T,
+             #               div(
+             #                 p("Use our", tags$a(href="https://ingest.vcsep.org.uk/", target="_blank","Data App"), "or get in touch with
+             # our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk"))
+             #               )
+             #              ),
+             #        
+             #             accordionItem(
+             #               id=5,
+             #               title='Feedback or make a request',
+             #               collapsed=T,
+             #               div(
+             #               p("We welcome your thoughts on what data would be useful to help shape your support to those in need.
+             #                      To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk")
+             #                     )
+             #             )
+             #            ),
+             #             accordionItem(
+             #               id=6,
+             #               title='Find out more',
+             #               collapsed=T,
+             #               div(p("To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")
+             #                     )
+             #              
+             #                  )
+             #              )
+             #           )
+             #          )
+              #         ),
 
               # column 2
               column(width = 4,
@@ -369,65 +389,68 @@ body <- dashboardBody(
                   tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
                   box( width=NULL, #height='175px',
                       a(class="twitter-timeline", href="https://twitter.com/vcsep"),
-                      style = "height:220px; overflow-y: scroll;overflow-x: scroll;")
+                      style = "height:698px; overflow-y: scroll;overflow-x: scroll;")
                       #uiOutput('twitter'))
-                ),
-                # - Row 2 -
-                fluidRow(
-                  box(title='Data store', width=NULL,
-                      style = "height:175px; overflow-y: scroll;overflow-x: scroll;",
-                      marginTop=T,
-                      fluidRow(
-                        column(width=12, height='110px',
-                               #box 
-                                 descriptionBlock(
-                                  #number = div("26"), 
-                                  #numberColor = "green", 
-                                  #numberIcon = "fas fa-caret-up",
-                                  header= '26',
-                                  #header_icon = "fa fa-caret-up",
-                                  text = 'datasets',
-                                  rightBorder = F,
-                                  marginBottom = T
-                               )
-                            
-                        )
-                      ),
-                      fluidRow(
-                        column(width=6, height='110px',
-                               descriptionBlock(
-                                 number="46%",
-                                 numberColor = 'green',
-                                 numberIcon = "fas fa-caret-up",
-                                 header='12',
-                                 text = 'VCS sources',
-                                 rightBorder = F,
-                                 marginBottom = F
-                               )
-                            ),
-                        column(width=6, height='110px',
-                               descriptionBlock(
-                                 number="54%",
-                                 #numberColor = 'green',
-                                 #numberIcon = "fas fa-caret-up",
-                                 header='14',
-                                 text = 'Open sources',
-                                 rightBorder = F,
-                                 marginBottom = F
-                               )
-                        )
-                      )
-                  )
-                ),
-                # - Row 3 -
-                fluidRow(
-                  box(title='Data contributors', width=NULL, #height='220px
-                      uiOutput('members'),
-                      style = "height:175px; overflow-y: scroll;overflow-x: scroll;")
                 )
               )
             )
-    ),
+          ),
+    #             # - Row 2 -
+    #             fluidRow(
+    #               box(title='Data store', width=NULL,
+    #                   style = "height:175px; overflow-y: scroll;overflow-x: scroll;",
+    #                   marginTop=T,
+    #                   fluidRow(
+    #                     column(width=12, height='110px',
+    #                            #box 
+    #                              descriptionBlock(
+    #                               #number = div("26"), 
+    #                               #numberColor = "green", 
+    #                               #numberIcon = "fas fa-caret-up",
+    #                               header= '26',
+    #                               #header_icon = "fa fa-caret-up",
+    #                               text = 'datasets',
+    #                               rightBorder = F,
+    #                               marginBottom = T
+    #                            )
+    #                         
+    #                     )
+    #                   ),
+    #                   fluidRow(
+    #                     column(width=6, height='110px',
+    #                            descriptionBlock(
+    #                              number="46%",
+    #                              numberColor = 'green',
+    #                              numberIcon = "fas fa-caret-up",
+    #                              header='12',
+    #                              text = 'VCS sources',
+    #                              rightBorder = F,
+    #                              marginBottom = F
+    #                            )
+    #                         ),
+    #                     column(width=6, height='110px',
+    #                            descriptionBlock(
+    #                              number="54%",
+    #                              #numberColor = 'green',
+    #                              #numberIcon = "fas fa-caret-up",
+    #                              header='14',
+    #                              text = 'Open sources',
+    #                              rightBorder = F,
+    #                              marginBottom = F
+    #                            )
+    #                     )
+    #                   )
+    #               )
+    #             ),
+    #             # - Row 3 -
+    #             fluidRow(
+    #               box(title='Data contributors', width=NULL, #height='220px
+    #                   uiOutput('members'),
+    #                   style = "height:175px; overflow-y: scroll;overflow-x: scroll;")
+    #             )
+    #           )
+    #         )
+    # ),
 
     # -- areas in need --
     tabItem(tabName = "unmetneed",
@@ -704,22 +727,22 @@ server = function(input, output, session) {
     test <- input$alive_count
   })
   
-  # obeserve if first tab is selected
-  observe({
-
-    req(input$sidebar_id)
-
-    if (input$sidebar_id == 'home') {
-      output$welcome <- renderUI({
-
-        div(
-          h2(tags$strong('Insights from the Emergencies Partnership')),
-          hr(),
-          h4('Bringing together data to', tags$strong('improve collaboration'), 'across the voluntary and community sector,',
-             tags$strong('before,'), tags$strong('during,'), "and", tags$strong('after'), "an", tags$strong("emergency"), ""),
-          br()
-        )
-      })
+  # # obeserve if first tab is selected
+  # observe({
+  # 
+  #   req(input$sidebar_id)
+  # 
+  #   if (input$sidebar_id == 'home') {
+  #     output$welcome <- renderUI({
+  # 
+  #       div(
+  #         h2(tags$strong('Insights from the Emergencies Partnership')),
+  #         hr(),
+  #         h4('Bringing together data to', tags$strong('improve collaboration'), 'across the voluntary and community sector,',
+  #            tags$strong('before,'), tags$strong('during,'), "and", tags$strong('after'), "an", tags$strong("emergency"), ""),
+  #         br()
+  #       )
+  #     })
       
         
         # output$welcome_about <- renderUI({
@@ -774,31 +797,31 @@ server = function(input, output, session) {
         # 
         # )
       
-
-      # --- plot list of contributors ---
-      output$members <- renderUI({
-        div(
-          tags$ul(tags$li(tags$a(href="https://www.bitc.org.uk/", target="_blank","Business in the Community")),
-                tags$li(tags$a(href="https://www.childrenscommissioner.gov.uk/", target="_blank","Children’s Commissioner for England")),
-                tags$li(tags$a(href="https://www.citizensadvice.org.uk/", target="_blank","Citizens Advice")),
-                tags$li(tags$a(href="https://www.cruse.org.uk/", target="_blank","Cruse")),
-                tags$li(tags$a(href="https://fareshare.org.uk/", target="_blank","FareShare")),
-                tags$li(tags$a(href="https://foodfoundation.org.uk/", target="_blank","Food Foundation")),
-                tags$li(tags$a(href="https://www.foodaidnetwork.org.uk/", target="_blank","Independent Food Aid Network")),
-                tags$li(tags$a(href="https://www.mind.org.uk/", target="_blank","Mind")),
-                tags$li(tags$a(href="https://www.re-act.org.uk/", target="_blank","RE:ACT")),
-                tags$li(tags$a(href="https://www.stepchange.org/", target="_blank","Stepchange")),
-                tags$li(tags$a(href="https://www.themix.org.uk/", target="_blank","The Mix")),
-                tags$li(tags$a(href="https://www.turn2us.org.uk/", target="_blank","Turn2Us")),
-                tags$li(tags$a(href="https://www.victimsupport.org.uk/", target="_blank","Victim Support")),
-                tags$li(tags$a(href="https://volunteeringmatters.org.uk/", target="_blank","Volunteering Matters")))
-        )
-
-      })
-
-    }
-
-  })
+# 
+#       # --- plot list of contributors ---
+#       output$members <- renderUI({
+#         div(
+#           tags$ul(tags$li(tags$a(href="https://www.bitc.org.uk/", target="_blank","Business in the Community")),
+#                 tags$li(tags$a(href="https://www.childrenscommissioner.gov.uk/", target="_blank","Children’s Commissioner for England")),
+#                 tags$li(tags$a(href="https://www.citizensadvice.org.uk/", target="_blank","Citizens Advice")),
+#                 tags$li(tags$a(href="https://www.cruse.org.uk/", target="_blank","Cruse")),
+#                 tags$li(tags$a(href="https://fareshare.org.uk/", target="_blank","FareShare")),
+#                 tags$li(tags$a(href="https://foodfoundation.org.uk/", target="_blank","Food Foundation")),
+#                 tags$li(tags$a(href="https://www.foodaidnetwork.org.uk/", target="_blank","Independent Food Aid Network")),
+#                 tags$li(tags$a(href="https://www.mind.org.uk/", target="_blank","Mind")),
+#                 tags$li(tags$a(href="https://www.re-act.org.uk/", target="_blank","RE:ACT")),
+#                 tags$li(tags$a(href="https://www.stepchange.org/", target="_blank","Stepchange")),
+#                 tags$li(tags$a(href="https://www.themix.org.uk/", target="_blank","The Mix")),
+#                 tags$li(tags$a(href="https://www.turn2us.org.uk/", target="_blank","Turn2Us")),
+#                 tags$li(tags$a(href="https://www.victimsupport.org.uk/", target="_blank","Victim Support")),
+#                 tags$li(tags$a(href="https://volunteeringmatters.org.uk/", target="_blank","Volunteering Matters")))
+#         )
+# 
+#       })
+# 
+#     }
+# 
+#   })
 
 
   # --- observe if references tab selected ---
@@ -821,7 +844,8 @@ server = function(input, output, session) {
           h4("Although not all data has been visualised in the platform yet,
             we would also like to thank the following organisation for their contributions:"),
           br(),
-          tags$ul(tags$li(tags$a(href="https://www.bitc.org.uk/", target="_blank","Business in the Community")),
+          tags$ul(tags$li(tags$a(href="https://www.redcross.org.uk/", target="_blank","British Red Cross")),
+                  tags$li(tags$a(href="https://www.bitc.org.uk/", target="_blank","Business in the Community")),
                   tags$li(tags$a(href="https://www.childrenscommissioner.gov.uk/", target="_blank","Children’s Commissioner for England")),
                   tags$li(tags$a(href="https://www.citizensadvice.org.uk/", target="_blank","Citizens Advice")),
                   tags$li(tags$a(href="https://www.cruse.org.uk/", target="_blank","Cruse")),
@@ -860,8 +884,7 @@ server = function(input, output, session) {
           p("Users are able to", tags$strong("select the type of emergency"), "they are responding to and 
             the",  tags$strong("“Areas at risk” map"), "and", tags$strong("“Areas to focus” list"), "will update", tags$strong("to show those 
             areas least resilient to the emergency."), "For information on what indicators 
-            are used to make these assessments, see the", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", 'British Red Cross Vulnerability')), 
-            "and", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "Resilience")), "Indices."),
+            are used to make these assessments, see the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index help tab'))),
           tags$br(),
           p(tags$strong("Interpreting the map:"), tags$br(), "Different layers are shown on the map depending on which emergency is selected. It is also possible, by selecting the button in the corner of the map to change what information is displayed", tags$br(),
                         p(tags$strong("Covid-19 theme:"), tags$br(), tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layers highlights the local authorities that are most vulnerable and have the least capacity to cope based upon the BRC resilience index.", tags$br(),
@@ -873,7 +896,7 @@ server = function(input, output, session) {
                         p(tags$strong("Flooding theme:"), tags$br(),
                         tags$strong(tags$em("Resilience of areas with highest flood incidents:")), "This highlights the resilience (vulnerability vs the capacity to cope) of the areas with the highest number of historical flood incidents per 10,000 people (Flood incidents quintile 4 and 5 - for more information see the BRC resilience index).", tags$br(),
                         tags$strong(tags$em("Resiliene of areas with highest flood risk:")), "This highlights the areas where the highest proportion of people live in flood risk areas (Flood risk quintile 4, 5 - for more information see the BRC resilience index)", tags$br(),
-                        tags$strong(tags$em("Flood warnings/alerts:")), "The points and polygons displayed show the latest flood warnings and alerts from the Metoffice")),
+                        tags$strong(tags$em("Flood warnings/alerts:")), "The points and polygons displayed show the latest flood warnings and alerts from the", tags$a(href="https://flood-warning-information.service.gov.uk/warnings", target="_blank","environment agency"))),
           p("As more organisations contribute their data, over time", tags$strong("we will build a better 
             understanding of “People in need” during an emergency, and where such needs may be going unmet."))
           
@@ -885,18 +908,19 @@ server = function(input, output, session) {
   })
 
 
-  # --- preparing base map ---- #
-  
   #set up polygons
   pal <- colorFactor("viridis", c(1:5), reverse = TRUE)
+  # --- preparing base map ---- #
 
   # set up the static parts of the map (that don't change as user selects different options)
   output$map <- renderLeaflet({
-    leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
-      setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # centre map on Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
-      addProviderTiles(providers$CartoDB.Positron) %>%
-      addTiles(urlTemplate = "", attribution = '2020 (c) British Red Cross')
-  })
+        leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
+        setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # centre map on Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
+        addProviderTiles(providers$CartoDB.Positron) %>%
+        addTiles(urlTemplate = "", attribution = '2020 (c) British Red Cross')
+      })
+  # to prevent map error in js console - not sure if necessary
+  outputOptions(output,"map",suspendWhenHidden=FALSE)
 
 
   # --- Respond to users input on location ----
@@ -4388,7 +4412,7 @@ server = function(input, output, session) {
         output$requests <- renderInfoBox({
           infoBox(
             "Requests",
-              color = "navy", fill = F, icon=icon("fas fa-hand-point-up")
+              color = "navy", fill = F, icon=icon("glyphicon-th-list", lib='glyphicon')
              )
             })
           }
@@ -4426,7 +4450,7 @@ server = function(input, output, session) {
                              "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
                   p(unique(difference), "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;")),
               #"Requests", unique(to_print),
-                color = "purple", fill = F, icon=icon("fas fa-hand-point-up")
+                color = "purple", fill = F, icon=icon("fas fa-list")
               )
             })
            }
@@ -4462,7 +4486,7 @@ server = function(input, output, session) {
                 p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;")),
             #div(p("Previous 7 days:", total_requests_this_week$total_this_week, style = "font-size:12pt;margin-top:5px;"),
             #    p("Difference to last week:", difference, style = "font-size:10pt;color:#808080;margin-top:-10px;")),
-            color = "purple", fill = F, icon=icon("fas fa-hand-point-up")
+            color = "purple", fill = F, icon=icon("fas fa-list")
                 )
           })
 
@@ -4502,7 +4526,7 @@ server = function(input, output, session) {
                   p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;")),
               #div(p("Previous 7 days:", total_requests_this_week$total_this_week, style = "font-size:12pt;margin-top:5px;"),
               #    p("Difference to last week:", difference, style = "font-size:10pt;color:#808080;margin-top:-10px;")),
-              color = "purple", fill = F, icon=icon("fas fa-hand-point-up")
+              color = "purple", fill = F, icon=icon("fas fa-list")
                 )
             })
           }
@@ -4652,7 +4676,7 @@ server = function(input, output, session) {
       infoBox(
         "Pulse", 
         div(p('Coming Soon', style = "font-size:12pt;margin-top:5px;")),
-        color = "purple", fill = F, icon = icon("fas fa-wave-square")
+        color = "purple", fill = F, icon = icon("fas fa-bullseye")
         )
       })
     }
