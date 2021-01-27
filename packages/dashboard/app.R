@@ -12,7 +12,8 @@ library(echarts4r) # Docker
 library(feather) # Docker
 library(scales) # Docker
 library(htmlwidgets) # Docker
-library(shinyjs)
+library(shinyjs) # Docker
+library(shinycssloaders)
 
 # function for table sorting 
 clearSorting <- function(proxy) {
@@ -37,7 +38,7 @@ area_lookup_tc2lad <- area_lookup %>% select('LAD19CD', 'TacticalCell')
 
 # ---- Read in the resilience index ----
 #LA_res <- read_csv('https://github.com/britishredcrosssociety/resilience-index/raw/main/data/processed/resilience%20index.csv')
-LA_res <- read_csv('data/resilience_index_bivar.csv')
+LA_res <- read_feather('data/resilience_index_bivar.feather')
 
 
 # --- read in shape files with minimal metadata ---
@@ -333,7 +334,7 @@ body <- dashboardBody(
                          accordionItem(
                            id=3,
                            title='Get involved',
-                           collapsed=T,
+                           collapsed=F,
                            div(#p("Our", tags$strong("Data Working Group"), "meets fortnightly on a Thursday at 11am to help us prioritise
                             # what data and analysis to focus on next."),
                                #p(tags$strong("Join us"), "to lend your voice to the conversation."),
@@ -476,7 +477,7 @@ body <- dashboardBody(
                   # - row 2 (action areas) -
                   box( width = NULL,  collapsible = T, collapsed=F,
                     title = "Areas to focus", #height='400px',
-                      DT::dataTableOutput('areas2focus', height='325px'),
+                      withSpinner(DT::dataTableOutput('areas2focus', height='325px')),
                       style = "height:400px; overflow-y: scroll;overflow-x: scroll;"
                       )
              )),
@@ -670,7 +671,7 @@ body <- dashboardBody(
                       #        vulnerable and least resiliant based on teh BRC developed resilience index', tags$br(),
                       #        'Economic vulnerability:')
                       #)),
-                      leafletOutput("map", height = "450px")
+                      withSpinner(leafletOutput("map", height = "450px"))
 
                     #absolutePanel(
                     #  id = "legend", class = "panel panel-default",
@@ -4237,6 +4238,7 @@ server = function(input, output, session) {
   #filtered_areas2focus()
   # all lads in tcs wanted
   output$areas2focus <- DT::renderDataTable({
+      #Sys.sleep(1.5)
       DT::datatable(dd_areas2focus$d, filter=list(position='top'),
             selection =c('single'),
             options = list(dom='tp', #should remove top search box the p includes paging
