@@ -201,6 +201,10 @@ requests <- read_feather('data/vcs_indicators/requests_this_week_and_last.feathe
 volunteers <- read_feather('data/vcs_indicators/volunteer-capacity-lad19CD-tc.feather')
 
 
+# -- local organisations --
+local_organisations <- read_feather('./data/navca_members_2019.feather')
+
+
 # ---  dashboard --- #
 # --- header --- #
 header <- dashboardHeaderPlus(title = "VCSEP Insights", titleWidth = "300px")#,
@@ -468,14 +472,14 @@ body <- dashboardBody(
               box(width = NULL, collapsible=T, collapsed=T,
                   title='About this dashboard', 
                   uiOutput('about_needs'),
-                  style = "height:200px; overflow-y: scroll;overflow-x: scroll;"),
+                  style = "height:325px; overflow-y: scroll;overflow-x: scroll;"),
              
               # row  -
                   fluidRow(
                     # column 1
                     column(width = 12,
                   # - row 2 (action areas) -
-                  box( width = NULL,  collapsible = T, collapsed=F,
+                  box( width = NULL,  collapsible = T, collapsed=T,
                     title = "Areas to focus", #height='400px',
                       withSpinner(DT::dataTableOutput('areas2focus', height='325px')),
                       style = "height:400px; overflow-y: scroll;overflow-x: scroll;"
@@ -488,8 +492,8 @@ body <- dashboardBody(
                         column(
                           width = 12,
                           box(
-                            width = NULL, collapsible = T, collapsed=F,#solidHeader = TRUE, status='primary',
-                            title = "People at risk", align = "center", style = "height:300px; overflow-y: scroll;overflow-x: scroll;",
+                            width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
+                            title = "People at risk", align = "center", style = "height:350px; overflow-y: scroll;overflow-x: scroll;",
                             
                           # multi columned box - bame row
                             fluidRow(style = "border-top: 1px solid #D3D3D3;",
@@ -650,8 +654,20 @@ body <- dashboardBody(
                                )
                             )
 
+                      ),
+                      # organisations in area 
+                    fluidRow(
+                      column(width = 12,
+                        box(
+                          width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
+                          title = "Local organisations", align = "center",
+                          uiOutput("region_needed"),#height = "600px"
+                          DT::dataTableOutput('local_orgs', height='400px'),
+                          style = "height:420px; overflow-y: scroll;overflow-x: scroll;"
                       )
-                    ),
+                    )
+                  )
+                ),
 
               # column - 2
               column( width = 6,
@@ -659,7 +675,7 @@ body <- dashboardBody(
                     boxPlus(
                       # bivariate
                       title = "Areas at risk",
-                      width = NULL, height = "510px", #solidHeader = TRUE, status='primary',
+                      width = NULL, height = "610px", #solidHeader = TRUE, status='primary',
                       closable = F,
                       #enable_sidebar = T,
                       #sidebar_width = 40,
@@ -671,7 +687,7 @@ body <- dashboardBody(
                       #        vulnerable and least resiliant based on teh BRC developed resilience index', tags$br(),
                       #        'Economic vulnerability:')
                       #)),
-                      withSpinner(leafletOutput("map", height = "450px"))
+                      withSpinner(leafletOutput("map", height = "550px"))
 
                     #absolutePanel(
                     #  id = "legend", class = "panel panel-default",
@@ -1680,6 +1696,40 @@ server = function(input, output, session) {
   filtered_volunteers <- reactive({
     volunteers_tc <- volunteers %>% filter(TacticalCell==input$tactical_cell)
 
+  })
+  
+  
+  # --- local organisation --- 
+  filtered_local_organisations <- reactive({
+    
+    req(input$sidebar_id)
+    if(input$sidebar_id == 'unmetneed') {
+      
+      if (input$tactical_cell == '-- England --') {
+       local_orgs <- local_organisations %>% select('Organisation name'=Name, 'Address', 
+                                                    'Website'=link, "Phone number"="Phone_number", 
+                                                    "Local authority"='LAD19NM', 
+                                                    "Region"='TacticalCell') %>%
+         arrange(`Organisation name`)
+      }
+      else {
+        if(input$lad_selected == 'All local authorities in region') {
+            local_orgs <- local_organisations %>% filter(TacticalCell == input$tactical_cell) %>% 
+              select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
+                    "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
+              arrange(`Organisation name`)
+        }
+        
+        else{
+          local_orgs <- local_organisations %>% filter(LAD19NM == input$lad_selected) %>% 
+            select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
+                   "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
+            arrange(`Organisation name`)
+        }
+      }
+      
+    }
+    
   })
 
 
@@ -4248,7 +4298,8 @@ server = function(input, output, session) {
             scrollX=T,
             scrollY='200px',
             autoWidth = T,
-            #columnDefs = list(list(className = 'dt-center', targets = list(c(2,3,4,5,6)))),
+            columnDefs = list(list(width = '80px', targets = c(4,5)),
+                              list(width = '40px', tagets=c(2,3))),
             initComplete = htmlwidgets::JS(
             "function(settings, json) {",
             paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
@@ -4360,13 +4411,43 @@ server = function(input, output, session) {
   })
   
   
+  # local organisations 
+  observe({
+    req(input$sidebar_id)
+    if(input$sidebar_id == 'unmetneed') {
+      #if (input$tactical_cell == '-- England --') {
+      #  output$region_needed <-  renderUI({
+      #    div(p(tags$strong("Please select a region or local authority"), tags$br(),
+      #         tags$strong("to view the navca members in the area")))
+      #    })
+      #}
+      #else {
+    
+        
+  # all lads in tcs wanted
+  output$local_orgs <- DT::renderDataTable({
+    #Sys.sleep(1.5)
+    DT::datatable(filtered_local_organisations(), filter=list(position='top'), escape=F,
+                  selection =c('single'),
+                  options = list(dom='tp', #should remove top search box the p includes paging
+                                 paging = T,
+                                 pageLength=5,
+                                 lengthMenu = c(5, 10, 15, 20),
+                                 scrollX=T,
+                                 scrollY='250px',
+                                 autoWidth = T,
+                                 columnDefs = list(list(width = '150px', targets = c(1,2))),
+                                 initComplete = htmlwidgets::JS(
+                                   "function(settings, json) {",
+                                   paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                   "}")
+                  )) }, escape=F)
+      #}
   
+    }
   
-
-  # --- show selected LAD at the top ----
-
-
-
+  })
+  
   # # ---- volunteer capacity areas to focus ----
   #
   # observe({
