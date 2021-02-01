@@ -479,7 +479,7 @@ body <- dashboardBody(
                     # column 1
                     column(width = 12,
                   # - row 2 (action areas) -
-                  box( width = NULL,  collapsible = T, collapsed=T,
+                  box( width = NULL,  collapsible = T, collapsed=F,
                     title = "Areas to focus", #height='400px',
                       withSpinner(DT::dataTableOutput('areas2focus', height='325px')),
                       style = "height:400px; overflow-y: scroll;overflow-x: scroll;"
