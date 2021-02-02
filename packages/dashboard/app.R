@@ -86,13 +86,19 @@ lad_uk2areas2vulnerability <- lad_uk2areas2vulnerability_full %>% select('LAD19C
 lad_uk2vuln_resilience <- left_join(unique(lad_uk2areas), LA_res, by='LAD19CD', keep=F)
 lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>% filter(!is.na(fill))
 
-# add text for legend
-#lad_uk2vuln_resilience_test <- lad_uk2vuln_resilience %>%
-#  mutate('forlegend' = case_when(`Socioeconomic Vulnerability quintile` == 1 ~ 'Low',
-#                                 `Socioeconomic Vulnerability quintile` == 2 ~ '',
-#                                 `Socioeconomic Vulnerability quintile` == 3 ~ '',
-#                                 `Socioeconomic Vulnerability quintile` == 4 ~ '',
-#                                 `Socioeconomic Vulnerability quintile` == 5 ~ 'High'))
+
+# for mapping click add in id column
+lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>%
+  mutate('res_id' = paste0('covidres_',LAD19CD)) %>%
+  mutate('econ_id' = paste0('econ_',LAD19CD)) %>%
+  mutate('soc_id' = paste0('soc_',LAD19CD)) %>%
+  mutate('socecon_id' = paste0('socecon_',LAD19CD)) %>%
+  mutate('clin_id' = paste0('clin_',LAD19CD)) %>%
+  mutate('health_id' = paste0('health_',LAD19CD)) %>%
+  mutate('floodres_id' = paste0('floodres_',LAD19CD)) %>%
+  mutate('incd_id' = paste0('incd_',LAD19CD)) %>%
+  mutate('risk_id' = paste0('risk_',LAD19CD)) 
+  
 
 # tactical cells
 tactical_cells <- area_lookup_tc2lad %>% filter(TacticalCell != 'Wales' & TacticalCell != 'Northern Ireland and the Isle of Man' & TacticalCell != 'Scotland')
@@ -192,7 +198,8 @@ flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_poi
 flood_warning_meta <- read_feather('./data/areas_to_focus/current_live_warnings_metadata.feather')
 
 # join dfs 
-flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F)
+flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) 
+
 flood_warning_points <- left_join(flood_warning_points,flood_warning_meta, by='floodAreaID', keep=F)
 
 
@@ -934,8 +941,12 @@ server = function(input, output, session) {
         leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
         setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # centre map on Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
         addProviderTiles(providers$CartoDB.Positron) %>%
-        addTiles(urlTemplate = "", attribution = '2020 (c) British Red Cross')
-      })
+        addTiles(urlTemplate = "", attribution = '2020 (c) British Red Cross') #%>%
+        # Add button to reset zoom - breaks other icons 
+        #addEasyButton(easyButton(
+        #  icon = "fas fa-globe", title = "Reset zoom level",
+        #  onClick = JS("function(btn, map){ map.setZoom(6); }"))) 
+    })
   # to prevent map error in js console - not sure if necessary
   outputOptions(output,"map",suspendWhenHidden=FALSE)
 
@@ -954,7 +965,7 @@ server = function(input, output, session) {
         #lads2select <- unique(lad_uk2vuln_resilience$Name)
         #lads2select <- c('All local authorities in region',sort(lads2select))
         lads2select <- c('All local authorities in region')
-        selectInput("lad_selected", "Local Authority", choices = lads2select, selected='All local authorities in region')
+        selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
       })
     }
     
@@ -966,7 +977,7 @@ server = function(input, output, session) {
           lads2select <- unique(filteredLA()$Name)
           lads2select <- c('All local authorities in region',sort(lads2select))
           #print(dd_areas2focus$l)
-          selectInput("lad_selected", "Local Authority", choices = lads2select, selected=dd_areas2focus$l)
+          selectInput("lad_selected", "Local authority district", choices = lads2select, selected=dd_areas2focus$l)
         })
         
       }
@@ -978,7 +989,7 @@ server = function(input, output, session) {
         output$secondSelection <- renderUI({
           lads2select <- unique(filteredLA()$Name)
           lads2select <- c('All local authorities in region',sort(lads2select))
-          selectInput("lad_selected", "Local Authority", choices = lads2select, selected='All local authorities in region')
+          selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
         })
         
       }
@@ -1208,7 +1219,7 @@ server = function(input, output, session) {
           fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
             filter(`Flood incidents quintile` >= 4 & !is.na(`Flood incidents quintile`)) %>%
             select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                 `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`)
+                 `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
         }
       
         else {
@@ -1218,7 +1229,7 @@ server = function(input, output, session) {
               filter(TacticalCell == input$tactical_cell) %>%
               filter(`Flood incidents quintile` >= 4 & !is.na(`Flood incidents quintile`)) %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                   `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`)
+                   `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
           
         }
         
@@ -1227,7 +1238,7 @@ server = function(input, output, session) {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
               filter(Name == input$lad_selected) %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`)
+                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
           
           }
         }
@@ -1250,7 +1261,7 @@ server = function(input, output, session) {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
               filter(`Flood risk quintile` >= 4 & !is.na(`Flood risk quintile`)) %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`)
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
           }
           
           else {
@@ -1260,7 +1271,7 @@ server = function(input, output, session) {
                 filter(TacticalCell == input$tactical_cell) %>%
                 filter(`Flood risk quintile` >= 4 & !is.na(`Flood risk quintile`)) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`)
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
               
             }
             
@@ -1269,7 +1280,7 @@ server = function(input, output, session) {
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(Name == input$lad_selected) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`)
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
               
             }
           }
@@ -1289,7 +1300,7 @@ server = function(input, output, session) {
           if (input$tactical_cell == '-- England --') {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`)
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
           }
           
           else {
@@ -1298,7 +1309,7 @@ server = function(input, output, session) {
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(TacticalCell == input$tactical_cell) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`)
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
               
             }
             
@@ -1307,7 +1318,7 @@ server = function(input, output, session) {
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(Name == input$lad_selected) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`)
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
             }
           }
       }
@@ -1767,7 +1778,7 @@ server = function(input, output, session) {
                         color = "black",
                         dashArray = "0.1",
                         fill=F) %>%
-            addPolygons(data=lad_uk_most_vuln, layerId = ~LAD19CD,
+            addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                         group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
                         weight = 0.7,
                         opacity = 0.8,
@@ -1789,7 +1800,7 @@ server = function(input, output, session) {
                         )
             ) %>%
              # economic vulnerability layer
-            addPolygons(data=econ_vuln, layerId = ~`Economic Vulnerability quintile`,
+            addPolygons(data=econ_vuln, layerId = ~econ_id,
                                 group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
                                 weight = 0.7,
                                 opacity = 0.8,
@@ -1812,7 +1823,7 @@ server = function(input, output, session) {
                                 )
                     ) %>%
                     # socioeconomic vulnerability layer
-                    addPolygons(data=socioecon_vuln, layerId = ~`Socioeconomic Vulnerability quintile`,
+                    addPolygons(data=socioecon_vuln, layerId = ~socecon_id,
                                 group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
                                 weight = 0.7,
                                 opacity = 0.8,
@@ -1835,7 +1846,7 @@ server = function(input, output, session) {
                                 )
                     ) %>%
                     # social vulnerability layer
-                    addPolygons(data=socio_vuln, layerId = ~`Social Vulnerability quintile`,
+                    addPolygons(data=socio_vuln, layerId = ~soc_id,
                                 group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
                                 weight = 0.7,
                                 opacity = 0.8,
@@ -1858,7 +1869,7 @@ server = function(input, output, session) {
                                 )
                     ) %>%
                     # Health/wellbeing vulnerability layer
-                    addPolygons(data=health_vuln, layerId = ~`Health/Wellbeing Vulnerability quintile`,
+                    addPolygons(data=health_vuln, layerId = ~health_id,
                                 group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
                                 weight = 0.7,
                                 opacity = 0.8,
@@ -1881,7 +1892,7 @@ server = function(input, output, session) {
                                 )
                     ) %>%
                     # clin vulnerability layer
-                    addPolygons(data=clin_vuln, layerId = ~`Clinical Vulnerability quintile`,
+                    addPolygons(data=clin_vuln, layerId = ~clin_id,
                                 group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
                                 weight = 0.7,
                                 opacity = 0.8,
@@ -1931,7 +1942,7 @@ server = function(input, output, session) {
                           dashArray = "0.1",
                           fill=F) %>%
               
-              addPolygons(data=lad_uk_most_vuln, layerId = ~LAD19CD,
+              addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                           group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
                           weight = 0.7,
                           opacity = 0.8,
@@ -1953,7 +1964,7 @@ server = function(input, output, session) {
                           )
               ) %>%
               # economic vulnerability layer
-              addPolygons(data=econ_vuln, layerId = ~`Economic Vulnerability quintile`,
+              addPolygons(data=econ_vuln, layerId = ~econ_id,
                           group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
                           weight = 0.7,
                           opacity = 0.8,
@@ -1976,7 +1987,7 @@ server = function(input, output, session) {
                           )
               ) %>%
               # socioeconomic vulnerability layer
-              addPolygons(data=socioecon_vuln, layerId = ~`Socioeconomic Vulnerability quintile`,
+              addPolygons(data=socioecon_vuln, layerId = ~socecon_id,
                           group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
                           weight = 0.7,
                           opacity = 0.8,
@@ -1999,7 +2010,7 @@ server = function(input, output, session) {
                           )
               ) %>%
               # social vulnerability layer
-              addPolygons(data=socio_vuln, layerId = ~`Social Vulnerability quintile`,
+              addPolygons(data=socio_vuln, layerId = ~soc_id,
                           group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
                           weight = 0.7,
                           opacity = 0.8,
@@ -2022,7 +2033,7 @@ server = function(input, output, session) {
                           )
               ) %>%
               # Health/wellbeing vulnerability layer
-              addPolygons(data=health_vuln, layerId = ~`Health/Wellbeing Vulnerability quintile`,
+              addPolygons(data=health_vuln, layerId = ~health_id,
                           group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
                           weight = 0.7,
                           opacity = 0.8,
@@ -2045,7 +2056,7 @@ server = function(input, output, session) {
                           )
               ) %>%
               # clin vulnerability layer
-              addPolygons(data=clin_vuln, layerId = ~`Clinical Vulnerability quintile`,
+              addPolygons(data=clin_vuln, layerId = ~clin_id,
                           group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
                           weight = 0.7,
                           opacity = 0.8,
@@ -2094,7 +2105,7 @@ server = function(input, output, session) {
                           dashArray = "0.1",
                           fill=F) %>%
               
-              addPolygons(data=lad_uk_most_vuln, layerId = ~LAD19CD,
+              addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                           group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
                           weight = 0.7,
                           opacity = 0.8,
@@ -2116,7 +2127,7 @@ server = function(input, output, session) {
                           )
               ) %>%
               # economic vulnerability layer
-              addPolygons(data=econ_vuln, layerId = ~`Economic Vulnerability quintile`,
+              addPolygons(data=econ_vuln, layerId = ~econ_id,
                           group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
                           weight = 0.7,
                           opacity = 0.8,
@@ -2139,7 +2150,7 @@ server = function(input, output, session) {
                           )
               ) %>%
               # socioeconomic vulnerability layer
-              addPolygons(data=socioecon_vuln, layerId = ~`Socioeconomic Vulnerability quintile`,
+              addPolygons(data=socioecon_vuln, layerId = ~socecon_id,
                           group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
                           weight = 0.7,
                           opacity = 0.8,
@@ -2162,7 +2173,7 @@ server = function(input, output, session) {
                           )
               ) %>%
               # social vulnerability layer
-              addPolygons(data=socio_vuln, layerId = ~`Social Vulnerability quintile`,
+              addPolygons(data=socio_vuln, layerId = ~soc_id,
                           group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
                           weight = 0.7,
                           opacity = 0.8,
@@ -2185,7 +2196,7 @@ server = function(input, output, session) {
                           )
               ) %>%
               # Health/wellbeing vulnerability layer
-              addPolygons(data=health_vuln, layerId = ~`Health/Wellbeing Vulnerability quintile`,
+              addPolygons(data=health_vuln, layerId = ~health_id,
                           group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
                           weight = 0.7,
                           opacity = 0.8,
@@ -2208,7 +2219,7 @@ server = function(input, output, session) {
                           )
               ) %>%
               # clin vulnerability layer
-              addPolygons(data=clin_vuln, layerId = ~`Clinical Vulnerability quintile`,
+              addPolygons(data=clin_vuln, layerId = ~clin_id,
                           group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
                           weight = 0.7,
                           opacity = 0.8,
@@ -2271,7 +2282,7 @@ server = function(input, output, session) {
                           color = "black",
                           dashArray = "0.1",
                           fill=F) %>%
-              addPolygons(data=flood_all, layerId = ~`Flood risk quintile`,
+              addPolygons(data=flood_all, layerId = ~floodres_id,
                           group="Resilience of local authority", fillColor = ~`fill`,
                           weight = 0.7,
                           opacity = 0.8,
@@ -2318,7 +2329,7 @@ server = function(input, output, session) {
                         color = "black",
                         dashArray = "0.1",
                         fill=F) %>%
-            addPolygons(data=flood_incd, layerId = ~`Flood incidents quintile`,
+            addPolygons(data=flood_incd, layerId = ~incd_id,
                         group="Resilience of high flood incident areas", fillColor = ~`fill`,
                         weight = 0.7,
                         opacity = 0.8,
@@ -2340,7 +2351,7 @@ server = function(input, output, session) {
                           direction = "auto"
                         )
                         ) %>%
-            addPolygons(data=flood_risk, layerId = ~`Flood risk quintile`,
+            addPolygons(data=flood_risk, layerId = ~risk_id,
                         group="Resilience of high flood risk areas", fillColor = ~`fill`,
                         weight = 0.7,
                         opacity = 0.8,
@@ -2401,7 +2412,7 @@ server = function(input, output, session) {
                         color = "black",
                         dashArray = "0.1",
                         fill=F) %>%
-            addPolygons(data=flood_all, layerId = ~`lad19nm`,
+            addPolygons(data=flood_all, layerId = ~floodres_id,
                         group="Resilience of all local authorities", fillColor = ~fill,
                         weight = 0.7,
                         opacity = 0.8,
@@ -2423,7 +2434,7 @@ server = function(input, output, session) {
                             direction = "auto"
                         )
             ) %>%
-            addPolygons(data=flood_incd, layerId = ~`Flood incidents quintile`,
+            addPolygons(data=flood_incd, layerId = ~incd_id,
                         group="Resilience of high flood incident areas", fillColor = ~fill,
                         weight = 0.7,
                         opacity = 0.8,
@@ -2444,7 +2455,7 @@ server = function(input, output, session) {
                           direction = "auto"
                         )
             ) %>%
-            addPolygons(data=flood_risk, layerId = ~`Flood risk quintile`,
+            addPolygons(data=flood_risk, layerId = ~risk_id,
                         group="Resilience of high flood risk areas", fillColor = ~fill,
                         weight = 0.7,
                         opacity = 0.8,
@@ -2507,7 +2518,7 @@ server = function(input, output, session) {
                           color = "black",
                           dashArray = "0.1",
                           fill=F) %>%
-              addPolygons(data=flood_all, layerId = ~`lad19nm`,
+              addPolygons(data=flood_all, layerId = ~floodres_id,
                           group="Resilience of all local authorities", fillColor = ~fill,
                           weight = 0.7,
                           opacity = 0.8,
@@ -2529,7 +2540,7 @@ server = function(input, output, session) {
                               direction = "auto"
                           )
               ) %>%
-              addPolygons(data=flood_incd, layerId = ~`Flood incidents quintile`,
+              addPolygons(data=flood_incd, layerId = ~incd_id,
                           group="Resilience of high flood incident areas", fillColor = ~fill,
                           weight = 0.7,
                           opacity = 0.8,
@@ -2551,7 +2562,7 @@ server = function(input, output, session) {
                               direction = "auto"
                           )
               ) %>%
-              addPolygons(data=flood_risk, layerId = ~`Flood risk quintile`,
+              addPolygons(data=flood_risk, layerId = ~risk_id,
                           group="Resilience of high flood risk areas", fillColor = ~fill,
                           weight = 0.7,
                           opacity = 0.8,
@@ -2612,7 +2623,7 @@ server = function(input, output, session) {
                             color = "black",
                             dashArray = "0.1",
                             fill=F) %>%
-                addPolygons(data=flood_all, layerId = ~`lad19nm`,
+                addPolygons(data=flood_all, layerId = ~floodres_id,
                             group="Resilience of all local authorities", fillColor = ~fill,
                             weight = 0.7,
                             opacity = 0.8,
@@ -4408,6 +4419,50 @@ server = function(input, output, session) {
       
     #}
 
+  })
+  
+  
+  # -- observe event local authority district click on map --
+  observeEvent(input$map_shape_click, {
+    
+    # capture click 
+    click <- input$map_shape_click
+    
+    if(!is.null(click$id)){
+    
+    # remove start
+    lad_id <- str_split(click, '_')[[1]][2]
+    
+    # Tactical cell lad in
+    tactical_cell_selected <- lad_uk2vuln_resilience %>%
+      filter(LAD19CD == lad_id) %>%
+      select('TacticalCell', 'LAD19NM') %>%
+      st_drop_geometry()
+    
+    
+    lad_choices <- lad_uk2vuln_resilience %>%
+      filter(TacticalCell == tactical_cell_selected$TacticalCell) %>%
+      select('LAD19NM') %>%
+      st_drop_geometry()
+    
+    
+    lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+    lad_choices <- c('All local authorities in region', lad_choices)
+    
+    
+    # --- update select input ---
+    updateSelectInput(
+      session, "tactical_cell",
+      choices = tactical_cells,
+      selected = tactical_cell_selected$TacticalCell
+    )
+    
+    updateSelectInput(session, "lad_selected",
+                      choices = lad_choices,
+                      selected=tactical_cell_selected$LAD19NM)
+    
+    }
+    
   })
   
   
