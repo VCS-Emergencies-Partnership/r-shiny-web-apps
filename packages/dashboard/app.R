@@ -13,7 +13,10 @@ library(feather) # Docker
 library(scales) # Docker
 library(htmlwidgets) # Docker
 library(shinyjs) # Docker
-library(shinycssloaders)
+library(shinycssloaders) # docker
+library(shinyWidgets) #-- ADD TO DOCKER
+
+source("functions.r")
 
 # function for table sorting 
 clearSorting <- function(proxy) {
@@ -667,9 +670,12 @@ body <- dashboardBody(
                       column(width = 12,
                         box(
                           width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                          title = "Local organisations", align = "center",
-                          uiOutput("region_needed"),#height = "600px"
-                          DT::dataTableOutput('local_orgs', height='400px'),
+                          title = "Local organisations", align = "left",
+                          fluidRow(
+                                   uiOutput("search_needed", height='50px')),
+                          fluidRow(
+                          #height = "600px"
+                          DT::dataTableOutput('local_orgs', height='400px')),
                           style = "height:420px; overflow-y: scroll;overflow-x: scroll;"
                       )
                     )
@@ -1710,38 +1716,38 @@ server = function(input, output, session) {
   })
   
   
-  # --- local organisation --- 
-  filtered_local_organisations <- reactive({
-    
-    req(input$sidebar_id)
-    if(input$sidebar_id == 'unmetneed') {
-      
-      if (input$tactical_cell == '-- England --') {
-       local_orgs <- local_organisations %>% select('Organisation name'=Name, 'Address', 
-                                                    'Website'=link, "Phone number"="Phone_number", 
-                                                    "Local authority"='LAD19NM', 
-                                                    "Region"='TacticalCell') %>%
-         arrange(`Organisation name`)
-      }
-      else {
-        if(input$lad_selected == 'All local authorities in region') {
-            local_orgs <- local_organisations %>% filter(TacticalCell == input$tactical_cell) %>% 
-              select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
-                    "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
-              arrange(`Organisation name`)
-        }
-        
-        else{
-          local_orgs <- local_organisations %>% filter(LAD19NM == input$lad_selected) %>% 
-            select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
-                   "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
-            arrange(`Organisation name`)
-        }
-      }
-      
-    }
-    
-  })
+  # # --- local organisation --- 
+  # filtered_local_organisations <- reactive({
+  #   
+  #   req(input$sidebar_id)
+  #   if(input$sidebar_id == 'unmetneed') {
+  #     
+  #     if (input$tactical_cell == '-- England --') {
+  #      local_orgs <- local_organisations %>% select('Organisation name'=Name, 'Address', 
+  #                                                   'Website'=link, "Phone number"="Phone_number", 
+  #                                                   "Local authority"='LAD19NM', 
+  #                                                   "Region"='TacticalCell') %>%
+  #        arrange(`Organisation name`)
+  #     }
+  #     else {
+  #       if(input$lad_selected == 'All local authorities in region') {
+  #           local_orgs <- local_organisations %>% filter(TacticalCell == input$tactical_cell) %>% 
+  #             select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
+  #                   "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
+  #             arrange(`Organisation name`)
+  #       }
+  #       
+  #       else{
+  #         local_orgs <- local_organisations %>% filter(LAD19NM == input$lad_selected) %>% 
+  #           select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
+  #                  "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
+  #           arrange(`Organisation name`)
+  #       }
+  #     }
+  #     
+  #   }
+  #   
+  # })
 
 
   # --- Generate Map ----
@@ -4465,43 +4471,133 @@ server = function(input, output, session) {
     
   })
   
-  
-  # local organisations 
-  observe({
-    req(input$sidebar_id)
-    if(input$sidebar_id == 'unmetneed') {
-      #if (input$tactical_cell == '-- England --') {
-      #  output$region_needed <-  renderUI({
-      #    div(p(tags$strong("Please select a region or local authority"), tags$br(),
-      #         tags$strong("to view the navca members in the area")))
-      #    })
-      #}
-      #else {
-    
-        
-  # all lads in tcs wanted
-  output$local_orgs <- DT::renderDataTable({
-    #Sys.sleep(1.5)
-    DT::datatable(filtered_local_organisations(), filter=list(position='top'), escape=F,
-                  selection =c('single'),
-                  options = list(dom='tp', #should remove top search box the p includes paging
-                                 paging = T,
-                                 pageLength=5,
-                                 lengthMenu = c(5, 10, 15, 20),
-                                 scrollX=T,
-                                 scrollY='250px',
-                                 autoWidth = T,
-                                 columnDefs = list(list(width = '150px', targets = c(1,2))),
-                                 initComplete = htmlwidgets::JS(
-                                   "function(settings, json) {",
-                                   paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
-                                   "}")
-                  )) }, escape=F)
-      #}
-  
-    }
-  
+  # create search of charity database 
+  output$search_needed <- renderUI({
+    searchInput(inputId = "search_term", 
+                label = "Search for charities with particular cause",
+                placeholder = 'i.e emergency',
+                btnSearch = icon("search"), 
+                btnReset = icon("remove"), 
+                value='',
+                width = "50%")
   })
+  
+  # --- show on first look ---
+  observe({
+    
+    if(input$sidebar_id == 'unmetneed') {
+    bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+    charities_found <- findcharities(bounding_wanted, 'emergency response')
+    
+    output$local_orgs <- DT::renderDataTable({
+      #Sys.sleep(1.5)
+      DT::datatable(charities_found, filter=list(position='top'), escape=F,
+                    selection =c('single'),
+                    options = list(dom='tp', #should remove top search box the p includes paging
+                                   paging = T,
+                                   pageLength=5,
+                                   lengthMenu = c(5, 10, 15, 20),
+                                   scrollX=T,
+                                   scrollY='250px',
+                                   autoWidth = T,
+                                   columnDefs = list(list(width = '200px', targets = c(2,3))),
+                                   initComplete = htmlwidgets::JS(
+                                     "function(settings, json) {",
+                                     paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                     "}")
+                    )) }, escape=F)
+    
+    
+    }
+  })
+  
+  
+  
+  
+  observeEvent(input$search_term_search, {
+    if(input$theme == 'Covid-19') {
+      
+      bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+      
+      testing <- findcharities(bounding_wanted, input$search_term)
+      #print(testing)
+      
+    }
+    
+    else {
+      if(input$theme == 'Flooding') {
+        
+        bounding_wanted <- st_bbox(filtered_areas_at_risk_flooding_resilience())
+        testing <- findcharities(bounding_wanted, input$search_term)
+        #print(testing)
+        
+      }
+    }
+    
+    print(testing)
+    
+    output$local_orgs <- DT::renderDataTable({
+      #Sys.sleep(1.5)
+      DT::datatable(testing, filter=list(position='top'), escape=F,
+                    selection =c('single'),
+                    options = list(dom='tp', #should remove top search box the p includes paging
+                                   paging = T,
+                                   pageLength=5,
+                                   lengthMenu = c(5, 10, 15, 20),
+                                   scrollX=T,
+                                   scrollY='250px',
+                                   autoWidth = T,
+                                   columnDefs = list(list(width = '200px', targets = c(2,3))),
+                                   initComplete = htmlwidgets::JS(
+                                     "function(settings, json) {",
+                                     paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                     "}")
+                    )) }, escape=F)
+ 
+   
+  })
+  
+  
+  
+  
+  
+  # 
+  # # local organisations 
+  # observe({
+  #   req(input$sidebar_id)
+  #   if(input$sidebar_id == 'unmetneed') {
+  #     #if (input$tactical_cell == '-- England --') {
+  #     #  output$region_needed <-  renderUI({
+  #     #    div(p(tags$strong("Please select a region or local authority"), tags$br(),
+  #     #         tags$strong("to view the navca members in the area")))
+  #     #    })
+  #     #}
+  #     #else {
+  #   
+  #       
+  # # all lads in tcs wanted
+  # output$local_orgs <- DT::renderDataTable({
+  #   #Sys.sleep(1.5)
+  #   DT::datatable(filtered_local_organisations(), filter=list(position='top'), escape=F,
+  #                 selection =c('single'),
+  #                 options = list(dom='tp', #should remove top search box the p includes paging
+  #                                paging = T,
+  #                                pageLength=5,
+  #                                lengthMenu = c(5, 10, 15, 20),
+  #                                scrollX=T,
+  #                                scrollY='250px',
+  #                                autoWidth = T,
+  #                                columnDefs = list(list(width = '150px', targets = c(1,2))),
+  #                                initComplete = htmlwidgets::JS(
+  #                                  "function(settings, json) {",
+  #                                  paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+  #                                  "}")
+  #                 )) }, escape=F)
+  #     #}
+  # 
+  #   }
+  # 
+  # })
   
   # # ---- volunteer capacity areas to focus ----
   #
