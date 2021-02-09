@@ -4554,7 +4554,7 @@ server = function(input, output, session) {
                                    scrollX=T,
                                    scrollY='250px',
                                    autoWidth = T,
-                                   columnDefs = list(list(width='400px',targets=c(5))),
+                                   columnDefs = list(list(width='400px',targets=c(3))),
                                    initComplete = htmlwidgets::JS(
                                      "function(settings, json) {",
                                      paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
@@ -4658,7 +4658,7 @@ server = function(input, output, session) {
                                    scrollX=T,
                                    scrollY='250px',
                                    autoWidth = T,
-                                   columnDefs = list(list(width='400px',targets=c(5))),
+                                   columnDefs = list(list(width='400px',targets=c(3))),
                                    initComplete = htmlwidgets::JS(
                                      "function(settings, json) {",
                                      paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
