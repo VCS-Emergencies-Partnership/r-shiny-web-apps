@@ -13,3 +13,6 @@ tidyverse
 viridis
 shinyjs
 shinycssloaders
+shinyWidgets
+R.utils
+ghql
