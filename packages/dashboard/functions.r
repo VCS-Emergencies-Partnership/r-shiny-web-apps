@@ -4,20 +4,15 @@ library(jsonlite)
 library('ghql')
 library(R.utils)
 
+# query charitybase
 #https://www.r-bloggers.com/2020/12/accessing-grahpql-from-r/
-
+#https://daattali.gitbooks.io/stat545-ubc-github-io/content/bit003_api-key-env-var.html
 findcharities <- function(curr_bbox, search_term) {
   
-  #tryCatch(
-    
-  #  expr = { withTimeout({
-    
-  
-
   link <- 'https://charitybase.uk/api/graphql'
 
   conn <- GraphqlClient$new(url = link,
-                          headers= list(Authorization='Apikey b9e235db-e6ab-43f4-9110-9b6da33560ad'))
+                          headers= list(Authorization=paste0('Apikey ', Sys.getenv("charitybase"))))
 
   query <- '
   query Search_charities_in_Area($top: Float!, $left: Float!, $right:Float!, $bottom: Float!, $search: String) {
@@ -100,21 +95,10 @@ findcharities <- function(curr_bbox, search_term) {
     charity_data_final$`Local authority` <- charity_data_final$geo$admin_district
     
     charity_data2return <- charity_data_final %>% select(-id, -contact, -geo) %>%
-      relocate(`Charity name`, `Causes`, `Phone`, `Email`, `Activities`, `Address`, `Postcode`, `Local authority`)
+      relocate(`Charity name`,`Phone`, `Activities`, `Causes`,  `Email`, `Address`, `Postcode`, `Local authority`)
   
     return(charity_data2return)
-  
-        } # end of else 
-      #}, # end of with timeout curly bracket
-      #  timeout = 0.01, onTimeout = 'warning') 
-      #}, # end of expression
-      # TimeoutException
-      #TimeoutException = function() {
-      #  print('time out issue')
-      #  test_error <- 'API running slowly'
-      #  return(test_error)
-      #}
     
-    #)
+  }
   
 }
