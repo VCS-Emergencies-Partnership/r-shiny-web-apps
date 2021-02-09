@@ -15,6 +15,9 @@ library(htmlwidgets) # Docker
 library(shinyjs) # Docker
 library(shinycssloaders) # docker
 library(shinyWidgets) #-- ADD TO DOCKER
+library(R.utils) # -- ADD TO DOCKER 
+library('ghql') # -- ADD TO DOCKER
+
 
 source("functions.r")
 
@@ -671,12 +674,15 @@ body <- dashboardBody(
                         box(
                           width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
                           title = "Local organisations", align = "left",
+                          fluidRow( 
+                            column(width=12,
+                                   uiOutput("search_needed", height='50px'))),
                           fluidRow(
-                                   uiOutput("search_needed", height='50px')),
-                          fluidRow(
+                            column(width=12,
                           #height = "600px"
-                          DT::dataTableOutput('local_orgs', height='400px')),
-                          style = "height:420px; overflow-y: scroll;overflow-x: scroll;"
+                          uiOutput('local_orgs_ui', height='250px'))),
+                          #scroll;overflow-x: scroll;"
+                          style = "height:500px; overflow-y: scroll;overflow-x: scroll;"
                       )
                     )
                   )
@@ -4471,24 +4477,72 @@ server = function(input, output, session) {
     
   })
   
-  # create search of charity database 
-  output$search_needed <- renderUI({
-    searchInput(inputId = "search_term", 
-                label = "Search for charities with particular cause",
-                placeholder = 'i.e emergency',
-                btnSearch = icon("search"), 
-                btnReset = icon("remove"), 
-                value='',
-                width = "50%")
-  })
+ 
   
   # --- show on first look ---
   observe({
     
     if(input$sidebar_id == 'unmetneed') {
+      
+      # create search of charity database 
+      output$search_needed <- renderUI({
+        # search bar
+        searchInput(inputId = "search_term", 
+                    label = "Search CharityBase for charities with a particular purpose",
+                    placeholder = 'i.e emergency response',
+                    btnSearch = icon("search"), 
+                    btnReset = icon("remove"), 
+                    value='',
+                    width = "70%")
+        
+      })
+      
     bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
-    charities_found <- findcharities(bounding_wanted, 'emergency response')
     
+    charities_found <- NULL
+    tryCatch({  
+    # - does the call take too long
+    charities_found <- withTimeout({
+                findcharities(bounding_wanted, '')
+      }, timeout =2)
+    },
+    error = function(e) {
+      charities_found <- NULL
+      
+    #TimeoutException = function(ex) {
+    #  message("Timeout. Skipping.") 
+    
+    })
+  
+    #print(charities_found)
+    
+    if (is.null(charities_found)) {
+      
+      output$local_orgs_ui <- renderUI({
+        div(p(tags$strong('Call to CharityBase database is running slowly'),
+              tags$br(),
+              'Pleas try again by searching for a cause in the search box'))
+      })
+      
+    }
+    
+    # running properly
+    else {
+    # # create search of charity database 
+    # output$search_needed <- renderUI({
+    #   # search bar
+    #   searchInput(inputId = "search_term", 
+    #               label = "Search for charities with particular cause",
+    #               placeholder = 'i.e emergency',
+    #               btnSearch = icon("search"), 
+    #               btnReset = icon("remove"), 
+    #               value='',
+    #               width = "50%")
+    #   
+    # })
+    
+    
+    # UI for table... render table
     output$local_orgs <- DT::renderDataTable({
       #Sys.sleep(1.5)
       DT::datatable(charities_found, filter=list(position='top'), escape=F,
@@ -4500,13 +4554,19 @@ server = function(input, output, session) {
                                    scrollX=T,
                                    scrollY='250px',
                                    autoWidth = T,
-                                   columnDefs = list(list(width = '200px', targets = c(2,3))),
+                                   columnDefs = list(list(width='400px',targets=c(5))),
                                    initComplete = htmlwidgets::JS(
                                      "function(settings, json) {",
                                      paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                      "}")
                     )) }, escape=F)
     
+    # now renderUI
+    output$local_orgs_ui <- renderUI({
+      DT::dataTableOutput('local_orgs')
+    })    
+    
+    }
     
     }
   })
@@ -4515,12 +4575,26 @@ server = function(input, output, session) {
   
   
   observeEvent(input$search_term_search, {
+    
+    
     if(input$theme == 'Covid-19') {
       
       bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
       
-      testing <- findcharities(bounding_wanted, input$search_term)
-      #print(testing)
+      charities_found <- NULL
+      tryCatch({  
+        # - does the call take too long
+        charities_found <- withTimeout({
+          findcharities(bounding_wanted, input$search_term)
+        }, timeout = 2)
+      },
+      error = function(e) {
+        charities_found <- NULL
+        
+        #TimeoutException = function(ex) {
+        #  message("Timeout. Skipping.") 
+        
+      })
       
     }
     
@@ -4528,17 +4602,54 @@ server = function(input, output, session) {
       if(input$theme == 'Flooding') {
         
         bounding_wanted <- st_bbox(filtered_areas_at_risk_flooding_resilience())
-        testing <- findcharities(bounding_wanted, input$search_term)
+        charities_found <- NULL
+        tryCatch({  
+          # - does the call take too long
+          charities_found <- withTimeout({
+            findcharities(bounding_wanted, input$search_term)
+          }, timeout = 2)
+        },
+        error = function(e) {
+          charities_found <- NULL
+          
+          #TimeoutException = function(ex) {
+          #  message("Timeout. Skipping.") 
+          
+        })
         #print(testing)
         
       }
     }
     
-    print(testing)
+   
+    if (is.null(charities_found)) {
+      
+      output$local_orgs_ui <- renderUI({
+        div(p(tags$strong('Call to CharityBase database is running slowly'),
+              tags$br(),
+              'Pleas try again by searching for a cause in the search box'))
+      })
+      
+     
+      
+    }
     
-    output$local_orgs <- DT::renderDataTable({
-      #Sys.sleep(1.5)
-      DT::datatable(testing, filter=list(position='top'), escape=F,
+    else {
+      
+      if (dim(charities_found)[1] == 0) {
+        
+        output$local_orgs_ui <- renderUI({
+          div(p(tags$strong('No charities with this purpose found within this area in CharityBase'),
+                tags$br(),
+                'Pleas try a different search term'))
+        })
+        
+      }
+      
+      else{
+        output$local_orgs <- DT::renderDataTable({
+        #Sys.sleep(1.5)
+        DT::datatable(charities_found, filter=list(position='top'), escape=F,
                     selection =c('single'),
                     options = list(dom='tp', #should remove top search box the p includes paging
                                    paging = T,
@@ -4547,14 +4658,18 @@ server = function(input, output, session) {
                                    scrollX=T,
                                    scrollY='250px',
                                    autoWidth = T,
-                                   columnDefs = list(list(width = '200px', targets = c(2,3))),
+                                   columnDefs = list(list(width='400px',targets=c(5))),
                                    initComplete = htmlwidgets::JS(
                                      "function(settings, json) {",
                                      paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                      "}")
                     )) }, escape=F)
- 
-   
+    
+            output$local_orgs_ui <- renderUI({
+            DT::dataTableOutput('local_orgs')
+          })
+      }
+    }
   })
   
   
