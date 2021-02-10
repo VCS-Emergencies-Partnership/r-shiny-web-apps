@@ -4505,7 +4505,7 @@ server = function(input, output, session) {
     # - does the call take too long
     charities_found <- withTimeout({
                 findcharities(bounding_wanted, '')
-      }, timeout =20)
+      }, timeout = 2)
     },
     error = function(e) {
       charities_found <- NULL
@@ -4607,7 +4607,7 @@ server = function(input, output, session) {
           # - does the call take too long
           charities_found <- withTimeout({
             findcharities(bounding_wanted, input$search_term)
-          }, timeout = 20)
+          }, timeout = 2)
         },
         error = function(e) {
           charities_found <- NULL
