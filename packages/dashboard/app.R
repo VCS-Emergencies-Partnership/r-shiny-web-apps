@@ -18,8 +18,9 @@ library(shinyWidgets) #-- ADD TO DOCKER
 library(R.utils) # -- ADD TO DOCKER 
 library('ghql') # -- ADD TO DOCKER
 
+readRenviron(".Renviron")
 
-source("functions.r")
+source("./functions.r")
 
 # function for table sorting 
 clearSorting <- function(proxy) {
@@ -4504,7 +4505,7 @@ server = function(input, output, session) {
     # - does the call take too long
     charities_found <- withTimeout({
                 findcharities(bounding_wanted, '')
-      }, timeout =2)
+      }, timeout =20)
     },
     error = function(e) {
       charities_found <- NULL
@@ -4576,7 +4577,6 @@ server = function(input, output, session) {
   
   observeEvent(input$search_term_search, {
     
-    
     if(input$theme == 'Covid-19') {
       
       bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
@@ -4607,7 +4607,7 @@ server = function(input, output, session) {
           # - does the call take too long
           charities_found <- withTimeout({
             findcharities(bounding_wanted, input$search_term)
-          }, timeout = 2)
+          }, timeout = 20)
         },
         error = function(e) {
           charities_found <- NULL
