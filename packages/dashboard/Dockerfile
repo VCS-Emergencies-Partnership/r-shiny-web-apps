@@ -1,6 +1,8 @@
-FROM rocker/shiny:3.6.3
+FROM rocker/shiny
+
 ARG SRC_DIR="/srv/shiny-server"
-COPY . $SRC_DIR
+COPY .Renviron $SRC_DIR
+COPY deps.txt $SRC_DIR
 WORKDIR $SRC_DIR
 RUN apt-get update \
   && apt-get install -y \
@@ -14,3 +16,5 @@ RUN apt-get update \
   --skipinstalled \
   $(cat $SRC_DIR/deps.txt)
 USER shiny
+
+CMD ["/srv/shiny-server/shiny-server.sh"]

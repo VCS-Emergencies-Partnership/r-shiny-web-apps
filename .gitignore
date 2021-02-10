@@ -1,6 +1,7 @@
 # History files
 .Rhistory
 .Rapp.history
+packages/dashboard/.Renviron
 
 # Session Data files
 .RData

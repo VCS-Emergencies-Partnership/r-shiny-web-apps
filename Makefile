@@ -18,7 +18,7 @@ run:
 .PHONY: run
 
 serve:
-	docker-compose up
+	docker-compose up 
 .PHONY: serve
 
 tf-doc:

@@ -13,7 +13,14 @@ library(feather) # Docker
 library(scales) # Docker
 library(htmlwidgets) # Docker
 library(shinyjs) # Docker
-library(shinycssloaders)
+library(shinycssloaders) # docker
+library(shinyWidgets) #-- ADD TO DOCKER
+library(R.utils) # -- ADD TO DOCKER 
+library('ghql') # -- ADD TO DOCKER
+
+readRenviron(".Renviron")
+
+source("./functions.r")
 
 # function for table sorting 
 clearSorting <- function(proxy) {
@@ -667,10 +674,16 @@ body <- dashboardBody(
                       column(width = 12,
                         box(
                           width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                          title = "Local organisations", align = "center",
-                          uiOutput("region_needed"),#height = "600px"
-                          DT::dataTableOutput('local_orgs', height='400px'),
-                          style = "height:420px; overflow-y: scroll;overflow-x: scroll;"
+                          title = "Local organisations", align = "left",
+                          fluidRow( 
+                            column(width=12,
+                                   uiOutput("search_needed", height='50px'))),
+                          fluidRow(
+                            column(width=12,
+                          #height = "600px"
+                          uiOutput('local_orgs_ui', height='250px'))),
+                          #scroll;overflow-x: scroll;"
+                          style = "height:500px; overflow-y: scroll;overflow-x: scroll;"
                       )
                     )
                   )
@@ -1710,38 +1723,38 @@ server = function(input, output, session) {
   })
   
   
-  # --- local organisation --- 
-  filtered_local_organisations <- reactive({
-    
-    req(input$sidebar_id)
-    if(input$sidebar_id == 'unmetneed') {
-      
-      if (input$tactical_cell == '-- England --') {
-       local_orgs <- local_organisations %>% select('Organisation name'=Name, 'Address', 
-                                                    'Website'=link, "Phone number"="Phone_number", 
-                                                    "Local authority"='LAD19NM', 
-                                                    "Region"='TacticalCell') %>%
-         arrange(`Organisation name`)
-      }
-      else {
-        if(input$lad_selected == 'All local authorities in region') {
-            local_orgs <- local_organisations %>% filter(TacticalCell == input$tactical_cell) %>% 
-              select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
-                    "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
-              arrange(`Organisation name`)
-        }
-        
-        else{
-          local_orgs <- local_organisations %>% filter(LAD19NM == input$lad_selected) %>% 
-            select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
-                   "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
-            arrange(`Organisation name`)
-        }
-      }
-      
-    }
-    
-  })
+  # # --- local organisation --- 
+  # filtered_local_organisations <- reactive({
+  #   
+  #   req(input$sidebar_id)
+  #   if(input$sidebar_id == 'unmetneed') {
+  #     
+  #     if (input$tactical_cell == '-- England --') {
+  #      local_orgs <- local_organisations %>% select('Organisation name'=Name, 'Address', 
+  #                                                   'Website'=link, "Phone number"="Phone_number", 
+  #                                                   "Local authority"='LAD19NM', 
+  #                                                   "Region"='TacticalCell') %>%
+  #        arrange(`Organisation name`)
+  #     }
+  #     else {
+  #       if(input$lad_selected == 'All local authorities in region') {
+  #           local_orgs <- local_organisations %>% filter(TacticalCell == input$tactical_cell) %>% 
+  #             select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
+  #                   "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
+  #             arrange(`Organisation name`)
+  #       }
+  #       
+  #       else{
+  #         local_orgs <- local_organisations %>% filter(LAD19NM == input$lad_selected) %>% 
+  #           select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
+  #                  "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
+  #           arrange(`Organisation name`)
+  #       }
+  #     }
+  #     
+  #   }
+  #   
+  # })
 
 
   # --- Generate Map ----
@@ -4465,43 +4478,241 @@ server = function(input, output, session) {
     
   })
   
+ 
   
-  # local organisations 
+  # --- show on first look ---
   observe({
-    req(input$sidebar_id)
-    if(input$sidebar_id == 'unmetneed') {
-      #if (input$tactical_cell == '-- England --') {
-      #  output$region_needed <-  renderUI({
-      #    div(p(tags$strong("Please select a region or local authority"), tags$br(),
-      #         tags$strong("to view the navca members in the area")))
-      #    })
-      #}
-      #else {
     
+    if(input$sidebar_id == 'unmetneed') {
+      
+      # create search of charity database 
+      output$search_needed <- renderUI({
+        # search bar
+        searchInput(inputId = "search_term", 
+                    label = "Search CharityBase for charities with a particular purpose",
+                    placeholder = 'i.e emergency response',
+                    btnSearch = icon("search"), 
+                    btnReset = icon("remove"), 
+                    value='',
+                    width = "70%")
         
-  # all lads in tcs wanted
-  output$local_orgs <- DT::renderDataTable({
-    #Sys.sleep(1.5)
-    DT::datatable(filtered_local_organisations(), filter=list(position='top'), escape=F,
-                  selection =c('single'),
-                  options = list(dom='tp', #should remove top search box the p includes paging
-                                 paging = T,
-                                 pageLength=5,
-                                 lengthMenu = c(5, 10, 15, 20),
-                                 scrollX=T,
-                                 scrollY='250px',
-                                 autoWidth = T,
-                                 columnDefs = list(list(width = '150px', targets = c(1,2))),
-                                 initComplete = htmlwidgets::JS(
-                                   "function(settings, json) {",
-                                   paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
-                                   "}")
-                  )) }, escape=F)
-      #}
+      })
+      
+    bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+    
+    charities_found <- NULL
+    tryCatch({  
+    # - does the call take too long
+    charities_found <- withTimeout({
+                findcharities(bounding_wanted, '')
+      }, timeout = 2)
+    },
+    error = function(e) {
+      charities_found <- NULL
+      
+    #TimeoutException = function(ex) {
+    #  message("Timeout. Skipping.") 
+    
+    })
   
+    #print(charities_found)
+    
+    if (is.null(charities_found)) {
+      
+      output$local_orgs_ui <- renderUI({
+        div(p(tags$strong('Call to CharityBase database is running slowly'),
+              tags$br(),
+              'Pleas try again by searching for a cause in the search box'))
+      })
+      
     }
-  
+    
+    # running properly
+    else {
+    # # create search of charity database 
+    # output$search_needed <- renderUI({
+    #   # search bar
+    #   searchInput(inputId = "search_term", 
+    #               label = "Search for charities with particular cause",
+    #               placeholder = 'i.e emergency',
+    #               btnSearch = icon("search"), 
+    #               btnReset = icon("remove"), 
+    #               value='',
+    #               width = "50%")
+    #   
+    # })
+    
+    
+    # UI for table... render table
+    output$local_orgs <- DT::renderDataTable({
+      #Sys.sleep(1.5)
+      DT::datatable(charities_found, filter=list(position='top'), escape=F,
+                    selection =c('single'),
+                    options = list(dom='tp', #should remove top search box the p includes paging
+                                   paging = T,
+                                   pageLength=5,
+                                   lengthMenu = c(5, 10, 15, 20),
+                                   scrollX=T,
+                                   scrollY='250px',
+                                   autoWidth = T,
+                                   columnDefs = list(list(width='400px',targets=c(3))),
+                                   initComplete = htmlwidgets::JS(
+                                     "function(settings, json) {",
+                                     paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                     "}")
+                    )) }, escape=F)
+    
+    # now renderUI
+    output$local_orgs_ui <- renderUI({
+      DT::dataTableOutput('local_orgs')
+    })    
+    
+    }
+    
+    }
   })
+  
+  
+  
+  
+  observeEvent(input$search_term_search, {
+    
+    if(input$theme == 'Covid-19') {
+      
+      bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+      
+      charities_found <- NULL
+      tryCatch({  
+        # - does the call take too long
+        charities_found <- withTimeout({
+          findcharities(bounding_wanted, input$search_term)
+        }, timeout = 2)
+      },
+      error = function(e) {
+        charities_found <- NULL
+        
+        #TimeoutException = function(ex) {
+        #  message("Timeout. Skipping.") 
+        
+      })
+      
+    }
+    
+    else {
+      if(input$theme == 'Flooding') {
+        
+        bounding_wanted <- st_bbox(filtered_areas_at_risk_flooding_resilience())
+        charities_found <- NULL
+        tryCatch({  
+          # - does the call take too long
+          charities_found <- withTimeout({
+            findcharities(bounding_wanted, input$search_term)
+          }, timeout = 2)
+        },
+        error = function(e) {
+          charities_found <- NULL
+          
+          #TimeoutException = function(ex) {
+          #  message("Timeout. Skipping.") 
+          
+        })
+        #print(testing)
+        
+      }
+    }
+    
+   
+    if (is.null(charities_found)) {
+      
+      output$local_orgs_ui <- renderUI({
+        div(p(tags$strong('Call to CharityBase database is running slowly'),
+              tags$br(),
+              'Pleas try again by searching for a cause in the search box'))
+      })
+      
+     
+      
+    }
+    
+    else {
+      
+      if (dim(charities_found)[1] == 0) {
+        
+        output$local_orgs_ui <- renderUI({
+          div(p(tags$strong('No charities with this purpose found within this area in CharityBase'),
+                tags$br(),
+                'Pleas try a different search term'))
+        })
+        
+      }
+      
+      else{
+        output$local_orgs <- DT::renderDataTable({
+        #Sys.sleep(1.5)
+        DT::datatable(charities_found, filter=list(position='top'), escape=F,
+                    selection =c('single'),
+                    options = list(dom='tp', #should remove top search box the p includes paging
+                                   paging = T,
+                                   pageLength=5,
+                                   lengthMenu = c(5, 10, 15, 20),
+                                   scrollX=T,
+                                   scrollY='250px',
+                                   autoWidth = T,
+                                   columnDefs = list(list(width='400px',targets=c(3))),
+                                   initComplete = htmlwidgets::JS(
+                                     "function(settings, json) {",
+                                     paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                     "}")
+                    )) }, escape=F)
+    
+            output$local_orgs_ui <- renderUI({
+            DT::dataTableOutput('local_orgs')
+          })
+      }
+    }
+  })
+  
+  
+  
+  
+  
+  # 
+  # # local organisations 
+  # observe({
+  #   req(input$sidebar_id)
+  #   if(input$sidebar_id == 'unmetneed') {
+  #     #if (input$tactical_cell == '-- England --') {
+  #     #  output$region_needed <-  renderUI({
+  #     #    div(p(tags$strong("Please select a region or local authority"), tags$br(),
+  #     #         tags$strong("to view the navca members in the area")))
+  #     #    })
+  #     #}
+  #     #else {
+  #   
+  #       
+  # # all lads in tcs wanted
+  # output$local_orgs <- DT::renderDataTable({
+  #   #Sys.sleep(1.5)
+  #   DT::datatable(filtered_local_organisations(), filter=list(position='top'), escape=F,
+  #                 selection =c('single'),
+  #                 options = list(dom='tp', #should remove top search box the p includes paging
+  #                                paging = T,
+  #                                pageLength=5,
+  #                                lengthMenu = c(5, 10, 15, 20),
+  #                                scrollX=T,
+  #                                scrollY='250px',
+  #                                autoWidth = T,
+  #                                columnDefs = list(list(width = '150px', targets = c(1,2))),
+  #                                initComplete = htmlwidgets::JS(
+  #                                  "function(settings, json) {",
+  #                                  paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+  #                                  "}")
+  #                 )) }, escape=F)
+  #     #}
+  # 
+  #   }
+  # 
+  # })
   
   # # ---- volunteer capacity areas to focus ----
   #
