@@ -10,9 +10,10 @@ library(R.utils)
 findcharities <- function(curr_bbox, search_term) {
   
   link <- 'https://charitybase.uk/api/graphql'
-
+  
+  #print(Sys.getenv("CHARITY_BASE_API_KEY"))
   conn <- GraphqlClient$new(url = link,
-                          headers= list(Authorization=paste0('Apikey ', Sys.getenv("charitybase"))))
+                          headers= list(Authorization=paste0('Apikey ', Sys.getenv("CHARITY_BASE_API_KEY"))))
 
   query <- '
   query Search_charities_in_Area($top: Float!, $left: Float!, $right:Float!, $bottom: Float!, $search: String) {
