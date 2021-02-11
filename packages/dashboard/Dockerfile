@@ -1,4 +1,4 @@
-FROM rocker/shiny
+FROM rocker/shiny:3.6.3
 
 ARG SRC_DIR="/srv/shiny-server"
 COPY .Renviron $SRC_DIR
