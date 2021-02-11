@@ -39,7 +39,6 @@ jobs:
       - name: Infuse with secrets
         run: |
           echo "CHARITY_BASE_API_KEY=${{ secrets.CHARITY_BASE_API_KEY }}" >> .Renviron
-          echo "NEW_KEY_NAME=${{ secrets.NEW_KEY_NAME }}" >> .Renviron
 
       - name: Generate image tag
         id: tag
