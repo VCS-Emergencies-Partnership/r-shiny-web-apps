@@ -40,7 +40,11 @@ LA_vi <- LA_vi %>% rename('LAD19CD'=Code)
 # -- Area lookup table ---
 #area_lookup <- read_csv("https://github.com/britishredcrosssociety/covid-19-vulnerability/raw/master/data/lookup%20mosa11%20to%20lad17%20to%20lad19%20to%20tactical%20cell.csv")
 area_lookup <- read_feather('./data/vulnerability_index/lookup_msoa11_to_lad19_to_tactical_cell.feather')
-area_lookup_tc2lad <- area_lookup %>% select('LAD19CD', 'TacticalCell')
+area_lookup_tc2lad <- area_lookup %>% select('LAD19CD', 'TacticalCell') %>% 
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
 
 
 # ---- Read in the resilience index ----
@@ -70,7 +74,8 @@ lad_uk <- lad_uk %>% rename('LAD19CD'=lad19cd)
 tc_shp <- read_sf('data/reduced_boundaries/vcsep_multiagencycells_wo-iom-ci_BFE.shp') %>%
   st_transform('+proj=longlat +datum=WGS84')
 
-tc_shp <- tc_shp %>% mutate("TacticalCell"=case_when(lookup_loc == 'Midlands and the East' ~ 'Central',
+tc_shp <- tc_shp %>% mutate("TacticalCell"=case_when(lookup_loc == 'Midlands and the East' ~ 'Midlands & East',
+                                                     lookup_loc == 'South and the Channel Islands' ~ 'South West',
                                                      TRUE ~ as.character(.$lookup_loc)))
 
 
@@ -91,7 +96,11 @@ lad_uk2areas2vulnerability <- lad_uk2areas2vulnerability_full %>% select('LAD19C
 
 # res shapefile
 lad_uk2vuln_resilience <- left_join(unique(lad_uk2areas), LA_res, by='LAD19CD', keep=F)
-lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>% filter(!is.na(fill))
+lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>% filter(!is.na(fill))  %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
 
 
 # for mapping click add in id column
@@ -119,15 +128,19 @@ par_table <- read_feather('data/people_at_risk/people-at-risk.feather')
 
 # temp fix of typo 
 par_table <- par_table %>% rename('lad_prop_recieving_section_95_support'=lad_prop_receving_section95_support,
-                                  'lad_prop_unemployed_on_ucred' = 'lad_prop_upemployed_on_ucred') 
+                                  'lad_prop_unemployed_on_ucred' = 'lad_prop_upemployed_on_ucred') %>% 
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
 
 
 # just working with engalnd for now
-england_regions = c("North", "Central", "London", "South and the Channel Islands", "South East")
+england_regions = c("North", "Midlands & East", "London", "South West", "South East")
 
 
 # just working with engalnd for now
-england_regions = c("North", "Central", "London", "South and the Channel Islands", "South East")
+england_regions = c("North", 'Midlands & East', "London", "South West", "South East")
 
 
 # calculate averages for all local authorities across england - to me this is the avg across england
@@ -151,6 +164,10 @@ par_table_lad_avg <- par_table %>%
          ) %>%
   summarise_all(., list('mean' = mean, 'stdev'=sd), na.rm=T) %>%
   mutate('LAD19CD'='lad_avg', 'TacticalCell'='lad_avg') %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) %>%
   select('LAD19CD', 'TacticalCell', everything())
 
 # calculate the tactical cell average.
@@ -176,6 +193,10 @@ par_table_tc_avg <- par_table %>%
   summarise_all(., list('mean'=mean, 'stdev'=sd), na.rm=T) %>%
   summarise_all(., list(round), 2) %>%
   mutate('LAD19CD'='tc_avg', 'TacticalCell'='tc_avg') %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) %>%
   select('LAD19CD', 'TacticalCell', everything())
 
 # --- areas to focus ---
@@ -185,14 +206,22 @@ covid_area2focus <- read_feather('data/areas_to_focus/areas2focus_covid.feather'
 # covid prefix for name for table
 covid_week = colnames(covid_area2focus)[6]
 covid_week = strsplit(covid_week, " ")
-covid_week = paste('Week', covid_week[[1]][2],'\n')
+covid_week = paste('Week', covid_week[[1]][2], ' 2021\n')
 # rename with suffix for time being. 
 covid_area2focus <- covid_area2focus %>%
-  rename('covid cases per 100,000'=colnames(covid_area2focus)[6])
+  rename('covid cases per 100,000'=colnames(covid_area2focus)[6]) %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
   
 # ---- Flooding ---
 # flooding stats within resilience index
 flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) %>%
   select('LAD19CD','LAD19NM','TacticalCell',`Vulnerability quintile`, `Total people in flood risk areas`, 
          `% people in flood risk areas`, `Flood risk quintile`,
          `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,
@@ -356,8 +385,7 @@ body <- dashboardBody(
                            div(#p("Our", tags$strong("Data Working Group"), "meets fortnightly on a Thursday at 11am to help us prioritise
                             # what data and analysis to focus on next."),
                                #p(tags$strong("Join us"), "to lend your voice to the conversation."),
-                               p(tags$strong("Share data:"), tags$br(), "Use our", tags$a(href="https://ingest.vcsep.org.uk/", target="_blank","Data App"), "or get in touch with
-             our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk")),
+                               p(tags$strong("Share data:"), tags$br(), "Get in touch with our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk")),
                                p(tags$strong("Feedback or make a request:"), tags$br(), "We welcome your thoughts on what data would be useful to help shape your support to those in need.
                                   To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk"),
                                 p(tags$strong("Find out more:"), tags$br(), "To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")
@@ -658,17 +686,17 @@ body <- dashboardBody(
                     #      )
                     #    ),
                     # 
-                        fluidRow(
-                        column(width = 12,
-                             box(
-                                width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                                 title = "People in need", align = "center", #height = "600px"
-                                 uiOutput('people_in_Need'),
-                                 style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
-                               )
-                            )
-
-                      ),
+                      #   fluidRow(
+                      #   column(width = 12,
+                      #        box(
+                      #           width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
+                      #            title = "People in need", align = "center", #height = "600px"
+                      #            uiOutput('people_in_Need'),
+                      #            style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
+                      #          )
+                      #       )
+                      # 
+                      # ),
                       # organisations in area 
                     fluidRow(
                       column(width = 12,
