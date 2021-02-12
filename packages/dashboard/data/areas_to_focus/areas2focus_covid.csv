@@ -1,60 +1,60 @@
-LAD19CD,Name,Vulnerability quintile,TacticalCell,week 3,week 4,cases_difference,% change in covid cases
-E06000001,Hartlepool,5,North,319.23,316.03,-3.2,-1
-E06000002,Middlesbrough,5,North,455.38,351.82,-103.56,-22.7
-E06000003,Redcar and Cleveland,4,North,398.83,266.86,-131.97,-33.1
-E06000004,Stockton-on-Tees,5,North,349.64,284.27,-65.37,-18.7
-E06000005,Darlington,5,North,308.04,247.18,-60.86,-19.8
-E06000006,Halton,5,North,581.87,403.37,-178.5,-30.7
-E06000007,Warrington,4,North,403.78,315.69,-88.09,-21.8
-E06000008,Blackburn with Darwen,4,North,543.1,409.5,-133.6,-24.6
-E06000009,Blackpool,5,North,253.14,226.61,-26.53,-10.5
-E06000010,"Kingston upon Hull, City of",5,North,203.64,156.67,-46.97,-23.1
-E06000011,East Riding of Yorkshire,3,North,174.69,150.95,-23.74,-13.6
-E06000012,North East Lincolnshire,5,Central,97.77,90.87,-6.9,-7.1
-E06000013,North Lincolnshire,4,Central,131.75,125.95,-5.8,-4.4
-E06000014,York,1,North,256.86,181.37,-75.49,-29.4
-E06000015,Derby,5,Central,522.34,367.27,-155.07,-29.7
-E06000016,Leicester,4,Central,497.71,356.27,-141.44,-28.4
-E06000017,Rutland,2,Central,172.82,230.42,57.6,33.3
-E06000018,Nottingham,5,Central,388.1,324.12,-63.98,-16.5
-E06000019,"Herefordshire, County of",2,Central,212.65,144.19,-68.46,-32.2
-E06000020,Telford and Wrekin,3,Central,392.54,311.92,-80.62,-20.5
-E06000021,Stoke-on-Trent,5,Central,309.31,231.3,-78.01,-25.2
-E06000022,Bath and North East Somerset,1,South and the Channel Islands,230.75,173.84,-56.91,-24.7
-E06000023,"Bristol, City of",2,South and the Channel Islands,306.45,256.81,-49.64,-16.2
-E06000024,North Somerset,2,South and the Channel Islands,238.08,167.87,-70.21,-29.5
-E06000025,South Gloucestershire,3,South and the Channel Islands,300.6,209.05,-91.55,-30.5
-E06000026,Plymouth,4,South and the Channel Islands,208.7,114.84,-93.86,-45
-E06000027,Torbay,5,South and the Channel Islands,168.06,169.52,1.46,0.9
-E06000030,Swindon,4,South and the Channel Islands,218.28,191.28,-27,-12.4
-E06000031,Peterborough,3,Central,472.66,396.03,-76.63,-16.2
-E06000032,Luton,4,South East,583.43,429,-154.43,-26.5
-E06000033,Southend-on-Sea,4,South East,413.38,228.26,-185.12,-44.8
-E06000034,Thurrock,4,South East,418.72,280.48,-138.24,-33
-E06000035,Medway,3,South East,391.3,235.86,-155.44,-39.7
-E06000036,Bracknell Forest,1,South and the Channel Islands,315.79,234.19,-81.6,-25.8
-E06000037,West Berkshire,1,South and the Channel Islands,252.45,173.56,-78.89,-31.2
-E06000038,Reading,1,South and the Channel Islands,507.48,356.66,-150.82,-29.7
-E06000039,Slough,5,South and the Channel Islands,673.4,454.06,-219.34,-32.6
-E06000040,Windsor and Maidenhead,1,South and the Channel Islands,293.88,175.67,-118.21,-40.2
-E06000041,Wokingham,1,South and the Channel Islands,241.35,193.43,-47.92,-19.9
-E06000042,Milton Keynes,3,South and the Channel Islands,417.88,274.63,-143.25,-34.3
-E06000043,Brighton and Hove,1,South East,283.27,169.48,-113.79,-40.2
-E06000044,Portsmouth,4,South East,426.23,284.31,-141.92,-33.3
-E06000045,Southampton,4,South East,379.77,275.62,-104.15,-27.4
-E06000046,Isle of Wight,4,South East,383.72,205.26,-178.46,-46.5
-E06000047,County Durham,4,North,295.23,249.77,-45.46,-15.4
-E06000049,Cheshire East,3,North,233.5,193.67,-39.83,-17.1
-E06000050,Cheshire West and Chester,2,North,327.92,264.96,-62.96,-19.2
-E06000051,Shropshire,3,Central,284.4,214.46,-69.94,-24.6
-E06000052,Cornwall,2,South and the Channel Islands,176.28,149,-27.28,-15.5
+LAD19CD,Name,Vulnerability quintile,TacticalCell,week 4,week 5,cases_difference,% change in covid cases
+E06000001,Hartlepool,5,North,320.3,206.06,-114.24,-35.7
+E06000002,Middlesbrough,5,North,356.08,373.1,17.02,4.8
+E06000003,Redcar and Cleveland,4,North,269.05,212.91,-56.14,-20.9
+E06000004,Stockton-on-Tees,5,North,291.87,248.29,-43.58,-14.9
+E06000005,Darlington,5,North,257.48,198.5,-58.98,-22.9
+E06000006,Halton,5,North,405.69,275.87,-129.82,-32
+E06000007,Warrington,4,North,317.6,231.89,-85.71,-27
+E06000008,Blackburn with Darwen,4,North,419.52,296.6,-122.92,-29.3
+E06000009,Blackpool,5,North,230.2,197.21,-32.99,-14.3
+E06000010,"Kingston upon Hull, City of",5,North,159.75,159.37,-0.38,-0.2
+E06000011,East Riding of Yorkshire,3,North,154.76,123.98,-30.78,-19.9
+E06000012,North East Lincolnshire,5,Central,96.51,96.51,0,0
+E06000013,North Lincolnshire,4,Central,127.11,118.4,-8.71,-6.9
+E06000014,York,1,North,184.69,116.32,-68.37,-37
+E06000015,Derby,5,Central,374.27,248.73,-125.54,-33.5
+E06000016,Leicester,4,Central,369.54,284.57,-84.97,-23
+E06000017,Rutland,2,Central,230.42,463.35,232.93,101.1
+E06000018,Nottingham,5,Central,334.64,290.48,-44.16,-13.2
+E06000019,"Herefordshire, County of",2,Central,151.45,86.1,-65.35,-43.1
+E06000020,Telford and Wrekin,3,Central,316.92,245.2,-71.72,-22.6
+E06000021,Stoke-on-Trent,5,Central,239.88,220.77,-19.11,-8
+E06000022,Bath and North East Somerset,1,South and the Channel Islands,175.91,92.61,-83.3,-47.4
+E06000023,"Bristol, City of",2,South and the Channel Islands,260.69,176.96,-83.73,-32.1
+E06000024,North Somerset,2,South and the Channel Islands,170.19,140.9,-29.29,-17.2
+E06000025,South Gloucestershire,3,South and the Channel Islands,213.61,168.37,-45.24,-21.2
+E06000026,Plymouth,4,South and the Channel Islands,115.99,67.53,-48.46,-41.8
+E06000027,Torbay,5,South and the Channel Islands,169.52,122.56,-46.96,-27.7
+E06000030,Swindon,4,South and the Channel Islands,193.53,133.67,-59.86,-30.9
+E06000031,Peterborough,3,Central,413.83,291.21,-122.62,-29.6
+E06000032,Luton,4,South East,437.92,310.25,-127.67,-29.2
+E06000033,Southend-on-Sea,4,South East,240.82,180.75,-60.07,-24.9
+E06000034,Thurrock,4,South East,295.4,153.15,-142.25,-48.2
+E06000035,Medway,3,South East,241.24,141.44,-99.8,-41.4
+E06000036,Bracknell Forest,1,South and the Channel Islands,241.54,193.39,-48.15,-19.9
+E06000037,West Berkshire,1,South and the Channel Islands,177.34,154.62,-22.72,-12.8
+E06000038,Reading,1,South and the Channel Islands,364.07,193.47,-170.6,-46.9
+E06000039,Slough,5,South and the Channel Islands,470.78,305.61,-165.17,-35.1
+E06000040,Windsor and Maidenhead,1,South and the Channel Islands,182.27,140.67,-41.6,-22.8
+E06000041,Wokingham,1,South and the Channel Islands,196.94,118.05,-78.89,-40.1
+E06000042,Milton Keynes,3,South and the Channel Islands,278.71,179.62,-99.09,-35.6
+E06000043,Brighton and Hove,1,South East,175.67,101.76,-73.91,-42.1
+E06000044,Portsmouth,4,South East,291.76,190.32,-101.44,-34.8
+E06000045,Southampton,4,South East,281.17,207.51,-73.66,-26.2
+E06000046,Isle of Wight,4,South East,208.08,107.22,-100.86,-48.5
+E06000047,County Durham,4,North,255.05,185.25,-69.8,-27.4
+E06000049,Cheshire East,3,North,197.58,163.48,-34.1,-17.3
+E06000050,Cheshire West and Chester,2,North,269.04,178.39,-90.65,-33.7
+E06000051,Shropshire,3,Central,217.56,183.82,-33.74,-15.5
+E06000052,Cornwall,2,South and the Channel Islands,151.45,79.57,-71.88,-47.5
 E06000053,Isles of Scilly,1,South and the Channel Islands,NA,NA,NA,NA
-E06000054,Wiltshire,2,South and the Channel Islands,227.19,147.79,-79.4,-34.9
-E06000055,Bedford,1,South East,488.77,382.01,-106.76,-21.8
-E06000056,Central Bedfordshire,2,South East,337.44,239.74,-97.7,-29
-E06000057,Northumberland,5,North,222.06,168.1,-53.96,-24.3
-E06000058,"Bournemouth, Christchurch and Poole",2,South and the Channel Islands,572.68,351.35,-221.33,-38.6
-E06000059,Dorset,4,South and the Channel Islands,247.02,203.17,-43.85,-17.8
+E06000054,Wiltshire,2,South and the Channel Islands,150.59,127.99,-22.6,-15
+E06000055,Bedford,1,South East,388.94,284.49,-104.45,-26.9
+E06000056,Central Bedfordshire,2,South East,245.63,163.87,-81.76,-33.3
+E06000057,Northumberland,5,North,171.2,136.46,-34.74,-20.3
+E06000058,"Bournemouth, Christchurch and Poole",2,South and the Channel Islands,359.45,229.93,-129.52,-36
+E06000059,Dorset,4,South and the Channel Islands,207.92,145.04,-62.88,-30.2
 E07000004,Aylesbury Vale,2,South and the Channel Islands,NA,NA,NA,NA
 E07000005,Chiltern,1,South and the Channel Islands,NA,NA,NA,NA
 E07000006,South Bucks,2,South and the Channel Islands,NA,NA,NA,NA
@@ -247,72 +247,72 @@ E07000243,Stevenage,3,South East,NA,NA,NA,NA
 E07000244,East Suffolk,4,Central,NA,NA,NA,NA
 E07000245,West Suffolk,2,Central,NA,NA,NA,NA
 E07000246,Somerset West and Taunton,3,South and the Channel Islands,NA,NA,NA,NA
-E08000001,Bolton,5,North,315.08,267.08,-48,-15.2
-E08000002,Bury,5,North,292.16,226.19,-65.97,-22.6
-E08000003,Manchester,5,North,329.74,286.87,-42.87,-13
-E08000004,Oldham,5,North,250.52,231.12,-19.4,-7.7
-E08000005,Rochdale,5,North,279.21,249.54,-29.67,-10.6
-E08000006,Salford,5,North,330.71,277.01,-53.7,-16.2
-E08000007,Stockport,2,North,290.02,237.2,-52.82,-18.2
-E08000008,Tameside,5,North,316.12,260.49,-55.63,-17.6
-E08000009,Trafford,2,North,287.33,211.92,-75.41,-26.2
-E08000010,Wigan,5,North,320.69,256.49,-64.2,-20
-E08000011,Knowsley,5,North,778.19,481.23,-296.96,-38.2
-E08000012,Liverpool,5,North,519.03,330.9,-188.13,-36.2
-E08000013,St. Helens,5,North,632.39,449.1,-183.29,-29
-E08000014,Sefton,5,North,505.77,336.82,-168.95,-33.4
-E08000015,Wirral,4,North,465.11,278.39,-186.72,-40.1
-E08000016,Barnsley,5,North,263.3,211.86,-51.44,-19.5
-E08000017,Doncaster,5,North,227.32,222.51,-4.81,-2.1
-E08000018,Rotherham,5,North,279.57,224.18,-55.39,-19.8
-E08000019,Sheffield,4,North,242.11,203.47,-38.64,-16
-E08000021,Newcastle upon Tyne,4,North,225.88,163.79,-62.09,-27.5
-E08000022,North Tyneside,4,North,213.07,208.26,-4.81,-2.3
-E08000023,South Tyneside,5,North,276.2,212.62,-63.58,-23
-E08000024,Sunderland,5,North,326.25,319.76,-6.49,-2
-E08000025,Birmingham,5,Central,526.7,391.48,-135.22,-25.7
-E08000026,Coventry,5,Central,397.02,306.58,-90.44,-22.8
-E08000027,Dudley,5,Central,538.87,402.99,-135.88,-25.2
-E08000028,Sandwell,5,Central,706.04,508.14,-197.9,-28
-E08000029,Solihull,4,Central,396.54,302.72,-93.82,-23.7
-E08000030,Walsall,5,Central,595.14,459.58,-135.56,-22.8
-E08000031,Wolverhampton,5,Central,642.85,386.17,-256.68,-39.9
-E08000032,Bradford,5,North,296.98,244.18,-52.8,-17.8
-E08000033,Calderdale,3,North,222.74,161.74,-61,-27.4
-E08000034,Kirklees,4,North,242.62,232.61,-10.01,-4.1
-E08000035,Leeds,4,North,278.14,222.03,-56.11,-20.2
-E08000036,Wakefield,5,North,254.66,210.16,-44.5,-17.5
-E08000037,Gateshead,5,North,202.42,210.34,7.92,3.9
-E09000001,City of London,1,London,400.56,204.92,-195.64,-48.8
-E09000002,Barking and Dagenham,5,London,592.75,335.83,-256.92,-43.3
-E09000003,Barnet,2,London,481.47,270.8,-210.67,-43.8
-E09000004,Bexley,3,London,430.55,231.18,-199.37,-46.3
-E09000005,Brent,2,London,624.98,387.54,-237.44,-38
-E09000006,Bromley,2,London,376.73,222.37,-154.36,-41
-E09000007,Camden,1,London,294.04,149.24,-144.8,-49.2
-E09000008,Croydon,3,London,493.91,283.42,-210.49,-42.6
-E09000009,Ealing,3,London,634.28,403.45,-230.83,-36.4
-E09000010,Enfield,3,London,439.79,278.91,-160.88,-36.6
-E09000011,Greenwich,3,London,488.99,267.07,-221.92,-45.4
-E09000012,Hackney,2,London,400.56,204.92,-195.64,-48.8
-E09000013,Hammersmith and Fulham,1,London,368.9,286.81,-82.09,-22.3
-E09000014,Haringey,2,London,444.08,251.26,-192.82,-43.4
-E09000015,Harrow,2,London,510.03,336.84,-173.19,-34
-E09000016,Havering,4,London,398.38,245.04,-153.34,-38.5
-E09000017,Hillingdon,3,London,539.64,374.43,-165.21,-30.6
-E09000018,Hounslow,4,London,604,411.01,-192.99,-32
-E09000019,Islington,1,London,313.44,197.97,-115.47,-36.8
-E09000020,Kensington and Chelsea,1,London,279.9,183.18,-96.72,-34.6
-E09000021,Kingston upon Thames,1,London,336.89,268.16,-68.73,-20.4
-E09000022,Lambeth,2,London,412.23,275.12,-137.11,-33.3
-E09000023,Lewisham,3,London,432.9,251.76,-181.14,-41.8
-E09000024,Merton,1,London,446.87,293.39,-153.48,-34.3
-E09000025,Newham,4,London,550.22,327.35,-222.87,-40.5
-E09000026,Redbridge,3,London,525.19,287.33,-237.86,-45.3
-E09000027,Richmond upon Thames,1,London,252.5,212.61,-39.89,-15.8
-E09000028,Southwark,2,London,392.69,233.67,-159.02,-40.5
-E09000029,Sutton,1,London,457.96,297.07,-160.89,-35.1
-E09000030,Tower Hamlets,2,London,408.32,190.3,-218.02,-53.4
-E09000031,Waltham Forest,3,London,499.67,261.39,-238.28,-47.7
-E09000032,Wandsworth,1,London,329.72,222.95,-106.77,-32.4
-E09000033,Westminster,1,London,310.73,193.25,-117.48,-37.8
+E08000001,Bolton,5,North,273,283.43,10.43,3.8
+E08000002,Bury,5,North,229.33,205.77,-23.56,-10.3
+E08000003,Manchester,5,North,292.84,232.61,-60.23,-20.6
+E08000004,Oldham,5,North,236.18,208.34,-27.84,-11.8
+E08000005,Rochdale,5,North,254.03,218.51,-35.52,-14
+E08000006,Salford,5,North,281.65,237.99,-43.66,-15.5
+E08000007,Stockport,2,North,243.68,205.16,-38.52,-15.8
+E08000008,Tameside,5,North,264.91,177.49,-87.42,-33
+E08000009,Trafford,2,North,215.71,163.05,-52.66,-24.4
+E08000010,Wigan,5,North,260.75,197.16,-63.59,-24.4
+E08000011,Knowsley,5,North,487.86,344.02,-143.84,-29.5
+E08000012,Liverpool,5,North,336.32,264.64,-71.68,-21.3
+E08000013,St. Helens,5,North,461.83,342.77,-119.06,-25.8
+E08000014,Sefton,5,North,345.14,278.57,-66.57,-19.3
+E08000015,Wirral,4,North,283.02,195.06,-87.96,-31.1
+E08000016,Barnsley,5,North,215.1,187.15,-27.95,-13
+E08000017,Doncaster,5,North,226.68,181.79,-44.89,-19.8
+E08000018,Rotherham,5,North,227.95,220.04,-7.91,-3.5
+E08000019,Sheffield,4,North,216.12,159.19,-56.93,-26.3
+E08000021,Newcastle upon Tyne,4,North,166.11,137.38,-28.73,-17.3
+E08000022,North Tyneside,4,North,211.63,179.88,-31.75,-15
+E08000023,South Tyneside,5,North,217.92,168.9,-49.02,-22.5
+E08000024,Sunderland,5,North,326.61,275.83,-50.78,-15.5
+E08000025,Birmingham,5,Central,400.33,273.6,-126.73,-31.7
+E08000026,Coventry,5,Central,311.69,220.45,-91.24,-29.3
+E08000027,Dudley,5,Central,409.83,233.21,-176.62,-43.1
+E08000028,Sandwell,5,Central,519.1,378.75,-140.35,-27
+E08000029,Solihull,4,Central,304.57,219.53,-85.04,-27.9
+E08000030,Walsall,5,Central,468.69,406.34,-62.35,-13.3
+E08000031,Wolverhampton,5,Central,394.9,302.25,-92.65,-23.5
+E08000032,Bradford,5,North,249.36,216.02,-33.34,-13.4
+E08000033,Calderdale,3,North,165.52,192.95,27.43,16.6
+E08000034,Kirklees,4,North,236.71,190.09,-46.62,-19.7
+E08000035,Leeds,4,North,229.59,191.52,-38.07,-16.6
+E08000036,Wakefield,5,North,214.75,202.98,-11.77,-5.5
+E08000037,Gateshead,5,North,212.81,168.77,-44.04,-20.7
+E09000001,City of London,1,London,215.58,114.15,-101.43,-47
+E09000002,Barking and Dagenham,5,London,345.22,225.92,-119.3,-34.6
+E09000003,Barnet,2,London,283.43,176.83,-106.6,-37.6
+E09000004,Bexley,3,London,238.03,157.08,-80.95,-34
+E09000005,Brent,2,London,399.97,238.04,-161.93,-40.5
+E09000006,Bromley,2,London,230.19,135.1,-95.09,-41.3
+E09000007,Camden,1,London,157.76,94.43,-63.33,-40.1
+E09000008,Croydon,3,London,295.57,187.48,-108.09,-36.6
+E09000009,Ealing,3,London,412.22,288.47,-123.75,-30
+E09000010,Enfield,3,London,285.21,168.07,-117.14,-41.1
+E09000011,Greenwich,3,London,278.18,168.09,-110.09,-39.6
+E09000012,Hackney,2,London,215.58,114.15,-101.43,-47
+E09000013,Hammersmith and Fulham,1,London,299.77,198.77,-101,-33.7
+E09000014,Haringey,2,London,263.17,135.12,-128.05,-48.7
+E09000015,Harrow,2,London,343.61,215,-128.61,-37.4
+E09000016,Havering,4,London,258.52,177.23,-81.29,-31.4
+E09000017,Hillingdon,3,London,380.94,270.15,-110.79,-29.1
+E09000018,Hounslow,4,London,427.96,283.22,-144.74,-33.8
+E09000019,Islington,1,London,204.56,113.83,-90.73,-44.4
+E09000020,Kensington and Chelsea,1,London,195.99,132.58,-63.41,-32.4
+E09000021,Kingston upon Thames,1,London,276.05,181.96,-94.09,-34.1
+E09000022,Lambeth,2,London,288.62,181.88,-106.74,-37
+E09000023,Lewisham,3,London,261.25,152.69,-108.56,-41.6
+E09000024,Merton,1,London,308.4,214.48,-93.92,-30.5
+E09000025,Newham,4,London,343.21,210.4,-132.81,-38.7
+E09000026,Redbridge,3,London,302.08,185.44,-116.64,-38.6
+E09000027,Richmond upon Thames,1,London,220.18,162.11,-58.07,-26.4
+E09000028,Southwark,2,London,249.98,135.5,-114.48,-45.8
+E09000029,Sutton,1,London,309.67,199.18,-110.49,-35.7
+E09000030,Tower Hamlets,2,London,201.08,109.32,-91.76,-45.6
+E09000031,Waltham Forest,3,London,269.69,164.63,-105.06,-39
+E09000032,Wandsworth,1,London,235.99,154.09,-81.9,-34.7
+E09000033,Westminster,1,London,199.76,114.8,-84.96,-42.5

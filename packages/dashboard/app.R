@@ -241,6 +241,13 @@ flood_warning_points <- left_join(flood_warning_points,flood_warning_meta, by='f
 
 # -- vcs indicators
 requests <- read_feather('data/vcs_indicators/requests_this_week_and_last.feather')
+requests <- requests %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
+  
+
 volunteers <- read_feather('data/vcs_indicators/volunteer-capacity-lad19CD-tc.feather')
 
 
