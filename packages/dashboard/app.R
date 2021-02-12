@@ -96,6 +96,7 @@ lad_uk2areas2vulnerability <- lad_uk2areas2vulnerability_full %>% select('LAD19C
 
 # res shapefile
 lad_uk2vuln_resilience <- left_join(unique(lad_uk2areas), LA_res, by='LAD19CD', keep=F)
+
 lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>% filter(!is.na(fill))  %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
                                          TacticalCell == 'Central' ~ 'Midlands & East',
@@ -234,10 +235,24 @@ flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_poi
 flood_warning_meta <- read_feather('./data/areas_to_focus/current_live_warnings_metadata.feather')
 
 # join dfs 
-flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) 
+flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
 
-flood_warning_points <- left_join(flood_warning_points,flood_warning_meta, by='floodAreaID', keep=F)
+flood_warning_points <- left_join(flood_warning_points,flood_warning_meta, by='floodAreaID', keep=F) %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
 
+flood_warning_meta <- flood_warning_meta %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
+  
 
 # -- vcs indicators
 requests <- read_feather('data/vcs_indicators/requests_this_week_and_last.feather')
@@ -988,7 +1003,35 @@ server = function(input, output, session) {
         leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
         setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # centre map on Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
         addProviderTiles(providers$CartoDB.Positron) %>%
-        addTiles(urlTemplate = "", attribution = '2020 (c) British Red Cross') #%>%
+        addTiles(urlTemplate = "", attribution = '2020 (c) British Red Cross') %>%
+        addEasyButton(easyButton(
+          states = list(
+            easyButtonState(
+              stateName="show-all",
+              icon="ion-toggle",
+              title="Show most vulnerable only",
+              onClick = JS("
+              function(btn, map) {
+                btn.state('top-ten');
+                Shiny.onInputChange('my_easy_button', 'most-vulnerable');
+              }")
+            ),
+            easyButtonState(
+              stateName="top-ten",
+              icon="ion-toggle-filled",
+              title="Show vulnerability of all areas",
+              onClick = JS("
+              function(btn, map) {
+                btn.state('show-all');
+                Shiny.onInputChange('my_easy_button', 'all-vulnerability');
+              }")
+            )
+          )
+        ))
+    
+    
+    
+    #%>%
         # Add button to reset zoom - breaks other icons 
         #addEasyButton(easyButton(
         #  icon = "fas fa-globe", title = "Reset zoom level",
@@ -1047,8 +1090,14 @@ server = function(input, output, session) {
     
   })
   
+  # 
+  showtop10_or_all <- reactiveValues(display_wanted='all-vulnerability')
   
+  observeEvent(input$my_easy_button, {
+    showtop10_or_all$display_wanted <- input$my_easy_button
+  })
   
+ 
   # ---- Respond to users input on location and theme ----
   
   # for zoom
@@ -1070,9 +1119,35 @@ server = function(input, output, session) {
   
   # -- because of layers need to be sepearte reactors --
   filtered_areas_at_risk_covid <- reactive({
+    
     # which tab is selected:
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
+      
+        if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+          
+          if (input$tactical_cell == '-- England --') {
+            # --- filter to just areas most in need ---
+            lad_uk_most_vuln <- lad_uk2vuln_resilience
+          }
+          
+          else {
+            # Filter to tactical cell
+            if (input$lad_selected == 'All local authorities in region') {
+              lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+                filter(TacticalCell == input$tactical_cell)
+            }
+            else {
+              # Filter to local authority
+              lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+                filter(Name == input$lad_selected)
+            }
+          }
+          
+        }
+      
+        else {
+      
         # --- RESILIENCE index ---  
         # vulnerable colours
         # High income, High inequality --> #3F2949
@@ -1100,7 +1175,8 @@ server = function(input, output, session) {
               filter(Name == input$lad_selected)
           }
         }
-      }
+        }
+    }
   })
   
  # --- covid labels ----
@@ -1116,6 +1192,29 @@ server = function(input, output, session) {
   
   # --- to see other vulnerability sub domains ---
   filtered_econ_vuln <- reactive({
+    
+    
+    # show all or just most vulnerable 
+    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+      
+      # which region to display
+      if (input$tactical_cell == '-- England --') {
+        econ_vuln <- lad_uk2vuln_resilience 
+        }
+      else {
+        if (input$lad_selected == 'All local authorities in region') {
+          econ_vuln <- lad_uk2vuln_resilience %>% 
+            filter(TacticalCell == input$tactical_cell)
+        }
+        else {
+          econ_vuln <- lad_uk2vuln_resilience %>%
+            filter(LAD19NM == input$lad_selected)
+        }
+        
+      }
+    }
+    else {
+    
     if (input$tactical_cell == '-- England --') {
     econ_vuln <- lad_uk2vuln_resilience %>% filter(`Economic Vulnerability quintile` >= 4)
     }
@@ -1130,9 +1229,33 @@ server = function(input, output, session) {
           filter(LAD19NM == input$lad_selected)
       }
     }
+  }
   })
   
   filtered_socioecon_vuln <- reactive({
+    
+    # show all or just most vulnerable 
+    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+      
+      if (input$tactical_cell == '-- England --') {
+        socioecon_vuln <- lad_uk2vuln_resilience
+      }
+      
+      else{
+        if (input$lad_selected == 'All local authorities in region') {
+          socioecon_vuln <- lad_uk2vuln_resilience %>% 
+            filter(TacticalCell == input$tactical_cell)
+        }
+        else {
+          socioecon_vuln <- lad_uk2vuln_resilience %>%
+            filter(LAD19NM == input$lad_selected)
+        }
+      }
+      
+    }
+    
+    else {
+    
     if (input$tactical_cell == '-- England --') {
       socioecon_vuln <- lad_uk2vuln_resilience %>% filter(`Socioeconomic Vulnerability quintile` >= 4)
     }
@@ -1147,9 +1270,32 @@ server = function(input, output, session) {
           filter(LAD19NM == input$lad_selected)
       }
     }
+    }
   })
   
   filtered_socio_vuln <- reactive({
+    
+    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+      
+      if (input$tactical_cell == '-- England --') {
+        socio_vuln <- lad_uk2vuln_resilience
+      }
+      
+      else{
+        if (input$lad_selected == 'All local authorities in region') {
+          socio_vuln <- lad_uk2vuln_resilience %>% 
+            filter(TacticalCell == input$tactical_cell)
+        }
+        else {
+          socio_vuln <- lad_uk2vuln_resilience %>%
+            filter(LAD19NM == input$lad_selected)
+        }
+      }
+      
+    }
+    
+    else {
+    
     if (input$tactical_cell == '-- England --') {
       socio_vuln <- lad_uk2vuln_resilience %>% filter(`Social Vulnerability quintile` >= 4)
     }
@@ -1162,11 +1308,32 @@ server = function(input, output, session) {
       else {
         socio_vuln <- lad_uk2vuln_resilience %>%
           filter(LAD19NM == input$lad_selected)
+        }
       }
     }
   })
   
   filtered_health_vuln <- reactive({
+    
+    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+      if (input$tactical_cell == '-- England --') {
+        health_vuln <- lad_uk2vuln_resilience
+      }
+      
+      else{
+        if (input$lad_selected == 'All local authorities in region') {
+          health_vuln <- lad_uk2vuln_resilience %>% 
+            filter(TacticalCell == input$tactical_cell)
+        }
+        else {
+          health_vuln <- lad_uk2vuln_resilience %>%
+            filter(LAD19NM == input$lad_selected)
+        }
+      }
+    }
+    
+    else {
+    
     if (input$tactical_cell == '-- England --') {
       health_vuln <- lad_uk2vuln_resilience %>% filter(`Health/Wellbeing Vulnerability quintile` >= 4)
     }
@@ -1179,11 +1346,32 @@ server = function(input, output, session) {
       else {
         health_vuln <- lad_uk2vuln_resilience %>%
           filter(LAD19NM == input$lad_selected)
+        }
       }
     }
   })
   
   filtered_clin_vuln <- reactive({
+    
+    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+      if (input$tactical_cell == '-- England --') {
+        clin_vuln <- lad_uk2vuln_resilience
+      }
+      
+      else{
+        if (input$lad_selected == 'All local authorities in region') {
+          clin_vuln <- lad_uk2vuln_resilience %>% 
+            filter(TacticalCell == input$tactical_cell)
+        }
+        else {
+          clin_vuln <- lad_uk2vuln_resilience %>%
+            filter(LAD19NM == input$lad_selected)
+        }
+      }
+    }
+    
+    else {
+    
     if (input$tactical_cell == '-- England --') {
       clin_vuln <- lad_uk2vuln_resilience %>% filter(`Clinical Vulnerability quintile` >= 4)
     }
@@ -1196,6 +1384,7 @@ server = function(input, output, session) {
       else {
         clin_vuln <- lad_uk2vuln_resilience %>%
           filter(LAD19NM == input$lad_selected)
+        }
       }
     }
   })
@@ -1343,11 +1532,13 @@ server = function(input, output, session) {
       
       if (input$theme == 'Flooding') {
         
+        if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+        
           # show all levels of resilience
           if (input$tactical_cell == '-- England --') {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
           }
           
           else {
@@ -1356,7 +1547,7 @@ server = function(input, output, session) {
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(TacticalCell == input$tactical_cell) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
               
             }
             
@@ -1365,9 +1556,49 @@ server = function(input, output, session) {
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(Name == input$lad_selected) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`,'TacticalCell')
             }
           }
+        }
+      
+      else {
+        # show all only most vulnerable areas
+        # --- RESILIENCE index ---  
+        # vulnerable colours
+        # High income, High inequality --> #3F2949
+        # High income, Medium inequality --> "#435786"
+        # Medium income, medium inequality --> #806A8A
+        # high inequality, medium income  --> "#77324C"
+        # "#3F2949" -->
+        vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+        
+        if (input$tactical_cell == '-- England --') {
+          fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+            filter(fill %in% vuln_cols) %>%
+            select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+                   `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+        }
+        
+        else {
+          # Filter to tactical cell
+          if (input$lad_selected == 'All local authorities in region') {
+            fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+              filter(TacticalCell == input$tactical_cell & fill %in% vuln_cols) %>%
+              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+            
+          }
+          
+          else {
+            # Filter to local authority
+            fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+              filter(Name == input$lad_selected) %>%
+              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+          }
+        }
+        
+        }
       }
     }
 })
@@ -1521,7 +1752,7 @@ server = function(input, output, session) {
   filtered_flood_resilience_labels <- reactive({
     
     if (input$tactical_cell == '-- England --') {
-    fl_resilience_lad_uk_most_vuln_for_labels <- lad_uk2vuln_resilience %>%
+    fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
       select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
              `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
              `Flooding incidents per 10,000 people`) %>%
@@ -1537,7 +1768,7 @@ server = function(input, output, session) {
     else {
       
       if (input$tactical_cell != '-- England --' & input$lad_selected=='All local authorities in region') {
-        fl_resilience_lad_uk_most_vuln_for_labels <- lad_uk2vuln_resilience %>%
+        fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
           filter(TacticalCell == input$tactical_cell) %>%
           select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
                  `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
@@ -1554,7 +1785,7 @@ server = function(input, output, session) {
       }
       
       else {
-        fl_resilience_lad_uk_most_vuln_for_labels <- lad_uk2vuln_resilience %>%
+        fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
           filter(lad19nm == input$lad_selected) %>%
           select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
                  `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
@@ -1751,10 +1982,10 @@ server = function(input, output, session) {
   })
 
   # --- Volunteer capacity ---
-  filtered_volunteers <- reactive({
-    volunteers_tc <- volunteers %>% filter(TacticalCell==input$tactical_cell)
+  #filtered_volunteers <- reactive({
+  #  volunteers_tc <- volunteers %>% filter(TacticalCell==input$tactical_cell)
 
-  })
+#  })
   
   
   # # --- local organisation --- 
@@ -2916,7 +3147,7 @@ server = function(input, output, session) {
           div(style= " text-align: center;margin-top:5px;",
               #hr(),
               p(format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), tags$br(),
-                "people receiving Section 95 support")
+                "people receiving support whilst seeking asylum (Section 95 support)")
               #p(tags$strong('No. of people receiving Section 95 support:'), format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), "people", tags$br(), write_eng_sec95)
           )
         })
@@ -3288,7 +3519,7 @@ server = function(input, output, session) {
                 #hr(),
                 p(format(tc_sec95_to_write$`tc_People receiving Section 95 support`, big.mark=',', scientific = F),
                   tags$br(),
-                  'people receiving Section 95 support')
+                  'people receiving support whilst seeking asylum (Section 95 support)')
                 #p(tags$strong('No. of people receiving Section 95 support:'), format(tc_sec95_to_write$`tc_People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_tc_sec95)
             )
           })
@@ -3830,7 +4061,7 @@ server = function(input, output, session) {
                 #hr(),
                 p(format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F),
                   tags$br(),
-                  'people receiving Section 95 support')
+                  'people receiving support whilst seeking asylum (Section 95 support)')
                 #p(tags$strong('No. of people receiving Section 95 support:'), format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_lad_sec95)
 
             )
@@ -3868,7 +4099,7 @@ server = function(input, output, session) {
                   #hr(),
                   p("Data unavailable",
                     tags$br(),
-                    'for people recieving Section 95 support')
+                    'people receiving support whilst seeking asylum (Section 95 support)')
                   #p(tags$strong('No. of people receiving Section 95 support:'), format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_lad_sec95)
               )
             })
@@ -4377,11 +4608,12 @@ server = function(input, output, session) {
   observe({
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
-      
+ 
       # if user has tactical cell selected
       if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
         # update reactive values 
         #clearSorting(proxy = dataTableProxy(outputId = "areas2focus"))
+       
         # filter by tactical cell
         tc_filtered_areas2focus <- filtered_areas2focus() %>% filter(Region == input$tactical_cell)
         
@@ -4418,6 +4650,7 @@ server = function(input, output, session) {
         }
         
         else {
+          
           #clearSorting(proxy = dataTableProxy(outputId = "areas2focus"))
           dd_areas2focus$l <- input$lad_selected
           dd_areas2focus$t <- input$tactical_cell
