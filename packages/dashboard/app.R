@@ -531,23 +531,23 @@ body <- dashboardBody(
     # - row 2  -
       fluidRow(
       # - column 1 -
-      column(width = 6,
-              box(width = NULL, collapsible=T, collapsed=T,
-                  title='About this dashboard', 
-                  uiOutput('about_needs'),
-                  style = "height:325px; overflow-y: scroll;overflow-x: scroll;"),
+      column(width = 4,
+              #box(width = NULL, collapsible=T, collapsed=T,
+              #    title='About this dashboard', 
+              #    uiOutput('about_needs'),
+              #    style = "height:325px; overflow-y: scroll;overflow-x: scroll;"),
              
               # row  -
-                  fluidRow(
+              #    fluidRow(
                     # column 1
-                    column(width = 12,
+              #      column(width = 12,
                   # - row 2 (action areas) -
-                  box( width = NULL,  collapsible = T, collapsed=F,
-                    title = "Areas to focus", #height='400px',
-                      withSpinner(DT::dataTableOutput('areas2focus', height='325px')),
-                      style = "height:400px; overflow-y: scroll;overflow-x: scroll;"
-                      )
-             )),
+              #    box( width = NULL,  collapsible = T, collapsed=F,
+              #      title = "Areas to focus", #height='400px',
+              #        withSpinner(DT::dataTableOutput('areas2focus', height='325px')),
+              #        style = "height:400px; overflow-y: scroll;overflow-x: scroll;"
+              #        )
+             #)),
 
                       # - row 3 -
                       fluidRow( 
@@ -555,132 +555,132 @@ body <- dashboardBody(
                         column(
                           width = 12,
                           box(
-                            width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                            title = "People at risk", align = "center", style = "height:350px; overflow-y: scroll;overflow-x: scroll;",
+                            width = NULL, collapsible = T, collapsed=F,#solidHeader = TRUE, status='primary',
+                            title = "People at risk", align = "center", style = "height:550px; overflow-y: scroll;overflow-x: scroll;",
                             
                           # multi columned box - bame row
                             fluidRow(style = "border-top: 1px solid #D3D3D3;",
-                              column(
-                                width = 6,
+                              #column(
+                              #  width = 6,
                                   uiOutput('bame_population_text', height='40px'),
                                   #echarts4rOutput('bame_population', height='40px'),
-                                  rightBorder=F,
-                                  marginBottom=T
-                              ),
+                              #    rightBorder=F,
+                              #    marginBottom=T
+                              #),
 
-                              column(
-                                width = 6,
+                              #column(
+                              #  width = 6,
                                   echarts4rOutput('bame_population', height='40px'),
                                   rightBorder=F,
                                   marginBottom =T
-                                )
+                              #  )
                               ),
                             
                             # -- section 95 row ---
                             fluidRow(style = "border-top: 1px solid #D3D3D3;",
-                              column(
-                                width = 6,
+                              #column(
+                              #  width = 6,
                                 uiOutput('section95_text'),
                                 #uiOutput('homeless_text', height='40px'),
                                 #echarts4rOutput('homeless', height='40px'),
-                                rightBorder=T,
-                                marginBottom=T
-                              ),
+                              #  rightBorder=T,
+                              #  marginBottom=T
+                              #),
 
-                              column(
-                                width = 6,
+                              #column(
+                              #  width = 6,
                                 echarts4rOutput('section95', height='40px'),
                                 #uiOutput('fuelp_text'),
                                 #echarts4rOutput('fuelp',height='40px'),
                                 #echarts4rOutput('homeless', height='40px'),
                                 rightBorder=F,
                                 marginBottom =T
-                              )
+                              #)
                             ),
                           
                           # -- homeless row ---
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
-                                   column(
-                                     width = 6,
+                                  # column(
+                                  #   width = 6,
                                      uiOutput('homeless_text'),
-                                     rightBorder=T,
-                                     marginBottom=T
-                                   ),
+                                  #   rightBorder=T,
+                                  #   marginBottom=T
+                                  # ),
                                    
-                                   column(
-                                     width = 6,
+                                   #column(
+                                  #   width = 6,
                                      echarts4rOutput('homeless', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
-                                   )
+                                   #)
                           ),
                           
                           # -- fuel poverty row ---
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
-                                   column(
-                                     width = 6,
+                                   #column(
+                                  #   width = 6,
                                      uiOutput('fuelp_text'),
-                                     rightBorder=T,
-                                     marginBottom=T
-                                   ),
+                                  #   rightBorder=T,
+                                  #   marginBottom=T
+                                  # ),
                                    
-                                   column(
-                                     width = 6,
+                                  # column(
+                                   #  width = 6,
                                      echarts4rOutput('fuelp', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
-                                   )
+                                   #)
                           ),
                           
                           # -- universal credit row ---
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
-                                   column(
-                                     width = 6,
+                                   #column(
+                                    # width = 6,
                                      uiOutput('unemployment_text'),
-                                     rightBorder=T,
-                                     marginBottom=T
-                                   ),
+                                    # rightBorder=T,
+                                   #  marginBottom=T
+                                  # ),
                                    
-                                   column(
-                                     width = 6,
+                                 #  column(
+                                 #    width = 6,
                                      echarts4rOutput('unemployment', height='40px'),
-                                     rightBorder=F,
-                                     marginBottom =T
-                                   )
+                                 #    rightBorder=F,
+                                 #    marginBottom =T
+                                 #  )
                           ),
                           
                           # -- digital exclusion row ---
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
-                                   column(
-                                     width = 6,
+                                   #column(
+                                   #  width = 6,
                                      uiOutput('digital_text'),
-                                     rightBorder=T,
-                                     marginBottom=T
-                                   ),
+                                   #  rightBorder=T,
+                                  #   marginBottom=T
+                                  # ),
                                    
-                                   column(
-                                     width = 6,
+                                  # column(
+                                  #   width = 6,
                                      echarts4rOutput('digital', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
-                                   )
+                                 #  )
                           ),
                           
                           # -- shielding row ---
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
-                                   column(
-                                     width = 6,
+                                   #column(
+                                   #  width = 6,
                                      uiOutput('shielding_text'),
-                                     rightBorder=T,
-                                     marginBottom=T
-                                   ),
+                                   #  rightBorder=T,
+                                   #  marginBottom=T
+                                   #),
                                    
-                                   column(
-                                     width = 6,
+                                   #column(
+                                  #   width = 6,
                                      echarts4rOutput('shielding_f', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
-                                   )
+                                 #  )
                           )
                           )
                         )
@@ -739,31 +739,18 @@ body <- dashboardBody(
                 ),
 
               # column - 2
-              column( width = 6,
+              column( width = 8,
                     # - row 1 -
-                    boxPlus(
+                    tabBox(
+                      id = 'areas',
                       # bivariate
                       title = "Areas at risk",
                       width = NULL, height = "610px", #solidHeader = TRUE, status='primary',
-                      closable = F,
-                      #enable_sidebar = T,
-                      #sidebar_width = 40,
-                      #sidebar_start_open = F,
-                      #sidebar_content = tagList(
-                      #  div(h4(tags$strong('Help:')),tags$br(),
-                      #      p(tags$strong('Covid-19 theme layers:'), tags$br(),
-                      #        'Resilience: vulnerability vs capacity to cope - this layer displays the areas that are most 
-                      #        vulnerable and least resiliant based on teh BRC developed resilience index', tags$br(),
-                      #        'Economic vulnerability:')
-                      #)),
-                      withSpinner(leafletOutput("map", height = "550px"))
-
-                    #absolutePanel(
-                    #  id = "legend", class = "panel panel-default",
-                    #  top = "auto", bottom = 5, right = "auto", width = 200, fixed = FALSE,
-                    #  draggable = FALSE, height = "auto",
-                    #  img(src = "bivar-legend.png", width = 200)
-                    #)
+                      #closable = F,
+                      tabPanel('map', 
+                      withSpinner(leafletOutput("map", height = "550px"))),
+                      tabPanel('data', 
+                      withSpinner(DT::dataTableOutput('areas2focus', height='325px')))
                 )
               )
         )
