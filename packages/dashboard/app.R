@@ -4685,7 +4685,7 @@ server = function(input, output, session) {
 })
   
 #store what ordering was desired for areas to focus
-store_rank_wanted <- reactiveValues(rank_wanted_covid ='cases per 100,000  ', rank_wanted_flooding = 'Historical flood incidents per 10,000')
+store_rank_wanted <- reactiveValues(rank_wanted_covid ='cases per 100,000  ', rank_wanted_flooding = 'Live flood warnings')
   
 
 observe({
@@ -4714,8 +4714,8 @@ observe({
           selectInput(
             inputId = "top_cases_top_change",
             label = "", 
-            choices = c("Historical flood incidents per 10,000", "Live flood warnings"),
-            selected = "Historical flood incidents per 10,000",
+            choices = c("Live flood warnings","Historical flood incidents per 10,000"),
+            selected = "Live flood warnings",
             #inline = TRUE, 
             #checkbox = TRUE,
             width="100%"
