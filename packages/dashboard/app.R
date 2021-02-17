@@ -809,7 +809,7 @@ body <- dashboardBody(
   #tabItem(tabName = 'vol_capacity',
   #        h2("volunteer capacity analysis")),
   tabItem(tabName = 'references',
-          fluidRow(style="padding-right:120px;padding-left:120px;padding-top:40px;padding-bottom:40px",
+          fluidRow(style="padding-right:100px;padding-left:100px;padding-top:20px;padding-bottom:20px",
                    # column 1
                    column(width = 12,
                           box(width=NULL,
@@ -953,30 +953,31 @@ server = function(input, output, session) {
         div(
           h2(tags$strong("Data contributors")),
           hr(),
-          h4("We make use of a range of data sources to bring you this insight,
+          p("We make use of a range of data sources to bring you this insight,
             including", tags$strong("data that is open source"), "as well as", tags$strong("data from our contributing partners.")),
           br(),
-          h4("The bulk of the data included in the platform comes from",
+          p("The platform uses data from the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross COVID-19 Vulnerability Index, The British Red Cross Resilience Index'), "and the British Red Cross Local Lockdown tool. 
+            The code from these tools is distributed under GPL-3 (GNU GENERAL PUBLICLICENSE version 3). Outputs related to the vulnerability index (e.g., vulnerability scores) are distributed under CC-BY-4.0 (Creative Commons Attribution 4.0 International), unless otherwise stated."),
+          p(
+            "Data is also included in the platform from",
             tags$a(href="https://www.ons.gov.uk/", target="_blank", "Office of National Statistics"), "and", tags$a(href="https://digital.nhs.uk/", target="_blank", "NHS Digital"), "shared under an", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence.")),
+            
           br(),
-          h4("Although not all data has been visualised in the platform yet,
-            we would also like to thank the following organisation for their contributions:"),
-          br(),
-          tags$ul(tags$li(tags$a(href="https://www.redcross.org.uk/", target="_blank","British Red Cross")),
-                  tags$li(tags$a(href="https://www.bitc.org.uk/", target="_blank","Business in the Community")),
-                  tags$li(tags$a(href="https://www.childrenscommissioner.gov.uk/", target="_blank","Children’s Commissioner for England")),
-                  tags$li(tags$a(href="https://www.citizensadvice.org.uk/", target="_blank","Citizens Advice")),
-                  tags$li(tags$a(href="https://www.cruse.org.uk/", target="_blank","Cruse")),
-                  tags$li(tags$a(href="https://fareshare.org.uk/", target="_blank","FareShare")),
-                  tags$li(tags$a(href="https://foodfoundation.org.uk/", target="_blank","Food Foundation")),
-                  tags$li(tags$a(href="https://www.foodaidnetwork.org.uk/", target="_blank","Independent Food Aid Network")),
-                  tags$li(tags$a(href="https://www.mind.org.uk/", target="_blank","Mind")),
-                  tags$li(tags$a(href="https://www.re-act.org.uk/", target="_blank","RE:ACT")),
-                  tags$li(tags$a(href="https://www.stepchange.org/", target="_blank","Stepchange")),
-                  tags$li(tags$a(href="https://www.themix.org.uk/", target="_blank","The Mix")),
-                  tags$li(tags$a(href="https://www.turn2us.org.uk/", target="_blank","Turn2Us")),
-                  tags$li(tags$a(href="https://www.victimsupport.org.uk/", target="_blank","Victim Support")),
-                  tags$li(tags$a(href="https://volunteeringmatters.org.uk/", target="_blank","Volunteering Matters")))
+          # tags$ul(tags$li(tags$a(href="https://www.redcross.org.uk/", target="_blank","British Red Cross")),
+          #         tags$li(tags$a(href="https://www.bitc.org.uk/", target="_blank","Business in the Community")),
+          #         tags$li(tags$a(href="https://www.childrenscommissioner.gov.uk/", target="_blank","Children’s Commissioner for England")),
+          #         tags$li(tags$a(href="https://www.citizensadvice.org.uk/", target="_blank","Citizens Advice")),
+          #         tags$li(tags$a(href="https://www.cruse.org.uk/", target="_blank","Cruse")),
+          #         tags$li(tags$a(href="https://fareshare.org.uk/", target="_blank","FareShare")),
+          #         tags$li(tags$a(href="https://foodfoundation.org.uk/", target="_blank","Food Foundation")),
+          #         tags$li(tags$a(href="https://www.foodaidnetwork.org.uk/", target="_blank","Independent Food Aid Network")),
+          #         tags$li(tags$a(href="https://www.mind.org.uk/", target="_blank","Mind")),
+          #         tags$li(tags$a(href="https://www.re-act.org.uk/", target="_blank","RE:ACT")),
+          #         tags$li(tags$a(href="https://www.stepchange.org/", target="_blank","Stepchange")),
+          #         tags$li(tags$a(href="https://www.themix.org.uk/", target="_blank","The Mix")),
+          #         tags$li(tags$a(href="https://www.turn2us.org.uk/", target="_blank","Turn2Us")),
+          #         tags$li(tags$a(href="https://www.victimsupport.org.uk/", target="_blank","Victim Support")),
+          #         tags$li(tags$a(href="https://volunteeringmatters.org.uk/", target="_blank","Volunteering Matters")))
 
         )
 
