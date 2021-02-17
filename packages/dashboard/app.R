@@ -2702,6 +2702,26 @@ server = function(input, output, session) {
                         color = "black",
                         dashArray = "0.1",
                         fill=F) %>%
+            addPolygons(data=flood_all, layerId = ~floodres_id,
+                        group="Resilience of all local authorities", fillColor = ~`fill`,
+                        weight = 0.7,
+                        opacity = 0.8,
+                        color = "black",
+                        dashArray = "0.1",
+                        fillOpacity = 0.7,
+                        highlight = highlightOptions(
+                          weight = 5,
+                          color = "#666",
+                          dashArray = "",
+                          fillOpacity = 0.7,
+                          bringToFront = TRUE,
+                        ), 
+                        label= filtered_flood_resilience_labels(),
+                        labelOptions = labelOptions(
+                          style = list("font-weight" = "normal", padding = "3px 8px"),
+                          textsize = "10px",
+                          direction = "auto"
+                        )) %>%
             addPolygons(data=flood_incd, layerId = ~incd_id,
                         group="Resilience of high flood incident areas", fillColor = ~`fill`,
                         weight = 0.7,
@@ -2723,7 +2743,7 @@ server = function(input, output, session) {
                           textsize = "10px",
                           direction = "auto"
                         )
-                        ) %>%
+            ) %>%
             addPolygons(data=flood_risk, layerId = ~risk_id,
                         group="Resilience of high flood risk areas", fillColor = ~`fill`,
                         weight = 0.7,
@@ -2750,7 +2770,7 @@ server = function(input, output, session) {
                         lat1 = as.numeric(curr_bbox["ymin"]),
                         lng2 = as.numeric(curr_bbox["xmax"]),
                         lat2 = as.numeric(curr_bbox["ymax"]))  %>%
-            addLayersControl(baseGroups = c("Resilience of high flood incident areas","Resilience of high flood risk areas"),
+            addLayersControl(baseGroups = c("Resilience of all local authorities","Resilience of high flood incident areas","Resilience of high flood risk areas"),
                              options= layersControlOptions(collapsed=T))
           
           }
