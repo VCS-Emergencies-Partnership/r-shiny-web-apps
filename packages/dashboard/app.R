@@ -2743,7 +2743,7 @@ server = function(input, output, session) {
                           textsize = "10px",
                           direction = "auto"
                         )
-                        ) %>%
+            ) %>%
             addPolygons(data=flood_risk, layerId = ~risk_id,
                         group="Resilience of high flood risk areas", fillColor = ~`fill`,
                         weight = 0.7,
