@@ -9,7 +9,7 @@ E06000007,North,NA,NA
 E06000008,North,NA,NA
 E06000009,North,NA,NA
 E06000010,North,NA,NA
-E06000011,North,NA,1
+E06000011,North,NA,NA
 E06000012,Central,NA,NA
 E06000013,Central,NA,NA
 E06000014,North,NA,NA
@@ -20,8 +20,8 @@ E06000017,Central,NA,NA
 E06000019,Central,NA,NA
 E06000020,Central,NA,NA
 E06000021,Central,NA,NA
-E06000022,South and the Channel Islands,NA,1
-E06000023,South and the Channel Islands,NA,1
+E06000022,South and the Channel Islands,NA,NA
+E06000023,South and the Channel Islands,NA,NA
 E06000024,South and the Channel Islands,NA,NA
 E06000025,South and the Channel Islands,NA,NA
 E06000026,South and the Channel Islands,NA,NA
@@ -109,8 +109,8 @@ E07000080,South and the Channel Islands,NA,NA
 E07000081,South and the Channel Islands,NA,NA
 E07000082,South and the Channel Islands,NA,NA
 E07000083,South and the Channel Islands,NA,NA
-E07000084,South East,NA,NA
-E07000085,South East,NA,NA
+E07000084,South East,1,NA
+E07000085,South East,1,NA
 E07000086,South East,NA,NA
 E07000087,South East,NA,NA
 E07000088,South East,NA,NA
@@ -151,7 +151,7 @@ E07000126,North,NA,NA
 E07000127,North,NA,NA
 E07000128,North,NA,NA
 E07000129,Central,NA,NA
-E07000130,Central,2,NA
+E07000130,Central,NA,2
 E07000131,Central,NA,NA
 E07000132,Central,NA,NA
 E07000133,Central,NA,NA
@@ -224,7 +224,7 @@ E07000213,South East,NA,NA
 E07000214,South East,NA,NA
 E07000215,South East,NA,NA
 E07000216,South East,NA,NA
-E07000217,South East,NA,1
+E07000217,South East,NA,NA
 E07000218,Central,NA,NA
 E07000219,Central,NA,NA
 E07000220,Central,NA,NA

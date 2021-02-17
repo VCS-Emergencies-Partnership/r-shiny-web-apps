@@ -96,6 +96,7 @@ lad_uk2areas2vulnerability <- lad_uk2areas2vulnerability_full %>% select('LAD19C
 
 # res shapefile
 lad_uk2vuln_resilience <- left_join(unique(lad_uk2areas), LA_res, by='LAD19CD', keep=F)
+
 lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>% filter(!is.na(fill))  %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
                                          TacticalCell == 'Central' ~ 'Midlands & East',
@@ -233,11 +234,36 @@ flood_warning_polygons <- read_sf('./data/areas_to_focus/current_live_warnings_p
 flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_points.geojson')
 flood_warning_meta <- read_feather('./data/areas_to_focus/current_live_warnings_metadata.feather')
 
+
+# for areas to focus list 
+total_type_of_warning_per_authority <- flood_warning_meta %>% group_by(lad19nm, severity) %>%
+  count() 
+# how many of each type of alert
+total_type_of_warning_per_aurthority_trans <- pivot_wider(total_type_of_warning_per_authority, names_from=severity, values_from=n, names_prefix = 'Total live ') %>%
+  rename('LAD19NM'=lad19nm) %>% replace(is.na(.), 0)
+
+# join to flooding areas to focus 
+flooding_area2focus <- left_join(flooding_area2focus, total_type_of_warning_per_aurthority_trans, by='LAD19NM', keep=F)
+
 # join dfs 
-flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) 
+flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
 
-flood_warning_points <- left_join(flood_warning_points,flood_warning_meta, by='floodAreaID', keep=F)
+flood_warning_points <- left_join(flood_warning_points,flood_warning_meta, by='floodAreaID', keep=F) %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
 
+flood_warning_meta <- flood_warning_meta %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
+  
 
 # -- vcs indicators
 requests <- read_feather('data/vcs_indicators/requests_this_week_and_last.feather')
@@ -246,7 +272,7 @@ requests <- requests %>%
                                          TacticalCell == 'Central' ~ 'Midlands & East',
                                          TRUE ~ as.character(.$TacticalCell))) %>%
   select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
-  
+
 
 volunteers <- read_feather('data/vcs_indicators/volunteer-capacity-lad19CD-tc.feather')
 
@@ -517,45 +543,61 @@ body <- dashboardBody(
     # - row 2  -
       fluidRow(
       # - column 1 -
-      column(width = 6,
-              box(width = NULL, collapsible=T, collapsed=T,
-                  title='About this dashboard', 
-                  uiOutput('about_needs'),
-                  style = "height:325px; overflow-y: scroll;overflow-x: scroll;"),
+      column(width = 4,
+              #box(width = NULL, collapsible=T, collapsed=T,
+              #    title='About this dashboard', 
+              #    uiOutput('about_needs'),
+              #    style = "height:325px; overflow-y: scroll;overflow-x: scroll;"),
              
               # row  -
-                  fluidRow(
+              #    fluidRow(
                     # column 1
-                    column(width = 12,
+              #      column(width = 12,
                   # - row 2 (action areas) -
-                  box( width = NULL,  collapsible = T, collapsed=F,
-                    title = "Areas to focus", #height='400px',
-                      withSpinner(DT::dataTableOutput('areas2focus', height='325px')),
-                      style = "height:400px; overflow-y: scroll;overflow-x: scroll;"
-                      )
-             )),
+              #    box( width = NULL,  collapsible = T, collapsed=F,
+              #      title = "Areas to focus", #height='400px',
+              #        withSpinner(DT::dataTableOutput('areas2focus', height='325px')),
+              #        style = "height:400px; overflow-y: scroll;overflow-x: scroll;"
+              #        )
+             #)),
 
                       # - row 3 -
                       fluidRow( 
                         # - column 1 -
                         column(
                           width = 12,
-                          box(
-                            width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                            title = "People at risk", align = "center", style = "height:350px; overflow-y: scroll;overflow-x: scroll;",
-                            
+                          tabBox(height='610px',
+                            width = NULL, #collapsible = T, collapsed=F,#solidHeader = TRUE, status='primary',
+                            title = "", 
+                            id = 'people_focus',
+                            tabPanel('Areas to focus',
+                                     fluidRow(width=NULL, 
+                                              column(width=12,style='margin-bottom:-5px;padding-bottom:-5px;',
+                                                     uiOutput("title_focus_list", height='30px'))),
+                                     fluidRow(width=NULL,
+                                              column(width=12, #tags$style("#top10options {font-size:10pt;height:30px;}"),
+                                                     style='margin-top:-30px;margin-bottom:-30px;padding-top:-30px;padding-bottom:-30px;padding-left:40px;font-size:10pt',
+                                              #HTML("label{float:left;}")
+                                           
+                                     uiOutput('top10options', height='20px'))),
+                                     
+                                     fluidRow(width=NULL,
+                                              column(width=12,
+                                     uiOutput("areas2focus_list",
+                                     style = "height:475px; overflow-y: scroll;overflow-x: scroll;")))),
+                            tabPanel("People at risk", 
                           # multi columned box - bame row
                             fluidRow(style = "border-top: 1px solid #D3D3D3;",
                               column(
-                                width = 6,
+                                width = 12,
                                   uiOutput('bame_population_text', height='40px'),
                                   #echarts4rOutput('bame_population', height='40px'),
-                                  rightBorder=F,
-                                  marginBottom=T
-                              ),
+                              #    rightBorder=F,
+                              #    marginBottom=T
+                              #),
 
-                              column(
-                                width = 6,
+                              #column(
+                              #  width = 6,
                                   echarts4rOutput('bame_population', height='40px'),
                                   rightBorder=F,
                                   marginBottom =T
@@ -565,16 +607,16 @@ body <- dashboardBody(
                             # -- section 95 row ---
                             fluidRow(style = "border-top: 1px solid #D3D3D3;",
                               column(
-                                width = 6,
+                                width = 12,
                                 uiOutput('section95_text'),
                                 #uiOutput('homeless_text', height='40px'),
                                 #echarts4rOutput('homeless', height='40px'),
-                                rightBorder=T,
-                                marginBottom=T
-                              ),
+                              #  rightBorder=T,
+                              #  marginBottom=T
+                              #),
 
-                              column(
-                                width = 6,
+                              #column(
+                              #  width = 6,
                                 echarts4rOutput('section95', height='40px'),
                                 #uiOutput('fuelp_text'),
                                 #echarts4rOutput('fuelp',height='40px'),
@@ -587,14 +629,14 @@ body <- dashboardBody(
                           # -- homeless row ---
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
                                    column(
-                                     width = 6,
+                                     width = 12,
                                      uiOutput('homeless_text'),
-                                     rightBorder=T,
-                                     marginBottom=T
-                                   ),
+                                  #   rightBorder=T,
+                                  #   marginBottom=T
+                                  # ),
                                    
-                                   column(
-                                     width = 6,
+                                   #column(
+                                  #   width = 6,
                                      echarts4rOutput('homeless', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
@@ -604,14 +646,14 @@ body <- dashboardBody(
                           # -- fuel poverty row ---
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
                                    column(
-                                     width = 6,
+                                     width = 12,
                                      uiOutput('fuelp_text'),
-                                     rightBorder=T,
-                                     marginBottom=T
-                                   ),
+                                  #   rightBorder=T,
+                                  #   marginBottom=T
+                                  # ),
                                    
-                                   column(
-                                     width = 6,
+                                  # column(
+                                   #  width = 6,
                                      echarts4rOutput('fuelp', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
@@ -621,31 +663,31 @@ body <- dashboardBody(
                           # -- universal credit row ---
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
                                    column(
-                                     width = 6,
+                                     width = 12,
                                      uiOutput('unemployment_text'),
-                                     rightBorder=T,
-                                     marginBottom=T
-                                   ),
+                                    # rightBorder=T,
+                                   #  marginBottom=T
+                                  # ),
                                    
-                                   column(
-                                     width = 6,
+                                 #  column(
+                                 #    width = 6,
                                      echarts4rOutput('unemployment', height='40px'),
-                                     rightBorder=F,
-                                     marginBottom =T
+                                 #    rightBorder=F,
+                                 #    marginBottom =T
                                    )
                           ),
                           
                           # -- digital exclusion row ---
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
                                    column(
-                                     width = 6,
+                                     width = 12,
                                      uiOutput('digital_text'),
-                                     rightBorder=T,
-                                     marginBottom=T
-                                   ),
+                                   #  rightBorder=T,
+                                  #   marginBottom=T
+                                  # ),
                                    
-                                   column(
-                                     width = 6,
+                                  # column(
+                                  #   width = 6,
                                      echarts4rOutput('digital', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
@@ -655,20 +697,23 @@ body <- dashboardBody(
                           # -- shielding row ---
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
                                    column(
-                                     width = 6,
+                                     width = 12,
                                      uiOutput('shielding_text'),
-                                     rightBorder=T,
-                                     marginBottom=T
-                                   ),
+                                   #  rightBorder=T,
+                                   #  marginBottom=T
+                                   #),
                                    
-                                   column(
-                                     width = 6,
+                                   #column(
+                                  #   width = 6,
                                      echarts4rOutput('shielding_f', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
-                                   )
+                                  )
+                          ),
+                          style = "height:550px; overflow-y: scroll;overflow-x: scroll;"
                           )
                           )
+                          
                         )
                       #)
                     ),
@@ -705,51 +750,52 @@ body <- dashboardBody(
                       # 
                       # ),
                       # organisations in area 
-                    fluidRow(
-                      column(width = 12,
-                        box(
-                          width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                          title = "Local organisations", align = "left",
-                          fluidRow( 
-                            column(width=12,
-                                   uiOutput("search_needed", height='50px'))),
-                          fluidRow(
-                            column(width=12,
-                          #height = "600px"
-                          uiOutput('local_orgs_ui', height='250px'))),
-                          #scroll;overflow-x: scroll;"
-                          style = "height:500px; overflow-y: scroll;overflow-x: scroll;"
-                      )
-                    )
-                  )
+                  #   fluidRow(
+                  #     column(width = 12,
+                  #       box(
+                  #         width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
+                  #         title = "Local organisations", align = "left",
+                  #         fluidRow( 
+                  #           column(width=12,
+                  #                  uiOutput("search_needed", height='50px'))),
+                  #         fluidRow(
+                  #           column(width=12,
+                  #         #height = "600px"
+                  #         uiOutput('local_orgs_ui', height='250px'))),
+                  #         #scroll;overflow-x: scroll;"
+                  #         style = "height:500px; overflow-y: scroll;overflow-x: scroll;"
+                  #     )
+                  #   )
+                  # )
                 ),
 
               # column - 2
-              column( width = 6,
+              column( width = 8,
                     # - row 1 -
-                    boxPlus(
+                    tabBox(
+                      id = 'areas',
                       # bivariate
-                      title = "Areas at risk",
+                      title = "",
                       width = NULL, height = "610px", #solidHeader = TRUE, status='primary',
-                      closable = F,
-                      #enable_sidebar = T,
-                      #sidebar_width = 40,
-                      #sidebar_start_open = F,
-                      #sidebar_content = tagList(
-                      #  div(h4(tags$strong('Help:')),tags$br(),
-                      #      p(tags$strong('Covid-19 theme layers:'), tags$br(),
-                      #        'Resilience: vulnerability vs capacity to cope - this layer displays the areas that are most 
-                      #        vulnerable and least resiliant based on teh BRC developed resilience index', tags$br(),
-                      #        'Economic vulnerability:')
-                      #)),
-                      withSpinner(leafletOutput("map", height = "550px"))
-
-                    #absolutePanel(
-                    #  id = "legend", class = "panel panel-default",
-                    #  top = "auto", bottom = 5, right = "auto", width = 200, fixed = FALSE,
-                    #  draggable = FALSE, height = "auto",
-                    #  img(src = "bivar-legend.png", width = 200)
-                    #)
+                      #closable = F,
+                      tabPanel('Areas at risk', 
+                      withSpinner(leafletOutput("map", height = "550px"))),
+                      tabPanel("Find local resources",
+                                # width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
+                                # title = "Local organisations", align = "left",
+                                 fluidRow( 
+                                   column(width=12,
+                                          uiOutput("search_needed", height='50px'))),
+                                 fluidRow(
+                                   column(width=12,
+                                          #height = "600px"
+                                          uiOutput('local_orgs_ui', height='350px'))),
+                                 #scroll;overflow-x: scroll;"
+                                 style = "height:550px; overflow-y: scroll;overflow-x: scroll;"
+                               ),
+                      tabPanel('Areas to focus table', 
+                      withSpinner(DT::dataTableOutput('areas2focus', height='350px')),
+                      style = "height:550px; overflow-y: scroll;overflow-x: scroll;")
                 )
               )
         )
@@ -989,7 +1035,35 @@ server = function(input, output, session) {
         leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
         setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # centre map on Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
         addProviderTiles(providers$CartoDB.Positron) %>%
-        addTiles(urlTemplate = "", attribution = '2020 (c) British Red Cross') #%>%
+        addTiles(urlTemplate = "", attribution = '2020 (c) British Red Cross') %>%
+        addEasyButton(easyButton(
+          states = list(
+            easyButtonState(
+              stateName="show-all",
+              icon="ion-toggle",
+              title="Show most vulnerable only",
+              onClick = JS("
+              function(btn, map) {
+                btn.state('top-ten');
+                Shiny.onInputChange('my_easy_button', 'most-vulnerable');
+              }")
+            ),
+            easyButtonState(
+              stateName="top-ten",
+              icon="ion-toggle-filled",
+              title="Show vulnerability of all areas",
+              onClick = JS("
+              function(btn, map) {
+                btn.state('show-all');
+                Shiny.onInputChange('my_easy_button', 'all-vulnerability');
+              }")
+            )
+          )
+        ))
+    
+    
+    
+    #%>%
         # Add button to reset zoom - breaks other icons 
         #addEasyButton(easyButton(
         #  icon = "fas fa-globe", title = "Reset zoom level",
@@ -1048,8 +1122,14 @@ server = function(input, output, session) {
     
   })
   
+  # 
+  showtop10_or_all <- reactiveValues(display_wanted='all-vulnerability')
   
+  observeEvent(input$my_easy_button, {
+    showtop10_or_all$display_wanted <- input$my_easy_button
+  })
   
+ 
   # ---- Respond to users input on location and theme ----
   
   # for zoom
@@ -1071,9 +1151,35 @@ server = function(input, output, session) {
   
   # -- because of layers need to be sepearte reactors --
   filtered_areas_at_risk_covid <- reactive({
+    
     # which tab is selected:
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
+      
+        if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+          
+          if (input$tactical_cell == '-- England --') {
+            # --- filter to just areas most in need ---
+            lad_uk_most_vuln <- lad_uk2vuln_resilience
+          }
+          
+          else {
+            # Filter to tactical cell
+            if (input$lad_selected == 'All local authorities in region') {
+              lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+                filter(TacticalCell == input$tactical_cell)
+            }
+            else {
+              # Filter to local authority
+              lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+                filter(Name == input$lad_selected)
+            }
+          }
+          
+        }
+      
+        else {
+      
         # --- RESILIENCE index ---  
         # vulnerable colours
         # High income, High inequality --> #3F2949
@@ -1101,7 +1207,8 @@ server = function(input, output, session) {
               filter(Name == input$lad_selected)
           }
         }
-      }
+        }
+    }
   })
   
  # --- covid labels ----
@@ -1117,6 +1224,29 @@ server = function(input, output, session) {
   
   # --- to see other vulnerability sub domains ---
   filtered_econ_vuln <- reactive({
+    
+    
+    # show all or just most vulnerable 
+    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+      
+      # which region to display
+      if (input$tactical_cell == '-- England --') {
+        econ_vuln <- lad_uk2vuln_resilience 
+        }
+      else {
+        if (input$lad_selected == 'All local authorities in region') {
+          econ_vuln <- lad_uk2vuln_resilience %>% 
+            filter(TacticalCell == input$tactical_cell)
+        }
+        else {
+          econ_vuln <- lad_uk2vuln_resilience %>%
+            filter(LAD19NM == input$lad_selected)
+        }
+        
+      }
+    }
+    else {
+    
     if (input$tactical_cell == '-- England --') {
     econ_vuln <- lad_uk2vuln_resilience %>% filter(`Economic Vulnerability quintile` >= 4)
     }
@@ -1131,9 +1261,33 @@ server = function(input, output, session) {
           filter(LAD19NM == input$lad_selected)
       }
     }
+  }
   })
   
   filtered_socioecon_vuln <- reactive({
+    
+    # show all or just most vulnerable 
+    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+      
+      if (input$tactical_cell == '-- England --') {
+        socioecon_vuln <- lad_uk2vuln_resilience
+      }
+      
+      else{
+        if (input$lad_selected == 'All local authorities in region') {
+          socioecon_vuln <- lad_uk2vuln_resilience %>% 
+            filter(TacticalCell == input$tactical_cell)
+        }
+        else {
+          socioecon_vuln <- lad_uk2vuln_resilience %>%
+            filter(LAD19NM == input$lad_selected)
+        }
+      }
+      
+    }
+    
+    else {
+    
     if (input$tactical_cell == '-- England --') {
       socioecon_vuln <- lad_uk2vuln_resilience %>% filter(`Socioeconomic Vulnerability quintile` >= 4)
     }
@@ -1148,9 +1302,32 @@ server = function(input, output, session) {
           filter(LAD19NM == input$lad_selected)
       }
     }
+    }
   })
   
   filtered_socio_vuln <- reactive({
+    
+    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+      
+      if (input$tactical_cell == '-- England --') {
+        socio_vuln <- lad_uk2vuln_resilience
+      }
+      
+      else{
+        if (input$lad_selected == 'All local authorities in region') {
+          socio_vuln <- lad_uk2vuln_resilience %>% 
+            filter(TacticalCell == input$tactical_cell)
+        }
+        else {
+          socio_vuln <- lad_uk2vuln_resilience %>%
+            filter(LAD19NM == input$lad_selected)
+        }
+      }
+      
+    }
+    
+    else {
+    
     if (input$tactical_cell == '-- England --') {
       socio_vuln <- lad_uk2vuln_resilience %>% filter(`Social Vulnerability quintile` >= 4)
     }
@@ -1163,11 +1340,32 @@ server = function(input, output, session) {
       else {
         socio_vuln <- lad_uk2vuln_resilience %>%
           filter(LAD19NM == input$lad_selected)
+        }
       }
     }
   })
   
   filtered_health_vuln <- reactive({
+    
+    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+      if (input$tactical_cell == '-- England --') {
+        health_vuln <- lad_uk2vuln_resilience
+      }
+      
+      else{
+        if (input$lad_selected == 'All local authorities in region') {
+          health_vuln <- lad_uk2vuln_resilience %>% 
+            filter(TacticalCell == input$tactical_cell)
+        }
+        else {
+          health_vuln <- lad_uk2vuln_resilience %>%
+            filter(LAD19NM == input$lad_selected)
+        }
+      }
+    }
+    
+    else {
+    
     if (input$tactical_cell == '-- England --') {
       health_vuln <- lad_uk2vuln_resilience %>% filter(`Health/Wellbeing Vulnerability quintile` >= 4)
     }
@@ -1180,11 +1378,32 @@ server = function(input, output, session) {
       else {
         health_vuln <- lad_uk2vuln_resilience %>%
           filter(LAD19NM == input$lad_selected)
+        }
       }
     }
   })
   
   filtered_clin_vuln <- reactive({
+    
+    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+      if (input$tactical_cell == '-- England --') {
+        clin_vuln <- lad_uk2vuln_resilience
+      }
+      
+      else{
+        if (input$lad_selected == 'All local authorities in region') {
+          clin_vuln <- lad_uk2vuln_resilience %>% 
+            filter(TacticalCell == input$tactical_cell)
+        }
+        else {
+          clin_vuln <- lad_uk2vuln_resilience %>%
+            filter(LAD19NM == input$lad_selected)
+        }
+      }
+    }
+    
+    else {
+    
     if (input$tactical_cell == '-- England --') {
       clin_vuln <- lad_uk2vuln_resilience %>% filter(`Clinical Vulnerability quintile` >= 4)
     }
@@ -1197,6 +1416,7 @@ server = function(input, output, session) {
       else {
         clin_vuln <- lad_uk2vuln_resilience %>%
           filter(LAD19NM == input$lad_selected)
+        }
       }
     }
   })
@@ -1344,11 +1564,13 @@ server = function(input, output, session) {
       
       if (input$theme == 'Flooding') {
         
+        if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+        
           # show all levels of resilience
           if (input$tactical_cell == '-- England --') {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
           }
           
           else {
@@ -1357,7 +1579,7 @@ server = function(input, output, session) {
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(TacticalCell == input$tactical_cell) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
               
             }
             
@@ -1366,9 +1588,49 @@ server = function(input, output, session) {
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(Name == input$lad_selected) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`,'TacticalCell')
             }
           }
+        }
+      
+      else {
+        # show all only most vulnerable areas
+        # --- RESILIENCE index ---  
+        # vulnerable colours
+        # High income, High inequality --> #3F2949
+        # High income, Medium inequality --> "#435786"
+        # Medium income, medium inequality --> #806A8A
+        # high inequality, medium income  --> "#77324C"
+        # "#3F2949" -->
+        vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+        
+        if (input$tactical_cell == '-- England --') {
+          fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+            filter(fill %in% vuln_cols) %>%
+            select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+                   `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+        }
+        
+        else {
+          # Filter to tactical cell
+          if (input$lad_selected == 'All local authorities in region') {
+            fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+              filter(TacticalCell == input$tactical_cell & fill %in% vuln_cols) %>%
+              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+            
+          }
+          
+          else {
+            # Filter to local authority
+            fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+              filter(Name == input$lad_selected) %>%
+              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+          }
+        }
+        
+        }
       }
     }
 })
@@ -1522,7 +1784,7 @@ server = function(input, output, session) {
   filtered_flood_resilience_labels <- reactive({
     
     if (input$tactical_cell == '-- England --') {
-    fl_resilience_lad_uk_most_vuln_for_labels <- lad_uk2vuln_resilience %>%
+    fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
       select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
              `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
              `Flooding incidents per 10,000 people`) %>%
@@ -1538,7 +1800,7 @@ server = function(input, output, session) {
     else {
       
       if (input$tactical_cell != '-- England --' & input$lad_selected=='All local authorities in region') {
-        fl_resilience_lad_uk_most_vuln_for_labels <- lad_uk2vuln_resilience %>%
+        fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
           filter(TacticalCell == input$tactical_cell) %>%
           select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
                  `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
@@ -1555,7 +1817,7 @@ server = function(input, output, session) {
       }
       
       else {
-        fl_resilience_lad_uk_most_vuln_for_labels <- lad_uk2vuln_resilience %>%
+        fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
           filter(lad19nm == input$lad_selected) %>%
           select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
                  `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
@@ -1631,41 +1893,13 @@ server = function(input, output, session) {
     # -- covid ---
     if(input$theme == 'Covid-19') {
       
-        covid_lads_in_tc <- covid_area2focus %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
-          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`, `% change in covid cases`)
+        covid_lads_in_tc <- covid_area2focus %>% arrange(-`covid cases per 100,000`) %>%
+          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
       
-        
-        #covid_cases2volunteers <- left_join(covid_lads_in_tc, volunteers_available, by='LAD19CD', keep=F) %>%
-        #  mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-        #                                          mean_score >= 2.5 ~ 'Low',
-        #                                          (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-        #                                          is.na(mean_score) ~ 'Data unavailable')) %>%
-        #  select('Local Authority', 'Region', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `covid cases per 100,000`, `% change in covid cases`)
-        
-       
-        # - order
-        # covid_cases2volunteers <- covid_cases2volunteers %>% arrange(-`Overall vulnerability`, -`% change in covid cases`, -`covid cases per 100,000`, -Score) %>%
-        #   select(-Score) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
-        #   #mutate_at(vars(`covid cases per 100,000`, `% change`), replace_na, 'NA') %>%
-        #   # renaming coivd cases to show week - hate format
-        #   rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .))
-        
         # no volunteer data
-        covid_cases2volunteers <- covid_lads_in_tc %>% arrange(-`Overall vulnerability`, -`% change in covid cases`, -`covid cases per 100,000`) %>%
+        covid_cases2volunteers <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
           select(-'LAD19CD') %>% 
-          #rename(`Volunteer presence`=`Volunteer capacity`) %>%
-          #mutate_at(vars(`covid cases per 100,000`, `% change`), replace_na, 'NA') %>%
-          # renaming coivd cases to show week - hate format
           rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .))
-        
-    # }
-    #   else {
-    # 
-    #   lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell)
-    #   # order descending by quintile and covid cases
-    #   covid_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`covid cases per 100,000`) %>%
-    #     select('LAD19CD','Local Authority'= Name, 'Overall vulnerability' =`Vulnerability quintile`, `covid cases per 100,000`,`% change in covid cases`)
-    # }
       
     }
     
@@ -1674,48 +1908,44 @@ server = function(input, output, session) {
       
       if(input$theme == 'Flooding') {
         
-          flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
+        # arrange for areas to focus list 
+        if (store_rank_wanted$rank_wanted_flooding == 'Historical flood incidents per 10,000') {
+        
+          flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Flooding incidents per 10,000 people`) %>%
             mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
             mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
-            select('LAD19CD','Local Authority'= LAD19NM, 'Region'=TacticalCell, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`,`Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+            rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+            select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
           
-          #flooding_cases2volunteers <- left_join(flooding_lads_in_tc, volunteers_available, by='LAD19CD', keep=F) %>%
-          #  mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-          #                                          mean_score >= 2.5 ~ 'Low',
-          #                                          (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-          #                                          is.na(mean_score) ~ 'Data unavailable')) %>%
-          #  select('Local Authority', 'Region', 'Overall vulnerability', 'Volunteer capacity', 'Score'=mean_score, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,`Total people in flood risk areas`, `% people in flood risk areas`)
-          
-          #print(covid_cases2volunteers)
-          # - order
-          # flooding_cases2volunteers <- flooding_cases2volunteers %>% 
-          #   arrange(-`Overall vulnerability`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`,-`Score`) %>%
-          #   select(-`Score`) %>% rename(`Volunteer presence`=`Volunteer capacity`) %>%
-          #   mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
-          #                                                     TRUE ~ (as.character(.$`% people in flood risk areas`))))
-          # 
-          # 
-          
-          # no volunteer data
           flooding_cases2volunteers <- flooding_lads_in_tc %>% 
-            arrange(-`Overall vulnerability`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
-            select(-`LAD19CD`) %>% 
-            #rename(`Volunteer presence`=`Volunteer capacity`) %>%
-            mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+              arrange( -`Flooding incidents per 10,000 people`) %>%
+              select(-`LAD19CD`) %>% 
+              mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
                                                               TRUE ~ (as.character(.$`% people in flood risk areas`))))
           
           
+        }
         
+        else {
+          # order based on flood warnings
+          if(store_rank_wanted$rank_wanted_flooding == 'Live flood warnings') {
+            
+            flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Total live Flood warning`,-`Total live Flood alert`) %>%
+              mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+              mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+              rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+              select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+            
+            flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+              arrange(-`Total live Flood warning`,-`Total live Flood alert`) %>%
+              select(-`LAD19CD`) %>% 
+              mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                TRUE ~ (as.character(.$`% people in flood risk areas`))))
+            
+            
+          }
           
-        # else {
-        #   lads_in_tc <- flooding_area2focus %>% filter(TacticalCell == input$tactical_cell)
-        #   # order descending by quintile and covid cases
-        #   flooding_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
-        #     mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
-        #     mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
-        #     select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
-        # }
-        
+        }
       } 
       # add new theme here 
     }
@@ -1723,25 +1953,120 @@ server = function(input, output, session) {
   })
   
   
-  # # ---- Flooding -----
-  # filtered_flooding_areas <- reactive({
-  #   if(input$tactical_cell == '-- England --') {
-  #     flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
-  #       mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
-  #       mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
-  #       select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`,`Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
-  #     
-  #   }
-  #   else {
-  #     lads_in_tc <- flooding_area2focus %>% filter(TacticalCell == input$tactical_cell)
-  #     # order descending by quintile and covid cases
-  #     flooding_lads_in_tc <- lads_in_tc %>% arrange(-`Vulnerability quintile`, -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
-  #       mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
-  #       mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
-  #       select('LAD19CD','Local Authority'= LAD19NM, 'Overall vulnerability' =`Vulnerability quintile`, `Total historical flooding incidents`, `Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
-  #   }
-  #   
-  # })
+  
+  # --- Areas to focus list ----
+  filtered_areas2focus_list <- reactive({
+    
+    #volunteers_available <- volunteers
+    
+    # -- covid ---
+    if(input$theme == 'Covid-19') {
+      
+      # what list do they want:
+      if (store_rank_wanted$rank_wanted_covid == 'cases per 100,000  ') {
+      
+      if (input$tactical_cell == '-- England --') {
+      
+      covid_lads_in_tc <- covid_area2focus %>% arrange(-`covid cases per 100,000`) %>%
+        select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+      
+      covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
+        select(-'LAD19CD') %>% 
+        rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+    }
+      else {
+      if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
+        
+        covid_lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
+          arrange(-`covid cases per 100,000`) %>%
+          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+        
+        covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
+          select(-'LAD19CD') %>% 
+          rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+      }
+        
+      else {
+        covid_lads_in_tc <- covid_area2focus %>% filter(Name == input$lad_selected) %>%
+          arrange(-`covid cases per 100,000`) %>%
+          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+        
+        covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
+          select(-'LAD19CD') %>% 
+          rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+        
+      }
+        
+      }
+      }
+      
+      else {
+        # rank on % change
+        if (input$tactical_cell == '-- England --') {
+          
+          covid_lads_in_tc <- covid_area2focus %>% arrange(-`% change in covid cases`) %>%
+            select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+          
+          covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
+            select(-'LAD19CD') %>% 
+            rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+        }
+        else {
+          if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
+            
+            covid_lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
+              arrange(-`% change in covid cases`) %>%
+              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+            
+            covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
+              select(-'LAD19CD') %>% 
+              rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+          }
+          
+          else {
+            covid_lads_in_tc <- covid_area2focus %>% filter(Name == input$lad_selected) %>%
+              arrange(-`% change in covid cases`) %>%
+              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+            
+            covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
+              select(-'LAD19CD') %>% 
+              rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+            
+          }
+          
+        }
+      }
+      
+    } # end of covid theme
+    
+    else {
+      # Flooding 
+      
+      if(input$theme == 'Flooding') {
+        
+        flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
+          mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+          mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+          select('LAD19CD','Local Authority'= LAD19NM, 'Region'=TacticalCell, `Total historical flooding incidents`,`Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+        
+       
+        # no volunteer data
+        flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+          arrange( -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
+          select(-`LAD19CD`) %>% 
+          #rename(`Volunteer presence`=`Volunteer capacity`) %>%
+          mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                            TRUE ~ (as.character(.$`% people in flood risk areas`))))
+        
+        
+        
+      } 
+      # add new theme here 
+    }
+    
+  })
+  
+  
 
 
 
@@ -1752,10 +2077,10 @@ server = function(input, output, session) {
   })
 
   # --- Volunteer capacity ---
-  filtered_volunteers <- reactive({
-    volunteers_tc <- volunteers %>% filter(TacticalCell==input$tactical_cell)
+  #filtered_volunteers <- reactive({
+  #  volunteers_tc <- volunteers %>% filter(TacticalCell==input$tactical_cell)
 
-  })
+#  })
   
   
   # # --- local organisation --- 
@@ -2888,7 +3213,7 @@ server = function(input, output, session) {
               #e_mark_line(data=eng_avg_bame, symbol = "none", lineStyle = list(color = "black")) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
 
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -2917,7 +3242,7 @@ server = function(input, output, session) {
           div(style= " text-align: center;margin-top:5px;",
               #hr(),
               p(format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), tags$br(),
-                "people receiving Section 95 support")
+                "people receiving support whilst seeking asylum (Section 95 support)")
               #p(tags$strong('No. of people receiving Section 95 support:'), format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), "people", tags$br(), write_eng_sec95)
           )
         })
@@ -2934,7 +3259,7 @@ server = function(input, output, session) {
                         #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
                         e_hide_grid_lines() %>%
                         e_flip_coords() %>%
-                        e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
+                        e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
 
                         #e_rm_axis(axis="x") %>%
                         #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -2982,7 +3307,7 @@ server = function(input, output, session) {
             #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
             e_hide_grid_lines() %>%
             e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
 
             #e_rm_axis(axis="x") %>%
             #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3034,7 +3359,7 @@ server = function(input, output, session) {
             #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
             e_hide_grid_lines() %>%
             e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
             
             #e_rm_axis(axis="x") %>%
             #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3086,7 +3411,7 @@ server = function(input, output, session) {
             #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
             e_hide_grid_lines() %>%
             e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
             
             #e_rm_axis(axis="x") %>%
             #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3148,7 +3473,7 @@ server = function(input, output, session) {
             #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
             e_hide_grid_lines() %>%
             e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=0, height='60%') %>%
+            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
             
             #e_rm_axis(axis="x") %>%
             #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3237,7 +3562,7 @@ server = function(input, output, session) {
               e_mark_line(data=tc_avg_bame, symbol = "none", lineStyle = list(color = "black"), title=label_to_show, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3289,7 +3614,7 @@ server = function(input, output, session) {
                 #hr(),
                 p(format(tc_sec95_to_write$`tc_People receiving Section 95 support`, big.mark=',', scientific = F),
                   tags$br(),
-                  'people receiving Section 95 support')
+                  'people receiving support whilst seeking asylum (Section 95 support)')
                 #p(tags$strong('No. of people receiving Section 95 support:'), format(tc_sec95_to_write$`tc_People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_tc_sec95)
             )
           })
@@ -3306,7 +3631,7 @@ server = function(input, output, session) {
               e_mark_line(data=tc_avg_section95, symbol = "none", lineStyle = list(color = "black"), title=tc_sec95_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3375,7 +3700,7 @@ server = function(input, output, session) {
               e_mark_line(data=tc_avg_homeless, symbol = "none", lineStyle = list(color = "black"), title=tc_homeless_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3448,7 +3773,7 @@ server = function(input, output, session) {
               e_mark_line(data=tc_avg_fuelp, symbol = "none", lineStyle = list(color = "black"), title=tc_fuelp_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3516,7 +3841,7 @@ server = function(input, output, session) {
               e_mark_line(data=tc_avg_unem, symbol = "none", lineStyle = list(color = "black"), title=tc_unem_for_avg,label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3594,7 +3919,7 @@ server = function(input, output, session) {
               e_mark_line(data=tc_avg_de, symbol = "none", lineStyle = list(color = "black"), title=tc_de_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3666,7 +3991,7 @@ server = function(input, output, session) {
               e_mark_line(data=tc_avg_shielding, symbol = "none", lineStyle = list(color = "black"), title=tc_shielding_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3756,7 +4081,7 @@ server = function(input, output, session) {
 
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3831,7 +4156,7 @@ server = function(input, output, session) {
                 #hr(),
                 p(format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F),
                   tags$br(),
-                  'people receiving Section 95 support')
+                  'people receiving support whilst seeking asylum (Section 95 support)')
                 #p(tags$strong('No. of people receiving Section 95 support:'), format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_lad_sec95)
 
             )
@@ -3850,7 +4175,7 @@ server = function(input, output, session) {
               e_mark_line(data=lad_avg_section95, symbol = "none", lineStyle = list(color = "black"), title=lad_sec95_for_avg,label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -3869,7 +4194,7 @@ server = function(input, output, session) {
                   #hr(),
                   p("Data unavailable",
                     tags$br(),
-                    'for people recieving Section 95 support')
+                    'people receiving support whilst seeking asylum (Section 95 support)')
                   #p(tags$strong('No. of people receiving Section 95 support:'), format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_lad_sec95)
               )
             })
@@ -3942,7 +4267,7 @@ server = function(input, output, session) {
               e_mark_line(data=lad_avg_homeless, symbol = "none", lineStyle = list(color = "black"), title=lad_homeless_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -4036,7 +4361,7 @@ server = function(input, output, session) {
               e_mark_line(data=lad_avg_fuelp, symbol = "none", lineStyle = list(color = "black"), title=lad_fuelp_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -4127,7 +4452,7 @@ server = function(input, output, session) {
               e_mark_line(data=lad_avg_unem, symbol = "none", lineStyle = list(color = "black"), title=lad_unem_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -4217,7 +4542,7 @@ server = function(input, output, session) {
               e_mark_line(data=lad_avg_de, symbol = "none", lineStyle = list(color = "black"), title=lad_de_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -4306,7 +4631,7 @@ server = function(input, output, session) {
               e_mark_line(data=lad_avg_shielding, symbol = "none", lineStyle = list(color = "black"), title=lad_sheilding_for_avg, label=list(formatter='label',fontSize=10)) %>%
               e_hide_grid_lines() %>%
               e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=15, bottom=0, height='60%') %>%
+              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
               
               #e_rm_axis(axis="x") %>%
               #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
@@ -4338,7 +4663,337 @@ server = function(input, output, session) {
       }
     }
 })
+  
+#store what ordering was desired for areas to focus
+store_rank_wanted <- reactiveValues(rank_wanted_covid ='cases per 100,000  ', rank_wanted_flooding = 'Historical flood incidents per 10,000')
+  
 
+observe({
+  if(input$theme == 'Covid-19') {
+  # set up options for areas to focus lists
+  output$top10options <- renderUI({
+      div(
+        selectInput(
+          inputId = "top_cases_top_change",
+          label = "", 
+          choices = c("cases per 100,000  ", "% change in cases"),
+          selected = "cases per 100,000  ",
+          #inline = TRUE, 
+          #checkbox = TRUE,
+          width="100%"
+        ),
+        hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-25px"))
+    })
+  }
+  
+  else{
+    if (input$theme == 'Flooding') {
+      # set up options for areas to focus lists
+      output$top10options <- renderUI({
+        div(
+          selectInput(
+            inputId = "top_cases_top_change",
+            label = "", 
+            choices = c("Historical flood incidents per 10,000", "Live flood warnings"),
+            selected = "Historical flood incidents per 10,000",
+            #inline = TRUE, 
+            #checkbox = TRUE,
+            width="100%"
+          ),
+          hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-25px"))
+      })
+      
+    }
+  }
+  
+})
+
+# make areas to focus list
+  observe({
+    
+    if(input$theme == 'Covid-19') {
+      
+      # -- change title based on what's selected --- 
+      if (store_rank_wanted$rank_wanted_covid == 'cases per 100,000  ') {
+        title_wanted <- "- Top 10 areas with highest number of Covid cases per 100,000,"
+      }
+    
+    
+      else {
+        title_wanted <- "- Top 10 areas with highest % change in Covid cases,"
+      }
+    
+
+    
+    top10 <- filtered_areas2focus_list()
+    
+    #print(input$lad_selected)
+    
+    ## if just showing a local authority: 
+    # the null is required because i think the way i've set up the second selection - it's called after this so when this is first run it's not currently assigned.
+    if (input$lad_selected == 'All local authorities in region' || is.null(input$lad_selected)) {
+      
+      # plot title 
+      output$title_focus_list <- renderUI({
+        div(
+          p(tags$strong(input$tactical_cell), title_wanted, covid_week),
+          hr(style = "border-top: 1px solid #000000;"))
+      })
+      
+      top102show <- head(top10, 10)
+      
+      # to colour number red or green 
+      top102show <- top102show %>% mutate(colour = case_when(`% change in covid cases` >0 ~ 'red',
+                                                             `% change in covid cases` == 0 ~ 'orange',
+                                                             `% change in covid cases` < 0 ~ 'green')) %>%
+        mutate(format_number = case_when(`% change in covid cases` > 0 ~ paste0('+',.$`% change in covid cases`,'%'),
+                                         `% change in covid cases` == 0 ~ paste0(.$`% change in covid cases`,'%'),
+                                         `% change in covid cases` < 0 ~ paste0(.$`% change in covid cases`,'%')))
+      
+      
+   
+      # format text 
+      
+      
+      output$areas2focus_list <- renderUI({
+          div( hr(),
+           # top 
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "cases,", tags$strong(top102show[1,6], style = paste("color:", top102show[1,5])), ")"),
+           hr(),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,3]), "cases, ", tags$strong(top102show[2,6], style = paste("color:", top102show[2,5])), ")"),
+           hr(),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0( "(", top102show[3,3]), "cases, ", tags$strong(top102show[3,6], style = paste("color:", top102show[3,5])), ")"),
+           hr(),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,3]), "cases, ", tags$strong(top102show[4,6], style = paste("color:", top102show[4,5])), ")"),
+           hr(),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,3]), "cases, ", tags$strong(top102show[5,6], style = paste("color:", top102show[5,5])), ")"),
+           hr(),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,3]), "cases, ", tags$strong(top102show[6,6], style = paste("color:", top102show[6,5])), ")"),
+           hr(),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,3]), "cases, ", tags$strong(top102show[7,6], style = paste("color:", top102show[7,5])), ")"),
+           hr(),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,3]), "cases, ", tags$strong(top102show[8,6], style = paste("color:", top102show[8,5])), ")"),
+           hr(),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,3]), "cases, ", tags$strong(top102show[9,6],style = paste("color:", top102show[9,5])), ")"),
+           hr(),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,3]), "cases, ", tags$strong(top102show[10,6], style = paste("color:", top102show[10,5])), ")")
+      )
+      
+    })
+    
+    }
+    
+    else {
+      top102show <- head(top10, 1)
+      
+      # plot title 
+      output$title_focus_list <- renderUI({
+        div(
+          p(tags$strong(input$lad_selected), '- number of covid cases per 100,000 and % change in covid cases,', covid_week),
+          hr(style = "border-top: 1px solid #000000;"))
+      })
+      
+      # to colour number red or green 
+      top102show <- top102show %>% mutate(colour = case_when(`% change in covid cases` >0 ~ 'red',
+                                                             `% change in covid cases` == 0 ~ 'orange',
+                                                             `% change in covid cases` < 0 ~ 'green')) %>%
+        mutate(format_number = case_when(`% change in covid cases` > 0 ~ paste0('+',.$`% change in covid cases`,'%'),
+                                         `% change in covid cases` == 0 ~ paste0(.$`% change in covid cases`,'%'),
+                                         `% change in covid cases` < 0 ~ paste0(.$`% change in covid cases`,'%')))
+      
+      output$areas2focus_list <- renderUI({
+        div( hr(),
+             # top 
+             p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "cases,", tags$strong(top102show[1,6], style = paste("color:", top102show[1,5])), ")"),
+             hr()
+        )
+        
+      })
+      
+      }
+    } # end of covid 
+    
+    else {
+      
+      if(input$theme == 'Flooding') {
+        
+        # retrieve list that's been selected
+        flooding_focus_list <- dd_areas2focus$d
+        #print(flooding_focus_list)
+        
+        # -- which list was wanted -- 
+        if(store_rank_wanted$rank_wanted_flooding == 'Historical flood incidents per 10,000') {
+          title_wanted <- "- Top 10 areas with highest number of historical flood incidents per 10,000 people"
+        
+          
+          # the null is required because i think the way i've set up the second selection - it's called after this so when this is first run it's not currently assigned.
+          if (input$lad_selected == 'All local authorities in region' || is.null(input$lad_selected)) {
+          
+            # plot title 
+            output$title_focus_list <- renderUI({
+              div(
+                p(tags$strong(input$tactical_cell), title_wanted),
+                hr(style = "border-top: 1px solid #000000;"))
+              })
+          
+              top102show <- head(flooding_focus_list, 10)
+          
+          
+          
+              # format text 
+              output$areas2focus_list <- renderUI({
+                div( hr(),
+                  # top 
+                  p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,6], ","), top102show[1,5],"historical floods)"),
+                  hr(),
+                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,6], ","), top102show[2,5],"historical floods)"),
+                 hr(),
+                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,6], ","), top102show[3,5],"historical floods)"),
+                 hr(),
+                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,6], ","), top102show[4,5],"historical floods)"),
+                 hr(),
+                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,6], ","), top102show[5,5],"historical floods)"),
+                 hr(),
+                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,6], ","), top102show[6,5],"historical floods)"),
+                 hr(),
+                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,6], ","), top102show[7,5],"historical floods)"),
+                 hr(),
+                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,6], ","), top102show[8,5],"historical floods)"),
+                 hr(),
+                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,6], ","), top102show[9,5],"historical floods)"),
+                 hr(),
+                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,6], ","), top102show[10,5],"historical floods)"),
+            )
+            
+          })
+          
+        }
+        
+        # for focus list selected just show a local authority
+        else {
+          top102show <- head(flooding_focus_list, 1)
+          
+          # plot title 
+          output$title_focus_list <- renderUI({
+            div(
+              p(tags$strong(input$lad_selected), '- number of historical flood incidents per 10,000 people'),
+              hr(style = "border-top: 1px solid #000000;"))
+          })
+          
+          
+          output$areas2focus_list <- renderUI({
+            div( hr(),
+                 # top 
+                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,6], ","), top102show[1,5],"historical floods)"),
+                 hr()
+            )
+            
+          })
+          
+        }
+        }
+        
+          # other flooding list 
+          else {
+            
+            # -- which list was wanted -- 
+            if(store_rank_wanted$rank_wanted_flooding == 'Live flood warnings') {
+              title_wanted <- "- Top 10 areas with highest number of live flood warnings and alerts"
+              
+              
+              # the null is required because i think the way i've set up the second selection - it's called after this so when this is first run it's not currently assigned.
+              if (input$lad_selected == 'All local authorities in region' || is.null(input$lad_selected)) {
+                
+                # plot title 
+                output$title_focus_list <- renderUI({
+                  div(
+                    p(tags$strong(input$tactical_cell), title_wanted),
+                    hr(style = "border-top: 1px solid #000000;"))
+                })
+                
+                top102show <- head(flooding_focus_list, 10)
+                
+                
+                
+                # format text 
+                output$areas2focus_list <- renderUI({
+                  div( hr(),
+                       # top 
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], "(", tags$strong(top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,7],"alerts", style='color:orange'), paste0(")")),
+                       hr(),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], "(", tags$strong(top102show[2,8], "warnings,", style="color:red"), tags$strong(top102show[2,7],"alerts", style='color:orange'), paste0(")")),
+                       hr(),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1], "(", tags$strong(top102show[3,8], "warnings,", style="color:red"), tags$strong(top102show[3,7],"alerts", style='color:orange'), paste0(")")),
+                       hr(),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], "(", tags$strong(top102show[4,8], "warnings,", style="color:red"), tags$strong(top102show[4,7],"alerts", style='color:orange'), paste0(")")),
+                       hr(),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], "(", tags$strong(top102show[5,8], "warnings,", style="color:red"), tags$strong(top102show[5,7],"alerts", style='color:orange'), paste0(")")),
+                       hr(),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], "(", tags$strong(top102show[6,8], "warnings,", style="color:red"), tags$strong(top102show[6,7],"alerts", style='color:orange'), paste0(")")),
+                       hr(),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], "(", tags$strong(top102show[7,8], "warnings,", style="color:red"), tags$strong(top102show[7,7],"alerts", style='color:orange'), paste0(")")),
+                       hr(),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], "(", tags$strong(top102show[8,8], "warnings,", style="color:red"), tags$strong(top102show[8,7],"alerts", style='color:orange'), paste0(")")),
+                       hr(),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], "(", tags$strong(top102show[9,8], "warnings,", style="color:red"), tags$strong(top102show[9,7],"alerts", style='color:orange'), paste0(")")),
+                       hr(),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], "(", tags$strong(top102show[10,8], "warnings,", style="color:red"), tags$strong(top102show[10,7],"alerts", style='color:orange'), paste0(")")),
+                       hr()
+                  )
+                  
+                })
+                
+              }
+              
+              # for focus list selected just show a local authority
+              else {
+                top102show <- head(flooding_focus_list, 1)
+                
+                # plot title 
+                output$title_focus_list <- renderUI({
+                  div(
+                    p(tags$strong(input$lad_selected), '- total live flood warnings and alerts'),
+                    hr(style = "border-top: 1px solid #000000;"))
+                })
+                
+                
+                output$areas2focus_list <- renderUI({
+                  div( hr(),
+                       # top 
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], "(", tags$strong(top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,7],"alerts", style='color:orange'), paste0(")")),
+                       hr()
+                  )
+                  
+                })
+                
+              }
+            }
+            
+            
+          }
+        
+      
+      } # end of flooding if
+      
+    }
+    
+  })
+
+
+  # observe if change in rank wanted has happened
+  observeEvent(input$top_cases_top_change, {
+    if (input$theme == 'Covid-19') {
+    store_rank_wanted$rank_wanted_covid <- input$top_cases_top_change
+    }
+    else {
+      if(input$theme == 'Flooding') {
+        store_rank_wanted$rank_wanted_flooding <- input$top_cases_top_change
+        
+      }
+    }
+  })
+  
+  
 
   # store reactive table so can filter on table click
   # for if row in table selected:
@@ -4352,13 +5007,13 @@ server = function(input, output, session) {
             selection =c('single'),
             options = list(dom='tp', #should remove top search box the p includes paging
             paging = T,
-            pageLength=5,
+            pageLength=10,
             lengthMenu = c(5, 10, 15, 20),
             scrollX=T,
-            scrollY='200px',
+            scrollY='350px',
             autoWidth = T,
-            columnDefs = list(list(width = '80px', targets = c(4,5)),
-                              list(width = '40px', tagets=c(2,3))),
+            #columnDefs = list(list(width = '0px', targets = c(3,4))#,
+            #                  ),
             initComplete = htmlwidgets::JS(
             "function(settings, json) {",
             paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
@@ -4378,11 +5033,12 @@ server = function(input, output, session) {
   observe({
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
-      
+ 
       # if user has tactical cell selected
       if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
         # update reactive values 
         #clearSorting(proxy = dataTableProxy(outputId = "areas2focus"))
+       
         # filter by tactical cell
         tc_filtered_areas2focus <- filtered_areas2focus() %>% filter(Region == input$tactical_cell)
         
@@ -4419,6 +5075,7 @@ server = function(input, output, session) {
         }
         
         else {
+          
           #clearSorting(proxy = dataTableProxy(outputId = "areas2focus"))
           dd_areas2focus$l <- input$lad_selected
           dd_areas2focus$t <- input$tactical_cell
@@ -4585,10 +5242,10 @@ server = function(input, output, session) {
                     selection =c('single'),
                     options = list(dom='tp', #should remove top search box the p includes paging
                                    paging = T,
-                                   pageLength=5,
+                                   pageLength=10,
                                    lengthMenu = c(5, 10, 15, 20),
                                    scrollX=T,
-                                   scrollY='250px',
+                                   scrollY='300px',
                                    autoWidth = T,
                                    columnDefs = list(list(width='400px',targets=c(3))),
                                    initComplete = htmlwidgets::JS(
@@ -4688,10 +5345,10 @@ server = function(input, output, session) {
                     selection =c('single'),
                     options = list(dom='tp', #should remove top search box the p includes paging
                                    paging = T,
-                                   pageLength=5,
+                                   pageLength=10,
                                    lengthMenu = c(5, 10, 15, 20),
                                    scrollX=T,
-                                   scrollY='250px',
+                                   scrollY='300px',
                                    autoWidth = T,
                                    columnDefs = list(list(width='400px',targets=c(3))),
                                    initComplete = htmlwidgets::JS(
