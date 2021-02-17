@@ -2773,7 +2773,7 @@ server = function(input, output, session) {
             addLayersControl(baseGroups = c("Resilience of all local authorities","Resilience of high flood incident areas","Resilience of high flood risk areas"),
                              options= layersControlOptions(collapsed=T))
           
-          }
+          } 
           
         }
         
