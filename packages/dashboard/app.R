@@ -20,9 +20,6 @@ library('ghql') # -- ADD TO DOCKER
 
 readRenviron(".Renviron")
 
-# options 
-options(shiny.trace = TRUE, shiny.error=browser)
-
 source("./functions.r")
 
 # function for table sorting 
