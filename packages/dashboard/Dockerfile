@@ -13,5 +13,5 @@ RUN apt-get update \
   && install2.r --error \
   --skipinstalled \
   $(cat $SRC_DIR/deps.txt)
-COPY shiny-customized.config /etc/shiny-server/shiny-server.conf
+COPY ./shiny-customized.config /etc/shiny-server/shiny-server.conf
 USER shiny
