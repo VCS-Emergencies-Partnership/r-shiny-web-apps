@@ -4693,6 +4693,7 @@ server = function(input, output, session) {
   
 #store what ordering was desired for areas to focus
 store_rank_wanted <- reactiveValues(rank_wanted_covid ='cases per 100,000  ', rank_wanted_flooding = 'Flood warnings/alerts')
+
   
 
 observe({
