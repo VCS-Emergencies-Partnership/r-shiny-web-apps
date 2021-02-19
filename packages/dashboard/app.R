@@ -280,6 +280,12 @@ volunteers <- read_feather('data/vcs_indicators/volunteer-capacity-lad19CD-tc.fe
 # -- local organisations --
 local_organisations <- read_feather('./data/navca_members_2019.feather')
 
+### --- update time --- 
+time_of_update <- Sys.time()
+time_and_date <- str_split(time_of_update, " ")
+last_updated_time <- paste0(time_and_date[[1]][2],",")
+last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%d"), "%d/%m/%Y"))
+
 
 # ---  dashboard --- #
 # --- header --- #
@@ -1929,7 +1935,7 @@ server = function(input, output, session) {
         
         else {
           # order based on flood warnings
-          if(store_rank_wanted$rank_wanted_flooding == 'Live flood warnings') {
+          if(store_rank_wanted$rank_wanted_flooding == 'Flood warnings/alerts') {
             
             flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Total live Flood warning`,-`Total live Flood alert`) %>%
               mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
@@ -4686,7 +4692,8 @@ server = function(input, output, session) {
 })
   
 #store what ordering was desired for areas to focus
-store_rank_wanted <- reactiveValues(rank_wanted_covid ='cases per 100,000  ', rank_wanted_flooding = 'Live flood warnings')
+store_rank_wanted <- reactiveValues(rank_wanted_covid ='cases per 100,000  ', rank_wanted_flooding = 'Flood warnings/alerts')
+
   
 
 observe({
@@ -4715,8 +4722,8 @@ observe({
           selectInput(
             inputId = "top_cases_top_change",
             label = "", 
-            choices = c("Live flood warnings","Historical flood incidents per 10,000"),
-            selected = "Live flood warnings",
+            choices = c("Flood warnings/alerts","Historical flood incidents per 10,000"),
+            selected = "Flood warnings/alerts",
             #inline = TRUE, 
             #checkbox = TRUE,
             width="100%"
@@ -4918,8 +4925,8 @@ observe({
           else {
             
             # -- which list was wanted -- 
-            if(store_rank_wanted$rank_wanted_flooding == 'Live flood warnings') {
-              title_wanted <- "- Top 10 areas with highest number of live flood warnings and alerts"
+            if(store_rank_wanted$rank_wanted_flooding == 'Flood warnings/alerts') {
+              title_wanted <- paste("- Top 10 areas with highest number of flood warnings and alerts as of", last_updated_time, last_updated_date)
               
               
               # the null is required because i think the way i've set up the second selection - it's called after this so when this is first run it's not currently assigned.
@@ -4973,7 +4980,7 @@ observe({
                 # plot title 
                 output$title_focus_list <- renderUI({
                   div(
-                    p(tags$strong(input$lad_selected), '- total live flood warnings and alerts'),
+                    p(tags$strong(input$lad_selected), '- total flood warnings and alerts as of', last_updated_time, last_updated_date),
                     hr(style = "border-top: 1px solid #000000;"))
                 })
                 
