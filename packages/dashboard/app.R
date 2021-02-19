@@ -20,6 +20,8 @@ library('ghql') # -- ADD TO DOCKER
 
 readRenviron(".Renviron")
 
+options(shiny.trace = F)
+
 source("./functions.r")
 
 # function for table sorting 
@@ -336,7 +338,7 @@ sidebar <- dashboardSidebar(
               #         menuSubItem("Requests", tabName='request_data'),
               #         menuSubItem("Pulse Check", tabName="pulse_check"),
               #         menuSubItem("Volunteer Capacity", tabName="vol_capacity")),
-
+              menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
               menuItem("References", tabName='references', icon=icon('feather-alt')),
 
 
@@ -814,6 +816,13 @@ body <- dashboardBody(
   #        h2("Pulse stats")),
   #tabItem(tabName = 'vol_capacity',
   #        h2("volunteer capacity analysis")),
+  tabItem(tabName='Help',
+          column(width = 12,
+                   tabBox(id='information about dashboards', width=NULL,
+                          tabPanel("Help - areas at risk in an emergency",
+                                   uiOutput('about_needs'),
+                                  style = "height:600px; overflow-y: scroll;overflow-x: scroll;"
+                                  )))),
   tabItem(tabName = 'references',
           fluidRow(style="padding-right:100px;padding-left:100px;padding-top:20px;padding-bottom:20px",
                    # column 1
@@ -997,33 +1006,57 @@ server = function(input, output, session) {
   observe({
     
     req(input$sidebar_id)
-    if (input$sidebar_id == 'unmetneed') {
+    #print(input$sidebar_id)
+    
+    if (input$sidebar_id == 'Help') {
       
       output$about_needs <- renderUI({
         div(
-          hr(),
+          p("The dashboard was last updated at", last_updated_time, "on", last_updated_date),
           p("This dashboard helps responders who wish to", tags$strong("target their efforts in areas of highest
             risk and least capacity to cope with an emergency."), "It also provides estimates of “People at risk”
-              based on different characteristics, to support influencing and advocacy efforts around emergencies."),
-          tags$br(),
+              based on demographic characteristics to support influencing and advocacy efforts around emergencies."),
           p("Users are able to", tags$strong("select the type of emergency"), "they are responding to and 
-            the",  tags$strong("“Areas at risk” map"), "and", tags$strong("“Areas to focus” list"), "will update", tags$strong("to show those 
-            areas least resilient to the emergency."), "For information on what indicators 
-            are used to make these assessments, see the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index help tab'))),
-          tags$br(),
-          p(tags$strong("Interpreting the map:"), tags$br(), "Different layers are shown on the map depending on which emergency is selected. It is also possible, by selecting the button in the corner of the map to change what information is displayed", tags$br(),
-                        p(tags$strong("Covid-19 theme:"), tags$br(), tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layers highlights the local authorities that are most vulnerable and have the least capacity to cope based upon the BRC resilience index.", tags$br(),
-                        tags$strong(tags$em("Economic vulnerability:")), "This layer shows the local authorities that are most ecomically vulnerable (scores of 4 or 5) based upon the BRC vulnerability index.", tags$br(),
-                        tags$strong(tags$em("Socioeconomic vulnerability:")), "This layer shows the local authorities that are most socioecomically vulnerable (scores of 4 or 5) based upon the BRC vulnerability index.", tags$br(), 
-                        tags$strong(tags$em("Social vulnerability:")), "This layer shows the local authorities that are most socially vulnerable (scores of 4 or 5) based upon the BRC vulnerability index.", tags$br(),
-                        tags$strong(tags$em("Health/wellbeing vulnerability:")), "This layer shows the local authorities that most vulnerable (scores of 4 or 5) with regards to health and wellbeing based upon the BRC vulnerability index.", tags$br(),
-                        tags$strong(tags$em("Clinical vulnerability:")), "This layer shows the local authorities that are most clinically vulnerable (scores of 4 or 5) based upon the BRC vulnerability index.", tags$br()),
-                        p(tags$strong("Flooding theme:"), tags$br(),
-                        tags$strong(tags$em("Resilience of areas with highest flood incidents:")), "This highlights the resilience (vulnerability vs the capacity to cope) of the areas with the highest number of historical flood incidents per 10,000 people (Flood incidents quintile 4 and 5 - for more information see the BRC resilience index).", tags$br(),
-                        tags$strong(tags$em("Resiliene of areas with highest flood risk:")), "This highlights the areas where the highest proportion of people live in flood risk areas (Flood risk quintile 4, 5 - for more information see the BRC resilience index)", tags$br(),
-                        tags$strong(tags$em("Flood warnings/alerts:")), "The points and polygons displayed show the latest flood warnings and alerts from the", tags$a(href="https://flood-warning-information.service.gov.uk/warnings", target="_blank","environment agency"))),
-          p("As more organisations contribute their data, over time", tags$strong("we will build a better 
-            understanding of “People in need” during an emergency, and where such needs may be going unmet."))
+            the",  tags$strong("“Areas at risk” map"), "and", tags$strong("“Areas to focus” list"), "will update to show 
+            the resilience (vulnerability vs capacity to cope) or a specific vulnerability (i.e clinical) of the area selected."),
+            
+            p("The vulnerability and resilience indicies were developed by the British Red Cross. 
+              Read more about how the reslience index and vulnerability index were created either in the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'help section here')),
+              "or", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "here."))),
+          
+          p(tags$strong("Interpreting the map:"), tags$br(), 
+            "For both emergency themes available so far the base layers of the map display either the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index')), "or",
+            "the", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index.")),
+            "It is possible to change the layer shown on the map by selecting the button in the corner of the map to change what information is displayed."),
+          
+          p(tags$strong("Covid-19 emergency map layers:"), 
+            tags$br(), 
+            tags$li(tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.'), "This shows the vulnerability vs the capacity to cope with an emergency of local authority districts in England. The ", tags$strong("darkest puple", style="color:#3F2949"), "highlighs those areas that are", tags$strong("most in need - highest vulnerability and least capacity to cope." , style="color:#3F2949")), 
+                                                                             tags$strong("The brightest red", style="color:#AE3A4E"), "indicates areas that are", tags$strong("highly vulnerable but have high capactiy to cope.",style="color:#AE3A4E"), 
+                                                                             tags$strong("The darker blue", style="color:#4885C1"), "indicates", tags$strong("low vulnerability but low capacity to cope.", style="color:#4885C1"), 
+                                                                             tags$strong("The lightest purple", style="color:#CABED0"), "indicates", tags$strong("the least in need - lowest vulnerability and highest capactiy.", style="color:#CABED0")), 
+                        tags$br(),
+                        tags$li(tags$strong(tags$em("Economic vulnerability:")), "This layer shows the economic vulnerability of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
+                        tags$br(),
+                        tags$li(tags$strong(tags$em("Socioeconomic vulnerability:")), "This layer shows the socioecomic vulnerability of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
+                        tags$br(),
+                        tags$li(tags$strong(tags$em("Social vulnerability:")), "This layer shows the social vulnerability (i.e barriers to housing and services, poor living environment etc.) of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
+                        tags$br(),
+                        tags$li(tags$strong(tags$em("Health/wellbeing vulnerability:")), "This layer shows the health/wellbeing vulnerability (i.e mental health and loneliness etc.) of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
+                        tags$br(),
+                        tags$li(tags$strong(tags$em("Clinical vulnerability:")), "This layer shows the clinical vulnerability (i.e underlying health conditions etc.) of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
+          tags$br(),              
+          p(tags$strong("Flooding emergency map layers:"),
+                        tags$li(tags$strong(tags$em("Resilience of all local authorities:")), "This shows the BRC resilience index using the same colour sheme as above."),
+                        tags$br(),
+                        tags$li(tags$strong(tags$em("Resilience of areas with highest flood incidents:")), "This highlights the resilience (vulnerability vs the capacity to cope) of the areas with the highest number of historical flood incidents per 10,000 people (Flood incidents quintile 4 and 5 - for more information see the", tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.')), 
+                        tags$br(),
+                        tags$li(tags$strong(tags$em("Resilience of areas with highest flood risk:")), "This highlights the areas where the highest proportion of people live in flood risk areas (Flood risk quintile 4, 5 - for more information see the", tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.')), 
+                        tags$br(),
+                        tags$li(tags$strong(tags$em("Flood warnings/alerts:")), "The points and polygons displayed show the flood warnings and alerts from the", tags$a(href="https://flood-warning-information.service.gov.uk/warnings", target="_blank","environment agency"), "as of", last_updated_time, last_updated_date)),
+          #tags$br(),
+          #p("As more organisations contribute their data, over time", tags$strong("we will build a better 
+          #  understanding of “People in need” during an emergency, and where such needs may be going unmet."))
           
         )
       })
