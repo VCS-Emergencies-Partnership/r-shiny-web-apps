@@ -970,8 +970,7 @@ server = function(input, output, session) {
           hr(),
           p("We make use of a range of data sources to bring you this insight,
             including", tags$strong("data that is open source"), "as well as", tags$strong("data from our contributing partners.")),
-          br(),
-          p("The platform uses data from the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross COVID-19 Vulnerability Index, The British Red Cross Resilience Index'), "and the British Red Cross Local Lockdown tool. 
+          p("The platform uses data and code from the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross COVID-19 Vulnerability Index, The British Red Cross Resilience Index'), "and the British Red Cross Local Lockdown tool. 
             The code from these tools is distributed under GPL-3 (GNU GENERAL PUBLICLICENSE version 3). Outputs related to the vulnerability index (e.g., vulnerability scores) are distributed under CC-BY-4.0 (Creative Commons Attribution 4.0 International), unless otherwise stated."),
           p(
             "Data is also included in the platform from",
@@ -1011,8 +1010,10 @@ server = function(input, output, session) {
     if (input$sidebar_id == 'Help') {
       
       output$about_needs <- renderUI({
-        div(
+        div(h4(tags$strong("Last updated:")),
           p("The dashboard was last updated at", last_updated_time, "on", last_updated_date),
+          tags$br(),
+          h4(tags$strong('About:')),
           p("This dashboard helps responders who wish to", tags$strong("target their efforts in areas of highest
             risk and least capacity to cope with an emergency."), "It also provides estimates of “People at risk”
               based on demographic characteristics to support influencing and advocacy efforts around emergencies."),
@@ -1023,19 +1024,19 @@ server = function(input, output, session) {
             p("The vulnerability and resilience indicies were developed by the British Red Cross. 
               Read more about how the reslience index and vulnerability index were created either in the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'help section here')),
               "or", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "here."))),
-          
-          p(tags$strong("Interpreting the map:"), tags$br(), 
-            "For both emergency themes available so far the base layers of the map display either the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index')), "or",
+          tags$br(),
+          h4(tags$strong("Interpreting the map:")), 
+            p("For both emergency themes available so far the base layers of the map display either the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index')), "or",
             "the", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index.")),
             "It is possible to change the layer shown on the map by selecting the button in the corner of the map to change what information is displayed."),
           
           p(tags$strong("Covid-19 emergency map layers:"), 
             tags$br(), 
-            tags$li(tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.'), "This shows the vulnerability vs the capacity to cope with an emergency of local authority districts in England. The ", tags$strong("darkest puple", style="color:#3F2949"), "highlighs those areas that are", tags$strong("most in need - highest vulnerability and least capacity to cope." , style="color:#3F2949")), 
+            tags$li(tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.'), "This shows the vulnerability vs the capacity to cope with an emergency of local authority districts in England. The ", tags$strong("darkest puple", style="color:#3F2949"), "highlights those areas that are", tags$strong("most in need - highest vulnerability and least capacity to cope." , style="color:#3F2949")), 
                                                                              tags$strong("The brightest red", style="color:#AE3A4E"), "indicates areas that are", tags$strong("highly vulnerable but have high capactiy to cope.",style="color:#AE3A4E"), 
                                                                              tags$strong("The darker blue", style="color:#4885C1"), "indicates", tags$strong("low vulnerability but low capacity to cope.", style="color:#4885C1"), 
                                                                              tags$strong("The lightest purple", style="color:#CABED0"), "indicates", tags$strong("the least in need - lowest vulnerability and highest capactiy.", style="color:#CABED0")), 
-                        tags$br(),
+                        
                         tags$li(tags$strong(tags$em("Economic vulnerability:")), "This layer shows the economic vulnerability of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
                         tags$br(),
                         tags$li(tags$strong(tags$em("Socioeconomic vulnerability:")), "This layer shows the socioecomic vulnerability of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
@@ -1047,7 +1048,7 @@ server = function(input, output, session) {
                         tags$li(tags$strong(tags$em("Clinical vulnerability:")), "This layer shows the clinical vulnerability (i.e underlying health conditions etc.) of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
           tags$br(),              
           p(tags$strong("Flooding emergency map layers:"),
-                        tags$li(tags$strong(tags$em("Resilience of all local authorities:")), "This shows the BRC resilience index using the same colour sheme as above."),
+                        tags$li(tags$strong(tags$em("Resilience of all local authorities:")), "This shows the BRC Resilience index (vulnerability vs capacity to cope) using the same colour scheme as the for the same layer on the Covid-19 data."),
                         tags$br(),
                         tags$li(tags$strong(tags$em("Resilience of areas with highest flood incidents:")), "This highlights the resilience (vulnerability vs the capacity to cope) of the areas with the highest number of historical flood incidents per 10,000 people (Flood incidents quintile 4 and 5 - for more information see the", tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.')), 
                         tags$br(),
