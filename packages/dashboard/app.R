@@ -1032,10 +1032,12 @@ server = function(input, output, session) {
           
           p(tags$strong("Covid-19 emergency map layers:"), 
             tags$br(), 
-            tags$li(tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.'), "This shows the vulnerability vs the capacity to cope with an emergency of local authority districts in England. The ", tags$strong("darkest puple", style="color:#3F2949"), "highlights those areas that are", tags$strong("most in need - highest vulnerability and least capacity to cope." , style="color:#3F2949")), 
-                                                                             tags$strong("The brightest red", style="color:#AE3A4E"), "indicates areas that are", tags$strong("highly vulnerable but have high capactiy to cope.",style="color:#AE3A4E"), 
-                                                                             tags$strong("The darker blue", style="color:#4885C1"), "indicates", tags$strong("low vulnerability but low capacity to cope.", style="color:#4885C1"), 
-                                                                             tags$strong("The lightest purple", style="color:#CABED0"), "indicates", tags$strong("the least in need - lowest vulnerability and highest capactiy.", style="color:#CABED0")), 
+            tags$li(tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.'), 
+                    "This shows the vulnerability vs the capacity to cope with an emergency of local authority districts in England. 
+                    The ", tags$strong("black", style="color:#000000"), "highlights those areas that are", tags$strong("most in need - highest vulnerability and least capacity to cope." , style="color:#000000")), 
+                                                                             #tags$strong("The brightest red", style="color:#AE3A4E"), "indicates areas that are", tags$strong("highly vulnerable but have high capactiy to cope.",style="color:#AE3A4E"), 
+                                                                             #tags$strong("The darker blue", style="color:#4885C1"), "indicates", tags$strong("low vulnerability but low capacity to cope.", style="color:#4885C1"), 
+                                                                             tags$strong("The lightest gray", style="color:#d9d9d9"), "indicates", tags$strong("the least in need - lowest vulnerability and highest capactiy.", style="color:#d9d9d9")), 
                         
                         tags$li(tags$strong(tags$em("Economic vulnerability:")), "This layer shows the economic vulnerability of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
                         tags$br(),
