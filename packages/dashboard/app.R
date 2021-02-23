@@ -1228,8 +1228,8 @@ server = function(input, output, session) {
         # Medium income, medium inequality --> #806A8A
         # high inequality, medium income  --> "#77324C"
         # "#3F2949" -->
-        vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
-        
+        #vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+        vuln_cols <- c("#000000","#b36600","#b3b3b3", "#376387")
         if (input$tactical_cell == '-- England --') {
         # --- filter to just areas most in need ---
         lad_uk_most_vuln <- lad_uk2vuln_resilience %>% filter(fill %in% vuln_cols)
@@ -1643,7 +1643,8 @@ server = function(input, output, session) {
         # Medium income, medium inequality --> #806A8A
         # high inequality, medium income  --> "#77324C"
         # "#3F2949" -->
-        vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+        #vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+        vuln_cols <- c("#000000","#b36600","#b3b3b3", "#376387")
         
         if (input$tactical_cell == '-- England --') {
           fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%

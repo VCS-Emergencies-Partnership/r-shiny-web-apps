@@ -1,4 +1,5 @@
 # - prep bivariate data fro map --
+library('pals')
 
 # https://timogrossenbacher.ch/2019/04/bivariate-maps-with-ggplot2-and-sf/#create-a-bivariate-choropleth
 
@@ -75,18 +76,46 @@ quantiles_res <- LA_res %>%
 # create color scale that encodes two variables
 # red for gini and blue for mean income
 # the special notation with gather is due to readibility reasons
+# bivariate_color_scale <- tibble(
+#   "3 - 3" = "#3F2949", # high inequality, high income
+#   "2 - 3" = "#435786",
+#   "1 - 3" = "#4885C1", # low inequality, high income
+#   "3 - 2" = "#77324C",
+#   "2 - 2" = "#806A8A", # medium inequality, medium income
+#   "1 - 2" = "#89A1C8",
+#   "3 - 1" = "#AE3A4E", # high inequality, low income
+#   "2 - 1" = "#BC7C8F",
+#   "1 - 1" = "#CABED0" # low inequality, low income
+# ) %>%
+#   gather("group", "fill")
+
 bivariate_color_scale <- tibble(
-  "3 - 3" = "#3F2949", # high inequality, high income
-  "2 - 3" = "#435786",
-  "1 - 3" = "#4885C1", # low inequality, high income
-  "3 - 2" = "#77324C",
-  "2 - 2" = "#806A8A", # medium inequality, medium income
-  "1 - 2" = "#89A1C8",
-  "3 - 1" = "#AE3A4E", # high inequality, low income
-  "2 - 1" = "#BC7C8F",
-  "1 - 1" = "#CABED0" # low inequality, low income
+  "3 - 3" = "#f3f3f3", # high inequality, high income
+  "2 - 3" = "#b4d3e1",
+  "1 - 3" = "#509dc2", # low inequality, high income
+  "3 - 2" = "#f3e6b3",
+  "2 - 2" = "#b3b3b3", # medium inequality, medium income
+  "1 - 2" = "#376387",
+  "3 - 1" = "#f3b300", # high inequality, low income
+  "2 - 1" = "#b36600",
+  "1 - 1" = "#000000" # low inequality, low income
 ) %>%
   gather("group", "fill")
+
+
+bivariate_color_scale <- tibble(
+  "3 - 3" = "#000000", # high inequality, high income
+  "2 - 3" = "#b36600",
+  "1 - 3" = "#f3b300", # low inequality, high income
+  "3 - 2" = "#376387",
+  "2 - 2" = "#b3b3b3", # medium inequality, medium income
+  "1 - 2" = "#f3e6b3",
+  "3 - 1" = "#509dc2", # high inequality, low income
+  "2 - 1" = "#b4d3e1",
+  "1 - 1" = "#f3f3f3" # low inequality, low income
+) %>%
+  gather("group", "fill")
+
 
 glimpse(bivariate_color_scale)
 quantiles_res
@@ -180,7 +209,7 @@ legend <- ggplot() +
       fill = fill)
   ) +
   scale_fill_identity() +
-  labs(x = "Higher Vulnerability",
+  labs(x = "Higher Vulnerability  ⟶️",
        y = "Higher Resilience ⟶️") +
   #theme_map() +
   # make font small enough
@@ -193,6 +222,39 @@ legend <- ggplot() +
 legend
 
 
+d<-expand.grid(x=1:3,y=1:3)
+#dlabel<-data.frame(x=1:3,xlabel=c("X low", "X middle","X High"))
+d<-merge(d,data.frame(x=1:3,xlabel=c("X low", "X middle","X high")),by="x")
+d<-merge(d,data.frame(y=1:3,ylabel=c("Y low", "Y middle","Y high")),by="y")
 
 
+geom.text.size = 7
+theme.size = (14/5) * geom.text.size
 
+g.legend<-
+  ggplot(test, aes(vuln,res,fill=fill))+
+  geom_tile()+
+  scale_fill_identity() +
+  scale_x_discrete(position = "top") +
+  #geom_text(alpha=1)+
+  theme_void()+
+  theme(legend.position="none",
+        panel.background=element_blank(),
+        plot.margin=margin(t=10,b=10,l=10))+
+  labs(x="Higher vulnerability", y=" Higher capacity")+
+  theme(axis.title=element_text(color="black", size=12), axis.title.y= element_text(angle=90, vjust=-8, hjust=0.5)) +
+  coord_fixed() +
+  annotate("segment", x=0.5, y=3.75, xend=3.5, yend=3.75,
+           col="black", arrow=arrow(length=unit(0.3, "cm"))) +
+  annotate("segment", x=0.1, y=3.5, xend=0.1, yend=0.5,
+           col="black", arrow=arrow(length=unit(0.3, "cm"))) #+
+  #geom_text(data=test, aes(x=0, y=2, label="Higher capacity"), color="gray30", angle=90, vjust=0.1, size=4.233333333) # size here is 4.233 mm - have to find equivalent 
+  #annotate()
+  # Draw some arrows:
+#  geom_segment(aes(x=3, xend = 3.5 , y=0, yend = 0), size=0.4,
+#               arrow = arrow(length = unit(0.3,"cm"))) +
+#  geom_segment(aes(x=0, xend = 0 , y=1, yend = 0.5), size=0.4,
+#               arrow = arrow(length = unit(0.3,"cm"))) 
+g.legend
+
+brewer.seqseq2()
