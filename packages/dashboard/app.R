@@ -584,7 +584,7 @@ body <- dashboardBody(
                                                      uiOutput("title_focus_list", height='30px'))),
                                      fluidRow(width=NULL,
                                               column(width=12, #tags$style("#top10options {font-size:10pt;height:30px;}"),
-                                                     style='margin-top:-30px;margin-bottom:-30px;padding-top:-30px;padding-bottom:-30px;padding-left:40px;font-size:10pt',
+                                                     style='margin-top:-30px;margin-bottom:-30px;padding-top:-30px;padding-bottom:-30px;padding-left:20px;font-size:10pt',
                                               #HTML("label{float:left;}")
                                            
                                      uiOutput('top10options', height='20px'))),
@@ -1074,7 +1074,7 @@ server = function(input, output, session) {
   # set up the static parts of the map (that don't change as user selects different options)
   output$map <- renderLeaflet({
         leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
-        setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # centre map on Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
+        setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # maybe could Fenny drayton to make map sclighly closer initially --> centre map on lat = 54.00366, lng = -2.547855 Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
         addProviderTiles(providers$CartoDB.Positron) %>%
         addTiles(urlTemplate = "", attribution = '2020 (c) British Red Cross') %>%
         addEasyButton(easyButton(
@@ -3120,7 +3120,7 @@ server = function(input, output, session) {
       if (any(input$map_groups %in% 'Resilience: vulnerability vs capacity to cope')) {
       
         map <- map %>%
-          addControl(html="<img src='bivar-legend.png', width=200>", position="bottomleft",
+          addControl(html="<img src='bivar-legend_v2.png', width=200>", position="bottomleft",
                    className = "fieldset {border: 0;}")
     }
     
@@ -3195,7 +3195,7 @@ server = function(input, output, session) {
       if (input$theme == 'Flooding') {
         map <- leafletProxy("map") %>%
           clearControls() %>%
-          addControl(html="<img src='bivar-legend.png', width=200>", position="bottomleft",
+          addControl(html="<img src='bivar-legend_v2.png', width=200>", position="bottomleft",
                      className = "fieldset {border: 0;}")
         
         #if ((any(input$map_groups %in% 'Resilience of high flood incident areas')) | (any(input$map_groups %in% 'Resilience of high flood risk areas'))) {
@@ -4745,7 +4745,7 @@ observe({
           #checkbox = TRUE,
           width="100%"
         ),
-        hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-25px"))
+        hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-4px"))
     })
   }
   
@@ -4763,7 +4763,8 @@ observe({
             #checkbox = TRUE,
             width="100%"
           ),
-          hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-25px"))
+          hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-4px"))
+          #hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-25px"))
       })
       
     }
