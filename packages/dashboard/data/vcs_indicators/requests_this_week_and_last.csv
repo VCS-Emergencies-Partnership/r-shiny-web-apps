@@ -22,7 +22,7 @@ E06000020,Central,NA,NA
 E06000021,Central,NA,NA
 E06000022,South and the Channel Islands,NA,NA
 E06000023,South and the Channel Islands,NA,NA
-E06000024,South and the Channel Islands,NA,NA
+E06000024,South and the Channel Islands,1,NA
 E06000025,South and the Channel Islands,NA,NA
 E06000026,South and the Channel Islands,NA,NA
 E06000027,South and the Channel Islands,NA,NA
@@ -126,7 +126,7 @@ E07000098,South East,NA,NA
 E07000099,South East,NA,NA
 E07000102,South East,NA,NA
 E07000103,South East,NA,NA
-E07000105,South East,NA,NA
+E07000105,South East,1,NA
 E07000106,South East,NA,NA
 E07000107,South East,NA,NA
 E07000108,South East,NA,NA
@@ -151,7 +151,7 @@ E07000126,North,NA,NA
 E07000127,North,NA,NA
 E07000128,North,NA,NA
 E07000129,Central,NA,NA
-E07000130,Central,NA,2
+E07000130,Central,NA,NA
 E07000131,Central,NA,NA
 E07000132,Central,NA,NA
 E07000133,Central,NA,NA
@@ -169,7 +169,7 @@ E07000144,Central,NA,NA
 E07000145,Central,NA,NA
 E07000146,Central,NA,NA
 E07000147,Central,NA,NA
-E07000148,Central,NA,NA
+E07000148,Central,1,NA
 E07000149,Central,NA,NA
 E07000150,Central,NA,NA
 E07000151,Central,NA,NA
@@ -307,7 +307,7 @@ E09000021,London,NA,NA
 E09000022,London,NA,NA
 E09000023,London,NA,NA
 E09000024,London,NA,NA
-E09000025,London,1,NA
+E09000025,London,NA,1
 E09000026,London,NA,NA
 E09000027,London,NA,NA
 E09000028,London,NA,NA
