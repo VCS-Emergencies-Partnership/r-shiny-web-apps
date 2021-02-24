@@ -584,7 +584,7 @@ body <- dashboardBody(
                                                      uiOutput("title_focus_list", height='30px'))),
                                      fluidRow(width=NULL,
                                               column(width=12, #tags$style("#top10options {font-size:10pt;height:30px;}"),
-                                                     style='margin-top:-30px;margin-bottom:-30px;padding-top:-30px;padding-bottom:-30px;padding-left:40px;font-size:10pt',
+                                                     style='margin-top:-30px;margin-bottom:-30px;padding-top:-30px;padding-bottom:-30px;padding-left:20px;font-size:10pt',
                                               #HTML("label{float:left;}")
                                            
                                      uiOutput('top10options', height='20px'))),
@@ -593,24 +593,24 @@ body <- dashboardBody(
                                               column(width=12,
                                      uiOutput("areas2focus_list",
                                      style = "height:475px; overflow-y: scroll;overflow-x: scroll;")))),
-                            tabPanel("People at risk", 
+                            tabPanel("Area demographics", 
                           # multi columned box - bame row
-                            fluidRow(style = "border-top: 1px solid #D3D3D3;",
-                              column(
-                                width = 12,
-                                  uiOutput('bame_population_text', height='40px'),
-                                  #echarts4rOutput('bame_population', height='40px'),
-                              #    rightBorder=F,
-                              #    marginBottom=T
-                              #),
-
-                              #column(
-                              #  width = 6,
-                                  echarts4rOutput('bame_population', height='40px'),
-                                  rightBorder=F,
-                                  marginBottom =T
-                                )
-                              ),
+                          # -- shielding row ---
+                          fluidRow(style = "border-top: 1px solid #D3D3D3;",
+                                   column(
+                                     width = 12,
+                                     uiOutput('shielding_text'),
+                                     #  rightBorder=T,
+                                     #  marginBottom=T
+                                     #),
+                                     
+                                     #column(
+                                     #   width = 6,
+                                     echarts4rOutput('shielding_f', height='40px'),
+                                     rightBorder=F,
+                                     marginBottom =T
+                                   )
+                          ),
                             
                             # -- section 95 row ---
                             fluidRow(style = "border-top: 1px solid #D3D3D3;",
@@ -702,21 +702,22 @@ body <- dashboardBody(
                                    )
                           ),
                           
-                          # -- shielding row ---
+                         
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
                                    column(
                                      width = 12,
-                                     uiOutput('shielding_text'),
-                                   #  rightBorder=T,
-                                   #  marginBottom=T
-                                   #),
-                                   
-                                   #column(
-                                  #   width = 6,
-                                     echarts4rOutput('shielding_f', height='40px'),
+                                     uiOutput('bame_population_text', height='40px'),
+                                     #echarts4rOutput('bame_population', height='40px'),
+                                     #    rightBorder=F,
+                                     #    marginBottom=T
+                                     #),
+                                     
+                                     #column(
+                                     #  width = 6,
+                                     echarts4rOutput('bame_population', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
-                                  )
+                                   )
                           ),
                           style = "height:550px; overflow-y: scroll;overflow-x: scroll;"
                           )
@@ -1032,10 +1033,13 @@ server = function(input, output, session) {
           
           p(tags$strong("Covid-19 emergency map layers:"), 
             tags$br(), 
-            tags$li(tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.'), "This shows the vulnerability vs the capacity to cope with an emergency of local authority districts in England. The ", tags$strong("darkest puple", style="color:#3F2949"), "highlights those areas that are", tags$strong("most in need - highest vulnerability and least capacity to cope." , style="color:#3F2949")), 
-                                                                             tags$strong("The brightest red", style="color:#AE3A4E"), "indicates areas that are", tags$strong("highly vulnerable but have high capactiy to cope.",style="color:#AE3A4E"), 
-                                                                             tags$strong("The darker blue", style="color:#4885C1"), "indicates", tags$strong("low vulnerability but low capacity to cope.", style="color:#4885C1"), 
-                                                                             tags$strong("The lightest purple", style="color:#CABED0"), "indicates", tags$strong("the least in need - lowest vulnerability and highest capactiy.", style="color:#CABED0")), 
+            tags$li(tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.'), 
+                    "This shows the vulnerability vs the capacity to cope with an emergency of local authority districts in England. 
+                    The ", tags$strong("black", style="color:#000000"), "highlights those areas that are", tags$strong("most in need - highest vulnerability and least capacity to cope." , style="color:#000000")), 
+                                                                             #tags$strong("The brightest red", style="color:#AE3A4E"), "indicates areas that are", tags$strong("highly vulnerable but have high capactiy to cope.",style="color:#AE3A4E"), 
+                                                                             #tags$strong("The darker blue", style="color:#4885C1"), "indicates", tags$strong("low vulnerability but low capacity to cope.", style="color:#4885C1"), 
+                                                                             tags$strong("The lightest gray", style="color:#d9d9d9"), "indicates", tags$strong("the least in need - lowest vulnerability and highest capactiy.", style="color:#d9d9d9"), 
+                    "We selected this colour scheme to try and avoid confusion with the RAG colour scheme that is commonly used in operational response."), 
                         
                         tags$li(tags$strong(tags$em("Economic vulnerability:")), "This layer shows the economic vulnerability of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
                         tags$br(),
@@ -1074,7 +1078,7 @@ server = function(input, output, session) {
   # set up the static parts of the map (that don't change as user selects different options)
   output$map <- renderLeaflet({
         leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
-        setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # centre map on Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
+        setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # maybe could Fenny drayton to make map sclighly closer initially --> centre map on lat = 54.00366, lng = -2.547855 Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
         addProviderTiles(providers$CartoDB.Positron) %>%
         addTiles(urlTemplate = "", attribution = '2020 (c) British Red Cross') %>%
         addEasyButton(easyButton(
@@ -1228,8 +1232,8 @@ server = function(input, output, session) {
         # Medium income, medium inequality --> #806A8A
         # high inequality, medium income  --> "#77324C"
         # "#3F2949" -->
-        vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
-        
+        #vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+        vuln_cols <- c("#000000","#b36600","#b3b3b3", "#376387")
         if (input$tactical_cell == '-- England --') {
         # --- filter to just areas most in need ---
         lad_uk_most_vuln <- lad_uk2vuln_resilience %>% filter(fill %in% vuln_cols)
@@ -1643,7 +1647,8 @@ server = function(input, output, session) {
         # Medium income, medium inequality --> #806A8A
         # high inequality, medium income  --> "#77324C"
         # "#3F2949" -->
-        vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+        #vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
+        vuln_cols <- c("#000000","#b36600","#b3b3b3", "#376387")
         
         if (input$tactical_cell == '-- England --') {
           fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
@@ -3119,7 +3124,7 @@ server = function(input, output, session) {
       if (any(input$map_groups %in% 'Resilience: vulnerability vs capacity to cope')) {
       
         map <- map %>%
-          addControl(html="<img src='bivar-legend.png', width=200>", position="bottomleft",
+          addControl(html="<img src='bivar-legend_v2.png', width=200>", position="bottomleft",
                    className = "fieldset {border: 0;}")
     }
     
@@ -3194,7 +3199,7 @@ server = function(input, output, session) {
       if (input$theme == 'Flooding') {
         map <- leafletProxy("map") %>%
           clearControls() %>%
-          addControl(html="<img src='bivar-legend.png', width=200>", position="bottomleft",
+          addControl(html="<img src='bivar-legend_v2.png', width=200>", position="bottomleft",
                      className = "fieldset {border: 0;}")
         
         #if ((any(input$map_groups %in% 'Resilience of high flood incident areas')) | (any(input$map_groups %in% 'Resilience of high flood risk areas'))) {
@@ -4744,7 +4749,7 @@ observe({
           #checkbox = TRUE,
           width="100%"
         ),
-        hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-25px"))
+        hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-4px"))
     })
   }
   
@@ -4762,7 +4767,8 @@ observe({
             #checkbox = TRUE,
             width="100%"
           ),
-          hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-25px"))
+          hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-4px"))
+          #hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-25px"))
       })
       
     }

@@ -19,7 +19,7 @@ h1, h2, h3, h4 { font-weight: 400; }
 }
 
 
-#legend {
+.leaflet-bottom.leaflet-left {
   /* Appearance */
   opacity:.8;
   background-color: transparent;
@@ -29,7 +29,7 @@ h1, h2, h3, h4 { font-weight: 400; }
   transform-origin: left bottom;
 }
 
-#legend:hover {
+.leaflet-bottom.leaflet-left:hover {
   transform: scale(2);
   transform-origin: left bottom;
 }
