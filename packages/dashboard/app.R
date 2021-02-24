@@ -593,24 +593,24 @@ body <- dashboardBody(
                                               column(width=12,
                                      uiOutput("areas2focus_list",
                                      style = "height:475px; overflow-y: scroll;overflow-x: scroll;")))),
-                            tabPanel("People at risk", 
+                            tabPanel("Area demographics", 
                           # multi columned box - bame row
-                            fluidRow(style = "border-top: 1px solid #D3D3D3;",
-                              column(
-                                width = 12,
-                                  uiOutput('bame_population_text', height='40px'),
-                                  #echarts4rOutput('bame_population', height='40px'),
-                              #    rightBorder=F,
-                              #    marginBottom=T
-                              #),
-
-                              #column(
-                              #  width = 6,
-                                  echarts4rOutput('bame_population', height='40px'),
-                                  rightBorder=F,
-                                  marginBottom =T
-                                )
-                              ),
+                          # -- shielding row ---
+                          fluidRow(style = "border-top: 1px solid #D3D3D3;",
+                                   column(
+                                     width = 12,
+                                     uiOutput('shielding_text'),
+                                     #  rightBorder=T,
+                                     #  marginBottom=T
+                                     #),
+                                     
+                                     #column(
+                                     #   width = 6,
+                                     echarts4rOutput('shielding_f', height='40px'),
+                                     rightBorder=F,
+                                     marginBottom =T
+                                   )
+                          ),
                             
                             # -- section 95 row ---
                             fluidRow(style = "border-top: 1px solid #D3D3D3;",
@@ -702,21 +702,22 @@ body <- dashboardBody(
                                    )
                           ),
                           
-                          # -- shielding row ---
+                         
                           fluidRow(style = "border-top: 1px solid #D3D3D3;",
                                    column(
                                      width = 12,
-                                     uiOutput('shielding_text'),
-                                   #  rightBorder=T,
-                                   #  marginBottom=T
-                                   #),
-                                   
-                                   #column(
-                                  #   width = 6,
-                                     echarts4rOutput('shielding_f', height='40px'),
+                                     uiOutput('bame_population_text', height='40px'),
+                                     #echarts4rOutput('bame_population', height='40px'),
+                                     #    rightBorder=F,
+                                     #    marginBottom=T
+                                     #),
+                                     
+                                     #column(
+                                     #  width = 6,
+                                     echarts4rOutput('bame_population', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
-                                  )
+                                   )
                           ),
                           style = "height:550px; overflow-y: scroll;overflow-x: scroll;"
                           )
@@ -1037,7 +1038,8 @@ server = function(input, output, session) {
                     The ", tags$strong("black", style="color:#000000"), "highlights those areas that are", tags$strong("most in need - highest vulnerability and least capacity to cope." , style="color:#000000")), 
                                                                              #tags$strong("The brightest red", style="color:#AE3A4E"), "indicates areas that are", tags$strong("highly vulnerable but have high capactiy to cope.",style="color:#AE3A4E"), 
                                                                              #tags$strong("The darker blue", style="color:#4885C1"), "indicates", tags$strong("low vulnerability but low capacity to cope.", style="color:#4885C1"), 
-                                                                             tags$strong("The lightest gray", style="color:#d9d9d9"), "indicates", tags$strong("the least in need - lowest vulnerability and highest capactiy.", style="color:#d9d9d9")), 
+                                                                             tags$strong("The lightest gray", style="color:#d9d9d9"), "indicates", tags$strong("the least in need - lowest vulnerability and highest capactiy.", style="color:#d9d9d9"), 
+                    "We selected this colour scheme to try and avoid confusion with the RAG colour scheme that is commonly used in operational response."), 
                         
                         tags$li(tags$strong(tags$em("Economic vulnerability:")), "This layer shows the economic vulnerability of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
                         tags$br(),
