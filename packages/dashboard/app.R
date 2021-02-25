@@ -1209,14 +1209,16 @@ server = function(input, output, session) {
           
           if (input$tactical_cell == '-- England --') {
             # --- filter to just areas most in need ---
-            lad_uk_most_vuln <- lad_uk2vuln_resilience
+            lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+              mutate('opacity_val' = 0.8)
           }
           
           else {
             # Filter to tactical cell
             if (input$lad_selected == 'All local authorities in region') {
               lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-                filter(TacticalCell == input$tactical_cell)
+                filter(TacticalCell == input$tactical_cell) %>%
+                mutate('opacity_val' = 0.8)
             }
             else {
               # Filter to local authority
@@ -1249,10 +1251,16 @@ server = function(input, output, session) {
         # high inequality, medium income  --> "#77324C"
         # "#3F2949" -->
         #vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
-        vuln_cols <- c("#000000","#b36600","#b3b3b3", "#376387")
+        #vuln_cols <- c("#000000","#b36600","#b3b3b3", "#376387")
+        top_ten_cols <- head(filtered_areas2focus_list(), n=10)
+        #top_ten_cols <- top_ten_cols %>% select('Local Authority')
+        top_ten_cols <- as.vector(top_ten_cols$`Local Authority`)
+        
         if (input$tactical_cell == '-- England --') {
         # --- filter to just areas most in need ---
-        lad_uk_most_vuln <- lad_uk2vuln_resilience %>% filter(fill %in% vuln_cols)
+        lad_uk_most_vuln <- lad_uk2vuln_resilience %>% #%>% filter(fill %in% vuln_cols)
+          mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                           !Name %in% top_ten_cols ~ 0.1)) 
         }
         
         else {
@@ -1260,7 +1268,9 @@ server = function(input, output, session) {
           if (input$lad_selected == 'All local authorities in region') {
             lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
               filter(TacticalCell == input$tactical_cell) %>%
-              filter(fill %in% vuln_cols)
+              #filter(fill %in% vuln_cols)
+              mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                               !Name %in% top_ten_cols ~ 0.1))
           }
           else {
             # Filter to local authority
@@ -2250,7 +2260,7 @@ server = function(input, output, session) {
                         opacity = 0.8,
                         color = "black",
                         dashArray = "0.1",
-                        fillOpacity = 0.7,
+                        fillOpacity = ~opacity_val,
                         highlight = highlightOptions(
                           weight = 5,
                           color = "#666",
@@ -2414,7 +2424,7 @@ server = function(input, output, session) {
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -5650,17 +5660,39 @@ observe({
     
     if(input$theme == 'Covid-19') {
       
+      #print(input$expand_search)
+      # if call times out before expand search option initiated it will be null
+      if (is.null(input$expand_search)) {
+        print("here")
+        bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+      }
+      
+      else{
+      
       if(input$expand_search == 'Yes') {
         
         lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
         neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
         bounding_wanted <- st_bbox(neighbours_of_interest)
       }
+      
       else {
+        # just show local authority results
+        if(input$expand_search == 'No') {
+          
         lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
         bounding_wanted <- st_bbox(lad_only)
-        #bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+        
+        }
+        # if searching having not loaded issue after initiation
+        else {
+          print('no in here')
+          bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+          }
+        }
       }
+      
+      glimpse(bounding_wanted)
       
       charities_found <- NULL
       tryCatch({  
