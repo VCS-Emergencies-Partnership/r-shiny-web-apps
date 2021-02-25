@@ -793,8 +793,12 @@ body <- dashboardBody(
                                 # width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
                                 # title = "Local organisations", align = "left",
                                  fluidRow( 
-                                   column(width=12,
-                                          uiOutput("search_needed", height='50px'))),
+                                   column(width=8,
+                                          uiOutput("search_needed", height='50px')),
+                               
+                                  column(width=4,
+                                          uiOutput("expand_search_needed", height='50px'))),
+                                
                                  fluidRow(
                                    column(width=12,
                                           #height = "600px"
@@ -1216,8 +1220,20 @@ server = function(input, output, session) {
             }
             else {
               # Filter to local authority
+              #lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+              #  filter(Name == input$lad_selected)
               lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-                filter(Name == input$lad_selected)
+                filter(TacticalCell == input$tactical_cell) %>%
+                mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                               Name != input$lad_selected ~ 0.1))
+              
+              # add alpha values 
+              
+              #--- test ---
+              #lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+              #neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
+              #bounding_wanted <- st_bbox(neighbours_of_interest)
+              
             }
           }
           
@@ -1249,7 +1265,9 @@ server = function(input, output, session) {
           else {
             # Filter to local authority
             lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-              filter(Name == input$lad_selected)
+              filter(Name == input$lad_selected) %>%
+              mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                             Name != input$lad_selected ~ 0.1))
           }
         }
         }
@@ -1285,7 +1303,9 @@ server = function(input, output, session) {
         }
         else {
           econ_vuln <- lad_uk2vuln_resilience %>%
-            filter(LAD19NM == input$lad_selected)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1))
         }
         
       }
@@ -1303,7 +1323,9 @@ server = function(input, output, session) {
       }
       else {
         econ_vuln <- lad_uk2vuln_resilience %>%
-          filter(LAD19NM == input$lad_selected)
+          filter(LAD19NM == input$lad_selected)  %>%
+          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                         Name != input$lad_selected ~ 0.1))
       }
     }
   }
@@ -1325,7 +1347,10 @@ server = function(input, output, session) {
         }
         else {
           socioecon_vuln <- lad_uk2vuln_resilience %>%
-            filter(LAD19NM == input$lad_selected)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1))
+          
         }
       }
       
@@ -1344,7 +1369,9 @@ server = function(input, output, session) {
       }
       else {
         socioecon_vuln <- lad_uk2vuln_resilience %>%
-          filter(LAD19NM == input$lad_selected)
+          filter(LAD19NM == input$lad_selected) %>%
+          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                         Name != input$lad_selected ~ 0.1))
       }
     }
     }
@@ -1365,7 +1392,9 @@ server = function(input, output, session) {
         }
         else {
           socio_vuln <- lad_uk2vuln_resilience %>%
-            filter(LAD19NM == input$lad_selected)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1))
         }
       }
       
@@ -1384,7 +1413,9 @@ server = function(input, output, session) {
       }
       else {
         socio_vuln <- lad_uk2vuln_resilience %>%
-          filter(LAD19NM == input$lad_selected)
+          filter(LAD19NM == input$lad_selected) %>%
+          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                         Name != input$lad_selected ~ 0.1))
         }
       }
     }
@@ -1404,7 +1435,9 @@ server = function(input, output, session) {
         }
         else {
           health_vuln <- lad_uk2vuln_resilience %>%
-            filter(LAD19NM == input$lad_selected)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1))
         }
       }
     }
@@ -1422,7 +1455,9 @@ server = function(input, output, session) {
       }
       else {
         health_vuln <- lad_uk2vuln_resilience %>%
-          filter(LAD19NM == input$lad_selected)
+          filter(LAD19NM == input$lad_selected) %>%
+          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                         Name != input$lad_selected ~ 0.1))
         }
       }
     }
@@ -1442,7 +1477,9 @@ server = function(input, output, session) {
         }
         else {
           clin_vuln <- lad_uk2vuln_resilience %>%
-            filter(LAD19NM == input$lad_selected)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1))
         }
       }
     }
@@ -1460,7 +1497,9 @@ server = function(input, output, session) {
       }
       else {
         clin_vuln <- lad_uk2vuln_resilience %>%
-          filter(LAD19NM == input$lad_selected)
+          filter(LAD19NM == input$lad_selected) %>%
+          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                         Name != input$lad_selected ~ 0.1))
         }
       }
     }
@@ -1550,8 +1589,10 @@ server = function(input, output, session) {
             # Filter to local authority
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
               filter(Name == input$lad_selected) %>%
+              mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                             Name != input$lad_selected ~ 0.1)) %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, `opacity_val`)
           
           }
         }
@@ -1592,8 +1633,10 @@ server = function(input, output, session) {
               # Filter to local authority
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(Name == input$lad_selected) %>%
+                mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                               Name != input$lad_selected ~ 0.1)) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, `opacity_val`)
               
             }
           }
@@ -1631,9 +1674,11 @@ server = function(input, output, session) {
             else {
               # Filter to local authority
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-                filter(Name == input$lad_selected) %>%
+                filter(TacticalCell == input$tactical_cell) %>%
+                mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                               Name != input$lad_selected ~ 0.1)) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`,'TacticalCell')
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`,'TacticalCell',`opacity_val`)
             }
           }
         }
@@ -1671,8 +1716,10 @@ server = function(input, output, session) {
             # Filter to local authority
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
               filter(Name == input$lad_selected) %>%
+              mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                             Name != input$lad_selected ~ 0.1)) %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`)
           }
         }
         
@@ -1864,7 +1911,7 @@ server = function(input, output, session) {
       
       else {
         fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
-          filter(lad19nm == input$lad_selected) %>%
+          #filter(lad19nm == input$lad_selected) %>%
           select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
                  `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
                  `Flooding incidents per 10,000 people`) %>%
@@ -2508,7 +2555,8 @@ server = function(input, output, session) {
           
           # local authority level
           else {
-            curr_bbox <- st_bbox(lad_uk_most_vuln)
+            lad_bbox <- lad_uk_most_vuln %>% filter(Name == input$lad_selected)
+            curr_bbox <- st_bbox(lad_bbox)
             
             leafletProxy("map") %>%
               clearShapes() %>%
@@ -2530,7 +2578,7 @@ server = function(input, output, session) {
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2552,7 +2600,7 @@ server = function(input, output, session) {
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2575,7 +2623,7 @@ server = function(input, output, session) {
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2598,7 +2646,7 @@ server = function(input, output, session) {
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2621,7 +2669,7 @@ server = function(input, output, session) {
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2644,7 +2692,7 @@ server = function(input, output, session) {
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2685,7 +2733,8 @@ server = function(input, output, session) {
         if (dim(plot_flood_warning_polygon)[1] == 0) {
           
           if (input$lad_selected != 'All local authorities in region') {
-            curr_bbox <- st_bbox(flood_all)
+            lad_bbox <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+            curr_bbox <- st_bbox(lad_bbox)
             
             
             leafletProxy("map") %>%
@@ -2707,7 +2756,7 @@ server = function(input, output, session) {
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -3046,8 +3095,8 @@ server = function(input, output, session) {
             
             else {
               
-              # -- zoom for uk ---
-              curr_bbox <- st_bbox(flood_all)
+              lad_bbox <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+              curr_bbox <- st_bbox(lad_bbox)
               
               leafletProxy("map") %>%
                 clearShapes() %>%
@@ -3068,7 +3117,7 @@ server = function(input, output, session) {
                             opacity = 0.8,
                             color = "black",
                             dashArray = "0.1",
-                            fillOpacity = 0.7,
+                            fillOpacity = ~opacity_val,
                             highlight = highlightOptions(
                               weight = 5,
                               color = "#666",
@@ -5245,21 +5294,63 @@ observe({
     
     if(input$sidebar_id == 'unmetneed') {
       
-      # create search of charity database 
-      output$search_needed <- renderUI({
-        # search bar
-        searchInput(inputId = "search_term", 
-                    label = "Search CharityBase for charities with a particular purpose",
-                    placeholder = 'i.e emergency response',
-                    btnSearch = icon("search"), 
-                    btnReset = icon("remove"), 
-                    value='',
-                    width = "70%")
-        
-      })
       
-    bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
-    
+      # provide option for expanded search if lad selected
+      if(input$lad_selected != 'All local authorities in region') {
+        # initally only search for the selected lad
+        lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+        bounding_wanted <- st_bbox(lad_only)
+        
+        # create search of charity database 
+        output$search_needed <- renderUI({
+          # search bar
+          searchInput(inputId = "search_term", 
+                      label = "Search CharityBase for charities with a particular purpose",
+                      placeholder = 'i.e emergency response',
+                      btnSearch = icon("search"), 
+                      btnReset = icon("remove"), 
+                      value='',
+                      width = "100%")
+        })  
+      
+      output$expand_search_needed <- renderUI({
+        
+        radioButtons(inputId="expand_search",
+                       label="Include neighbouring local authorities in search",
+                       #status='success',
+                       width = "100%",
+                       choices=c("Yes","No"),
+                       selected="No",
+                       inline=T
+                       
+                    )
+        
+        })
+      }
+      
+      else {
+        # search either whole tactical cell or all of engalnd
+        bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+        # create search of charity database 
+        output$search_needed <- renderUI({
+          # search bar
+          searchInput(inputId = "search_term", 
+                      label = "Search CharityBase for charities with a particular purpose",
+                      placeholder = 'i.e emergency response',
+                      btnSearch = icon("search"), 
+                      btnReset = icon("remove"), 
+                      value='',
+                      width = "100%")
+        })
+        
+        output$expand_search_needed <- renderUI({
+        })
+      }
+      
+      
+   
+      
+      
     charities_found <- NULL
     tryCatch({  
     # - does the call take too long
@@ -5332,14 +5423,244 @@ observe({
     }
   })
   
+  # allow user to expand search area
+  observeEvent(input$expand_search, {
+    #print(input$expand_search)
+    
+    if(input$expand_search == 'Yes') {
+      
+      # search charitybase for just lad bounding box
+      if(input$theme == 'Covid-19') {
+        
+        #
+        lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+        neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
+        
+        #print(neighbours_of_interest$lad19nm)
+        
+        bounding_wanted <- st_bbox(neighbours_of_interest)
+        
+        charities_found <- NULL
+        tryCatch({  
+          # - does the call take too long
+          charities_found <- withTimeout({
+            findcharities(bounding_wanted, input$search_term)
+          }, timeout = 2)
+        },
+        error = function(e) {
+          charities_found <- NULL
+          
+          #TimeoutException = function(ex) {
+          #  message("Timeout. Skipping.") 
+          
+        })
+        
+      }
+      
+      else {
+        if(input$theme == 'Flooding') {
+          
+          # filter geometries to neighbouring locations and search bounding of theses.. 
+          #using interesects so we don't loose findings from lad selected
+          lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+          neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
+          
+          #print(neighbours_of_interest$lad19nm)
+          
+          bounding_wanted <- st_bbox(neighbours_of_interest)
+          charities_found <- NULL
+          tryCatch({  
+            # - does the call take too long
+            charities_found <- withTimeout({
+              findcharities(bounding_wanted, input$search_term)
+            }, timeout = 2)
+          },
+          error = function(e) {
+            charities_found <- NULL
+            
+            #TimeoutException = function(ex) {
+            #  message("Timeout. Skipping.") 
+            
+          })
+          #print(testing)
+          
+        }
+      }
+      
+      
+      if (is.null(charities_found)) {
+        
+        output$local_orgs_ui <- renderUI({
+          div(p(tags$strong('Call to CharityBase database is running slowly'),
+                tags$br(),
+                'Pleas try again by searching for a cause in the search box'))
+        })
+        
+        
+        
+      }
+      
+      else {
+        
+        if (dim(charities_found)[1] == 0) {
+          
+          output$local_orgs_ui <- renderUI({
+            div(p(tags$strong('No charities with this purpose found within this area in CharityBase'),
+                  tags$br(),
+                  'Pleas try a different search term'))
+          })
+          
+        }
+        
+        else{
+          output$local_orgs <- DT::renderDataTable({
+            #Sys.sleep(1.5)
+            DT::datatable(charities_found, filter=list(position='top'), escape=F,
+                          selection =c('single'),
+                          options = list(dom='tp', #should remove top search box the p includes paging
+                                         paging = T,
+                                         pageLength=10,
+                                         lengthMenu = c(5, 10, 15, 20),
+                                         scrollX=T,
+                                         scrollY='300px',
+                                         autoWidth = T,
+                                         columnDefs = list(list(width='400px',targets=c(3))),
+                                         initComplete = htmlwidgets::JS(
+                                           "function(settings, json) {",
+                                           paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                           "}")
+                          )) }, escape=F)
+          
+          output$local_orgs_ui <- renderUI({
+            DT::dataTableOutput('local_orgs')
+          })
+        }
+      }
+      
+    }
+    
+    else {
+      
+      # search charitybase for just lad bounding box
+      if(input$theme == 'Covid-19') {
+        
+        lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+        bounding_wanted <- st_bbox(lad_only)
+        
+        charities_found <- NULL
+        tryCatch({  
+          # - does the call take too long
+          charities_found <- withTimeout({
+            findcharities(bounding_wanted, input$search_term)
+          }, timeout = 2)
+        },
+        error = function(e) {
+          charities_found <- NULL
+          
+          #TimeoutException = function(ex) {
+          #  message("Timeout. Skipping.") 
+          
+        })
+        
+      }
+      
+      else {
+        if(input$theme == 'Flooding') {
+          
+          lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+          bounding_wanted <- st_bbox(lad_only)
+          
+          charities_found <- NULL
+          tryCatch({  
+            # - does the call take too long
+            charities_found <- withTimeout({
+              findcharities(bounding_wanted, input$search_term)
+            }, timeout = 2)
+          },
+          error = function(e) {
+            charities_found <- NULL
+            
+            #TimeoutException = function(ex) {
+            #  message("Timeout. Skipping.") 
+            
+          })
+          #print(testing)
+          
+        }
+      }
+      
+      
+      if (is.null(charities_found)) {
+        
+        output$local_orgs_ui <- renderUI({
+          div(p(tags$strong('Call to CharityBase database is running slowly'),
+                tags$br(),
+                'Pleas try again by searching for a cause in the search box'))
+        })
+        
+        
+        
+      }
+      
+      else {
+        
+        if (dim(charities_found)[1] == 0) {
+          
+          output$local_orgs_ui <- renderUI({
+            div(p(tags$strong('No charities with this purpose found within this area in CharityBase'),
+                  tags$br(),
+                  'Pleas try a different search term'))
+          })
+          
+        }
+        
+        else{
+          output$local_orgs <- DT::renderDataTable({
+            #Sys.sleep(1.5)
+            DT::datatable(charities_found, filter=list(position='top'), escape=F,
+                          selection =c('single'),
+                          options = list(dom='tp', #should remove top search box the p includes paging
+                                         paging = T,
+                                         pageLength=10,
+                                         lengthMenu = c(5, 10, 15, 20),
+                                         scrollX=T,
+                                         scrollY='300px',
+                                         autoWidth = T,
+                                         columnDefs = list(list(width='400px',targets=c(3))),
+                                         initComplete = htmlwidgets::JS(
+                                           "function(settings, json) {",
+                                           paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                           "}")
+                          )) }, escape=F)
+          
+          output$local_orgs_ui <- renderUI({
+            DT::dataTableOutput('local_orgs')
+          })
+        }
+      }
+      
+    }
+    
+  })
   
   
   
+  # call api if user enters search term:
   observeEvent(input$search_term_search, {
     
     if(input$theme == 'Covid-19') {
       
-      bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+      if(input$expand_search == 'Yes') {
+        
+        lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+        neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
+        bounding_wanted <- st_bbox(neighbours_of_interest)
+      }
+      else {
+        lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+        bounding_wanted <- st_bbox(lad_only)
+        #bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+      }
       
       charities_found <- NULL
       tryCatch({  
@@ -5360,8 +5681,19 @@ observe({
     
     else {
       if(input$theme == 'Flooding') {
+        if (input$expand_search == 'Yes') {
+          lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+          neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
+          bounding_wanted <- st_bbox(neighbours_of_interest)
         
-        bounding_wanted <- st_bbox(filtered_areas_at_risk_flooding_resilience())
+        }
+        else {
+          lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+          bounding_wanted <- st_bbox(lad_only)
+          #bounding_wanted <- st_bbox(filtered_areas_at_risk_flooding_resilience())
+        }
+        
+        # plot search result
         charities_found <- NULL
         tryCatch({  
           # - does the call take too long
