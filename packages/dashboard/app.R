@@ -1089,8 +1089,8 @@ server = function(input, output, session) {
           states = list(
             easyButtonState(
               stateName="show-all",
-              #icon="ion-toggle",
-              icon="fas fa-bullseye",
+              icon="ion-toggle",
+              #icon="fas fa-bullseye",
               title="Show top 10 areas to focus",
               onClick = JS("
               function(btn, map) {
@@ -1100,8 +1100,8 @@ server = function(input, output, session) {
             ),
             easyButtonState(
               stateName="top-ten",
-              #icon="ion-toggle-filled",
-              icon = "far fa-times-circle",
+              icon="ion-toggle-filled",
+              #icon = "far fa-times-circle",
               title="Show all areas",
               onClick = JS("
               function(btn, map) {
@@ -1212,7 +1212,8 @@ server = function(input, output, session) {
           if (input$tactical_cell == '-- England --') {
             # --- filter to just areas most in need ---
             lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-              mutate('opacity_val' = 0.8)
+              mutate('opacity_val' = 0.8) %>%
+              mutate('weight_val'=0.7)
           }
           
           else {
@@ -1220,7 +1221,8 @@ server = function(input, output, session) {
             if (input$lad_selected == 'All local authorities in region') {
               lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(TacticalCell == input$tactical_cell) %>%
-                mutate('opacity_val' = 0.8)
+                mutate('opacity_val' = 0.8) %>%
+                mutate('weight_val' = 0.7)
             }
             else {
               # Filter to local authority
@@ -1229,7 +1231,9 @@ server = function(input, output, session) {
               lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(TacticalCell == input$tactical_cell) %>%
                 mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                               Name != input$lad_selected ~ 0.1))
+                                               Name != input$lad_selected ~ 0.1)) %>%
+                mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                               Name != input$lad_selected ~ 0.7))
               
               # add alpha values 
               
@@ -1262,7 +1266,9 @@ server = function(input, output, session) {
         # --- filter to just areas most in need ---
         lad_uk_most_vuln <- lad_uk2vuln_resilience %>% #%>% filter(fill %in% vuln_cols)
           mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                           !Name %in% top_ten_cols ~ 0.1)) 
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                           !Name %in% top_ten_cols ~ 0.7)) 
         }
         
         else {
@@ -1272,14 +1278,18 @@ server = function(input, output, session) {
               filter(TacticalCell == input$tactical_cell) %>%
               #filter(fill %in% vuln_cols)
               mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                               !Name %in% top_ten_cols ~ 0.1))
+                                               !Name %in% top_ten_cols ~ 0.1)) %>%
+              mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                              !Name %in% top_ten_cols ~ 0.7)) 
           }
           else {
             # Filter to local authority
             lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
               filter(TacticalCell == input$tactical_cell) %>%
               mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                             Name != input$lad_selected ~ 0.1))
+                                             Name != input$lad_selected ~ 0.1)) %>%
+              mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                              !Name %in% top_ten_cols ~ 0.7)) 
           }
         }
         }
@@ -1310,19 +1320,23 @@ server = function(input, output, session) {
       # which region to display
       if (input$tactical_cell == '-- England --') {
         econ_vuln <- lad_uk2vuln_resilience %>%
-          mutate('opacity_val' = 0.8)
+          mutate('opacity_val' = 0.8) %>%
+          mutate('weight_val' = 0.7)
         }
       else {
         if (input$lad_selected == 'All local authorities in region') {
           econ_vuln <- lad_uk2vuln_resilience %>% 
             filter(TacticalCell == input$tactical_cell) %>%
-            mutate('opacity_val' = 0.8)
+            mutate('opacity_val' = 0.8) %>%
+            mutate('weight_val' = 0.7)
         }
         else {
           econ_vuln <- lad_uk2vuln_resilience %>%
             filter(TacticalCell == input$tactical_cell) %>%
             mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                           Name != input$lad_selected ~ 0.1))
+                                           Name != input$lad_selected ~ 0.1)) %>%
+            mutate('weight_val' = case_when(Name == input$lad_selected ~ 2,
+                                            Name != input$lad_selected ~ 0.7))
         }
         
       }
@@ -1332,7 +1346,9 @@ server = function(input, output, session) {
     if (input$tactical_cell == '-- England --') {
     econ_vuln <- lad_uk2vuln_resilience %>% 
       mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                        !Name %in% top_ten_cols ~ 0.1))
+                                        !Name %in% top_ten_cols ~ 0.1)) %>%
+      mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                       !Name %in% top_ten_cols ~ 0.7))
     }
     
     else{
@@ -1340,13 +1356,17 @@ server = function(input, output, session) {
         econ_vuln <- lad_uk2vuln_resilience %>% 
           filter(TacticalCell == input$tactical_cell) %>%
           mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                           !Name %in% top_ten_cols ~ 0.1))
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
       else {
         econ_vuln <- lad_uk2vuln_resilience %>%
           filter(TacticalCell == input$tactical_cell) %>%
           mutate('opacity_val' = case_when(Name == input$lad_selected ~ 0.8,
-                                           Name != input$lad_selected ~ 0.1))
+                                           Name != input$lad_selected ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
     }
   }
@@ -1362,20 +1382,24 @@ server = function(input, output, session) {
       
       if (input$tactical_cell == '-- England --') {
         socioecon_vuln <- lad_uk2vuln_resilience %>%
-          mutate('opacity_val' = 0.8)
+          mutate('opacity_val' = 0.8) %>% 
+          mutate('weight_val' = 0.7)
       }
       
       else{
         if (input$lad_selected == 'All local authorities in region') {
           socioecon_vuln <- lad_uk2vuln_resilience %>% 
             filter(TacticalCell == input$tactical_cell) %>%
-            mutate('opacity_val' = 0.8)
+            mutate('opacity_val' = 0.8) %>% 
+            mutate('weight_val' = 0.7)
         }
         else {
           socioecon_vuln <- lad_uk2vuln_resilience %>%
             filter(TacticalCell == input$tactical_cell) %>%
             mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                           Name != input$lad_selected ~ 0.1))
+                                           Name != input$lad_selected ~ 0.1)) %>%
+            mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                           Name != input$lad_selected ~ 0.7))
           
         }
       }
@@ -1388,7 +1412,9 @@ server = function(input, output, session) {
       socioecon_vuln <- lad_uk2vuln_resilience %>% 
         #filter(`Socioeconomic Vulnerability quintile` >= 4)
         mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                         !Name %in% top_ten_cols ~ 0.1))
+                                         !Name %in% top_ten_cols ~ 0.1)) %>%
+        mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                        !Name %in% top_ten_cols ~ 0.7))
     }
     
     else{
@@ -1396,13 +1422,17 @@ server = function(input, output, session) {
         socioecon_vuln <- lad_uk2vuln_resilience %>% 
           filter(TacticalCell == input$tactical_cell) %>%
           mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                           !Name %in% top_ten_cols ~ 0.1))
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
       else {
         socioecon_vuln <- lad_uk2vuln_resilience %>%
           filter(TacticalCell == input$tactical_cell) %>%
           mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                         Name != input$lad_selected ~ 0.1))
+                                         Name != input$lad_selected ~ 0.1)) %>%
+          mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                        Name != input$lad_selected ~ 0.7))
       }
     }
     }
@@ -1417,20 +1447,24 @@ server = function(input, output, session) {
       
       if (input$tactical_cell == '-- England --') {
         socio_vuln <- lad_uk2vuln_resilience %>%
-          mutate('opacity_val' = 0.8)
+          mutate('opacity_val' = 0.8) %>% 
+          mutate('weight_val' = 0.7)
       }
       
       else{
         if (input$lad_selected == 'All local authorities in region') {
           socio_vuln <- lad_uk2vuln_resilience %>% 
             filter(TacticalCell == input$tactical_cell) %>%
-            mutate('opacity_val' = 0.8)
+            mutate('opacity_val' = 0.8) %>% 
+            mutate('weight_val' = 0.7)
         }
         else {
           socio_vuln <- lad_uk2vuln_resilience %>%
             filter(TacticalCell == input$tactical_cell) %>%
             mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                           Name != input$lad_selected ~ 0.1))
+                                           Name != input$lad_selected ~ 0.1)) %>%
+            mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                          Name != input$lad_selected ~ 0.7))
         }
       }
       
@@ -1441,7 +1475,9 @@ server = function(input, output, session) {
     if (input$tactical_cell == '-- England --') {
       socio_vuln <- lad_uk2vuln_resilience %>% #filter(`Social Vulnerability quintile` >= 4)
         mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                         !Name %in% top_ten_cols ~ 0.1))
+                                         !Name %in% top_ten_cols ~ 0.1)) %>%
+        mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                        !Name %in% top_ten_cols ~ 0.7))
     }
     
     else{
@@ -1449,13 +1485,17 @@ server = function(input, output, session) {
         socio_vuln <- lad_uk2vuln_resilience %>% 
           filter(TacticalCell == input$tactical_cell) %>%
           mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                           !Name %in% top_ten_cols ~ 0.1))
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
       else {
         socio_vuln <- lad_uk2vuln_resilience %>%
           filter(TacticalCell == input$tactical_cell) %>%
           mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                         Name != input$lad_selected ~ 0.1))
+                                         Name != input$lad_selected ~ 0.1)) %>%
+          mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                        Name != input$lad_selected ~ 0.7))
         }
       }
     }
@@ -1469,20 +1509,24 @@ server = function(input, output, session) {
     if(showtop10_or_all$display_wanted == 'show_all') {
       if (input$tactical_cell == '-- England --') {
         health_vuln <- lad_uk2vuln_resilience %>%
-          mutate('opacity_val' = 0.8)
+          mutate('opacity_val' = 0.8) %>% 
+          mutate('weight_val' = 0.7)
       }
       
       else{
         if (input$lad_selected == 'All local authorities in region') {
           health_vuln <- lad_uk2vuln_resilience %>% 
             filter(TacticalCell == input$tactical_cell) %>%
-            mutate('opacity_val' = 0.8)
+            mutate('opacity_val' = 0.8) %>% 
+            mutate('weight_val' = 0.7)
         }
         else {
           health_vuln <- lad_uk2vuln_resilience %>%
             filter(TacticalCell == input$tactical_cell) %>%
             mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                           Name != input$lad_selected ~ 0.1))
+                                           Name != input$lad_selected ~ 0.1)) %>%
+            mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                          Name != input$lad_selected ~ 0.7))
         }
       }
     }
@@ -1492,7 +1536,9 @@ server = function(input, output, session) {
     if (input$tactical_cell == '-- England --') {
       health_vuln <- lad_uk2vuln_resilience %>% 
         mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                         !Name %in% top_ten_cols ~ 0.1))
+                                         !Name %in% top_ten_cols ~ 0.1)) %>%
+        mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                        !Name %in% top_ten_cols ~ 0.7))
         #filter(`Health/Wellbeing Vulnerability quintile` >= 4)
     }
     
@@ -1501,13 +1547,17 @@ server = function(input, output, session) {
         health_vuln <- lad_uk2vuln_resilience %>% 
           filter(TacticalCell == input$tactical_cell) %>%
           mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                           !Name %in% top_ten_cols ~ 0.1))
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
       else {
         health_vuln <- lad_uk2vuln_resilience %>%
           filter(TacticalCell == input$tactical_cell) %>%
-          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                         Name != input$lad_selected ~ 0.1))
+          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8, 
+                                         Name != input$lad_selected ~ 0.1)) %>%
+          mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                        Name != input$lad_selected ~ 0.7))
         }
       }
     }
@@ -1522,20 +1572,24 @@ server = function(input, output, session) {
     if(showtop10_or_all$display_wanted == 'show_all') {
       if (input$tactical_cell == '-- England --') {
         clin_vuln <- lad_uk2vuln_resilience %>%
-          mutate('opacity_val' = 0.8)
+          mutate('opacity_val' = 0.8) %>% 
+          mutate('weight_val' = 0.7) 
       }
       
       else{
         if (input$lad_selected == 'All local authorities in region') {
           clin_vuln <- lad_uk2vuln_resilience %>% 
             filter(TacticalCell == input$tactical_cell) %>%
-            mutate('opacity_val'= 0.8)
+            mutate('opacity_val'= 0.8) %>% 
+            mutate('weight_val' = 0.7)
         }
         else {
           clin_vuln <- lad_uk2vuln_resilience %>%
             filter(TacticalCell == input$tactical_cell) %>%
             mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                           Name != input$lad_selected ~ 0.1))
+                                           Name != input$lad_selected ~ 0.1)) %>%
+            mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                          Name != input$lad_selected ~ 0.7))
         }
       }
     }
@@ -1545,7 +1599,9 @@ server = function(input, output, session) {
     if (input$tactical_cell == '-- England --') {
       clin_vuln <- lad_uk2vuln_resilience %>% #filter(`Clinical Vulnerability quintile` >= 4)
                   mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                         !Name %in% top_ten_cols ~ 0.1))
+                                         !Name %in% top_ten_cols ~ 0.1)) %>%
+        mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                        !Name %in% top_ten_cols ~ 0.7))
     }
     
     else{
@@ -1553,13 +1609,17 @@ server = function(input, output, session) {
         clin_vuln <- lad_uk2vuln_resilience %>% 
           filter(TacticalCell == input$tactical_cell) %>%
           mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
-                                           !Name %in% top_ten_cols ~ 0.1))
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
       else {
         clin_vuln <- lad_uk2vuln_resilience %>%
           filter(TacticalCell == input$tactical_cell) %>%
           mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
-                                         Name != input$lad_selected ~ 0.1))
+                                         Name != input$lad_selected ~ 0.1)) %>%
+          mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                        Name != input$lad_selected ~ 0.7))
         }
       }
     }
@@ -1717,7 +1777,8 @@ server = function(input, output, session) {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
                      `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
-              mutate('opacity_val'=0.8)
+              mutate('opacity_val'=0.8) %>%
+              mutate('weight_val'=0.7)
           }
           
           else {
@@ -1727,7 +1788,8 @@ server = function(input, output, session) {
                 filter(TacticalCell == input$tactical_cell) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
                        `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
-                mutate('opacity_val'=0.8)
+                mutate('opacity_val'=0.8) %>%
+                mutate('weight_val'=0.7)
               
             }
             
@@ -1737,8 +1799,10 @@ server = function(input, output, session) {
                 filter(TacticalCell == input$tactical_cell) %>%
                 mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
                                                Name != input$lad_selected ~ 0.1)) %>%
+                mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                               Name != input$lad_selected ~ 0.7)) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`,'TacticalCell',`opacity_val`)
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`,'TacticalCell',`opacity_val`,`weight_val`) 
             }
           }
         }
@@ -1764,7 +1828,9 @@ server = function(input, output, session) {
             select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
                    `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
             mutate('opacity_val'=case_when(lad19nm %in% top_ten_cols ~ 0.8,
-                                           !lad19nm %in% top_ten_cols ~ 0.1))
+                                           !lad19nm %in% top_ten_cols ~ 0.1)) %>%
+            mutate('weight_val'=case_when(lad19nm %in% top_ten_cols ~ 2,
+                                           !lad19nm %in% top_ten_cols ~ 0.7)) 
         }
         
         else {
@@ -1774,8 +1840,10 @@ server = function(input, output, session) {
               filter(TacticalCell == input$tactical_cell) %>%
               mutate('opacity_val'=case_when(lad19nm %in% top_ten_cols ~ 0.8,
                                              !lad19nm %in% top_ten_cols ~ 0.1)) %>%
+              mutate('weight_val'=case_when(lad19nm %in% top_ten_cols ~ 2,
+                                            !lad19nm %in% top_ten_cols ~ 0.7)) %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`)
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`, `weight_val`)
             
           }
           
@@ -1785,8 +1853,10 @@ server = function(input, output, session) {
               filter(TacticalCell == input$tactical_cell) %>%
               mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
                                              Name != input$lad_selected ~ 0.1)) %>%
+              mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                             Name != input$lad_selected ~ 0.7)) %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`)
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`, `weight_val`)
           }
         }
         
@@ -2489,7 +2559,7 @@ server = function(input, output, session) {
                         fill=F) %>%
             addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                         group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
-                        weight = 0.7,
+                        weight = ~weight_val,
                         opacity = 0.8,
                         color = "black",
                         dashArray = "0.1",
@@ -2511,7 +2581,7 @@ server = function(input, output, session) {
              # economic vulnerability layer
             addPolygons(data=econ_vuln, layerId = ~econ_id,
                                 group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
-                                weight = 0.7,
+                                weight = ~weight_val,
                                 opacity = 0.8,
                                 color = "black",
                                 dashArray = "0.1",
@@ -2534,7 +2604,7 @@ server = function(input, output, session) {
                     # socioeconomic vulnerability layer
                     addPolygons(data=socioecon_vuln, layerId = ~socecon_id,
                                 group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
-                                weight = 0.7,
+                                weight = ~weight_val,
                                 opacity = 0.8,
                                 color = "black",
                                 dashArray = "0.1",
@@ -2557,7 +2627,7 @@ server = function(input, output, session) {
                     # social vulnerability layer
                     addPolygons(data=socio_vuln, layerId = ~soc_id,
                                 group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
-                                weight = 0.7,
+                                weight = ~weight_val,
                                 opacity = 0.8,
                                 color = "black",
                                 dashArray = "0.1",
@@ -2580,7 +2650,7 @@ server = function(input, output, session) {
                     # Health/wellbeing vulnerability layer
                     addPolygons(data=health_vuln, layerId = ~health_id,
                                 group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
-                                weight = 0.7,
+                                weight = ~weight_val,
                                 opacity = 0.8,
                                 color = "black",
                                 dashArray = "0.1",
@@ -2603,7 +2673,7 @@ server = function(input, output, session) {
                     # clin vulnerability layer
                     addPolygons(data=clin_vuln, layerId = ~clin_id,
                                 group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
-                                weight = 0.7,
+                                weight = ~weight_val,
                                 opacity = 0.8,
                                 color = "black",
                                 dashArray = "0.1",
@@ -2653,7 +2723,7 @@ server = function(input, output, session) {
               
               addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                           group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2675,7 +2745,7 @@ server = function(input, output, session) {
               # economic vulnerability layer
               addPolygons(data=econ_vuln, layerId = ~econ_id,
                           group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2698,7 +2768,7 @@ server = function(input, output, session) {
               # socioeconomic vulnerability layer
               addPolygons(data=socioecon_vuln, layerId = ~socecon_id,
                           group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2721,7 +2791,7 @@ server = function(input, output, session) {
               # social vulnerability layer
               addPolygons(data=socio_vuln, layerId = ~soc_id,
                           group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2744,7 +2814,7 @@ server = function(input, output, session) {
               # Health/wellbeing vulnerability layer
               addPolygons(data=health_vuln, layerId = ~health_id,
                           group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2767,7 +2837,7 @@ server = function(input, output, session) {
               # clin vulnerability layer
               addPolygons(data=clin_vuln, layerId = ~clin_id,
                           group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2817,7 +2887,7 @@ server = function(input, output, session) {
               
               addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                           group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
-                          weight = 0.7,
+                          weight = ~weight_val, 
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2839,7 +2909,7 @@ server = function(input, output, session) {
               # economic vulnerability layer
               addPolygons(data=econ_vuln, layerId = ~econ_id,
                           group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2862,7 +2932,7 @@ server = function(input, output, session) {
               # socioeconomic vulnerability layer
               addPolygons(data=socioecon_vuln, layerId = ~socecon_id,
                           group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2885,7 +2955,7 @@ server = function(input, output, session) {
               # social vulnerability layer
               addPolygons(data=socio_vuln, layerId = ~soc_id,
                           group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2908,7 +2978,7 @@ server = function(input, output, session) {
               # Health/wellbeing vulnerability layer
               addPolygons(data=health_vuln, layerId = ~health_id,
                           group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2931,7 +3001,7 @@ server = function(input, output, session) {
               # clin vulnerability layer
               addPolygons(data=clin_vuln, layerId = ~clin_id,
                           group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -2995,7 +3065,7 @@ server = function(input, output, session) {
                           fill=F) %>%
               addPolygons(data=flood_all, layerId = ~floodres_id,
                           group="Resilience of local authority", fillColor = ~`fill`,
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -3042,7 +3112,7 @@ server = function(input, output, session) {
                         fill=F) %>%
             addPolygons(data=flood_all, layerId = ~floodres_id,
                         group="Resilience of all local authorities", fillColor = ~`fill`,
-                        weight = 0.7,
+                        weight = ~weight_val,
                         opacity = 0.8,
                         color = "black",
                         dashArray = "0.1",
@@ -3101,7 +3171,7 @@ server = function(input, output, session) {
                         fill=F) %>%
             addPolygons(data=flood_all, layerId = ~floodres_id,
                         group="Resilience of all local authorities", fillColor = ~fill,
-                        weight = 0.7,
+                        weight = ~weight_val,
                         opacity = 0.8,
                         color = "black",
                         dashArray = "0.1",
@@ -3164,7 +3234,7 @@ server = function(input, output, session) {
                           fill=F) %>%
               addPolygons(data=flood_all, layerId = ~floodres_id,
                           group="Resilience of all local authorities", fillColor = ~fill,
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
@@ -3225,7 +3295,7 @@ server = function(input, output, session) {
                             fill=F) %>%
                 addPolygons(data=flood_all, layerId = ~floodres_id,
                             group="Resilience of all local authorities", fillColor = ~fill,
-                            weight = 0.7,
+                            weight = ~weight_val,
                             opacity = 0.8,
                             color = "black",
                             dashArray = "0.1",
@@ -5050,7 +5120,7 @@ observe({
         #flooding_focus_list <- dd_areas2focus$d
         
         flooding_focus_list <- filtered_areas2focus_list()
-        print(flooding_focus_list)
+        #print(flooding_focus_list)
         
         # -- which list was wanted -- 
         if(store_rank_wanted$rank_wanted_flooding == 'Historical flood incidents per 10,000') {
