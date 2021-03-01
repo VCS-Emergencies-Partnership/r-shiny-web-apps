@@ -339,7 +339,7 @@ sidebar <- dashboardSidebar(
               #         menuSubItem("Pulse Check", tabName="pulse_check"),
               #         menuSubItem("Volunteer Capacity", tabName="vol_capacity")),
               menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
-              menuItem("References", tabName='references', icon=icon('feather-alt')),
+              menuItem("References", tabName='references', icon=icon('fas fa-feather-alt')),
 
 
   # - display vcsep logo -
@@ -793,8 +793,12 @@ body <- dashboardBody(
                                 # width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
                                 # title = "Local organisations", align = "left",
                                  fluidRow( 
-                                   column(width=12,
-                                          uiOutput("search_needed", height='50px'))),
+                                   column(width=8,
+                                          uiOutput("search_needed", height='50px')),
+                               
+                                  column(width=4,
+                                          uiOutput("expand_search_needed", height='50px'))),
+                                
                                  fluidRow(
                                    column(width=12,
                                           #height = "600px"
@@ -1086,21 +1090,23 @@ server = function(input, output, session) {
             easyButtonState(
               stateName="show-all",
               icon="ion-toggle",
-              title="Show most vulnerable only",
+              #icon="fas fa-bullseye",
+              title="Show top 10 areas to focus",
               onClick = JS("
               function(btn, map) {
                 btn.state('top-ten');
-                Shiny.onInputChange('my_easy_button', 'most-vulnerable');
+                Shiny.onInputChange('my_easy_button', 'show_top_ten');
               }")
             ),
             easyButtonState(
               stateName="top-ten",
               icon="ion-toggle-filled",
-              title="Show vulnerability of all areas",
+              #icon = "far fa-times-circle",
+              title="Show all areas",
               onClick = JS("
               function(btn, map) {
                 btn.state('show-all');
-                Shiny.onInputChange('my_easy_button', 'all-vulnerability');
+                Shiny.onInputChange('my_easy_button', 'show_all');
               }")
             )
           )
@@ -1168,7 +1174,7 @@ server = function(input, output, session) {
   })
   
   # 
-  showtop10_or_all <- reactiveValues(display_wanted='all-vulnerability')
+  showtop10_or_all <- reactiveValues(display_wanted='show_all')
   
   observeEvent(input$my_easy_button, {
     showtop10_or_all$display_wanted <- input$my_easy_button
@@ -1201,23 +1207,41 @@ server = function(input, output, session) {
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
       
-        if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+        if(showtop10_or_all$display_wanted == 'show_all') {
           
           if (input$tactical_cell == '-- England --') {
             # --- filter to just areas most in need ---
-            lad_uk_most_vuln <- lad_uk2vuln_resilience
+            lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+              mutate('opacity_val' = 0.8) %>%
+              mutate('weight_val'=0.7)
           }
           
           else {
             # Filter to tactical cell
             if (input$lad_selected == 'All local authorities in region') {
               lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-                filter(TacticalCell == input$tactical_cell)
+                filter(TacticalCell == input$tactical_cell) %>%
+                mutate('opacity_val' = 0.8) %>%
+                mutate('weight_val' = 0.7)
             }
             else {
               # Filter to local authority
+              #lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+              #  filter(Name == input$lad_selected)
               lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-                filter(Name == input$lad_selected)
+                filter(TacticalCell == input$tactical_cell) %>%
+                mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                               Name != input$lad_selected ~ 0.1)) %>%
+                mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                               Name != input$lad_selected ~ 0.7))
+              
+              # add alpha values 
+              
+              #--- test ---
+              #lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+              #neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
+              #bounding_wanted <- st_bbox(neighbours_of_interest)
+              
             }
           }
           
@@ -1233,10 +1257,18 @@ server = function(input, output, session) {
         # high inequality, medium income  --> "#77324C"
         # "#3F2949" -->
         #vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
-        vuln_cols <- c("#000000","#b36600","#b3b3b3", "#376387")
+        #vuln_cols <- c("#000000","#b36600","#b3b3b3", "#376387")
+        top_ten_cols <- head(filtered_areas2focus_list(), n=10)
+        #top_ten_cols <- top_ten_cols %>% select('Local Authority')
+        top_ten_cols <- as.vector(top_ten_cols$`Local Authority`)
+        
         if (input$tactical_cell == '-- England --') {
         # --- filter to just areas most in need ---
-        lad_uk_most_vuln <- lad_uk2vuln_resilience %>% filter(fill %in% vuln_cols)
+        lad_uk_most_vuln <- lad_uk2vuln_resilience %>% #%>% filter(fill %in% vuln_cols)
+          mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                           !Name %in% top_ten_cols ~ 0.7)) 
         }
         
         else {
@@ -1244,12 +1276,20 @@ server = function(input, output, session) {
           if (input$lad_selected == 'All local authorities in region') {
             lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
               filter(TacticalCell == input$tactical_cell) %>%
-              filter(fill %in% vuln_cols)
+              #filter(fill %in% vuln_cols)
+              mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                               !Name %in% top_ten_cols ~ 0.1)) %>%
+              mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                              !Name %in% top_ten_cols ~ 0.7)) 
           }
           else {
             # Filter to local authority
             lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-              filter(Name == input$lad_selected)
+              filter(TacticalCell == input$tactical_cell) %>%
+              mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                             Name != input$lad_selected ~ 0.1)) %>%
+              mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                              !Name %in% top_ten_cols ~ 0.7)) 
           }
         }
         }
@@ -1271,21 +1311,32 @@ server = function(input, output, session) {
   filtered_econ_vuln <- reactive({
     
     
+    top_ten_cols <- head(filtered_areas2focus_list(), n=10)
+    top_ten_cols <- as.vector(top_ten_cols$`Local Authority`)
+    
     # show all or just most vulnerable 
-    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+    if(showtop10_or_all$display_wanted == 'show_all') {
       
       # which region to display
       if (input$tactical_cell == '-- England --') {
-        econ_vuln <- lad_uk2vuln_resilience 
+        econ_vuln <- lad_uk2vuln_resilience %>%
+          mutate('opacity_val' = 0.8) %>%
+          mutate('weight_val' = 0.7)
         }
       else {
         if (input$lad_selected == 'All local authorities in region') {
           econ_vuln <- lad_uk2vuln_resilience %>% 
-            filter(TacticalCell == input$tactical_cell)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val' = 0.8) %>%
+            mutate('weight_val' = 0.7)
         }
         else {
           econ_vuln <- lad_uk2vuln_resilience %>%
-            filter(LAD19NM == input$lad_selected)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1)) %>%
+            mutate('weight_val' = case_when(Name == input$lad_selected ~ 2,
+                                            Name != input$lad_selected ~ 0.7))
         }
         
       }
@@ -1293,17 +1344,29 @@ server = function(input, output, session) {
     else {
     
     if (input$tactical_cell == '-- England --') {
-    econ_vuln <- lad_uk2vuln_resilience %>% filter(`Economic Vulnerability quintile` >= 4)
+    econ_vuln <- lad_uk2vuln_resilience %>% 
+      mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                        !Name %in% top_ten_cols ~ 0.1)) %>%
+      mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                       !Name %in% top_ten_cols ~ 0.7))
     }
     
     else{
       if (input$lad_selected == 'All local authorities in region') {
         econ_vuln <- lad_uk2vuln_resilience %>% 
-          filter(TacticalCell == input$tactical_cell & `Economic Vulnerability quintile` >= 4)
+          filter(TacticalCell == input$tactical_cell) %>%
+          mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
       else {
         econ_vuln <- lad_uk2vuln_resilience %>%
-          filter(LAD19NM == input$lad_selected)
+          filter(TacticalCell == input$tactical_cell) %>%
+          mutate('opacity_val' = case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
     }
   }
@@ -1311,21 +1374,33 @@ server = function(input, output, session) {
   
   filtered_socioecon_vuln <- reactive({
     
+    top_ten_cols <- head(filtered_areas2focus_list(), n=10)
+    top_ten_cols <- as.vector(top_ten_cols$`Local Authority`)
+    
     # show all or just most vulnerable 
-    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+    if(showtop10_or_all$display_wanted == 'show_all') {
       
       if (input$tactical_cell == '-- England --') {
-        socioecon_vuln <- lad_uk2vuln_resilience
+        socioecon_vuln <- lad_uk2vuln_resilience %>%
+          mutate('opacity_val' = 0.8) %>% 
+          mutate('weight_val' = 0.7)
       }
       
       else{
         if (input$lad_selected == 'All local authorities in region') {
           socioecon_vuln <- lad_uk2vuln_resilience %>% 
-            filter(TacticalCell == input$tactical_cell)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val' = 0.8) %>% 
+            mutate('weight_val' = 0.7)
         }
         else {
           socioecon_vuln <- lad_uk2vuln_resilience %>%
-            filter(LAD19NM == input$lad_selected)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1)) %>%
+            mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                           Name != input$lad_selected ~ 0.7))
+          
         }
       }
       
@@ -1334,17 +1409,30 @@ server = function(input, output, session) {
     else {
     
     if (input$tactical_cell == '-- England --') {
-      socioecon_vuln <- lad_uk2vuln_resilience %>% filter(`Socioeconomic Vulnerability quintile` >= 4)
+      socioecon_vuln <- lad_uk2vuln_resilience %>% 
+        #filter(`Socioeconomic Vulnerability quintile` >= 4)
+        mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                         !Name %in% top_ten_cols ~ 0.1)) %>%
+        mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                        !Name %in% top_ten_cols ~ 0.7))
     }
     
     else{
       if (input$lad_selected == 'All local authorities in region') {
         socioecon_vuln <- lad_uk2vuln_resilience %>% 
-          filter(TacticalCell == input$tactical_cell & `Socioeconomic Vulnerability quintile` >= 4)
+          filter(TacticalCell == input$tactical_cell) %>%
+          mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
       else {
         socioecon_vuln <- lad_uk2vuln_resilience %>%
-          filter(LAD19NM == input$lad_selected)
+          filter(TacticalCell == input$tactical_cell) %>%
+          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                         Name != input$lad_selected ~ 0.1)) %>%
+          mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                        Name != input$lad_selected ~ 0.7))
       }
     }
     }
@@ -1352,20 +1440,31 @@ server = function(input, output, session) {
   
   filtered_socio_vuln <- reactive({
     
-    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+    top_ten_cols <- head(filtered_areas2focus_list(), n=10)
+    top_ten_cols <- as.vector(top_ten_cols$`Local Authority`)
+    
+    if(showtop10_or_all$display_wanted == 'show_all') {
       
       if (input$tactical_cell == '-- England --') {
-        socio_vuln <- lad_uk2vuln_resilience
+        socio_vuln <- lad_uk2vuln_resilience %>%
+          mutate('opacity_val' = 0.8) %>% 
+          mutate('weight_val' = 0.7)
       }
       
       else{
         if (input$lad_selected == 'All local authorities in region') {
           socio_vuln <- lad_uk2vuln_resilience %>% 
-            filter(TacticalCell == input$tactical_cell)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val' = 0.8) %>% 
+            mutate('weight_val' = 0.7)
         }
         else {
           socio_vuln <- lad_uk2vuln_resilience %>%
-            filter(LAD19NM == input$lad_selected)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1)) %>%
+            mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                          Name != input$lad_selected ~ 0.7))
         }
       }
       
@@ -1374,17 +1473,29 @@ server = function(input, output, session) {
     else {
     
     if (input$tactical_cell == '-- England --') {
-      socio_vuln <- lad_uk2vuln_resilience %>% filter(`Social Vulnerability quintile` >= 4)
+      socio_vuln <- lad_uk2vuln_resilience %>% #filter(`Social Vulnerability quintile` >= 4)
+        mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                         !Name %in% top_ten_cols ~ 0.1)) %>%
+        mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                        !Name %in% top_ten_cols ~ 0.7))
     }
     
     else{
       if (input$lad_selected == 'All local authorities in region') {
         socio_vuln <- lad_uk2vuln_resilience %>% 
-          filter(TacticalCell == input$tactical_cell & `Social Vulnerability quintile` >= 4)
+          filter(TacticalCell == input$tactical_cell) %>%
+          mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
       else {
         socio_vuln <- lad_uk2vuln_resilience %>%
-          filter(LAD19NM == input$lad_selected)
+          filter(TacticalCell == input$tactical_cell) %>%
+          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                         Name != input$lad_selected ~ 0.1)) %>%
+          mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                        Name != input$lad_selected ~ 0.7))
         }
       }
     }
@@ -1392,19 +1503,30 @@ server = function(input, output, session) {
   
   filtered_health_vuln <- reactive({
     
-    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+    top_ten_cols <- head(filtered_areas2focus_list(), n=10)
+    top_ten_cols <- as.vector(top_ten_cols$`Local Authority`)
+    
+    if(showtop10_or_all$display_wanted == 'show_all') {
       if (input$tactical_cell == '-- England --') {
-        health_vuln <- lad_uk2vuln_resilience
+        health_vuln <- lad_uk2vuln_resilience %>%
+          mutate('opacity_val' = 0.8) %>% 
+          mutate('weight_val' = 0.7)
       }
       
       else{
         if (input$lad_selected == 'All local authorities in region') {
           health_vuln <- lad_uk2vuln_resilience %>% 
-            filter(TacticalCell == input$tactical_cell)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val' = 0.8) %>% 
+            mutate('weight_val' = 0.7)
         }
         else {
           health_vuln <- lad_uk2vuln_resilience %>%
-            filter(LAD19NM == input$lad_selected)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1)) %>%
+            mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                          Name != input$lad_selected ~ 0.7))
         }
       }
     }
@@ -1412,17 +1534,30 @@ server = function(input, output, session) {
     else {
     
     if (input$tactical_cell == '-- England --') {
-      health_vuln <- lad_uk2vuln_resilience %>% filter(`Health/Wellbeing Vulnerability quintile` >= 4)
+      health_vuln <- lad_uk2vuln_resilience %>% 
+        mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                         !Name %in% top_ten_cols ~ 0.1)) %>%
+        mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                        !Name %in% top_ten_cols ~ 0.7))
+        #filter(`Health/Wellbeing Vulnerability quintile` >= 4)
     }
     
     else{
       if (input$lad_selected == 'All local authorities in region') {
         health_vuln <- lad_uk2vuln_resilience %>% 
-          filter(TacticalCell == input$tactical_cell & `Health/Wellbeing Vulnerability quintile` >= 4)
+          filter(TacticalCell == input$tactical_cell) %>%
+          mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
       else {
         health_vuln <- lad_uk2vuln_resilience %>%
-          filter(LAD19NM == input$lad_selected)
+          filter(TacticalCell == input$tactical_cell) %>%
+          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8, 
+                                         Name != input$lad_selected ~ 0.1)) %>%
+          mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                        Name != input$lad_selected ~ 0.7))
         }
       }
     }
@@ -1430,19 +1565,31 @@ server = function(input, output, session) {
   
   filtered_clin_vuln <- reactive({
     
-    if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+    top_ten_cols <- head(filtered_areas2focus_list(), n=10)
+    top_ten_cols <- as.vector(top_ten_cols$`Local Authority`)
+    
+    
+    if(showtop10_or_all$display_wanted == 'show_all') {
       if (input$tactical_cell == '-- England --') {
-        clin_vuln <- lad_uk2vuln_resilience
+        clin_vuln <- lad_uk2vuln_resilience %>%
+          mutate('opacity_val' = 0.8) %>% 
+          mutate('weight_val' = 0.7) 
       }
       
       else{
         if (input$lad_selected == 'All local authorities in region') {
           clin_vuln <- lad_uk2vuln_resilience %>% 
-            filter(TacticalCell == input$tactical_cell)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'= 0.8) %>% 
+            mutate('weight_val' = 0.7)
         }
         else {
           clin_vuln <- lad_uk2vuln_resilience %>%
-            filter(LAD19NM == input$lad_selected)
+            filter(TacticalCell == input$tactical_cell) %>%
+            mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                           Name != input$lad_selected ~ 0.1)) %>%
+            mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                          Name != input$lad_selected ~ 0.7))
         }
       }
     }
@@ -1450,17 +1597,29 @@ server = function(input, output, session) {
     else {
     
     if (input$tactical_cell == '-- England --') {
-      clin_vuln <- lad_uk2vuln_resilience %>% filter(`Clinical Vulnerability quintile` >= 4)
+      clin_vuln <- lad_uk2vuln_resilience %>% #filter(`Clinical Vulnerability quintile` >= 4)
+                  mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                         !Name %in% top_ten_cols ~ 0.1)) %>%
+        mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                        !Name %in% top_ten_cols ~ 0.7))
     }
     
     else{
       if (input$lad_selected == 'All local authorities in region') {
         clin_vuln <- lad_uk2vuln_resilience %>% 
-          filter(TacticalCell == input$tactical_cell & `Clinical Vulnerability quintile` >= 4)
+          filter(TacticalCell == input$tactical_cell) %>%
+          mutate('opacity_val' = case_when(Name %in% top_ten_cols ~ 0.8,
+                                           !Name %in% top_ten_cols ~ 0.1)) %>%
+          mutate('weight_val' = case_when(Name %in% top_ten_cols ~ 2,
+                                          !Name %in% top_ten_cols ~ 0.7))
       }
       else {
         clin_vuln <- lad_uk2vuln_resilience %>%
-          filter(LAD19NM == input$lad_selected)
+          filter(TacticalCell == input$tactical_cell) %>%
+          mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                         Name != input$lad_selected ~ 0.1)) %>%
+          mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                        Name != input$lad_selected ~ 0.7))
         }
       }
     }
@@ -1520,87 +1679,89 @@ server = function(input, output, session) {
 
   
   # -- Flooding Theme ---
-  filtered_areas_at_risk_flooding_incd <- reactive({
-    # which tab is selected:
-    req(input$sidebar_id)
-    if (input$sidebar_id == 'unmetneed') {
-      
-      if (input$theme == 'Flooding') {
-      
-        if (input$tactical_cell == '-- England --') {
-          # --- filter to just areas most in need ---
-          fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
-            filter(`Flood incidents quintile` >= 4 & !is.na(`Flood incidents quintile`)) %>%
-            select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                 `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
-        }
-      
-        else {
-          # Filter to tactical cell
-          if (input$lad_selected == 'All local authorities in region') {
-            fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-              filter(TacticalCell == input$tactical_cell) %>%
-              filter(`Flood incidents quintile` >= 4 & !is.na(`Flood incidents quintile`)) %>%
-              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                   `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
-          
-        }
-        
-          else {
-            # Filter to local authority
-            fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-              filter(Name == input$lad_selected) %>%
-              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
-          
-          }
-        }
-      }
-    }
-  })
-  
-  # react flood areas at risk 
-  
-      
-  filtered_areas_at_risk_flooding_risk <- reactive({
-    # which tab is selected:
-    req(input$sidebar_id)
-    if (input$sidebar_id == 'unmetneed') {
-      
-      if (input$theme == 'Flooding') {
-          
-          if (input$tactical_cell == '-- England --') {
-            # --- filter to just areas most in need ---
-            fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
-              filter(`Flood risk quintile` >= 4 & !is.na(`Flood risk quintile`)) %>%
-              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
-          }
-          
-          else {
-            # Filter to tactical cell
-            if (input$lad_selected == 'All local authorities in region') {
-              fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-                filter(TacticalCell == input$tactical_cell) %>%
-                filter(`Flood risk quintile` >= 4 & !is.na(`Flood risk quintile`)) %>%
-                select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
-              
-            }
-            
-            else {
-              # Filter to local authority
-              fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-                filter(Name == input$lad_selected) %>%
-                select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
-              
-            }
-          }
-      }
-    }
-  })
-  
+  # filtered_areas_at_risk_flooding_incd <- reactive({
+  #   # which tab is selected:
+  #   req(input$sidebar_id)
+  #   if (input$sidebar_id == 'unmetneed') {
+  #     
+  #     if (input$theme == 'Flooding') {
+  #     
+  #       if (input$tactical_cell == '-- England --') {
+  #         # --- filter to just areas most in need ---
+  #         fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
+  #           filter(`Flood incidents quintile` >= 4 & !is.na(`Flood incidents quintile`)) %>%
+  #           select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+  #                `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+  #       }
+  #     
+  #       else {
+  #         # Filter to tactical cell
+  #         if (input$lad_selected == 'All local authorities in region') {
+  #           fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+  #             filter(TacticalCell == input$tactical_cell) %>%
+  #             filter(`Flood incidents quintile` >= 4 & !is.na(`Flood incidents quintile`)) %>%
+  #             select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+  #                  `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+  #         
+  #       }
+  #       
+  #         else {
+  #           # Filter to local authority
+  #           fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+  #             filter(Name == input$lad_selected) %>%
+  #             mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+  #                                            Name != input$lad_selected ~ 0.1)) %>%
+  #             select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+  #                    `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, `opacity_val`)
+  #         
+  #         }
+  #       }
+  #     }
+  #   }
+  # })
+  # 
+  # # react flood areas at risk 
+  # filtered_areas_at_risk_flooding_risk <- reactive({
+  #   # which tab is selected:
+  #   req(input$sidebar_id)
+  #   if (input$sidebar_id == 'unmetneed') {
+  #     
+  #     if (input$theme == 'Flooding') {
+  #         
+  #         if (input$tactical_cell == '-- England --') {
+  #           # --- filter to just areas most in need ---
+  #           fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
+  #             filter(`Flood risk quintile` >= 4 & !is.na(`Flood risk quintile`)) %>%
+  #             select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+  #                    `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+  #         }
+  #         
+  #         else {
+  #           # Filter to tactical cell
+  #           if (input$lad_selected == 'All local authorities in region') {
+  #             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+  #               filter(TacticalCell == input$tactical_cell) %>%
+  #               filter(`Flood risk quintile` >= 4 & !is.na(`Flood risk quintile`)) %>%
+  #               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+  #                      `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`)
+  #             
+  #           }
+  #           
+  #           else {
+  #             # Filter to local authority
+  #             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
+  #               filter(Name == input$lad_selected) %>%
+  #               mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+  #                                              Name != input$lad_selected ~ 0.1)) %>%
+  #               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+  #                      `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, `opacity_val`)
+  #             
+  #           }
+  #         }
+  #     }
+  #   }
+  # })
+  # 
   # - if you want all - 
   filtered_areas_at_risk_flooding_resilience <- reactive({
     # which tab is selected:
@@ -1609,13 +1770,15 @@ server = function(input, output, session) {
       
       if (input$theme == 'Flooding') {
         
-        if(showtop10_or_all$display_wanted == 'all-vulnerability') {
+        if(showtop10_or_all$display_wanted == 'show_all') {
         
           # show all levels of resilience
           if (input$tactical_cell == '-- England --') {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
+              mutate('opacity_val'=0.8) %>%
+              mutate('weight_val'=0.7)
           }
           
           else {
@@ -1624,16 +1787,22 @@ server = function(input, output, session) {
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(TacticalCell == input$tactical_cell) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
+                mutate('opacity_val'=0.8) %>%
+                mutate('weight_val'=0.7)
               
             }
             
             else {
               # Filter to local authority
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-                filter(Name == input$lad_selected) %>%
+                filter(TacticalCell == input$tactical_cell) %>%
+                mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                               Name != input$lad_selected ~ 0.1)) %>%
+                mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                               Name != input$lad_selected ~ 0.7)) %>%
                 select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`,'TacticalCell')
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`,'TacticalCell',`opacity_val`,`weight_val`) 
             }
           }
         }
@@ -1648,31 +1817,46 @@ server = function(input, output, session) {
         # high inequality, medium income  --> "#77324C"
         # "#3F2949" -->
         #vuln_cols <- c("#77324C","#3F2949","#435786","#806A8A")
-        vuln_cols <- c("#000000","#b36600","#b3b3b3", "#376387")
+        #vuln_cols <- c("#000000","#b36600","#b3b3b3", "#376387")
+        
+        top_ten_cols <- head(filtered_areas2focus_list(), n=10)
+        top_ten_cols <- as.vector(top_ten_cols$`Local Authority`)
+        
         
         if (input$tactical_cell == '-- England --') {
           fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-            filter(fill %in% vuln_cols) %>%
             select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                   `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+                   `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
+            mutate('opacity_val'=case_when(lad19nm %in% top_ten_cols ~ 0.8,
+                                           !lad19nm %in% top_ten_cols ~ 0.1)) %>%
+            mutate('weight_val'=case_when(lad19nm %in% top_ten_cols ~ 2,
+                                           !lad19nm %in% top_ten_cols ~ 0.7)) 
         }
         
         else {
           # Filter to tactical cell
           if (input$lad_selected == 'All local authorities in region') {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-              filter(TacticalCell == input$tactical_cell & fill %in% vuln_cols) %>%
+              filter(TacticalCell == input$tactical_cell) %>%
+              mutate('opacity_val'=case_when(lad19nm %in% top_ten_cols ~ 0.8,
+                                             !lad19nm %in% top_ten_cols ~ 0.1)) %>%
+              mutate('weight_val'=case_when(lad19nm %in% top_ten_cols ~ 2,
+                                            !lad19nm %in% top_ten_cols ~ 0.7)) %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`, `weight_val`)
             
           }
           
           else {
             # Filter to local authority
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-              filter(Name == input$lad_selected) %>%
+              filter(TacticalCell == input$tactical_cell) %>%
+              mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                                             Name != input$lad_selected ~ 0.1)) %>%
+              mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
+                                             Name != input$lad_selected ~ 0.7)) %>%
               select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell')
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`, `weight_val`)
           }
         }
         
@@ -1772,59 +1956,59 @@ server = function(input, output, session) {
   })
   
   
-  # -- flood map labels --
-  filtered_flood_incd_labels <- reactive({
-    
-    fl_incd_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_incd() %>%
-      select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-      `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`) %>%
-        st_drop_geometry() %>%
-        mutate_all(list(~na_if(.,""))) %>%
-        mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2)) %>%
-        mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
-        mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
-                                                               TRUE ~ (as.character(.$`% people in flood risk areas`))))
-  
-    fl_incd_labels <- paste0(
-                     sprintf("<strong>%s</strong><br/>",  fl_incd_lad_uk_most_vuln_for_labels$lad19nm),
-                     "Vulnerability (5 = highest vulnerability): ",  fl_incd_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
-                     "Capacity (5 = lowest capacity): ",  fl_incd_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
-                     "Flood Incidents (5 = most common): ",  fl_incd_lad_uk_most_vuln_for_labels$`Flood incidents quintile`, "<br/>",
-                     "Number of historical flooding incidents: ", fl_incd_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
-                     "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`, "<br/>",
-                     "Total people in flood risk areas: ", fl_incd_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
-                     "% people in flood risk areas: ", fl_incd_lad_uk_most_vuln_for_labels$`% people in flood risk areas`) %>%
-                   lapply(htmltools::HTML)
-    
-    
-    })
-  
-  
-  filtered_flood_risk_labels <- reactive({
-    
-    fl_risk_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_risk() %>%
-      select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
-        `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
-         `Flooding incidents per 10,000 people`) %>%
-          st_drop_geometry() %>%
-          mutate_all(list(~na_if(.,""))) %>%
-          mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
-          mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
-                                                                     TRUE ~ (as.character(.$`% people in flood risk areas`)))) %>%
-                   mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
-    
-    fl_risk_labels <- paste0(
-                     sprintf("<strong>%s</strong><br/>",  fl_risk_lad_uk_most_vuln_for_labels$lad19nm),
-                     "Vulnerability (5 = highest vulnerability): ",  fl_risk_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
-                     "Capacity (5 = lowest capacity): ",  fl_risk_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
-                     "Flood Risk (5 = most risk): ", fl_risk_lad_uk_most_vuln_for_labels$`Flood risk quintile`, "<br/>",
-                     "Total people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
-                     "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`, "<br/>",
-                     "Number of historical flooding incidents: ", fl_risk_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
-                     "Flooding incidents per 10,000 people: ", fl_risk_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`
-                   ) %>%
-                   lapply(htmltools::HTML)
-  })
+  # # -- flood map labels --
+  # filtered_flood_incd_labels <- reactive({
+  #   
+  #   fl_incd_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_incd() %>%
+  #     select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
+  #     `Flooding incidents per 10,000 people`, `Flood incidents quintile`, `Total people in flood risk areas`, `% people in flood risk areas`) %>%
+  #       st_drop_geometry() %>%
+  #       mutate_all(list(~na_if(.,""))) %>%
+  #       mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2)) %>%
+  #       mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
+  #       mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+  #                                                              TRUE ~ (as.character(.$`% people in flood risk areas`))))
+  # 
+  #   fl_incd_labels <- paste0(
+  #                    sprintf("<strong>%s</strong><br/>",  fl_incd_lad_uk_most_vuln_for_labels$lad19nm),
+  #                    "Vulnerability (5 = highest vulnerability): ",  fl_incd_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
+  #                    "Capacity (5 = lowest capacity): ",  fl_incd_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
+  #                    "Flood Incidents (5 = most common): ",  fl_incd_lad_uk_most_vuln_for_labels$`Flood incidents quintile`, "<br/>",
+  #                    "Number of historical flooding incidents: ", fl_incd_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
+  #                    "Flooding incidents per 10,000 people: ", fl_incd_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`, "<br/>",
+  #                    "Total people in flood risk areas: ", fl_incd_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
+  #                    "% people in flood risk areas: ", fl_incd_lad_uk_most_vuln_for_labels$`% people in flood risk areas`) %>%
+  #                  lapply(htmltools::HTML)
+  #   
+  #   
+  #   })
+  # 
+  # 
+  # filtered_flood_risk_labels <- reactive({
+  #   
+  #   fl_risk_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_risk() %>%
+  #     select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
+  #       `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
+  #        `Flooding incidents per 10,000 people`) %>%
+  #         st_drop_geometry() %>%
+  #         mutate_all(list(~na_if(.,""))) %>%
+  #         mutate(`% people in flood risk areas` = round(`% people in flood risk areas`, 2)) %>%
+  #         mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+  #                                                                    TRUE ~ (as.character(.$`% people in flood risk areas`)))) %>%
+  #                  mutate(`Flooding incidents per 10,000 people` = round(`Flooding incidents per 10,000 people`,2))
+  #   
+  #   fl_risk_labels <- paste0(
+  #                    sprintf("<strong>%s</strong><br/>",  fl_risk_lad_uk_most_vuln_for_labels$lad19nm),
+  #                    "Vulnerability (5 = highest vulnerability): ",  fl_risk_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
+  #                    "Capacity (5 = lowest capacity): ",  fl_risk_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
+  #                    "Flood Risk (5 = most risk): ", fl_risk_lad_uk_most_vuln_for_labels$`Flood risk quintile`, "<br/>",
+  #                    "Total people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
+  #                    "% people in flood risk areas: ", fl_risk_lad_uk_most_vuln_for_labels$`% people in flood risk areas`, "<br/>",
+  #                    "Number of historical flooding incidents: ", fl_risk_lad_uk_most_vuln_for_labels$`Total historical flooding incidents`, "<br/>",
+  #                    "Flooding incidents per 10,000 people: ", fl_risk_lad_uk_most_vuln_for_labels$`Flooding incidents per 10,000 people`
+  #                  ) %>%
+  #                  lapply(htmltools::HTML)
+  # })
   
   
   filtered_flood_resilience_labels <- reactive({
@@ -1864,7 +2048,7 @@ server = function(input, output, session) {
       
       else {
         fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
-          filter(lad19nm == input$lad_selected) %>%
+          #filter(lad19nm == input$lad_selected) %>%
           select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
                  `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
                  `Flooding incidents per 10,000 people`) %>%
@@ -1954,7 +2138,7 @@ server = function(input, output, session) {
       
       if(input$theme == 'Flooding') {
         
-        # arrange for areas to focus list 
+        # arrange so areas to focus table follows list
         if (store_rank_wanted$rank_wanted_flooding == 'Historical flood incidents per 10,000') {
         
           flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Flooding incidents per 10,000 people`) %>%
@@ -1991,8 +2175,26 @@ server = function(input, output, session) {
             
           }
           
+          else {
+            if (store_rank_wanted$rank_wanted_flooding == '% of population living in flood risk areas') {
+              
+              flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`% people in flood risk areas`) %>%
+                mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+                mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+                rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+                select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+              
+              flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+                arrange(-`% people in flood risk areas`) %>%
+                select(-`LAD19CD`) %>% 
+                mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                  TRUE ~ (as.character(.$`% people in flood risk areas`))))
+              
+            }
+          
+          }
         }
-      } 
+      }
       # add new theme here 
     }
 
@@ -2002,7 +2204,6 @@ server = function(input, output, session) {
   
   # --- Areas to focus list ----
   filtered_areas2focus_list <- reactive({
-    
     #volunteers_available <- volunteers
     
     # -- covid ---
@@ -2011,10 +2212,10 @@ server = function(input, output, session) {
       # what list do they want:
       if (store_rank_wanted$rank_wanted_covid == 'cases per 100,000  ') {
       
-      if (input$tactical_cell == '-- England --') {
+        if (input$tactical_cell == '-- England --') {
       
-      covid_lads_in_tc <- covid_area2focus %>% arrange(-`covid cases per 100,000`) %>%
-        select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+        covid_lads_in_tc <- covid_area2focus %>% arrange(-`covid cases per 100,000`) %>%
+          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
       
       covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
         select(-'LAD19CD') %>% 
@@ -2090,25 +2291,184 @@ server = function(input, output, session) {
       
       if(input$theme == 'Flooding') {
         
-        flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
-          mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
-          mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
-          select('LAD19CD','Local Authority'= LAD19NM, 'Region'=TacticalCell, `Total historical flooding incidents`,`Flooding incidents per 10,000 people`, `Total people in flood risk areas`, `% people in flood risk areas`)
+        # arrange for areas to focus list 
+        if (store_rank_wanted$rank_wanted_flooding == 'Historical flood incidents per 10,000') {
+          
+          if(input$tactical_cell == '-- England --') {
+          
+          flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Flooding incidents per 10,000 people`) %>%
+            mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+            mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+            rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+            select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+          
+          flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+            arrange( -`Flooding incidents per 10,000 people`) %>%
+            select(-`LAD19CD`) %>% 
+            mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                              TRUE ~ (as.character(.$`% people in flood risk areas`))))
+          
+          }
+          
+          else {
+            if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
+              
+              flooding_lads_in_tc <- flooding_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
+                arrange(-`Flooding incidents per 10,000 people`) %>%
+                mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+                mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+                rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+                select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+              
+              flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+                arrange( -`Flooding incidents per 10,000 people`) %>%
+                select(-`LAD19CD`) %>% 
+                mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                  TRUE ~ (as.character(.$`% people in flood risk areas`))))
+              
+            }
+            
+            else {
+              
+              flooding_lads_in_tc <- flooding_area2focus %>% filter(LAD19NM == input$lad_selected) %>%
+                arrange(-`Flooding incidents per 10,000 people`) %>%
+                mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+                mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+                rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+                select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+              
+              flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+                arrange( -`Flooding incidents per 10,000 people`) %>%
+                select(-`LAD19CD`) %>% 
+                mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                  TRUE ~ (as.character(.$`% people in flood risk areas`))))
+              
+            }
+            
+          }
+        }
         
-       
-        # no volunteer data
-        flooding_cases2volunteers <- flooding_lads_in_tc %>% 
-          arrange( -`Flooding incidents per 10,000 people`,-`Total people in flood risk areas`) %>%
-          select(-`LAD19CD`) %>% 
-          #rename(`Volunteer presence`=`Volunteer capacity`) %>%
-          mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
-                                                            TRUE ~ (as.character(.$`% people in flood risk areas`))))
-        
-        
-        
+        else {
+          # order based on flood warnings
+          if(store_rank_wanted$rank_wanted_flooding == 'Flood warnings/alerts') {
+            
+            
+          if(input$tactical_cell == '-- England --') {
+            
+            flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Total live Flood warning`,-`Total live Flood alert`, -`Flooding incidents per 10,000 people`) %>%
+              mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+              mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+              rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+              select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+            
+            flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+              arrange(-`Total live Flood warning`,-`Total live Flood alert`) %>%
+              select(-`LAD19CD`) %>% 
+              mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                TRUE ~ (as.character(.$`% people in flood risk areas`))))
+            
+            }
+            
+            else {
+              if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
+                
+                flooding_lads_in_tc <- flooding_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
+                  arrange(-`Total live Flood warning`,-`Total live Flood alert`, -`Flooding incidents per 10,000 people`) %>%
+                  mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+                  mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+                  rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+                  select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+                
+                flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+                  arrange(-`Total live Flood warning`,-`Total live Flood alert`) %>%
+                  select(-`LAD19CD`) %>% 
+                  mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                    TRUE ~ (as.character(.$`% people in flood risk areas`))))
+                
+              
+              }
+              
+              else {
+                flooding_lads_in_tc <- flooding_area2focus %>% filter(LAD19NM == input$lad_selected) %>%
+                  arrange(-`Total live Flood warning`,-`Total live Flood alert`, -`Flooding incidents per 10,000 people`) %>%
+                  mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+                  mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+                  rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+                  select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+                
+                flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+                  arrange(-`Total live Flood warning`,-`Total live Flood alert`) %>%
+                  select(-`LAD19CD`) %>% 
+                  mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                    TRUE ~ (as.character(.$`% people in flood risk areas`))))
+                
+              }
+            }
+            }#
+  
+          
+          else {
+            if (store_rank_wanted$rank_wanted_flooding == '% of population living in flood risk areas') {
+              
+              if(input$tactical_cell == '-- England --') {
+              
+              flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`% people in flood risk areas`) %>%
+                mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+                mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+                rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+                select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+              
+              flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+                arrange(-`% people in flood risk areas`) %>%
+                select(-`LAD19CD`) %>% 
+                mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                  TRUE ~ (as.character(.$`% people in flood risk areas`))))
+              }
+              
+              else {
+                if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
+                  
+                  flooding_lads_in_tc <- flooding_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
+                    arrange(-`% people in flood risk areas`) %>%
+                    mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+                    mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+                    rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+                    select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+                  
+                  flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+                    arrange(-`% people in flood risk areas`) %>%
+                    select(-`LAD19CD`) %>% 
+                    mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                      TRUE ~ (as.character(.$`% people in flood risk areas`))))
+                  
+                }
+                
+                else {
+                  
+                  flooding_lads_in_tc <- flooding_area2focus %>% filter(LAD19NM == input$lad_selected) %>%
+                    arrange(-`% people in flood risk areas`) %>%
+                    mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
+                    mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
+                    rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
+                    select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+                  
+                  flooding_cases2volunteers <- flooding_lads_in_tc %>% 
+                    arrange(-`% people in flood risk areas`) %>%
+                    select(-`LAD19CD`) %>% 
+                    mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
+                                                                      TRUE ~ (as.character(.$`% people in flood risk areas`))))
+                  
+                }
+                
+              }
+            }
+          }
+          
+        }
+      } # add new theme here 
+      
       } 
-      # add new theme here 
-    }
+
     
   })
   
@@ -2199,11 +2559,11 @@ server = function(input, output, session) {
                         fill=F) %>%
             addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                         group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
-                        weight = 0.7,
+                        weight = ~weight_val,
                         opacity = 0.8,
                         color = "black",
                         dashArray = "0.1",
-                        fillOpacity = 0.7,
+                        fillOpacity = ~opacity_val,
                         highlight = highlightOptions(
                           weight = 5,
                           color = "#666",
@@ -2221,11 +2581,11 @@ server = function(input, output, session) {
              # economic vulnerability layer
             addPolygons(data=econ_vuln, layerId = ~econ_id,
                                 group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
-                                weight = 0.7,
+                                weight = ~weight_val,
                                 opacity = 0.8,
                                 color = "black",
                                 dashArray = "0.1",
-                                fillOpacity = 0.7,
+                                fillOpacity = ~opacity_val,
                                 highlight = highlightOptions(
                                   weight = 5,
                                   color = "#666",
@@ -2244,11 +2604,11 @@ server = function(input, output, session) {
                     # socioeconomic vulnerability layer
                     addPolygons(data=socioecon_vuln, layerId = ~socecon_id,
                                 group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
-                                weight = 0.7,
+                                weight = ~weight_val,
                                 opacity = 0.8,
                                 color = "black",
                                 dashArray = "0.1",
-                                fillOpacity = 0.7,
+                                fillOpacity = ~opacity_val,
                                 highlight = highlightOptions(
                                   weight = 5,
                                   color = "#666",
@@ -2267,11 +2627,11 @@ server = function(input, output, session) {
                     # social vulnerability layer
                     addPolygons(data=socio_vuln, layerId = ~soc_id,
                                 group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
-                                weight = 0.7,
+                                weight = ~weight_val,
                                 opacity = 0.8,
                                 color = "black",
                                 dashArray = "0.1",
-                                fillOpacity = 0.7,
+                                fillOpacity = ~opacity_val,
                                 highlight = highlightOptions(
                                   weight = 5,
                                   color = "#666",
@@ -2290,11 +2650,11 @@ server = function(input, output, session) {
                     # Health/wellbeing vulnerability layer
                     addPolygons(data=health_vuln, layerId = ~health_id,
                                 group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
-                                weight = 0.7,
+                                weight = ~weight_val,
                                 opacity = 0.8,
                                 color = "black",
                                 dashArray = "0.1",
-                                fillOpacity = 0.7,
+                                fillOpacity = ~opacity_val,
                                 highlight = highlightOptions(
                                   weight = 5,
                                   color = "#666",
@@ -2313,11 +2673,11 @@ server = function(input, output, session) {
                     # clin vulnerability layer
                     addPolygons(data=clin_vuln, layerId = ~clin_id,
                                 group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
-                                weight = 0.7,
+                                weight = ~weight_val,
                                 opacity = 0.8,
                                 color = "black",
                                 dashArray = "0.1",
-                                fillOpacity = 0.7,
+                                fillOpacity = ~opacity_val,
                                 highlight = highlightOptions(
                                   weight = 5,
                                   color = "#666",
@@ -2363,11 +2723,11 @@ server = function(input, output, session) {
               
               addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                           group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2385,11 +2745,11 @@ server = function(input, output, session) {
               # economic vulnerability layer
               addPolygons(data=econ_vuln, layerId = ~econ_id,
                           group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2408,11 +2768,11 @@ server = function(input, output, session) {
               # socioeconomic vulnerability layer
               addPolygons(data=socioecon_vuln, layerId = ~socecon_id,
                           group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2431,11 +2791,11 @@ server = function(input, output, session) {
               # social vulnerability layer
               addPolygons(data=socio_vuln, layerId = ~soc_id,
                           group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2454,11 +2814,11 @@ server = function(input, output, session) {
               # Health/wellbeing vulnerability layer
               addPolygons(data=health_vuln, layerId = ~health_id,
                           group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2477,11 +2837,11 @@ server = function(input, output, session) {
               # clin vulnerability layer
               addPolygons(data=clin_vuln, layerId = ~clin_id,
                           group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2508,7 +2868,8 @@ server = function(input, output, session) {
           
           # local authority level
           else {
-            curr_bbox <- st_bbox(lad_uk_most_vuln)
+            lad_bbox <- lad_uk_most_vuln %>% filter(Name == input$lad_selected)
+            curr_bbox <- st_bbox(lad_bbox)
             
             leafletProxy("map") %>%
               clearShapes() %>%
@@ -2526,11 +2887,11 @@ server = function(input, output, session) {
               
               addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                           group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
-                          weight = 0.7,
+                          weight = ~weight_val, 
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2548,11 +2909,11 @@ server = function(input, output, session) {
               # economic vulnerability layer
               addPolygons(data=econ_vuln, layerId = ~econ_id,
                           group="Economic vulnerability", fillColor = ~pal(`Economic Vulnerability quintile`),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2571,11 +2932,11 @@ server = function(input, output, session) {
               # socioeconomic vulnerability layer
               addPolygons(data=socioecon_vuln, layerId = ~socecon_id,
                           group="Socioeconomic vulnerability", fillColor = ~pal(`Socioeconomic Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2594,11 +2955,11 @@ server = function(input, output, session) {
               # social vulnerability layer
               addPolygons(data=socio_vuln, layerId = ~soc_id,
                           group="Social vulnerability", fillColor = ~pal(`Social Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2617,11 +2978,11 @@ server = function(input, output, session) {
               # Health/wellbeing vulnerability layer
               addPolygons(data=health_vuln, layerId = ~health_id,
                           group="Health/Wellbeing vulnerability", fillColor = ~pal(`Health/Wellbeing Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2640,11 +3001,11 @@ server = function(input, output, session) {
               # clin vulnerability layer
               addPolygons(data=clin_vuln, layerId = ~clin_id,
                           group="Clinical vulnerability", fillColor = ~pal(`Clinical Vulnerability quintile` ),
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2674,8 +3035,8 @@ server = function(input, output, session) {
     else {
       if (input$theme == 'Flooding') {
         
-        flood_incd <- filtered_areas_at_risk_flooding_incd()
-        flood_risk <- filtered_areas_at_risk_flooding_risk()
+        #flood_incd <- filtered_areas_at_risk_flooding_incd()
+        #flood_risk <- filtered_areas_at_risk_flooding_risk()
         flood_all <- filtered_areas_at_risk_flooding_resilience()
         plot_flood_warning_polygon <- st_as_sf(filteredFlood_warnings_polygons())
         plot_flood_warning_points <- filteredFlood_warnings_points()
@@ -2685,7 +3046,8 @@ server = function(input, output, session) {
         if (dim(plot_flood_warning_polygon)[1] == 0) {
           
           if (input$lad_selected != 'All local authorities in region') {
-            curr_bbox <- st_bbox(flood_all)
+            lad_bbox <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+            curr_bbox <- st_bbox(lad_bbox)
             
             
             leafletProxy("map") %>%
@@ -2703,11 +3065,11 @@ server = function(input, output, session) {
                           fill=F) %>%
               addPolygons(data=flood_all, layerId = ~floodres_id,
                           group="Resilience of local authority", fillColor = ~`fill`,
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2750,11 +3112,11 @@ server = function(input, output, session) {
                         fill=F) %>%
             addPolygons(data=flood_all, layerId = ~floodres_id,
                         group="Resilience of all local authorities", fillColor = ~`fill`,
-                        weight = 0.7,
+                        weight = ~weight_val,
                         opacity = 0.8,
                         color = "black",
                         dashArray = "0.1",
-                        fillOpacity = 0.7,
+                        fillOpacity = ~opacity_val,
                         highlight = highlightOptions(
                           weight = 5,
                           color = "#666",
@@ -2767,56 +3129,12 @@ server = function(input, output, session) {
                           style = list("font-weight" = "normal", padding = "3px 8px"),
                           textsize = "10px",
                           direction = "auto"
-                        )) %>%
-            addPolygons(data=flood_incd, layerId = ~incd_id,
-                        group="Resilience of high flood incident areas", fillColor = ~`fill`,
-                        weight = 0.7,
-                        opacity = 0.8,
-                        color = "black",
-                        dashArray = "0.1",
-                        fillOpacity = 0.7,
-                        highlight = highlightOptions(
-                          weight = 5,
-                          color = "#666",
-                          dashArray = "",
-                          fillOpacity = 0.7,
-                          bringToFront = TRUE
-                        ),
-                        label = filtered_flood_incd_labels(),
-                        
-                        labelOptions = labelOptions(
-                          style = list("font-weight" = "normal", padding = "3px 8px"),
-                          textsize = "10px",
-                          direction = "auto"
-                        )
-            ) %>%
-            addPolygons(data=flood_risk, layerId = ~risk_id,
-                        group="Resilience of high flood risk areas", fillColor = ~`fill`,
-                        weight = 0.7,
-                        opacity = 0.8,
-                        color = "black",
-                        dashArray = "0.1",
-                        fillOpacity = 0.7,
-                        highlight = highlightOptions(
-                          weight = 5,
-                          color = "#666",
-                          dashArray = "",
-                          fillOpacity = 0.7,
-                          bringToFront = TRUE ,
-                        ),
-                        label= filtered_flood_risk_labels(),
-                        
-                        labelOptions = labelOptions(
-                          style = list("font-weight" = "normal", padding = "3px 8px"),
-                          textsize = "10px",
-                          direction = "auto"
-                        )
-            ) %>%
+                        ))  %>%
             flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                         lat1 = as.numeric(curr_bbox["ymin"]),
                         lng2 = as.numeric(curr_bbox["xmax"]),
                         lat2 = as.numeric(curr_bbox["ymax"]))  %>%
-            addLayersControl(baseGroups = c("Resilience of all local authorities","Resilience of high flood incident areas","Resilience of high flood risk areas"),
+            addLayersControl(baseGroups = c("Resilience of all local authorities"),
                              options= layersControlOptions(collapsed=T))
           
           } 
@@ -2853,11 +3171,11 @@ server = function(input, output, session) {
                         fill=F) %>%
             addPolygons(data=flood_all, layerId = ~floodres_id,
                         group="Resilience of all local authorities", fillColor = ~fill,
-                        weight = 0.7,
+                        weight = ~weight_val,
                         opacity = 0.8,
                         color = "black",
                         dashArray = "0.1",
-                        fillOpacity = 0.7,
+                        fillOpacity = ~opacity_val,
                         highlight = highlightOptions(
                           weight = 5,
                           color = "#666",
@@ -2871,49 +3189,6 @@ server = function(input, output, session) {
                             style = list("font-weight" = "normal", padding = "3px 8px"),
                             textsize = "10px",
                             direction = "auto"
-                        )
-            ) %>%
-            addPolygons(data=flood_incd, layerId = ~incd_id,
-                        group="Resilience of high flood incident areas", fillColor = ~fill,
-                        weight = 0.7,
-                        opacity = 0.8,
-                        color = "black",
-                        dashArray = "0.1",
-                        fillOpacity = 0.7,
-                        highlight = highlightOptions(
-                          weight = 5,
-                          color = "#666",
-                          dashArray = "",
-                          fillOpacity = 0.7,
-                          bringToFront = TRUE,
-                        ),
-                        label= filtered_flood_incd_labels(),
-                        labelOptions = labelOptions(
-                          style = list("font-weight" = "normal", padding = "3px 8px"),
-                          textsize = "10px",
-                          direction = "auto"
-                        )
-            ) %>%
-            addPolygons(data=flood_risk, layerId = ~risk_id,
-                        group="Resilience of high flood risk areas", fillColor = ~fill,
-                        weight = 0.7,
-                        opacity = 0.8,
-                        color = "black",
-                        dashArray = "0.1",
-                        fillOpacity = 0.7,
-                        highlight = highlightOptions(
-                          weight = 5,
-                          color = "#666",
-                          dashArray = "",
-                          fillOpacity = 0.7,
-                          bringToFront = TRUE,
-                        ),
-                        label= filtered_flood_risk_labels(),
-                        
-                        labelOptions = labelOptions(
-                          style = list("font-weight" = "normal", padding = "3px 8px"),
-                          textsize = "10px",
-                          direction = "auto"
                         )
             ) %>%
             addAwesomeMarkers(data=plot_flood_warning_points, layerId=~`description`,
@@ -2932,7 +3207,7 @@ server = function(input, output, session) {
                         lat1 = as.numeric(curr_bbox["ymin"]),
                         lng2 = as.numeric(curr_bbox["xmax"]),
                         lat2 = as.numeric(curr_bbox["ymax"])) %>%
-            addLayersControl(baseGroups = c("Resilience of all local authorities","Resilience of high flood incident areas","Resilience of high flood risk areas"),
+            addLayersControl(baseGroups = c("Resilience of all local authorities"),
                              overlayGroups = c("Latest flood warnings"),
                              options= layersControlOptions(collapsed=T))
           
@@ -2959,11 +3234,11 @@ server = function(input, output, session) {
                           fill=F) %>%
               addPolygons(data=flood_all, layerId = ~floodres_id,
                           group="Resilience of all local authorities", fillColor = ~fill,
-                          weight = 0.7,
+                          weight = ~weight_val,
                           opacity = 0.8,
                           color = "black",
                           dashArray = "0.1",
-                          fillOpacity = 0.7,
+                          fillOpacity = ~opacity_val,
                           highlight = highlightOptions(
                             weight = 5,
                             color = "#666",
@@ -2972,50 +3247,6 @@ server = function(input, output, session) {
                             bringToFront = TRUE,
                             ),
                             label= filtered_flood_resilience_labels(),
-                            
-                            labelOptions = labelOptions(
-                              style = list("font-weight" = "normal", padding = "3px 8px"),
-                              textsize = "10px",
-                              direction = "auto"
-                          )
-              ) %>%
-              addPolygons(data=flood_incd, layerId = ~incd_id,
-                          group="Resilience of high flood incident areas", fillColor = ~fill,
-                          weight = 0.7,
-                          opacity = 0.8,
-                          color = "black",
-                          dashArray = "0.1",
-                          fillOpacity = 0.7,
-                          highlight = highlightOptions(
-                            weight = 5,
-                            color = "#666",
-                            dashArray = "",
-                            fillOpacity = 0.7,
-                            bringToFront = TRUE,
-                            ),
-                            label= filtered_flood_incd_labels(),
-                            
-                            labelOptions = labelOptions(
-                              style = list("font-weight" = "normal", padding = "3px 8px"),
-                              textsize = "10px",
-                              direction = "auto"
-                          )
-              ) %>%
-              addPolygons(data=flood_risk, layerId = ~risk_id,
-                          group="Resilience of high flood risk areas", fillColor = ~fill,
-                          weight = 0.7,
-                          opacity = 0.8,
-                          color = "black",
-                          dashArray = "0.1",
-                          fillOpacity = 0.7,
-                          highlight = highlightOptions(
-                            weight = 5,
-                            color = "#666",
-                            dashArray = "",
-                            fillOpacity = 0.7,
-                            bringToFront = TRUE,
-                            ),
-                            label= filtered_flood_risk_labels(),
                             
                             labelOptions = labelOptions(
                               style = list("font-weight" = "normal", padding = "3px 8px"),
@@ -3039,15 +3270,15 @@ server = function(input, output, session) {
                           lat1 = as.numeric(curr_bbox["ymin"]),
                           lng2 = as.numeric(curr_bbox["xmax"]),
                           lat2 = as.numeric(curr_bbox["ymax"])) %>%
-              addLayersControl(baseGroups = c("Resilience of all local authorities","Resilience of high flood incident areas","Resilience of high flood risk areas"),
+              addLayersControl(baseGroups = c("Resilience of all local authorities"),
                                overlayGroups = c("Latest flood warnings"),
                                options= layersControlOptions(collapsed=T))
             } 
             
             else {
               
-              # -- zoom for uk ---
-              curr_bbox <- st_bbox(flood_all)
+              lad_bbox <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+              curr_bbox <- st_bbox(lad_bbox)
               
               leafletProxy("map") %>%
                 clearShapes() %>%
@@ -3064,11 +3295,11 @@ server = function(input, output, session) {
                             fill=F) %>%
                 addPolygons(data=flood_all, layerId = ~floodres_id,
                             group="Resilience of all local authorities", fillColor = ~fill,
-                            weight = 0.7,
+                            weight = ~weight_val,
                             opacity = 0.8,
                             color = "black",
                             dashArray = "0.1",
-                            fillOpacity = 0.7,
+                            fillOpacity = ~opacity_val,
                             highlight = highlightOptions(
                               weight = 5,
                               color = "#666",
@@ -4761,7 +4992,7 @@ observe({
           selectInput(
             inputId = "top_cases_top_change",
             label = "", 
-            choices = c("Flood warnings/alerts","Historical flood incidents per 10,000"),
+            choices = c("Flood warnings/alerts","Historical flood incidents per 10,000", "% of population living in flood risk areas"),
             selected = "Flood warnings/alerts",
             #inline = TRUE, 
             #checkbox = TRUE,
@@ -4886,7 +5117,9 @@ observe({
       if(input$theme == 'Flooding') {
         
         # retrieve list that's been selected
-        flooding_focus_list <- dd_areas2focus$d
+        #flooding_focus_list <- dd_areas2focus$d
+        
+        flooding_focus_list <- filtered_areas2focus_list()
         #print(flooding_focus_list)
         
         # -- which list was wanted -- 
@@ -4905,7 +5138,6 @@ observe({
               })
           
               top102show <- head(flooding_focus_list, 10)
-          
           
           
               # format text 
@@ -4981,8 +5213,6 @@ observe({
                 
                 top102show <- head(flooding_focus_list, 10)
                 
-                
-                
                 # format text 
                 output$areas2focus_list <- renderUI({
                   div( hr(),
@@ -5010,6 +5240,7 @@ observe({
                   )
                   
                 })
+             
                 
               }
               
@@ -5035,6 +5266,92 @@ observe({
                 })
                 
               }
+            }
+            
+            else {
+              
+              if(store_rank_wanted$rank_wanted_flooding == '% of population living in flood risk areas') {
+                
+                title_wanted <- paste("- Top 10 areas with highest proportion of population living in flood risk areas")
+                
+                
+                # the null is required because i think the way i've set up the second selection - it's called after this so when this is first run it's not currently assigned.
+                if (input$lad_selected == 'All local authorities in region' || is.null(input$lad_selected)) {
+                  
+                  # plot title 
+                  output$title_focus_list <- renderUI({
+                    div(
+                      p(tags$strong(input$tactical_cell), title_wanted),
+                      hr(style = "border-top: 1px solid #000000;"))
+                  })
+                  
+                  top102show <- head(flooding_focus_list, 10)
+                  
+                  top102show <- top102show %>%
+                    mutate(format_number = case_when(`% people in flood risk areas` > 0 ~ paste0(.$`% people in flood risk areas`,'%')))
+                                                     
+                  
+                  
+                  # format text 
+                  output$areas2focus_list <- renderUI({
+                    div( hr(),
+                         # top 
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,9], ","), top102show[1,3],"people)"),
+                         hr(),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,9], ","), top102show[2,3],"people)"),
+                         hr(),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,9], ","), top102show[3,3],"people)"),
+                         hr(),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,9], ","), top102show[4,3],"people)"),
+                         hr(),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,9], ","), top102show[5,3],"people)"),
+                         hr(),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,9], ","), top102show[6,3],"people)"),
+                         hr(),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,9], ","), top102show[7,3],"people)"),
+                         hr(),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,9], ","), top102show[8,3],"people)"),
+                         hr(),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,9], ","), top102show[9,3],"people)"),
+                         hr(),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,9], ","), top102show[10,3],"people)"),
+                    )
+                    
+                  })
+                  
+                  }
+                
+                # for focus list selected just show a local authority
+                else {
+                  top102show <- head(flooding_focus_list, 1)
+                  
+                  top102show <- top102show %>%
+                    mutate(format_number = case_when(`% people in flood risk areas` > 0 ~ paste0(.$`% people in flood risk areas`,'%')))
+                  
+                  
+                  # plot title 
+                  output$title_focus_list <- renderUI({
+                    div(
+                      p(tags$strong(input$lad_selected), '- Top 10 areas with highest proportion of population living in flood risk areas'),
+                      hr(style = "border-top: 1px solid #000000;"))
+                  })
+                  
+                  
+                  output$areas2focus_list <- renderUI({
+                    div( hr(),
+                         # top 
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,9], ","), top102show[1,3],"people)"),
+                         hr()
+                    )
+                    
+                  })
+                  
+                }
+                
+                
+                
+              }
+              
             }
             
             
@@ -5245,21 +5562,64 @@ observe({
     
     if(input$sidebar_id == 'unmetneed') {
       
-      # create search of charity database 
-      output$search_needed <- renderUI({
-        # search bar
-        searchInput(inputId = "search_term", 
-                    label = "Search CharityBase for charities with a particular purpose",
-                    placeholder = 'i.e emergency response',
-                    btnSearch = icon("search"), 
-                    btnReset = icon("remove"), 
-                    value='',
-                    width = "70%")
-        
-      })
+  
+      # provide option for expanded search if lad selected
+      if(input$lad_selected != 'All local authorities in region') {
+        # initally only search for the selected lad
+        lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
       
-    bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
-    
+        bounding_wanted <- st_bbox(lad_only)
+        
+        # create search of charity database 
+        output$search_needed <- renderUI({
+          # search bar
+          searchInput(inputId = "search_term", 
+                      label = "Search CharityBase for charities with a particular purpose",
+                      placeholder = 'i.e emergency response',
+                      btnSearch = icon("search"), 
+                      btnReset = icon("remove"), 
+                      value='',
+                      width = "100%")
+        })  
+      
+      output$expand_search_needed <- renderUI({
+        
+        radioButtons(inputId="expand_search",
+                       label="Include neighbouring local authorities in search",
+                       #status='success',
+                       width = "100%",
+                       choices=c("Yes","No"),
+                       selected="No",
+                       inline=T
+                       
+                    )
+        
+        })
+      }
+      
+      else {
+        # search either whole tactical cell or all of engalnd
+        bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+        # create search of charity database 
+        output$search_needed <- renderUI({
+          # search bar
+          searchInput(inputId = "search_term", 
+                      label = "Search CharityBase for charities with a particular purpose",
+                      placeholder = 'i.e emergency response',
+                      btnSearch = icon("search"), 
+                      btnReset = icon("remove"), 
+                      value='',
+                      width = "100%")
+        })
+        
+        output$expand_search_needed <- renderUI({
+        })
+      }
+      
+      
+   
+    #glimpse(bounding_wanted)
+      
     charities_found <- NULL
     tryCatch({  
     # - does the call take too long
@@ -5332,14 +5692,265 @@ observe({
     }
   })
   
+  # allow user to expand search area
+  observeEvent(input$expand_search, {
+    #print(input$expand_search)
+    
+    if(input$expand_search == 'Yes') {
+      
+      # search charitybase for just lad bounding box
+      if(input$theme == 'Covid-19') {
+        
+        #
+        lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+        neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
+        
+        #print(neighbours_of_interest$lad19nm)
+        
+        bounding_wanted <- st_bbox(neighbours_of_interest)
+        
+        charities_found <- NULL
+        tryCatch({  
+          # - does the call take too long
+          charities_found <- withTimeout({
+            findcharities(bounding_wanted, input$search_term)
+          }, timeout = 2)
+        },
+        error = function(e) {
+          charities_found <- NULL
+          
+          #TimeoutException = function(ex) {
+          #  message("Timeout. Skipping.") 
+          
+        })
+        
+      }
+      
+      else {
+        if(input$theme == 'Flooding') {
+          
+          # filter geometries to neighbouring locations and search bounding of theses.. 
+          #using interesects so we don't loose findings from lad selected
+          lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+          neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
+          
+          #print(neighbours_of_interest$lad19nm)
+          
+          bounding_wanted <- st_bbox(neighbours_of_interest)
+          charities_found <- NULL
+          tryCatch({  
+            # - does the call take too long
+            charities_found <- withTimeout({
+              findcharities(bounding_wanted, input$search_term)
+            }, timeout = 2)
+          },
+          error = function(e) {
+            charities_found <- NULL
+            
+            #TimeoutException = function(ex) {
+            #  message("Timeout. Skipping.") 
+            
+          })
+          #print(testing)
+          
+        }
+      }
+      
+      
+      if (is.null(charities_found)) {
+        
+        output$local_orgs_ui <- renderUI({
+          div(p(tags$strong('Call to CharityBase database is running slowly'),
+                tags$br(),
+                'Pleas try again by searching for a cause in the search box'))
+        })
+        
+        
+        
+      }
+      
+      else {
+        
+        if (dim(charities_found)[1] == 0) {
+          
+          output$local_orgs_ui <- renderUI({
+            div(p(tags$strong('No charities with this purpose found within this area in CharityBase'),
+                  tags$br(),
+                  'Pleas try a different search term'))
+          })
+          
+        }
+        
+        else{
+          output$local_orgs <- DT::renderDataTable({
+            #Sys.sleep(1.5)
+            DT::datatable(charities_found, filter=list(position='top'), escape=F,
+                          selection =c('single'),
+                          options = list(dom='tp', #should remove top search box the p includes paging
+                                         paging = T,
+                                         pageLength=10,
+                                         lengthMenu = c(5, 10, 15, 20),
+                                         scrollX=T,
+                                         scrollY='300px',
+                                         autoWidth = T,
+                                         columnDefs = list(list(width='400px',targets=c(3))),
+                                         initComplete = htmlwidgets::JS(
+                                           "function(settings, json) {",
+                                           paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                           "}")
+                          )) }, escape=F)
+          
+          output$local_orgs_ui <- renderUI({
+            DT::dataTableOutput('local_orgs')
+          })
+        }
+      }
+      
+    }
+    
+    else {
+      
+      # search charitybase for just lad bounding box
+      if(input$theme == 'Covid-19') {
+        
+        lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+        bounding_wanted <- st_bbox(lad_only)
+        
+        charities_found <- NULL
+        tryCatch({  
+          # - does the call take too long
+          charities_found <- withTimeout({
+            findcharities(bounding_wanted, input$search_term)
+          }, timeout = 2)
+        },
+        error = function(e) {
+          charities_found <- NULL
+          
+          #TimeoutException = function(ex) {
+          #  message("Timeout. Skipping.") 
+          
+        })
+        
+      }
+      
+      else {
+        if(input$theme == 'Flooding') {
+          
+          lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+          bounding_wanted <- st_bbox(lad_only)
+          
+          charities_found <- NULL
+          tryCatch({  
+            # - does the call take too long
+            charities_found <- withTimeout({
+              findcharities(bounding_wanted, input$search_term)
+            }, timeout = 2)
+          },
+          error = function(e) {
+            charities_found <- NULL
+            
+            #TimeoutException = function(ex) {
+            #  message("Timeout. Skipping.") 
+            
+          })
+          #print(testing)
+          
+        }
+      }
+      
+      
+      if (is.null(charities_found)) {
+        
+        output$local_orgs_ui <- renderUI({
+          div(p(tags$strong('Call to CharityBase database is running slowly'),
+                tags$br(),
+                'Pleas try again by searching for a cause in the search box'))
+        })
+        
+        
+        
+      }
+      
+      else {
+        
+        if (dim(charities_found)[1] == 0) {
+          
+          output$local_orgs_ui <- renderUI({
+            div(p(tags$strong('No charities with this purpose found within this area in CharityBase'),
+                  tags$br(),
+                  'Pleas try a different search term'))
+          })
+          
+        }
+        
+        else{
+          output$local_orgs <- DT::renderDataTable({
+            #Sys.sleep(1.5)
+            DT::datatable(charities_found, filter=list(position='top'), escape=F,
+                          selection =c('single'),
+                          options = list(dom='tp', #should remove top search box the p includes paging
+                                         paging = T,
+                                         pageLength=10,
+                                         lengthMenu = c(5, 10, 15, 20),
+                                         scrollX=T,
+                                         scrollY='300px',
+                                         autoWidth = T,
+                                         columnDefs = list(list(width='400px',targets=c(3))),
+                                         initComplete = htmlwidgets::JS(
+                                           "function(settings, json) {",
+                                           paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
+                                           "}")
+                          )) }, escape=F)
+          
+          output$local_orgs_ui <- renderUI({
+            DT::dataTableOutput('local_orgs')
+          })
+        }
+      }
+      
+    }
+    
+  })
   
   
   
+  # call api if user enters search term:
   observeEvent(input$search_term_search, {
     
     if(input$theme == 'Covid-19') {
       
-      bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+      #print(input$expand_search)
+      # if call times out before expand search option initiated it will be null
+      if (is.null(input$expand_search)) {
+        print("here")
+        bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+      }
+      
+      else{
+      
+      if(input$expand_search == 'Yes') {
+        
+        lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+        neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
+        bounding_wanted <- st_bbox(neighbours_of_interest)
+      }
+      
+      else {
+        # just show local authority results
+        if(input$expand_search == 'No') {
+          
+        lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+        bounding_wanted <- st_bbox(lad_only)
+        
+        }
+        # if searching having not loaded issue after initiation
+        else {
+          print('no in here')
+          bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+          }
+        }
+      }
+      
       
       charities_found <- NULL
       tryCatch({  
@@ -5360,8 +5971,19 @@ observe({
     
     else {
       if(input$theme == 'Flooding') {
+        if (input$expand_search == 'Yes') {
+          lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+          neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
+          bounding_wanted <- st_bbox(neighbours_of_interest)
         
-        bounding_wanted <- st_bbox(filtered_areas_at_risk_flooding_resilience())
+        }
+        else {
+          lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
+          bounding_wanted <- st_bbox(lad_only)
+          #bounding_wanted <- st_bbox(filtered_areas_at_risk_flooding_resilience())
+        }
+        
+        # plot search result
         charities_found <- NULL
         tryCatch({  
           # - does the call take too long
@@ -5656,7 +6278,7 @@ observe({
         infoBox(
           "Volunteer Presence",
           div(p('Coming Soon', style = "font-size:12pt;margin-top:5px;")),
-          color = "purple", fill = F, icon=icon('hands-helping')
+          color = "purple", fill = F, icon=icon('fas fa-hands-helping')
         )
       })
     }
