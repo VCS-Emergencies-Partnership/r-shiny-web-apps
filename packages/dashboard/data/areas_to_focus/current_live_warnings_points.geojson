@@ -7,8 +7,6 @@
 { "type": "Feature", "properties": { "floodAreaID": "061WAF06Coln" }, "geometry": { "type": "Point", "coordinates": [ -1.77522047497561, 51.721649556253574 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "061WAF10Dikler" }, "geometry": { "type": "Point", "coordinates": [ -1.743603600058296, 51.89808185533709 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "052WAFNAR" }, "geometry": { "type": "Point", "coordinates": [ 0.490459878066433, 52.694156858367421 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "011WAFDW" }, "geometry": { "type": "Point", "coordinates": [ -3.146697749730374, 54.575390259577354 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "111WAFAVOL" }, "geometry": { "type": "Point", "coordinates": [ -1.784534730340116, 50.793662053151763 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "111WAFPIDD" }, "geometry": { "type": "Point", "coordinates": [ -2.206400838643026, 50.721419185489978 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "063WAT23West" }, "geometry": { "type": "Point", "coordinates": [ -0.28954309794029, 51.475776597168448 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "065FAG009" }, "geometry": { "type": "Point", "coordinates": [ -1.161559790278374, 51.154637487318411 ] } },
@@ -17,7 +15,6 @@
 { "type": "Feature", "properties": { "floodAreaID": "122WAF972" }, "geometry": { "type": "Point", "coordinates": [ -0.377363812394764, 53.942009224625195 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "054FWFNF1D" }, "geometry": { "type": "Point", "coordinates": [ 0.75881288414157, 52.929276898715337 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "052FAGBURY" }, "geometry": { "type": "Point", "coordinates": [ 0.722314118279519, 52.247678065974569 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "114WACT1T1BA00" }, "geometry": { "type": "Point", "coordinates": [ -4.83476359406237, 50.302350781226558 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "031WAF216" }, "geometry": { "type": "Point", "coordinates": [ -2.372133641279341, 51.788807795098244 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "052FAGNEWMARKET" }, "geometry": { "type": "Point", "coordinates": [ 0.404846937624049, 52.244398510594728 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "064FAG99Eastkent" }, "geometry": { "type": "Point", "coordinates": [ 1.201932087699884, 51.253805589083072 ] } },
@@ -32,7 +29,6 @@
 { "type": "Feature", "properties": { "floodAreaID": "065FAG016" }, "geometry": { "type": "Point", "coordinates": [ -0.78716804465589, 50.900738506475598 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "065FAG011" }, "geometry": { "type": "Point", "coordinates": [ -1.317173257104907, 51.01803337526249 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "065FAG010" }, "geometry": { "type": "Point", "coordinates": [ -1.1413031084286, 51.048503822715197 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "065FAG013" }, "geometry": { "type": "Point", "coordinates": [ -1.082220083126235, 50.931913660883701 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "061FAG22GtSheff" }, "geometry": { "type": "Point", "coordinates": [ -1.433201316402239, 51.493699788990355 ] } }
 ]
 }
