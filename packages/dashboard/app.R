@@ -1069,15 +1069,16 @@ server = function(input, output, session) {
             tags$br(),
             tags$li(tags$strong("Historical flood events per 10,000 people:"), "Historical flood incidents are determined by the number of Fire and Rescue Service call outs to flooding incidents."),
             tags$br(),
-            tags$li(tags$strong("Proportion of the population living in flood risk areas:"), "This shows the proportion of the population of each local authority district living in areas where there is a greater than 1% chance a year of flooding.")),
+            tags$li(tags$strong("Proportion of the population living in flood risk areas:"), "This shows the proportion of the population of each local authority district living in areas where there is a greater than 1% chance a year of flooding.
+                    This is calculated by determining the number of people living in the flood zones defined by the environment agency. ")),
             
           p(tags$strong("Frequency of update:"), "TBC"),
           p(tags$strong("Source:"), 
-            "The environment agency flood warnings and alerts are available under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", " Open Government Licence v3.0."),
+            "The", tags$a(href="https://flood-warning-information.service.gov.uk/warnings",target="_blank", "environment agency"), "flood warnings and alerts are available under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", " Open Government Licence v3.0."),
             tags$br(),
             "This representation of historical flood incidents is based upon the BRC Resilience index, released under the GLP-v3 licence. The code is available",
             tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "here."),
-            "This representation of the proportion of people living in flood risk areas is based upon the BRC resilience index, released under the GLP-v3 licence. The code is available",
+            "The areas at greater than 1% chance of flooding were defined by the",tags$a(href="https://data.gov.uk/dataset/bad20199-6d39-4aad-8564-26a46778fd94/risk-of-flooding-from-rivers-and-sea", target="_blank", "environment agency risk of flooding from rivers and sea"),"This representation of the proportion of people living in flood risk areas is based upon the BRC resilience index, released under the GLP-v3 licence. The code is available",
             tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "here.")),
           tags$br(),
             
