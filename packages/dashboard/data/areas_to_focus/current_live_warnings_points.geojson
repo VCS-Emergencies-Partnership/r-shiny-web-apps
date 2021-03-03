@@ -15,7 +15,6 @@
 { "type": "Feature", "properties": { "floodAreaID": "122WAF972" }, "geometry": { "type": "Point", "coordinates": [ -0.377363812394764, 53.942009224625195 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "054FWFNF1D" }, "geometry": { "type": "Point", "coordinates": [ 0.75881288414157, 52.929276898715337 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "052FAGBURY" }, "geometry": { "type": "Point", "coordinates": [ 0.722314118279519, 52.247678065974569 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "031WAF216" }, "geometry": { "type": "Point", "coordinates": [ -2.372133641279341, 51.788807795098244 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "052FAGNEWMARKET" }, "geometry": { "type": "Point", "coordinates": [ 0.404846937624049, 52.244398510594728 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "064FAG99Eastkent" }, "geometry": { "type": "Point", "coordinates": [ 1.201932087699884, 51.253805589083072 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "064WAF6LittleStour" }, "geometry": { "type": "Point", "coordinates": [ 1.210789113483785, 51.301016822226217 ] } },
