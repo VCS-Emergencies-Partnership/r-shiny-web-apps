@@ -984,7 +984,7 @@ server = function(input, output, session) {
           hr(),
           p("We make use of a range of data sources to bring you this insight,
             including", tags$strong("data that is open source"), "as well as", tags$strong("data from our contributing partners.")),
-          p("The platform uses data and code from the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", 'British Red Cross COVID-19 Vulnerability Index,'), tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", 'British Red Cross Resilience Index,'), "and the British Red Cross Local Lockdown tool. 
+          p("The platform uses data and code from the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", 'British Red Cross COVID-19 Vulnerability Index,'), tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", 'British Red Cross Resilience Index'), "and the British Red Cross Local Lockdown tool. 
             The code from these tools is distributed under GPL-3 (GNU GENERAL PUBLIC LICENSE version 3). Outputs related to the vulnerability index (e.g., vulnerability scores) are distributed under CC-BY-4.0 (Creative Commons Attribution 4.0 International), unless otherwise stated."),
           p(
             "Data is also included in the platform from",
