@@ -207,17 +207,26 @@ par_table_tc_avg <- par_table %>%
 covid_area2focus <- read_feather('data/areas_to_focus/areas2focus_covid.feather')
 
 # covid prefix for name for table
-covid_week = colnames(covid_area2focus)[6]
-covid_week = strsplit(covid_week, " ")
-covid_week = paste('Week', covid_week[[1]][2], ' 2021\n')
+#covid_week = colnames(covid_area2focus)[6]
+#covid_week = strsplit(covid_week, " ")
+#covid_week = paste('Week', covid_week[[1]][2], ' 2021\n')
+covid_data_date = format(covid_area2focus$date[1], '%d/%m/%Y')
+
 # rename with suffix for time being. 
 covid_area2focus <- covid_area2focus %>%
-  rename('covid cases per 100,000'=colnames(covid_area2focus)[6]) %>%
+  rename('covid cases per 100,000'=newCasesBySpecimenDateRollingRate) %>%
+  rename('Name' = areaName) %>%
+  rename('Total cases' = newCasesBySpecimenDateRollingSum) %>%
+  rename('% change in covid cases' = newCasesBySpecimenDateChangePercentage) %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
                                          TacticalCell == 'Central' ~ 'Midlands & East',
                                          TRUE ~ as.character(.$TacticalCell))) %>%
-  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
+  select(-'TacticalCell', -'date',-'areaType', -'newCasesBySpecimenDate') %>%
+  rename("TacticalCell"=TacticalCell_update)
   
+
+
+
 # ---- Flooding ---
 # flooding stats within resilience index
 flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
@@ -975,8 +984,8 @@ server = function(input, output, session) {
           hr(),
           p("We make use of a range of data sources to bring you this insight,
             including", tags$strong("data that is open source"), "as well as", tags$strong("data from our contributing partners.")),
-          p("The platform uses data and code from the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross COVID-19 Vulnerability Index, The British Red Cross Resilience Index'), "and the British Red Cross Local Lockdown tool. 
-            The code from these tools is distributed under GPL-3 (GNU GENERAL PUBLICLICENSE version 3). Outputs related to the vulnerability index (e.g., vulnerability scores) are distributed under CC-BY-4.0 (Creative Commons Attribution 4.0 International), unless otherwise stated."),
+          p("The platform uses data and code from the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", 'British Red Cross COVID-19 Vulnerability Index,'), tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", 'British Red Cross Resilience Index,'), "and the British Red Cross Local Lockdown tool. 
+            The code from these tools is distributed under GPL-3 (GNU GENERAL PUBLIC LICENSE version 3). Outputs related to the vulnerability index (e.g., vulnerability scores) are distributed under CC-BY-4.0 (Creative Commons Attribution 4.0 International), unless otherwise stated."),
           p(
             "Data is also included in the platform from",
             tags$a(href="https://www.ons.gov.uk/", target="_blank", "Office of National Statistics"), "and", tags$a(href="https://digital.nhs.uk/", target="_blank", "NHS Digital"), "shared under an", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence.")),
@@ -1030,12 +1039,58 @@ server = function(input, output, session) {
               Read more about how the reslience index and vulnerability index were created either in the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'help section here')),
               "or", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "here."))),
           tags$br(),
+          h4(tags$strong("Areas to focus:")),
+             p("Highlights 10 areas where an emergency is most prevalent in England and by region. 
+               It is intended to support our multiagency network to focus their outreach and response efforts in those areas that are most impacted by an emergency."),
+            h5(tags$strong("Covid-19:", style="color:blue")),
+               p("View the top 10 areas with either the highest number of cases per 100,000 or an area with the greatest  % change in total covid cases over a rolling 7 day period. 
+                This current relevant 7 day period is up to:", covid_data_date), 
+               
+               p(
+               tags$li(tags$strong("Covid cases per 100,000:"), "a rolling 7-day average of positive covid tests for each local authority district (lower tier local authority). 
+                       To convert the rolling average of cases to average of cases per 100,000, the average number of cases is divided by the population of the local authority district and multiplied by 100,000."),
+               tags$br(),
+               tags$li(tags$strong("Total covid cases:"), "the total number of new cases (by specimen date) seen over the relevant 7 day period ."),
+               tags$br(),
+               tags$li(tags$strong('% change in covid cases:'), 'the % change in new cases (by specimen date) between the most recent relevant 7-day period and the 7-day period prior to that.'),
+               tags$br(),
+               tags$li(tags$strong("Rolling average:"), "This is determined by averaging the number new cases by specimen date on the day itself, the 3 days prior and the 3 days after.
+                       For this to be possible this data is the rolling average of 5 days prior to the current day (i.e. starting from 5 days prior to today - the 7 days prior to that).")),
+              
+               p(tags$strong("Frequency of update:"), "Data is updated daily but note 5-day lag due to rolling average."),
+               p(tags$strong("Source:"), "For more information see", tags$a(href="https://coronavirus.data.gov.uk/", target="_blank", "https://coronavirus.data.gov.uk/."),
+                  "This data contains Public Health England data © Crown copyright and database right 2020 and is available under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", " Open Government Licence v3.0.")),
+          #tags$br(),
+          h5(tags$strong("Flooding:", style="color:blue")),
+          p("View the top 10 areas with either the most flood warnings ranked by severity of warning, 
+            the most historical flood incidents per 10,000 people, or with the highest proportion of population living in flood risk areas."),
+          p(tags$li(tags$strong('Flood warnings and alerts:'), "local authority districts are deemed to be affected by a flood alert or warning if the predicted most extreme scenario (represented by the flood outline provided by the environment agency) overlaps their local authority district. 
+                    On occasions the flood outline shown in the app may not appear to overlay a local authority. This is to help the performance of the app by reducing the complexity of the flood outline thereby reducing the file size."),
+            tags$br(),
+            tags$li(tags$strong("Historical flood events per 10,000 people:"), "Historical flood incidents are determined by the number of Fire and Rescue Service call outs to flooding incidents."),
+            tags$br(),
+            tags$li(tags$strong("Proportion of the population living in flood risk areas:"), "This shows the proportion of the population of each local authority district living in areas where there is a greater than 1% chance a year of flooding.")),
+            
+          p(tags$strong("Frequency of update:"), "TBC"),
+          p(tags$strong("Source:"), 
+            "The environment agency flood warnings and alerts are available under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", " Open Government Licence v3.0."),
+            tags$br(),
+            "This representation of historical flood incidents is based upon the BRC Resilience index, released under the GLP-v3 licence. The code is available",
+            tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "here."),
+            "This representation of the proportion of people living in flood risk areas is based upon the BRC resilience index, released under the GLP-v3 licence. The code is available",
+            tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "here.")),
+          tags$br(),
+            
+          
+          
+          
           h4(tags$strong("Interpreting the map:")), 
             p("For both emergency themes available so far the base layers of the map display either the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index')), "or",
             "the", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index.")),
             "It is possible to change the layer shown on the map by selecting the button in the corner of the map to change what information is displayed."),
+            tags$br(),
           
-          p(tags$strong("Covid-19 emergency map layers:"), 
+          p(tags$strong("Covid-19 emergency map layers:", style="color:blue"), 
             tags$br(), 
             tags$li(tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.'), 
                     "This shows the vulnerability vs the capacity to cope with an emergency of local authority districts in England. 
@@ -1055,13 +1110,13 @@ server = function(input, output, session) {
                         tags$br(),
                         tags$li(tags$strong(tags$em("Clinical vulnerability:")), "This layer shows the clinical vulnerability (i.e underlying health conditions etc.) of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
           tags$br(),              
-          p(tags$strong("Flooding emergency map layers:"),
+          p(tags$strong("Flooding emergency map layers:", style="color:blue"),
                         tags$li(tags$strong(tags$em("Resilience of all local authorities:")), "This shows the BRC Resilience index (vulnerability vs capacity to cope) using the same colour scheme as the for the same layer on the Covid-19 data."),
                         tags$br(),
-                        tags$li(tags$strong(tags$em("Resilience of areas with highest flood incidents:")), "This highlights the resilience (vulnerability vs the capacity to cope) of the areas with the highest number of historical flood incidents per 10,000 people (Flood incidents quintile 4 and 5) - for more information see the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.')), 
-                        tags$br(),
-                        tags$li(tags$strong(tags$em("Resilience of areas with highest flood risk:")), "This highlights the areas where the highest proportion of people live in flood risk areas (Flood risk quintile 4, 5) - for more information see the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.')),
-                        tags$br(),
+                        #tags$li(tags$strong(tags$em("Resilience of areas with highest flood incidents:")), "This highlights the resilience (vulnerability vs the capacity to cope) of the areas with the highest number of historical flood incidents per 10,000 people (Flood incidents quintile 4 and 5) - for more information see the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.')), 
+                        #tags$br(),
+                        #tags$li(tags$strong(tags$em("Resilience of areas with highest flood risk:")), "This highlights the areas where the highest proportion of people live in flood risk areas (Flood risk quintile 4, 5) - for more information see the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.')),
+                        #tags$br(),
                         tags$li(tags$strong(tags$em("Flood warnings/alerts:")), "The points and polygons displayed show the flood warnings and alerts from the", tags$a(href="https://flood-warning-information.service.gov.uk/warnings", target="_blank","environment agency"), "as of", last_updated_time, last_updated_date)),
           #tags$br(),
           #p("As more organisations contribute their data, over time", tags$strong("we will build a better 
@@ -2124,12 +2179,12 @@ server = function(input, output, session) {
     if(input$theme == 'Covid-19') {
       
         covid_lads_in_tc <- covid_area2focus %>% arrange(-`covid cases per 100,000`) %>%
-          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
       
         # no volunteer data
         covid_cases2volunteers <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
-          select(-'LAD19CD') %>% 
-          rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .))
+          select(-'LAD19CD') # %>% 
+          #rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .))
       
     }
     
@@ -2215,32 +2270,32 @@ server = function(input, output, session) {
         if (input$tactical_cell == '-- England --') {
       
         covid_lads_in_tc <- covid_area2focus %>% arrange(-`covid cases per 100,000`) %>%
-          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
       
       covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
-        select(-'LAD19CD') %>% 
-        rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+        select(-'LAD19CD') #%>% 
+        #rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
     }
       else {
       if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
         
         covid_lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
           arrange(-`covid cases per 100,000`) %>%
-          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
         
         covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
-          select(-'LAD19CD') %>% 
-          rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+          select(-'LAD19CD') #%>% 
+          #rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
       }
         
       else {
         covid_lads_in_tc <- covid_area2focus %>% filter(Name == input$lad_selected) %>%
           arrange(-`covid cases per 100,000`) %>%
-          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
         
         covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
-          select(-'LAD19CD') %>% 
-          rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+          select(-'LAD19CD') #%>% 
+          #rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
         
       }
         
@@ -2252,32 +2307,32 @@ server = function(input, output, session) {
         if (input$tactical_cell == '-- England --') {
           
           covid_lads_in_tc <- covid_area2focus %>% arrange(-`% change in covid cases`) %>%
-            select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+            select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
           
           covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
-            select(-'LAD19CD') %>% 
-            rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+            select(-'LAD19CD') # %>% 
+            #rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
         }
         else {
           if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
             
             covid_lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
               arrange(-`% change in covid cases`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`,`% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
-              select(-'LAD19CD') %>% 
-              rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+              select(-'LAD19CD') #%>% 
+              #rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
           }
           
           else {
             covid_lads_in_tc <- covid_area2focus %>% filter(Name == input$lad_selected) %>%
               arrange(-`% change in covid cases`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
-              select(-'LAD19CD') %>% 
-              rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
+              select(-'LAD19CD') #%>% 
+              #rename_at(vars(`covid cases per 100,000`), ~ paste0(covid_week, .)) 
             
           }
           
@@ -5014,12 +5069,12 @@ observe({
       
       # -- change title based on what's selected --- 
       if (store_rank_wanted$rank_wanted_covid == 'cases per 100,000  ') {
-        title_wanted <- "- Top 10 areas with highest number of Covid cases per 100,000,"
+        title_wanted <- "- Top 10 areas with highest number of covid cases per 100,000"
       }
     
     
       else {
-        title_wanted <- "- Top 10 areas with highest % change in Covid cases,"
+        title_wanted <- "- Top 10 areas with highest % change in covid cases,"
       }
     
 
@@ -5035,7 +5090,7 @@ observe({
       # plot title 
       output$title_focus_list <- renderUI({
         div(
-          p(tags$strong(input$tactical_cell), title_wanted, covid_week),
+          p(tags$strong(input$tactical_cell), title_wanted),
           hr(style = "border-top: 1px solid #000000;"))
       })
       
@@ -5052,30 +5107,31 @@ observe({
       
    
       # format text 
+      #glimpse(top102show)
       
       
       output$areas2focus_list <- renderUI({
           div( hr(),
            # top 
-           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "cases,", tags$strong(top102show[1,6], style = paste("color:", top102show[1,5])), ")"),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])), ")"),
            hr(),
-           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,3]), "cases, ", tags$strong(top102show[2,6], style = paste("color:", top102show[2,5])), ")"),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,3]), "per 100k,", top102show[2,4], "cases,", tags$strong(top102show[2,7], style = paste("color:", top102show[2,6])), ")"),
            hr(),
-           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0( "(", top102show[3,3]), "cases, ", tags$strong(top102show[3,6], style = paste("color:", top102show[3,5])), ")"),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0( "(", top102show[3,3]), "per 100k,", top102show[3,4], "cases,", tags$strong(top102show[3,7], style = paste("color:", top102show[3,6])), ")"),
            hr(),
-           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,3]), "cases, ", tags$strong(top102show[4,6], style = paste("color:", top102show[4,5])), ")"),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,3]), "per 100k,", top102show[4,4], "cases,", tags$strong(top102show[4,7], style = paste("color:", top102show[4,6])), ")"),
            hr(),
-           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,3]), "cases, ", tags$strong(top102show[5,6], style = paste("color:", top102show[5,5])), ")"),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,3]), "per 100k,", top102show[5,4], "cases,", tags$strong(top102show[5,7], style = paste("color:", top102show[5,6])), ")"),
            hr(),
-           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,3]), "cases, ", tags$strong(top102show[6,6], style = paste("color:", top102show[6,5])), ")"),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,3]), "per 100k,", top102show[6,4], "cases,", tags$strong(top102show[6,7], style = paste("color:", top102show[6,6])), ")"),
            hr(),
-           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,3]), "cases, ", tags$strong(top102show[7,6], style = paste("color:", top102show[7,5])), ")"),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,3]), "per 100k,", top102show[7,4], "cases,", tags$strong(top102show[7,7], style = paste("color:", top102show[7,6])), ")"),
            hr(),
-           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,3]), "cases, ", tags$strong(top102show[8,6], style = paste("color:", top102show[8,5])), ")"),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,3]), "per 100k,", top102show[8,4], "cases,", tags$strong(top102show[8,7], style = paste("color:", top102show[8,6])), ")"),
            hr(),
-           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,3]), "cases, ", tags$strong(top102show[9,6],style = paste("color:", top102show[9,5])), ")"),
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,3]), "per 100k,", top102show[9,4], "cases,", tags$strong(top102show[9,7], style = paste("color:", top102show[9,6])), ")"),
            hr(),
-           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,3]), "cases, ", tags$strong(top102show[10,6], style = paste("color:", top102show[10,5])), ")")
+           p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,3]),"per 100k,", top102show[10,4], "cases,", tags$strong(top102show[10,7], style = paste("color:", top102show[10,6])), ")")
       )
       
     })
@@ -5088,7 +5144,7 @@ observe({
       # plot title 
       output$title_focus_list <- renderUI({
         div(
-          p(tags$strong(input$lad_selected), '- number of covid cases per 100,000 and % change in covid cases,', covid_week),
+          p(tags$strong(input$lad_selected), '- number of covid cases per 100,000, Total cases and % change in covid cases,'),
           hr(style = "border-top: 1px solid #000000;"))
       })
       
@@ -5103,7 +5159,8 @@ observe({
       output$areas2focus_list <- renderUI({
         div( hr(),
              # top 
-             p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "cases,", tags$strong(top102show[1,6], style = paste("color:", top102show[1,5])), ")"),
+             p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])), ")"),
+             #p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "cases,", tags$strong(top102show[1,6], style = paste("color:", top102show[1,5])), ")"),
              hr()
         )
         
