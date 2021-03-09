@@ -211,6 +211,9 @@ covid_area2focus <- read_feather('data/areas_to_focus/areas2focus_covid.feather'
 #covid_week = strsplit(covid_week, " ")
 #covid_week = paste('Week', covid_week[[1]][2], ' 2021\n')
 covid_data_date = format(covid_area2focus$date[1], '%d/%m/%Y')
+# possible weird repetitive unknown unititialised column error work around. 
+remove <- c("date")
+covid_area2focus <- covid_area2focus[, !(names(covid_area2focus) %in% remove)]
 
 # rename with suffix for time being. 
 covid_area2focus <- covid_area2focus %>%
@@ -221,7 +224,7 @@ covid_area2focus <- covid_area2focus %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
                                          TacticalCell == 'Central' ~ 'Midlands & East',
                                          TRUE ~ as.character(.$TacticalCell))) %>%
-  select(-'TacticalCell', -'date',-'areaType', -'newCasesBySpecimenDate') %>%
+  select(-'TacticalCell', -'areaType', -'newCasesBySpecimenDate') %>%
   rename("TacticalCell"=TacticalCell_update)
   
 
@@ -300,7 +303,7 @@ last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%
 
 # ---  dashboard --- #
 # --- header --- #
-header <- dashboardHeaderPlus(title = "VCSEP Insights", titleWidth = "300px")#,
+header <- dashboardHeader(title = "VCSEP Insights", titleWidth = "300px")#,
                               #dropdownMenu(
                               #  type = "notifications",
                               #  icon = icon("question-circle"),
@@ -311,6 +314,7 @@ header <- dashboardHeaderPlus(title = "VCSEP Insights", titleWidth = "300px")#,
 # --- side bar --- #
 sidebar <- dashboardSidebar(
   width = "300px",
+  minified = F,
   tags$style(HTML(".sidebar-menu li a { font-size: 16px; }")),
   sidebarMenu(id="sidebar_id",
               # -- Home page ---
@@ -371,7 +375,7 @@ body <- dashboardBody(
             fluidRow(style="padding-right:20px",
               # column 1
               column(width = 8,
-                     box(width=NULL,
+                     box(width=NULL, headerBorder = F,
                        #uiOutput('welcome'),
                        div(
                          h2(tags$strong('Insights from the Emergencies Partnership')),
@@ -382,11 +386,11 @@ body <- dashboardBody(
                          p("View the latest insight", tags$strong('underneath the insights tab'), 'in the sidebar')
                        ),
                        textOutput("keep_alive"),
-                       style = "height:620px; overflow-y: scroll;overflow-x: scroll;", footer=div(
+                       style = "height:650px; overflow-y: scroll;overflow-x: scroll;margin-top:-50px;padding-top:-50px", footer=div(
                          p(tags$strong(tags$i("This platform is still in the early stages of development. 
                                Some features may not work properly, but are coming soon.")), 
                            style="color:blue")),
-                       accordion(inputId='accordion1',
+                       accordion(id='accordion1',
                          accordionItem(
                            id=1,
                            title='About',
@@ -484,9 +488,9 @@ body <- dashboardBody(
                 # - Row 1 -
                 fluidRow(
                   tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
-                  box( width=NULL, #height='175px',
+                  box( width=NULL, headerBorder = F, #height='175px',
                       a(class="twitter-timeline", href="https://twitter.com/vcsep"),
-                      style = "height:698px; overflow-y: scroll;overflow-x: scroll;")
+                      style = "height:698px; overflow-y: scroll;overflow-x: scroll;;margin-top:-20px;padding-top:-20px")
                       #uiOutput('twitter'))
                 )
               )
@@ -841,9 +845,9 @@ body <- dashboardBody(
           fluidRow(style="padding-right:100px;padding-left:100px;padding-top:20px;padding-bottom:20px",
                    # column 1
                    column(width = 12,
-                          box(width=NULL,
+                          box(width=NULL, headerBorder=F,
                               uiOutput('refs'),
-                              style = "height:650px; overflow-y: scroll;overflow-x: scroll;"
+                              style = "height:650px; overflow-y: scroll;overflow-x: scroll;margin-top:-50px;padding-top:-50px"
                               #style = 'overflow-y:scroll; height: calc(100vh - 200px) !important;'
                           )))
     )
@@ -854,8 +858,8 @@ body <- dashboardBody(
 
 # --- build user interface --- #
 ui <- function(request) {
-  dashboardPagePlus(
-  sidebar_fullCollapse = TRUE,
+  dashboardPage(
+  #sidebar_fullCollapse = TRUE,
   skin='purple',
   header,
   sidebar,
@@ -5076,7 +5080,7 @@ observe({
     
     
       else {
-        title_wanted <- "- Top 10 areas with highest % change in covid cases,"
+        title_wanted <- "- Top 10 areas with highest % change in covid cases"
       }
     
 
@@ -5479,6 +5483,7 @@ observe({
     if (input$sidebar_id == 'unmetneed') {
  
       # if user has tactical cell selected
+      #print(input$lad_selected)
       if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
         # update reactive values 
         #clearSorting(proxy = dataTableProxy(outputId = "areas2focus"))
@@ -5619,11 +5624,12 @@ observe({
   # --- show on first look ---
   observe({
     
+    req(input$sidebar_id)
     if(input$sidebar_id == 'unmetneed') {
       
-  
       # provide option for expanded search if lad selected
       if(input$lad_selected != 'All local authorities in region') {
+        
         # initally only search for the selected lad
         lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
       
@@ -5751,10 +5757,11 @@ observe({
     }
   })
   
+  
   # allow user to expand search area
   observeEvent(input$expand_search, {
     #print(input$expand_search)
-    
+    print(input$expand_search)
     if(input$expand_search == 'Yes') {
       
       # search charitybase for just lad bounding box
@@ -5865,7 +5872,7 @@ observe({
         }
       }
       
-    }
+    } # end of expand search box
     
     else {
       
@@ -6030,6 +6037,14 @@ observe({
     
     else {
       if(input$theme == 'Flooding') {
+        
+        # Enable search when capture null expand search or when a local authroity is selected
+        if (is.null(input$expand_search) | input$lad_selected == 'All local authorities in region') {
+          bounding_wanted <- st_bbox(filtered_areas_at_risk_flooding_resilience())
+        }
+        
+        else {
+        # enable search if lad selected
         if (input$expand_search == 'Yes') {
           lad_of_interest <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
           neighbours_of_interest <- lad_uk2vuln_resilience %>% filter(lengths(st_intersects(., lad_of_interest)) > 0)
@@ -6040,6 +6055,7 @@ observe({
           lad_only <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
           bounding_wanted <- st_bbox(lad_only)
           #bounding_wanted <- st_bbox(filtered_areas_at_risk_flooding_resilience())
+          }
         }
         
         # plot search result
