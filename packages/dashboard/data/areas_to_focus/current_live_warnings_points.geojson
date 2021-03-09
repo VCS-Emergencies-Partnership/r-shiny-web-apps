@@ -7,9 +7,12 @@
 { "type": "Feature", "properties": { "floodAreaID": "065FAG009" }, "geometry": { "type": "Point", "coordinates": [ -1.161559790278374, 51.154637487318411 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "061WAF10Windrush" }, "geometry": { "type": "Point", "coordinates": [ -1.518641582277303, 51.774915819397449 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "065FAG016" }, "geometry": { "type": "Point", "coordinates": [ -0.78716804465589, 50.900738506475598 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "122WAF974" }, "geometry": { "type": "Point", "coordinates": [ -0.709906045972288, 53.779458963942204 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "111WAFPIDD" }, "geometry": { "type": "Point", "coordinates": [ -2.206400838643026, 50.721419185489978 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "061WAF06Coln" }, "geometry": { "type": "Point", "coordinates": [ -1.77522047497561, 51.721649556253574 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "052FAGBURY" }, "geometry": { "type": "Point", "coordinates": [ 0.722314118279519, 52.247678065974569 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "062FAGCheshamGW" }, "geometry": { "type": "Point", "coordinates": [ -0.608915263864501, 51.721225581467252 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "122WAF970" }, "geometry": { "type": "Point", "coordinates": [ -0.436723204535929, 54.132843609618789 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "065FAG015" }, "geometry": { "type": "Point", "coordinates": [ -0.950798941910383, 50.902001759484442 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "054WAFNF1D" }, "geometry": { "type": "Point", "coordinates": [ 0.758771493627103, 52.929555751162106 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "065FAG006" }, "geometry": { "type": "Point", "coordinates": [ -1.39187989462398, 51.025315355720309 ] } },
@@ -20,6 +23,7 @@
 { "type": "Feature", "properties": { "floodAreaID": "064WAF6LittleStour" }, "geometry": { "type": "Point", "coordinates": [ 1.210789113483785, 51.301016822226217 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "064FAG99Eastkent" }, "geometry": { "type": "Point", "coordinates": [ 1.201932087699884, 51.253805589083072 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "052WAFNAR" }, "geometry": { "type": "Point", "coordinates": [ 0.490459878066433, 52.694156858367421 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "061FAG22GtSheff" }, "geometry": { "type": "Point", "coordinates": [ -1.433201316402239, 51.493699788990355 ] } }
+{ "type": "Feature", "properties": { "floodAreaID": "061FAG22GtSheff" }, "geometry": { "type": "Point", "coordinates": [ -1.433201316402239, 51.493699788990355 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "052WAFKYM" }, "geometry": { "type": "Point", "coordinates": [ -0.328499289908881, 52.288999923597352 ] } }
 ]
 }
