@@ -1069,7 +1069,8 @@ server = function(input, output, session) {
           p("View the top 10 areas with either the most flood warnings ranked by severity of warning, 
             the most historical flood incidents per 10,000 people, or with the highest proportion of population living in flood risk areas."),
           p(tags$li(tags$strong('Flood warnings and alerts:'), "local authority districts are deemed to be affected by a flood alert or warning if the predicted most extreme scenario (represented by the flood outline provided by the environment agency) overlaps their local authority district. 
-                    On occasions the flood outline shown in the app may not appear to overlay a local authority. This is to help the performance of the app by reducing the complexity of the flood outline thereby reducing the file size."),
+                    On occasions the flood outline shown in the app may not appear to overlay a local authority. This is to help the performance of the app by reducing the complexity of the flood outline thereby reducing the file size.
+                    When there are no flood warnings active the areas are ordered by number of historical flood incidents per 10,000 people."),
             tags$br(),
             tags$li(tags$strong("Historical flood events per 10,000 people:"), "Historical flood incidents are determined by the number of Fire and Rescue Service call outs to flooding incidents."),
             tags$br(),
