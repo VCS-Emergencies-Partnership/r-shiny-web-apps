@@ -21,8 +21,8 @@ E06000019,Central,NA,NA
 E06000020,Central,NA,NA
 E06000021,Central,NA,NA
 E06000022,South and the Channel Islands,NA,NA
-E06000023,South and the Channel Islands,NA,1
-E06000024,South and the Channel Islands,NA,NA
+E06000023,South and the Channel Islands,1,NA
+E06000024,South and the Channel Islands,NA,1
 E06000025,South and the Channel Islands,NA,1
 E06000026,South and the Channel Islands,1,1
 E06000027,South and the Channel Islands,NA,NA
@@ -31,7 +31,7 @@ E06000030,South and the Channel Islands,NA,NA
 E06000031,Central,NA,NA
 E06000032,South East,NA,NA
 E06000033,South East,NA,NA
-E06000034,South East,NA,1
+E06000034,South East,1,NA
 E06000035,South East,NA,NA
 E06000036,South and the Channel Islands,NA,NA
 E06000037,South and the Channel Islands,NA,NA
@@ -78,7 +78,7 @@ E07000037,Central,NA,NA
 E07000038,Central,NA,NA
 E07000039,Central,NA,NA
 E07000040,South and the Channel Islands,NA,1
-E07000041,South and the Channel Islands,NA,2
+E07000041,South and the Channel Islands,2,NA
 E07000042,South and the Channel Islands,NA,NA
 E07000043,South and the Channel Islands,NA,NA
 E07000044,South and the Channel Islands,NA,NA
@@ -93,7 +93,7 @@ E07000064,South East,NA,NA
 E07000065,South East,NA,NA
 E07000066,South East,NA,NA
 E07000067,South East,NA,NA
-E07000069,South East,NA,1
+E07000069,South East,1,NA
 E07000068,South East,NA,NA
 E07000070,South East,NA,NA
 E07000071,South East,NA,1
@@ -126,7 +126,7 @@ E07000098,South East,NA,NA
 E07000099,South East,NA,NA
 E07000102,South East,NA,NA
 E07000103,South East,NA,NA
-E07000105,South East,NA,NA
+E07000105,South East,NA,1
 E07000106,South East,NA,NA
 E07000107,South East,NA,NA
 E07000108,South East,NA,NA
@@ -166,7 +166,7 @@ E07000141,Central,NA,NA
 E07000142,Central,NA,NA
 E07000143,Central,NA,NA
 E07000144,Central,NA,NA
-E07000145,Central,NA,1
+E07000145,Central,NA,2
 E07000146,Central,NA,NA
 E07000147,Central,NA,NA
 E07000148,Central,NA,2
@@ -270,7 +270,7 @@ E08000021,North,NA,NA
 E08000022,North,NA,NA
 E08000023,North,NA,NA
 E08000024,North,NA,NA
-E08000025,Central,NA,4
+E08000025,Central,3,1
 E08000026,Central,NA,1
 E08000027,Central,NA,1
 E08000028,Central,NA,NA
@@ -280,7 +280,7 @@ E08000031,Central,NA,NA
 E08000032,North,NA,NA
 E08000033,North,NA,NA
 E08000034,North,NA,NA
-E08000035,North,NA,NA
+E08000035,North,NA,1
 E08000036,North,NA,NA
 E08000037,North,NA,NA
 E09000002,London,NA,NA
