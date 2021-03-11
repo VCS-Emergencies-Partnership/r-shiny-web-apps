@@ -14,11 +14,12 @@ setHeight = function() {
   //console.log(areafoucustitleHeight);
   console.log(areafocusoptionsHeight);
   console.log(areafocusList);
-  console.log(boxHeight-20 );
+  console.log(boxHeight - 20);
   console.log(areafocusList - 20);
 
   $("#map").height(boxHeight - 20);
   $("#areas2focus_list").height(areafocusList - 20);
+  $(".nav-tabs-custom>.tab-content").height(boxHeight - 20);
 
 };
 
