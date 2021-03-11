@@ -364,7 +364,7 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   useShinyjs(),
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-  tags$head(includeCSS("styles.css")),
+  tags$head(includeCSS("styles.css"), includeHTML("google-analytics.html")),
   tags$script(src='socket_timeout.js'),
   #tags$head(HTML("<title> VCSEP Unmet needs platform </title>")),
 
