@@ -6,5 +6,218 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-W79WXXP70S');
+  //G-JJ32M7WFST my link
+  //G-W79WXXP70S vcsep link
   
+  // which pages are visited:
+  $(document).on('shiny:inputchanged', function(event) {
+    if(event.value == 'unmetneed') {
+    gtag('event', 'which_page_visited', {
+      'event_category': 'page_visit',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+    }
+    
+    else {
+      if(event.value == 'Help') {
+        gtag('event', 'which_page_visited', {
+      'event_category': 'which_page_visited',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+        
+        }
+        
+        else {
+          if(event.value == 'references') {
+        gtag('event', 'which_page_visited', {
+      'event_category': 'which_page_visited',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+        
+          }
+          else {
+            if(event.value == 'home') {
+              gtag('event', 'which_page_visited', {
+              'event_category': 'which_page_visited',
+              'event_label': event.name,
+              'value': event.value
+            }); 
+              //console.log(event.name)
+              //console.log(event.value)
+            
+          }
+          
+        }
+      }
+    }
+  });
+  
+    //sidebar drop down list interaction 
+    $(document).on('shiny:inputchanged', function(event) {
+    
+    if(event.name == 'theme') {
+      gtag('event', 'theme_change', {
+      'event_category': 'which_theme_selected',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+    }
+    
+    else {
+       if(event.name == 'tactical_cell') {
+      gtag('event', 'place_change', {
+      'event_category': 'tactical_cell',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+    }
+     else {
+       if (event.name == 'lad_selected') {
+      gtag('event', 'place_change', {
+      'event_category': 'local_authority',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+      }
+    }
+  }
+});
+
+
+    // Select inputs changed areas to focus
+    $(document).on('shiny:inputchanged', function(event) {
+    
+    if(event.name == 'top_cases_top_change') {
+      gtag('event', 'areas_to_focus', {
+      'event_category': 'which_option_selected',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+    }
+    
+});
+
+
+    // which tabs on unmet need page selected
+    //sidebar drop down list interaction 
+    $(document).on('shiny:inputchanged', function(event) {
+    
+    if(event.value == 'Areas to focus') {
+      gtag('event', 'unmet_need_sub_tabs_visited', {
+      'event_category': 'which_subtab_selected',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+    }
+    
+    else {
+       if(event.value == 'Area demographics') {
+      gtag('event', 'unmet_need_sub_tabs_visited', {
+      'event_category': 'which_subtab_selected',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+    }
+     else {
+       if (event.value == 'Areas at risk') {
+      gtag('event', 'unmet_need_sub_tabs_visited', {
+      'event_category': 'which_subtab_selected',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+      }
+      
+      else {
+         if (event.value == 'Find local resources') {
+      gtag('event', 'unmet_need_sub_tabs_visited', {
+      'event_category': 'which_subtab_selected',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+      }
+      else {
+         if (event.value == 'Areas to focus table') {
+      gtag('event', 'unmet_need_sub_tabs_visited', {
+      'event_category': 'which_subtab_selected',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+          }
+        }
+      }
+    }
+  }
+});
+
+// are people searching charity base
+    $(document).on('shiny:inputchanged', function(event) {
+    
+    if(event.name == 'search_term_search') {
+      gtag('event', 'charitybase_search', {
+      'event_category': 'charity_base_search_used',
+      'event_label': event.name,
+      'value': 'search_carried_out'
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+    }
+
+    });
+    
+    // are people using expansion
+  // are people searching charity base
+    $(document).on('shiny:inputchanged', function(event) {
+    if(event.name == 'expand_search') {
+      gtag('event', 'charitybase_search', {
+      'event_category': 'charity_base_area_expansion',
+      'event_label': event.name,
+      'value': event.value
+    }); 
+      //console.log(event.name)
+      //console.log(event.value)
+    }
+});
+
+ // map interaction
+  //$(':button').on('shiny:click', function(event) {
+  //  console.log(event.name)
+  //  console.log(event.value)
+  //  if(event.name == 'my_easy_button') {
+  //    gtag('event', 'map_interaction', {
+  //    'event_category': 'show_focus_areas',
+  //    'event_label': event.name,
+  //    'value': event.value
+  //  }); 
+  //    console.log(event.name)
+  //    console.log(event.value)
+  //  }
+//});
+
 </script>
