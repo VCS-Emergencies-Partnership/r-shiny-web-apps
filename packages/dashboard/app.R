@@ -1031,21 +1031,27 @@ server = function(input, output, session) {
         div(h4(tags$strong("Last updated:")),
           p("The dashboard was last updated at", last_updated_time, "on", last_updated_date),
           tags$br(),
+          
+          # -- about section ---
           h4(tags$strong('About:')),
-          p("This dashboard helps responders who wish to", tags$strong("target their efforts in areas of highest
-            risk and least capacity to cope with an emergency."), "It also provides estimates of “People at risk”
-              based on demographic characteristics to support influencing and advocacy efforts around emergencies."),
-          p("Users are able to", tags$strong("select the type of emergency"), "they are responding to and 
-            the",  tags$strong("“Areas at risk” map"), "and", tags$strong("“Areas to focus” list"), "will update to show 
-            the resilience (vulnerability vs capacity to cope) or a specific vulnerability (i.e clinical) of the area selected."),
-            
-            p("The vulnerability and resilience indicies were developed by the British Red Cross. 
-              Read more about how the reslience index and vulnerability index were created either in the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'help section here')),
-              "or", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "here."))),
+          p("This tool highlights areas that are in greatest need across a range of emergencies and gives information to support outreach in those areas (e.g. people at risk by demographic). 
+            It has been designed with and for members of the Voluntary and Community Emergencies Sector Partnership to inform their emergency preparedness and response efforts, who’s four key questions are:"),
+          
+          tags$li("Where is the need for support greatest?"),
+          tags$li("Who is in greatest need of support?"),
+          tags$li("What type of support do they need?"),
+          tags$li("How are those people and areas being supported?"),
+          tags$br(),
+          
+          p("We utilise a range of sources (see references tab) to answer these questions, including the",
+            tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "British Red Cross Resilience Index,"),
+            "which ranks the resilience of an area based on its vulnerability to a range of factors against an areas ability to cope."),
+          
           tags$br(),
           h4(tags$strong("Areas to focus:")),
              p("Highlights 10 areas where an emergency is most prevalent in England and by region. 
-               It is intended to support our multiagency network to focus their outreach and response efforts in those areas that are most impacted by an emergency."),
+               It is intended to support our multiagency network to focus their outreach and response efforts in those areas that are most impacted by an emergency.
+               To view the the resilience of just these areas select the toggle below the zoom buttons on the map."),
             h5(tags$strong("Covid-19:", style="color:blue")),
                p("View the top 10 areas with either the highest number of cases per 100,000 or an area with the greatest  % change in total covid cases over a rolling 7 day period. 
                 This current relevant 7 day period is up to:", covid_data_date), 
@@ -1070,7 +1076,8 @@ server = function(input, output, session) {
             the most historical flood incidents per 10,000 people, or with the highest proportion of population living in flood risk areas."),
           p(tags$li(tags$strong('Flood warnings and alerts:'), "local authority districts are deemed to be affected by a flood alert or warning if the predicted most extreme scenario (represented by the flood outline provided by the environment agency) overlaps their local authority district. 
                     On occasions the flood outline shown in the app may not appear to overlay a local authority. This is to help the performance of the app by reducing the complexity of the flood outline thereby reducing the file size.
-                    When there are no flood warnings active the areas are ordered by number of historical flood incidents per 10,000 people."),
+                    When there are no flood warnings active the areas are ordered by number of historical flood incidents per 10,000 people.", 
+                    tags$strong("Caveat:"), "- currently these warnings are updated daily as opposed to every 15 minutes as per the environment agency - we aim to change this in an upcoming release."),
             tags$br(),
             tags$li(tags$strong("Historical flood events per 10,000 people:"), "Historical flood incidents are determined by the number of Fire and Rescue Service call outs to flooding incidents."),
             tags$br(),
@@ -1085,19 +1092,40 @@ server = function(input, output, session) {
             tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "here."),
             "The areas at greater than 1% chance of flooding were defined by the",tags$a(href="https://data.gov.uk/dataset/bad20199-6d39-4aad-8564-26a46778fd94/risk-of-flooding-from-rivers-and-sea", target="_blank", "environment agency risk of flooding from rivers and sea"),"This representation of the proportion of people living in flood risk areas is based upon the BRC resilience index, released under the GLP-v3 licence. The code is available",
             tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "here.")),
-          tags$br(),
-            
-          
-          
-          
-          h4(tags$strong("Interpreting the map:")), 
-            p("For both emergency themes available so far the base layers of the map display either the", tags$strong(tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index')), "or",
-            "the", tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index.")),
-            "It is possible to change the layer shown on the map by selecting the button in the corner of the map to change what information is displayed."),
             tags$br(),
           
-          p(tags$strong("Covid-19 emergency map layers:", style="color:blue"), 
-            tags$br(), 
+          
+          
+          h4(tags$strong("Areas at Risk - interpreting the map:")), 
+          tags$br(),
+          p(img(src = "bivar-legend_v2.png", width = 225, style="float:left;text-align:left;vertical-align:middle;"),
+          "We use a map to answer the key question of “where is the need greatest”. 
+            You’ll notice a legend in the bottom left corner of the map, with 9 different colours
+            to show the varying levels of greatest need. The colour pallet has been specifically chosen 
+            to a) avoid confusing with Red, Amber and Green which is typically used to assess performance,
+            and b) as it is a recommended", 
+            tags$a(href="https://nowosad.github.io/post/cbc-bp2/", target="_blank", "color-blind friendly pallet.")),
+          
+         p(
+         "Darker colours reflect those areas in greater need of support, with Black highlighting areas thought to be in greatest need. 
+           By this we mean, what areas have the most vulnerability to an emergency with the least capacity to cope, should an emergency occur." 
+           
+          ),#For each emergency, the areas flagged as being in greatest need will differ, depending on the indicators chosen to understand vulnerability and resilience.",
+         tags$br(),
+         tags$br(),
+           
+          h4(tags$strong("Map layers:")), 
+          p(tags$strong("Covid-19 emergency map:", style="color:blue"),
+            tags$br(),
+            "The British Red Cross developed a series of indices to identify UK areas vulnerable 
+            to the effects of COVID-19, and a resilience index which overlays capacity to cope.
+            Using statistical modelling of data from a range of", tags$a(hrefe="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/output/metadata_vi.csv", target="_blank", "(mostly open) sources,"), "the indices
+            provide an area rating, which is then used to map areas of need. 
+            Users can also explore different layers of the map based on vulnerability type, 
+            by selecting the button in the top right corner of the map."),
+            p("These layers include:",
+              tags$br(),
+          
             tags$li(tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.'), 
                     "This shows the vulnerability vs the capacity to cope with an emergency of local authority districts in England. 
                     The ", tags$strong("black", style="color:#000000"), "highlights those areas that are", tags$strong("most in need - highest vulnerability and least capacity to cope." , style="color:#000000")), 
@@ -5663,6 +5691,8 @@ observe({
       }
       
       else {
+        # sometimes this hasn't been initiated so causes error
+        if(is.null(input$lad_selected)) {
         # search either whole tactical cell or all of engalnd
         bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
         # create search of charity database 
@@ -5679,7 +5709,27 @@ observe({
         
         output$expand_search_needed <- renderUI({
         })
-      }
+        }
+        
+        else {
+            # search either whole tactical cell or all of engalnd
+            bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+            # create search of charity database 
+            output$search_needed <- renderUI({
+              # search bar
+              searchInput(inputId = "search_term", 
+                          label = "Search CharityBase for charities with a particular purpose",
+                          placeholder = 'i.e emergency response',
+                          btnSearch = icon("search"), 
+                          btnReset = icon("remove"), 
+                          value='',
+                          width = "100%")
+            })
+            
+            output$expand_search_needed <- renderUI({
+            })
+          }
+        } 
       
       
    
