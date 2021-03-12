@@ -26,8 +26,12 @@
 { "type": "Feature", "properties": { "floodAreaID": "122WAF936" }, "geometry": { "type": "Point", "coordinates": [ -1.843035293650337, 54.396550611964521 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "011FWFNC6KC" }, "geometry": { "type": "Point", "coordinates": [ -3.152303880919684, 54.600640093125747 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "122WAF937" }, "geometry": { "type": "Point", "coordinates": [ -1.537590525935153, 54.298670115651383 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "011WAFPC" }, "geometry": { "type": "Point", "coordinates": [ -2.979831820963259, 54.783399151405661 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "011WAFUE" }, "geometry": { "type": "Point", "coordinates": [ -2.463255328867758, 54.546069542348626 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "122WAF940" }, "geometry": { "type": "Point", "coordinates": [ -1.449148189172727, 54.129177730541002 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "011WAFLE" }, "geometry": { "type": "Point", "coordinates": [ -2.927515248582514, 54.909040867293044 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "122WAF942" }, "geometry": { "type": "Point", "coordinates": [ -1.977407943618405, 54.072745010433181 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "122WAT957" }, "geometry": { "type": "Point", "coordinates": [ 0.048758477373762, 53.652219030174273 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "031WAF103" }, "geometry": { "type": "Point", "coordinates": [ -2.661802400852113, 52.665198366691712 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "122WAF947" }, "geometry": { "type": "Point", "coordinates": [ -1.112843647894906, 53.822420153366842 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "122WAF946" }, "geometry": { "type": "Point", "coordinates": [ -1.1484945612109, 53.977896767186067 ] } },
@@ -36,7 +40,10 @@
 { "type": "Feature", "properties": { "floodAreaID": "054WATBT3" }, "geometry": { "type": "Point", "coordinates": [ 1.619769681559488, 52.488144784606277 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "054WATBT2" }, "geometry": { "type": "Point", "coordinates": [ 1.578573916370916, 52.584052090625534 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "122WAF938" }, "geometry": { "type": "Point", "coordinates": [ -1.366803518152454, 54.303547612132206 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "122FWF712" }, "geometry": { "type": "Point", "coordinates": [ -1.081363957093626, 53.948621291111671 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "031WAF216" }, "geometry": { "type": "Point", "coordinates": [ -2.372133641279341, 51.788807795098244 ] } }
+{ "type": "Feature", "properties": { "floodAreaID": "031WAF216" }, "geometry": { "type": "Point", "coordinates": [ -2.372133641279341, 51.788807795098244 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "112FWTPOR01" }, "geometry": { "type": "Point", "coordinates": [ -3.59987488061468, 51.219299760874179 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "112WATSOM3" }, "geometry": { "type": "Point", "coordinates": [ -2.913866024217675, 51.198416330106014 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "112WATSOM2" }, "geometry": { "type": "Point", "coordinates": [ -2.992834396307738, 51.25735642626514 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "113WACT2A" }, "geometry": { "type": "Point", "coordinates": [ -4.154659355631669, 51.077319727045314 ] } }
 ]
 }
