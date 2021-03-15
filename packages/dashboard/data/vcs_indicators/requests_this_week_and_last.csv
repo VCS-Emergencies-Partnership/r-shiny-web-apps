@@ -21,7 +21,7 @@ E06000019,Central,NA,NA
 E06000020,Central,NA,NA
 E06000021,Central,NA,NA
 E06000022,South and the Channel Islands,NA,NA
-E06000023,South and the Channel Islands,NA,1
+E06000023,South and the Channel Islands,NA,NA
 E06000024,South and the Channel Islands,NA,NA
 E06000025,South and the Channel Islands,NA,NA
 E06000026,South and the Channel Islands,NA,1
@@ -31,7 +31,7 @@ E06000030,South and the Channel Islands,NA,NA
 E06000031,Central,NA,NA
 E06000032,South East,NA,NA
 E06000033,South East,NA,NA
-E06000034,South East,NA,1
+E06000034,South East,NA,NA
 E06000035,South East,NA,NA
 E06000036,South and the Channel Islands,NA,NA
 E06000037,South and the Channel Islands,NA,NA
@@ -78,7 +78,7 @@ E07000037,Central,NA,NA
 E07000038,Central,NA,NA
 E07000039,Central,NA,NA
 E07000040,South and the Channel Islands,NA,NA
-E07000041,South and the Channel Islands,NA,2
+E07000041,South and the Channel Islands,NA,NA
 E07000042,South and the Channel Islands,NA,NA
 E07000043,South and the Channel Islands,NA,NA
 E07000044,South and the Channel Islands,NA,NA
@@ -93,7 +93,7 @@ E07000064,South East,NA,NA
 E07000065,South East,NA,NA
 E07000066,South East,NA,NA
 E07000067,South East,NA,NA
-E07000069,South East,NA,1
+E07000069,South East,NA,NA
 E07000068,South East,NA,NA
 E07000070,South East,NA,NA
 E07000071,South East,NA,NA
@@ -101,7 +101,7 @@ E07000072,South East,NA,NA
 E07000073,South East,NA,NA
 E07000074,South East,NA,NA
 E07000075,South East,1,NA
-E07000076,South East,1,NA
+E07000076,South East,NA,1
 E07000077,South East,NA,NA
 E07000078,South and the Channel Islands,NA,NA
 E07000079,South and the Channel Islands,NA,NA
@@ -270,7 +270,7 @@ E08000021,North,NA,NA
 E08000022,North,NA,NA
 E08000023,North,NA,NA
 E08000024,North,NA,NA
-E08000025,Central,NA,3
+E08000025,Central,NA,NA
 E08000026,Central,NA,NA
 E08000027,Central,NA,NA
 E08000028,Central,NA,NA
@@ -313,6 +313,6 @@ E09000027,London,NA,NA
 E09000028,London,1,NA
 E09000029,London,NA,NA
 E09000030,London,NA,NA
-E09000031,London,1,1
+E09000031,London,1,2
 E09000032,London,NA,NA
 E09000033,London,NA,NA
