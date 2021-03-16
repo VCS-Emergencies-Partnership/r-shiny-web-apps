@@ -259,6 +259,27 @@ total_type_of_warning_per_aurthority_trans <- pivot_wider(total_type_of_warning_
 # join to flooding areas to focus 
 flooding_area2focus <- left_join(flooding_area2focus, total_type_of_warning_per_aurthority_trans, by='LAD19NM', keep=F)
 
+# ensure always have columns for all alerts
+# if column not there
+if(!"Total live severe Flood warning" %in% colnames(flooding_area2focus)) {
+  flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood warning' = 0)
+}
+
+if(!"Total live Flood warning" %in% colnames(flooding_area2focus)) {
+  flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood warning' = 0)
+}
+
+if(!"Total live Flood alert" %in% colnames(flooding_area2focus)) {
+  flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood alert' = 0)
+}
+
+# ensure order is consistent
+flooding_area2focus <- flooding_area2focus %>% relocate(`Total live severe Flood warning`, `Total live Flood warning`, -`Total live Flood alert`, .after=`Flood incidents quintile`) %>%
+  mutate(`Total live severe Flood warning`=replace_na(`Total live severe Flood warning`,0)) %>%
+  mutate(`Total live Flood warning`=replace_na(`Total live Flood warning`,0)) %>%
+  mutate(`Total live Flood alert`=replace_na(`Total live Flood alert`,0))
+
+
 # join dfs 
 flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
@@ -2249,7 +2270,8 @@ server = function(input, output, session) {
           # order based on flood warnings
           if(store_rank_wanted$rank_wanted_flooding == 'Flood warnings/alerts') {
             
-            flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Total live Flood warning`,-`Total live Flood alert`) %>%
+            
+            flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Total live severe Flood warning`, -`Total live Flood warning`,-`Total live Flood alert`, -`Flooding incidents per 10,000 people`) %>%
               mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
               mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
               rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
@@ -2261,6 +2283,7 @@ server = function(input, output, session) {
               mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
                                                                 TRUE ~ (as.character(.$`% people in flood risk areas`))))
             
+        
             
           }
           
@@ -5308,25 +5331,25 @@ observe({
                 output$areas2focus_list <- renderUI({
                   div( hr(),
                        # top 
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], "(", tags$strong(top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], "(", tags$strong(top102show[2,8], "warnings,", style="color:red"), tags$strong(top102show[2,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), paste0(top102show[2,1],":"), tags$strong(top102show[2,7], "severe warnings,", top102show[2,8], "warnings,", style="color:red"), tags$strong(top102show[2,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1], "(", tags$strong(top102show[3,8], "warnings,", style="color:red"), tags$strong(top102show[3,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), paste0(top102show[3,1],":"), tags$strong(top102show[3,7], "severe warnings,", top102show[3,8], "warnings,", style="color:red"), tags$strong(top102show[3,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], "(", tags$strong(top102show[4,8], "warnings,", style="color:red"), tags$strong(top102show[4,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), paste0(top102show[4,1],":"), tags$strong(top102show[4,7], "severe warnings,", top102show[4,8], "warnings,", style="color:red"), tags$strong(top102show[4,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], "(", tags$strong(top102show[5,8], "warnings,", style="color:red"), tags$strong(top102show[5,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), paste0(top102show[5,1],":"), tags$strong(top102show[5,7], "severe warnings,", top102show[5,8], "warnings,", style="color:red"), tags$strong(top102show[5,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], "(", tags$strong(top102show[6,8], "warnings,", style="color:red"), tags$strong(top102show[6,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), paste0(top102show[6,1],":"), tags$strong(top102show[6,7], "severe warnings,", top102show[6,8], "warnings,", style="color:red"), tags$strong(top102show[6,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], "(", tags$strong(top102show[7,8], "warnings,", style="color:red"), tags$strong(top102show[7,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), paste0(top102show[7,1],":"), tags$strong(top102show[7,7], "severe warnings,", top102show[7,8], "warnings,", style="color:red"), tags$strong(top102show[7,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], "(", tags$strong(top102show[8,8], "warnings,", style="color:red"), tags$strong(top102show[8,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), paste0(top102show[8,1],":"), tags$strong(top102show[8,7], "severe warnings,", top102show[8,8], "warnings,", style="color:red"), tags$strong(top102show[8,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], "(", tags$strong(top102show[9,8], "warnings,", style="color:red"), tags$strong(top102show[9,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), paste0(top102show[9,1],":"), tags$strong(top102show[9,7], "severe warnings,", top102show[9,8], "warnings,", style="color:red"), tags$strong(top102show[9,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], "(", tags$strong(top102show[10,8], "warnings,", style="color:red"), tags$strong(top102show[10,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), paste0(top102show[10,1],":"), tags$strong(top102show[10,7], "severe warnings,", top102show[10,8], "warnings,", style="color:red"), tags$strong(top102show[10,9],"alerts", style='color:orange')),
                        hr()
                   )
                   
@@ -5350,7 +5373,7 @@ observe({
                 output$areas2focus_list <- renderUI({
                   div( hr(),
                        # top 
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], "(", tags$strong(top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange')),
                        hr()
                   )
                   
@@ -5387,25 +5410,25 @@ observe({
                   output$areas2focus_list <- renderUI({
                     div( hr(),
                          # top 
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,9], ","), top102show[1,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,10], ","), top102show[1,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,9], ","), top102show[2,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,10], ","), top102show[2,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,9], ","), top102show[3,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,10], ","), top102show[3,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,9], ","), top102show[4,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,10], ","), top102show[4,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,9], ","), top102show[5,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,10], ","), top102show[5,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,9], ","), top102show[6,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,10], ","), top102show[6,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,9], ","), top102show[7,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,10], ","), top102show[7,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,9], ","), top102show[8,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,10], ","), top102show[8,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,9], ","), top102show[9,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,10], ","), top102show[9,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,9], ","), top102show[10,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,10], ","), top102show[10,3],"people)"),
                     )
                     
                   })
@@ -5431,7 +5454,7 @@ observe({
                   output$areas2focus_list <- renderUI({
                     div( hr(),
                          # top 
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,9], ","), top102show[1,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,10], ","), top102show[1,3],"people)"),
                          hr()
                     )
                     
