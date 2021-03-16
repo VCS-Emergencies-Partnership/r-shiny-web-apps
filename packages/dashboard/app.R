@@ -259,7 +259,29 @@ total_type_of_warning_per_aurthority_trans <- pivot_wider(total_type_of_warning_
 # join to flooding areas to focus 
 flooding_area2focus <- left_join(flooding_area2focus, total_type_of_warning_per_aurthority_trans, by='LAD19NM', keep=F)
 
-# join dfs 
+
+# ensure always have columns for all alerts
+# if column not there
+if(!"Total live severe Flood warning" %in% colnames(flooding_area2focus)) {
+  flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood warning' = 0)
+}
+
+if(!"Total live Flood warning" %in% colnames(flooding_area2focus)) {
+  flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood warning' = 0)
+}
+
+if(!"Total live Flood alert" %in% colnames(flooding_area2focus)) {
+  flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood alert' = 0)
+}
+
+# ensure order is consistent
+flooding_area2focus <- flooding_area2focus %>% relocate(`Total live severe Flood warning`, `Total live Flood warning`, -`Total live Flood alert`, .after=`Flood incidents quintile`) %>%
+  mutate(`Total live severe Flood warning`=replace_na(`Total live severe Flood warning`,0)) %>%
+  mutate(`Total live Flood warning`=replace_na(`Total live Flood warning`,0)) %>%
+  mutate(`Total live Flood alert`=replace_na(`Total live Flood alert`,0))
+
+
+# join dfs for mapping
 flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
                                          TacticalCell == 'Central' ~ 'Midlands & East',
@@ -602,58 +624,174 @@ body <- dashboardBody(
                                            
                                      uiOutput('top10options', height='20px'))),
                                      
+                                     # top 10 options
+                                     fluidRow(width=NULL,
+                                     column(width=12, style = "height:475px; overflow-y: scroll;overflow-x: scroll;",
                                      fluidRow(width=NULL,
                                               column(width=12,
+                                                     uiOutput('top_10_1'))),
+                                              # column(width=2,
+                                              #       actionBttn('top_10_1_select',
+                                              #                  label='top_10_1_select',
+                                              #                  style='material-circle',
+                                              #                  color="primary",
+                                              #                  size='xs',
+                                              #                  icon = icon('fas fa-map-pin')))),
+                                     fluidRow(width=NULL,
+                                              column(width=10,
+                                                     uiOutput('top_10_2')),
+                                              column(width=2, 
+                                                     actionBttn('top_10_2_select',
+                                                                label='top_10_2_select',
+                                                                style='material-circle',
+                                                                color="primary",
+                                                                size='xs',
+                                                                icon = icon('fas fa-map-pin')))),
+                                     fluidRow(width=NULL,
+                                              column(width=10,
+                                                     uiOutput('top_10_3')),
+                                              column(width=2,
+                                                     actionBttn('top_10_3_select',
+                                                                label='top_10_3_select',
+                                                                style='material-circle',
+                                                                color="primary",
+                                                                size='xs',
+                                                                icon = icon('fas fa-map-pin')))),
+                                     fluidRow(width=NULL,
+                                              column(width=10, 
+                                                     uiOutput('top_10_4')),
+                                              column(width=2,
+                                                     actionBttn('top_10_4_select',
+                                                                label='top_10_4_select',
+                                                                style='material-circle',
+                                                                color="primary",
+                                                                size='xs',
+                                                                icon = icon('fas fa-map-pin')))),
+                                     fluidRow(width=NULL,
+                                              column(width=10,
+                                                     uiOutput('top_10_5')),
+                                              column(width=2,
+                                                     actionBttn('top_10_5_select',
+                                                                label='top_10_5_select',
+                                                                style='material-circle',
+                                                                color="primary",
+                                                                size='xs',
+                                                                icon = icon('fas fa-map-pin')))),
+                                     fluidRow(width=NULL,
+                                              column(width=10,
+                                                     uiOutput('top_10_6')),
+                                              column(width=2,
+                                                     actionBttn('top_10_6_select',
+                                                                label='top_10_6_select',
+                                                                style='material-circle',
+                                                                color="primary",
+                                                                size='xs',
+                                                                icon = icon('fas fa-map-pin')))),
+                                     fluidRow(width=NULL,
+                                              column(width=10,
+                                                     uiOutput('top_10_7')),
+                                              column(width=2,
+                                                     actionBttn('top_10_7_select',
+                                                                label='top_10_7_select',
+                                                                style='material-circle',
+                                                                color="primary",
+                                                                size='xs',
+                                                                icon = icon('fas fa-map-pin')))),
+                                     fluidRow(width=NULL,
+                                              column(width=10,
+                                                     uiOutput('top_10_8')),
+                                              column(width=2,
+                                                     actionBttn('top_10_8_select',
+                                                                label='top_10_8_select',
+                                                                style='material-circle',
+                                                                color="primary",
+                                                                size='xs',
+                                                                icon = icon('fas fa-map-pin')))),
+                                     fluidRow(width=NULL,
+                                              column(width=10,
+                                                     uiOutput('top_10_9')),
+                                              column(width=2,
+                                                     actionBttn('top_10_9_select',
+                                                                label='top_10_9_select',
+                                                                style='material-circle',
+                                                                color="primary",
+                                                                size='xs',
+                                                                icon = icon('fas fa-map-pin')))),
+                                     fluidRow(width=NULL,
+                                              column(width=10,
+                                                     uiOutput('top_10_10')),
+                                              column(width=2,
+                                                     actionBttn('top_10_10_select',
+                                                                label='top_10_10_select',
+                                                                style='material-circle',
+                                                                color="primary",
+                                                                size='xs',
+                                                                icon = icon('fas fa-map-pin'))))
+                                     ))
+                                     
+                                     ),
+                                                     
+                                                     
                                      #uiOutput("areas2focus_list",
                                      #style = "height:475px; overflow-y: scroll;overflow-x: scroll;"),
-                                     navPills(
-                                       id = "top_10s",
-                                       navPillsItem(
-                                         left = uiOutput('top_10_1') 
-                                         #color = "green",
-                                         #right = 10
-                                       ),
-                                       navPillsItem(
-                                         left = uiOutput('top_10_2') 
-                                         #color = "red",
-                                       ),
-                                       navPillsItem(
-                                         left = uiOutput('top_10_3')
-                                         #color = "green",
-                                         #right = 10
-                                       ),
-                                       navPillsItem(
-                                         left = uiOutput('top_10_4')
-                                         #color = "red",
-                                       ),
-                                       navPillsItem(
-                                         left = uiOutput('top_10_5') 
-                                         #color = "green",
-                                         #right = 10
-                                       ),
-                                       navPillsItem(
-                                         left = uiOutput('top_10_6') 
-                                         #color = "red",
-                                       ),
-                                       navPillsItem(
-                                         left = uiOutput('top_10_7')
-                                         #color = "green",
-                                         #right = 10
-                                       ),
-                                       navPillsItem(
-                                         left = uiOutput('top_10_8')
-                                         #color = "red",
-                                       ),
-                                       navPillsItem(
-                                         left = uiOutput('top_10_9') 
-                                         #color = "green",
-                                         #right = 10
-                                       ),
-                                       navPillsItem(
-                                         left = uiOutput('top_10_10') 
-                                         #color = "red",
-                                       )
-                                       )))),
+                                     # navPills(
+                                     #   id = "top_10s",
+                                     #   navPillsItem(
+                                     #     left = uiOutput('top_10_1'),
+                                     #     selected=F
+                                     #     #color = "green",
+                                     #     #right = 10
+                                     #   ),
+                                     #   navPillsItem(
+                                     #     left = uiOutput('top_10_2'),
+                                     #     selected=F
+                                     #     #color = "red",
+                                     #   ),
+                                     #   navPillsItem(
+                                     #     left = uiOutput('top_10_3'),
+                                     #     selected=F
+                                     #     #color = "green",
+                                     #     #right = 10
+                                     #   ),
+                                     #   navPillsItem(
+                                     #     left = uiOutput('top_10_4'),
+                                     #     selected=F
+                                     #     #color = "red",
+                                     #   ),
+                                     #   navPillsItem(
+                                     #     left = uiOutput('top_10_5'),
+                                     #     selected=F
+                                     #     #color = "green",
+                                     #     #right = 10
+                                     #   ),
+                                     #   navPillsItem(
+                                     #     left = uiOutput('top_10_6'),
+                                     #     selected=F
+                                     #     #color = "red",
+                                     #   ),
+                                     #   navPillsItem(
+                                     #     left = uiOutput('top_10_7'),
+                                     #     selected=F
+                                     #     #color = "green",
+                                     #     #right = 10
+                                     #   ),
+                                     #   navPillsItem(
+                                     #     left = uiOutput('top_10_8'),
+                                     #     selected=F
+                                     #     #color = "red",
+                                     #   ),
+                                     #   navPillsItem(
+                                     #     left = uiOutput('top_10_9'),
+                                     #     selected=F
+                                     #     #color = "green",
+                                     #     #right = 10
+                                     #   ),
+                                     #   navPillsItem(
+                                     #     left = uiOutput('top_10_10'),
+                                     #     selected=F
+                                     #     #color = "red",
+                                     #   )
+                                     #   )))),
                             tabPanel("Area demographics", 
                           # multi columned box - bame row
                           # -- shielding row ---
@@ -2278,11 +2416,12 @@ server = function(input, output, session) {
         # arrange so areas to focus table follows list
         if (store_rank_wanted$rank_wanted_flooding == 'Historical flood incidents per 10,000') {
         
-          flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Flooding incidents per 10,000 people`) %>%
+          flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Total live severe Flood warning`, -`Total live Flood warning`,-`Total live Flood alert`, -`Flooding incidents per 10,000 people`) %>%
             mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
             mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
             rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
             select(-`Vulnerability quintile`, -`Flood risk quintile`, -`Flood incidents quintile`)
+          
           
           flooding_cases2volunteers <- flooding_lads_in_tc %>% 
               arrange( -`Flooding incidents per 10,000 people`) %>%
@@ -5193,43 +5332,51 @@ observe({
       #glimpse(top102show)
       output$top_10_1 <- renderUI({
         #paste("1.", top102show[1,1], "-", top102show[1,3], "per 100k,", top102show[1,4], "cases,", top102show[1,7], sep=" ")
-        p(style='margin-top:-10px;margin-bottom:-5px',tags$strong('1.'), top102show[1,1], ":", paste0( top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])))
+        div(
+          p(tags$strong('1.'), top102show[1,1], ":", paste0( top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])),
+        actionBttn('top_10_1_select',
+                   label='top_10_1_select',
+                   style='material-circle',
+                   color="primary",
+                   size='xs',
+                   icon = icon('fas fa-map-pin'))))
       })
-      
+      #style='margin-top:-10px;margin-bottom:-5px'
+      #style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;'
       output$top_10_2 <- renderUI({
-        p(style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,3]), "per 100k,", top102show[2,4], "cases,", tags$strong(top102show[2,7], style = paste("color:", top102show[2,6])), ")")
+        p(tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,3]), "per 100k,", top102show[2,4], "cases,", tags$strong(top102show[2,7], style = paste("color:", top102show[2,6])), ")")
       })
-      
+
       output$top_10_3 <- renderUI({
-        p(style='margin-top:-10px;margin-bottom:-5px;margin-left:-5px;padding-right:-10px;',tags$strong('3.'), top102show[3,1],paste0( "(", top102show[3,3]), "per 100k,", top102show[3,4], "cases,", tags$strong(top102show[3,7], style = paste("color:", top102show[3,6])), ")")
+        p(tags$strong('3.'), top102show[3,1],paste0( "(", top102show[3,3]), "per 100k,", top102show[3,4], "cases,", tags$strong(top102show[3,7], style = paste("color:", top102show[3,6])), ")")
       })
-      
+
       output$top_10_4 <- renderUI({
-        p(style='margin-top:-10px;margin-bottom:-5px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,3]), "per 100k,", top102show[4,4], "cases,", tags$strong(top102show[4,7], style = paste("color:", top102show[4,6])), ")")
+        p(tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,3]), "per 100k,", top102show[4,4], "cases,", tags$strong(top102show[4,7], style = paste("color:", top102show[4,6])), ")")
       })
-      
+
       output$top_10_5 <- renderUI({
-        p(style='margin-top:-10px;margin-bottom:-5px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,3]), "per 100k,", top102show[5,4], "cases,", tags$strong(top102show[5,7], style = paste("color:", top102show[5,6])), ")")
+        p(tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,3]), "per 100k,", top102show[5,4], "cases,", tags$strong(top102show[5,7], style = paste("color:", top102show[5,6])), ")")
       })
-      
+
       output$top_10_6 <- renderUI({
-        p(style='margin-top:-10px;margin-bottom:-5px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,3]), "per 100k,", top102show[6,4], "cases,", tags$strong(top102show[6,7], style = paste("color:", top102show[6,6])), ")")
+        p(tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,3]), "per 100k,", top102show[6,4], "cases,", tags$strong(top102show[6,7], style = paste("color:", top102show[6,6])), ")")
       })
-      
+
       output$top_10_7 <- renderUI({
-        p(style='margin-top:-10px;margin-bottom:-5px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,3]), "per 100k,", top102show[7,4], "cases,", tags$strong(top102show[7,7], style = paste("color:", top102show[7,6])), ")")
+        p(tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,3]), "per 100k,", top102show[7,4], "cases,", tags$strong(top102show[7,7], style = paste("color:", top102show[7,6])), ")")
       })
-      
+
       output$top_10_8 <- renderUI({
-        p(style='margin-top:-10px;margin-bottom:-5px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,3]), "per 100k,", top102show[8,4], "cases,", tags$strong(top102show[8,7], style = paste("color:", top102show[8,6])), ")")
+        p(tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,3]), "per 100k,", top102show[8,4], "cases,", tags$strong(top102show[8,7], style = paste("color:", top102show[8,6])), ")")
       })
-      
+
       output$top_10_9 <- renderUI({
-        p(style='margin-top:-10px;margin-bottom:-5px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,3]), "per 100k,", top102show[9,4], "cases,", tags$strong(top102show[9,7], style = paste("color:", top102show[9,6])), ")")
+        p(tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,3]), "per 100k,", top102show[9,4], "cases,", tags$strong(top102show[9,7], style = paste("color:", top102show[9,6])), ")")
       })
-      
+
       output$top_10_10 <- renderUI({
-        p(style='margin-top:-10px;margin-bottom:-5px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,3]),"per 100k,", top102show[10,4], "cases,", tags$strong(top102show[10,7], style = paste("color:", top102show[10,6])), ")")
+        p(tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,3]),"per 100k,", top102show[10,4], "cases,", tags$strong(top102show[10,7], style = paste("color:", top102show[10,6])), ")")
       })
       
     #   output$areas2focus_list <- renderUI({
@@ -5281,6 +5428,42 @@ observe({
       output$top_10_1 <- renderUI({
         #paste("1.", top102show[1,1], "-", top102show[1,3], "per 100k,", top102show[1,4], "cases,", top102show[1,7], sep=" ")
         p(tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])), ")")
+      })
+      
+      output$top_10_2 <- renderUI({
+       
+      })
+      
+      output$top_10_3 <- renderUI({
+        
+      })
+      
+      output$top_10_4 <- renderUI({
+        
+      })
+      
+      output$top_10_5 <- renderUI({
+        
+      })
+      
+      output$top_10_6 <- renderUI({
+       
+      })
+      
+      output$top_10_7 <- renderUI({
+       
+      })
+      
+      output$top_10_8 <- renderUI({
+       
+      })
+      
+      output$top_10_9 <- renderUI({
+        
+      })
+      
+      output$top_10_10 <- renderUI({
+        
       })
       
       
@@ -5402,30 +5585,30 @@ observe({
                 output$areas2focus_list <- renderUI({
                   div( hr(),
                        # top 
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], "(", tags$strong(top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], "(", tags$strong(top102show[2,8], "warnings,", style="color:red"), tags$strong(top102show[2,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), paste0(top102show[2,1],":"), tags$strong(top102show[2,7], "severe warnings,", top102show[2,8], "warnings,", style="color:red"), tags$strong(top102show[2,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1], "(", tags$strong(top102show[3,8], "warnings,", style="color:red"), tags$strong(top102show[3,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), paste0(top102show[3,1],":"), tags$strong(top102show[3,7], "severe warnings,", top102show[3,8], "warnings,", style="color:red"), tags$strong(top102show[3,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], "(", tags$strong(top102show[4,8], "warnings,", style="color:red"), tags$strong(top102show[4,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), paste0(top102show[4,1],":"), tags$strong(top102show[4,7], "severe warnings,", top102show[4,8], "warnings,", style="color:red"), tags$strong(top102show[4,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], "(", tags$strong(top102show[5,8], "warnings,", style="color:red"), tags$strong(top102show[5,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), paste0(top102show[5,1],":"), tags$strong(top102show[5,7], "severe warnings,", top102show[5,8], "warnings,", style="color:red"), tags$strong(top102show[5,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], "(", tags$strong(top102show[6,8], "warnings,", style="color:red"), tags$strong(top102show[6,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), paste0(top102show[6,1],":"), tags$strong(top102show[6,7], "severe warnings,", top102show[6,8], "warnings,", style="color:red"), tags$strong(top102show[6,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], "(", tags$strong(top102show[7,8], "warnings,", style="color:red"), tags$strong(top102show[7,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), paste0(top102show[7,1],":"), tags$strong(top102show[7,7], "severe warnings,", top102show[7,8], "warnings,", style="color:red"), tags$strong(top102show[7,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], "(", tags$strong(top102show[8,8], "warnings,", style="color:red"), tags$strong(top102show[8,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), paste0(top102show[8,1],":"), tags$strong(top102show[8,7], "severe warnings,", top102show[8,8], "warnings,", style="color:red"), tags$strong(top102show[8,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], "(", tags$strong(top102show[9,8], "warnings,", style="color:red"), tags$strong(top102show[9,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), paste0(top102show[9,1],":"), tags$strong(top102show[9,7], "severe warnings,", top102show[9,8], "warnings,", style="color:red"), tags$strong(top102show[9,9],"alerts", style='color:orange')),
                        hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], "(", tags$strong(top102show[10,8], "warnings,", style="color:red"), tags$strong(top102show[10,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), paste0(top102show[10,1],":"), tags$strong(top102show[10,7], "severe warnings,", top102show[10,8], "warnings,", style="color:red"), tags$strong(top102show[10,9],"alerts", style='color:orange')),
                        hr()
                   )
                   
                 })
-             
+               
                 
               }
               
@@ -5444,7 +5627,8 @@ observe({
                 output$areas2focus_list <- renderUI({
                   div( hr(),
                        # top 
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], "(", tags$strong(top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,7],"alerts", style='color:orange'), paste0(")")),
+                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange')),
+                       
                        hr()
                   )
                   
@@ -5481,25 +5665,25 @@ observe({
                   output$areas2focus_list <- renderUI({
                     div( hr(),
                          # top 
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,9], ","), top102show[1,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,10], ","), top102show[1,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,9], ","), top102show[2,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,10], ","), top102show[2,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,9], ","), top102show[3,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,10], ","), top102show[3,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,9], ","), top102show[4,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,10], ","), top102show[4,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,9], ","), top102show[5,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,10], ","), top102show[5,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,9], ","), top102show[6,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,10], ","), top102show[6,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,9], ","), top102show[7,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,10], ","), top102show[7,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,9], ","), top102show[8,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,10], ","), top102show[8,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,9], ","), top102show[9,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,10], ","), top102show[9,3],"people)"),
                          hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,9], ","), top102show[10,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,10], ","), top102show[10,3],"people)"),
                     )
                     
                   })
@@ -5525,7 +5709,7 @@ observe({
                   output$areas2focus_list <- renderUI({
                     div( hr(),
                          # top 
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,9], ","), top102show[1,3],"people)"),
+                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,10], ","), top102show[1,3],"people)"),
                          hr()
                     )
                     
@@ -5563,8 +5747,9 @@ observe({
     }
   })
   
-  observeEvent(input$top_10s, {
-    print(input$top_10s)
+  observeEvent(input$top_10_1_select, {
+    #update local authority select input which will hopefully update everything else. 
+    print('button clicked')
   })
   
   
