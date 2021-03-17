@@ -386,7 +386,7 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   useShinyjs(),
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-  tags$head(includeCSS("styles.css"), includeHTML("google-analytics.html")),
+  tags$head(includeCSS("styles.css")), #includeHTML("google-analytics.html")),
   tags$script(src='socket_timeout.js'),
   #tags$head(HTML("<title> VCSEP Unmet needs platform </title>")),
 
@@ -630,103 +630,33 @@ body <- dashboardBody(
                                      fluidRow(width=NULL,
                                               column(width=12,
                                                      uiOutput('top_10_1'))),
-                                              # column(width=2,
-                                              #       actionBttn('top_10_1_select',
-                                              #                  label='top_10_1_select',
-                                              #                  style='material-circle',
-                                              #                  color="primary",
-                                              #                  size='xs',
-                                              #                  icon = icon('fas fa-map-pin')))),
                                      fluidRow(width=NULL,
                                               column(width=10,
-                                                     uiOutput('top_10_2')),
-                                              column(width=2, 
-                                                     actionBttn('top_10_2_select',
-                                                                label='top_10_2_select',
-                                                                style='material-circle',
-                                                                color="primary",
-                                                                size='xs',
-                                                                icon = icon('fas fa-map-pin')))),
+                                                     uiOutput('top_10_2'))),
                                      fluidRow(width=NULL,
                                               column(width=10,
-                                                     uiOutput('top_10_3')),
-                                              column(width=2,
-                                                     actionBttn('top_10_3_select',
-                                                                label='top_10_3_select',
-                                                                style='material-circle',
-                                                                color="primary",
-                                                                size='xs',
-                                                                icon = icon('fas fa-map-pin')))),
+                                                     uiOutput('top_10_3'))),
                                      fluidRow(width=NULL,
                                               column(width=10, 
-                                                     uiOutput('top_10_4')),
-                                              column(width=2,
-                                                     actionBttn('top_10_4_select',
-                                                                label='top_10_4_select',
-                                                                style='material-circle',
-                                                                color="primary",
-                                                                size='xs',
-                                                                icon = icon('fas fa-map-pin')))),
+                                                     uiOutput('top_10_4'))),
                                      fluidRow(width=NULL,
                                               column(width=10,
-                                                     uiOutput('top_10_5')),
-                                              column(width=2,
-                                                     actionBttn('top_10_5_select',
-                                                                label='top_10_5_select',
-                                                                style='material-circle',
-                                                                color="primary",
-                                                                size='xs',
-                                                                icon = icon('fas fa-map-pin')))),
+                                                     uiOutput('top_10_5'))),
                                      fluidRow(width=NULL,
                                               column(width=10,
-                                                     uiOutput('top_10_6')),
-                                              column(width=2,
-                                                     actionBttn('top_10_6_select',
-                                                                label='top_10_6_select',
-                                                                style='material-circle',
-                                                                color="primary",
-                                                                size='xs',
-                                                                icon = icon('fas fa-map-pin')))),
+                                                     uiOutput('top_10_6'))),
                                      fluidRow(width=NULL,
                                               column(width=10,
-                                                     uiOutput('top_10_7')),
-                                              column(width=2,
-                                                     actionBttn('top_10_7_select',
-                                                                label='top_10_7_select',
-                                                                style='material-circle',
-                                                                color="primary",
-                                                                size='xs',
-                                                                icon = icon('fas fa-map-pin')))),
+                                                     uiOutput('top_10_7'))),
                                      fluidRow(width=NULL,
                                               column(width=10,
-                                                     uiOutput('top_10_8')),
-                                              column(width=2,
-                                                     actionBttn('top_10_8_select',
-                                                                label='top_10_8_select',
-                                                                style='material-circle',
-                                                                color="primary",
-                                                                size='xs',
-                                                                icon = icon('fas fa-map-pin')))),
+                                                     uiOutput('top_10_8'))),
                                      fluidRow(width=NULL,
                                               column(width=10,
-                                                     uiOutput('top_10_9')),
-                                              column(width=2,
-                                                     actionBttn('top_10_9_select',
-                                                                label='top_10_9_select',
-                                                                style='material-circle',
-                                                                color="primary",
-                                                                size='xs',
-                                                                icon = icon('fas fa-map-pin')))),
+                                                     uiOutput('top_10_9'))),
                                      fluidRow(width=NULL,
                                               column(width=10,
-                                                     uiOutput('top_10_10')),
-                                              column(width=2,
-                                                     actionBttn('top_10_10_select',
-                                                                label='top_10_10_select',
-                                                                style='material-circle',
-                                                                color="primary",
-                                                                size='xs',
-                                                                icon = icon('fas fa-map-pin'))))
+                                                     uiOutput('top_10_10')))
                                      ))
                                      
                                      ),
@@ -5332,51 +5262,45 @@ observe({
       #glimpse(top102show)
       output$top_10_1 <- renderUI({
         #paste("1.", top102show[1,1], "-", top102show[1,3], "per 100k,", top102show[1,4], "cases,", top102show[1,7], sep=" ")
-        div(
-          p(tags$strong('1.'), top102show[1,1], ":", paste0( top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])),
-        actionBttn('top_10_1_select',
-                   label='top_10_1_select',
-                   style='material-circle',
-                   color="primary",
-                   size='xs',
-                   icon = icon('fas fa-map-pin'))))
+        #div(
+          p(id='1', tags$strong('1.'), top102show[1,1], ":", paste0( top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])))
       })
       #style='margin-top:-10px;margin-bottom:-5px'
       #style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;'
       output$top_10_2 <- renderUI({
-        p(tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,3]), "per 100k,", top102show[2,4], "cases,", tags$strong(top102show[2,7], style = paste("color:", top102show[2,6])), ")")
+        p(id='2', tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,3]), "per 100k,", top102show[2,4], "cases,", tags$strong(top102show[2,7], style = paste("color:", top102show[2,6])), ")")
       })
 
       output$top_10_3 <- renderUI({
-        p(tags$strong('3.'), top102show[3,1],paste0( "(", top102show[3,3]), "per 100k,", top102show[3,4], "cases,", tags$strong(top102show[3,7], style = paste("color:", top102show[3,6])), ")")
+        p(id='3', tags$strong('3.'), top102show[3,1],paste0( "(", top102show[3,3]), "per 100k,", top102show[3,4], "cases,", tags$strong(top102show[3,7], style = paste("color:", top102show[3,6])), ")")
       })
 
       output$top_10_4 <- renderUI({
-        p(tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,3]), "per 100k,", top102show[4,4], "cases,", tags$strong(top102show[4,7], style = paste("color:", top102show[4,6])), ")")
+        p(id='4', tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,3]), "per 100k,", top102show[4,4], "cases,", tags$strong(top102show[4,7], style = paste("color:", top102show[4,6])), ")")
       })
 
       output$top_10_5 <- renderUI({
-        p(tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,3]), "per 100k,", top102show[5,4], "cases,", tags$strong(top102show[5,7], style = paste("color:", top102show[5,6])), ")")
+        p(id='5', tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,3]), "per 100k,", top102show[5,4], "cases,", tags$strong(top102show[5,7], style = paste("color:", top102show[5,6])), ")")
       })
 
       output$top_10_6 <- renderUI({
-        p(tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,3]), "per 100k,", top102show[6,4], "cases,", tags$strong(top102show[6,7], style = paste("color:", top102show[6,6])), ")")
+        p(id='6', tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,3]), "per 100k,", top102show[6,4], "cases,", tags$strong(top102show[6,7], style = paste("color:", top102show[6,6])), ")")
       })
 
       output$top_10_7 <- renderUI({
-        p(tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,3]), "per 100k,", top102show[7,4], "cases,", tags$strong(top102show[7,7], style = paste("color:", top102show[7,6])), ")")
+        p(id='7', tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,3]), "per 100k,", top102show[7,4], "cases,", tags$strong(top102show[7,7], style = paste("color:", top102show[7,6])), ")")
       })
 
       output$top_10_8 <- renderUI({
-        p(tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,3]), "per 100k,", top102show[8,4], "cases,", tags$strong(top102show[8,7], style = paste("color:", top102show[8,6])), ")")
+        p(id='8', tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,3]), "per 100k,", top102show[8,4], "cases,", tags$strong(top102show[8,7], style = paste("color:", top102show[8,6])), ")")
       })
 
       output$top_10_9 <- renderUI({
-        p(tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,3]), "per 100k,", top102show[9,4], "cases,", tags$strong(top102show[9,7], style = paste("color:", top102show[9,6])), ")")
+        p(id='9', tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,3]), "per 100k,", top102show[9,4], "cases,", tags$strong(top102show[9,7], style = paste("color:", top102show[9,6])), ")")
       })
 
       output$top_10_10 <- renderUI({
-        p(tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,3]),"per 100k,", top102show[10,4], "cases,", tags$strong(top102show[10,7], style = paste("color:", top102show[10,6])), ")")
+        p(id='10', tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,3]),"per 100k,", top102show[10,4], "cases,", tags$strong(top102show[10,7], style = paste("color:", top102show[10,6])), ")")
       })
       
     #   output$areas2focus_list <- renderUI({
@@ -5427,15 +5351,13 @@ observe({
       
       output$top_10_1 <- renderUI({
         #paste("1.", top102show[1,1], "-", top102show[1,3], "per 100k,", top102show[1,4], "cases,", top102show[1,7], sep=" ")
-        p(tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])), ")")
+        p(id='1', tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])), ")")
       })
       
       output$top_10_2 <- renderUI({
-       
       })
       
       output$top_10_3 <- renderUI({
-        
       })
       
       output$top_10_4 <- renderUI({
@@ -5747,10 +5669,44 @@ observe({
     }
   })
   
-  observeEvent(input$top_10_1_select, {
+  #areas2focus_zoom_in = reactiveValues(row_id=NA)
+  
+onclick("1",
+          print('testing')
+  )
+  
+  
+               
     #update local authority select input which will hopefully update everything else. 
-    print('button clicked')
-  })
+    # print('testing'),
+    # 
+    # # Tactical cell lad in
+    # row_wanted <- filtered_areas2focus_list()[1,],
+    # 
+    # print(row_wanted)
+    # 
+    # # lad_choices <- lad_uk2vuln_resilience %>%
+    # #   filter(TacticalCell == tactical_cell_selected$TacticalCell) %>%
+    # #   select('LAD19NM'),
+    # # 
+    # # 
+    # # lad_choices <- sort(as.vector(lad_choices$LAD19NM)),
+    # # lad_choices <- c('All local authorities in region', lad_choices),
+    # # 
+    # # 
+    # # # --- update select input ---
+    # # updateSelectInput(
+    # #   session, "tactical_cell",
+    # #   choices = tactical_cells,
+    # #   selected = tactical_cell_selected$TacticalCell
+    # # ),
+    # # 
+    # # updateSelectInput(session, "lad_selected",
+    # #                   choices = lad_choices,
+    # #                   selected=tactical_cell_selected$LAD19NM)
+    # 
+    # )
+  
   
   
 
