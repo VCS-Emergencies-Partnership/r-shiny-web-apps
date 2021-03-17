@@ -281,6 +281,7 @@ flooding_area2focus <- flooding_area2focus %>% relocate(`Total live severe Flood
   mutate(`Total live Flood alert`=replace_na(`Total live Flood alert`,0))
 
 
+
 # join dfs for mapping
 flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
@@ -2307,7 +2308,8 @@ server = function(input, output, session) {
           # order based on flood warnings
           if(store_rank_wanted$rank_wanted_flooding == 'Flood warnings/alerts') {
             
-            flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Total live Flood warning`,-`Total live Flood alert`) %>%
+            
+            flooding_lads_in_tc <- flooding_area2focus %>% arrange(-`Total live severe Flood warning`, -`Total live Flood warning`,-`Total live Flood alert`, -`Flooding incidents per 10,000 people`) %>%
               mutate(`Flooding incidents per 10,000 people`=round(`Flooding incidents per 10,000 people`,2)) %>%
               mutate(`% people in flood risk areas`=round(`% people in flood risk areas`,2)) %>%
               rename('Local Authority'=LAD19NM, 'Region'=TacticalCell) %>% 
@@ -2319,6 +2321,7 @@ server = function(input, output, session) {
               mutate(`% people in flood risk areas` = case_when(`% people in flood risk areas` == 0.00 ~ '< 0.01',
                                                                 TRUE ~ (as.character(.$`% people in flood risk areas`))))
             
+        
             
           }
           
@@ -5544,7 +5547,6 @@ observe({
                 
                 top102show <- head(flooding_focus_list, 10)
                 
-                
                 output$top_10_1 <- renderUI({
                   p(style='margin-top:10px;margin-bottom:10px',id='top_1', tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange'))
                 })
@@ -5552,7 +5554,6 @@ observe({
                 #style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;'
                 output$top_10_2 <- renderUI({
                   p(style='margin-top:10px;margin-bottom:10px',id='top_2', tags$strong('2.'), paste0(top102show[2,1],":"), tags$strong(top102show[2,7], "severe warnings,", top102show[2,8], "warnings,", style="color:red"), tags$strong(top102show[2,9],"alerts", style='color:orange'))
-                  
                   
                 })
                 
@@ -5669,7 +5670,7 @@ observe({
                   
                   
                 })
-                
+
                 output$top_10_7 <- renderUI({
                   
                   
@@ -5685,7 +5686,6 @@ observe({
                 })
                 
                 output$top_10_10 <- renderUI({
-                  
                   
                 })
                 
@@ -5819,7 +5819,7 @@ observe({
                   })
                   
                   output$top_10_3 <- renderUI({
-                    
+
                     
                   })
                   
