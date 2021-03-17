@@ -626,102 +626,43 @@ body <- dashboardBody(
                                      
                                      # top 10 options
                                      fluidRow(width=NULL,
-                                     column(width=12, style = "height:475px; overflow-y: scroll;overflow-x: scroll;",
-                                     fluidRow(width=NULL,
+                                     column(width=12, style = "height:450px; overflow-y: scroll;overflow-x: scroll;",
+                                    # fluidRow(width=NULL,
+                                    #          column(width=12,
+                                    #                 uiOutput('selected_area'))), 
+                                    fluidRow(width=NULL,
                                               column(width=12,
                                                      uiOutput('top_10_1'))),
                                      fluidRow(width=NULL,
-                                              column(width=10,
+                                              column(width=12,
                                                      uiOutput('top_10_2'))),
                                      fluidRow(width=NULL,
-                                              column(width=10,
+                                              column(width=12,
                                                      uiOutput('top_10_3'))),
                                      fluidRow(width=NULL,
-                                              column(width=10, 
+                                              column(width=12, 
                                                      uiOutput('top_10_4'))),
                                      fluidRow(width=NULL,
-                                              column(width=10,
+                                              column(width=12,
                                                      uiOutput('top_10_5'))),
                                      fluidRow(width=NULL,
-                                              column(width=10,
+                                              column(width=12,
                                                      uiOutput('top_10_6'))),
                                      fluidRow(width=NULL,
-                                              column(width=10,
+                                              column(width=12,
                                                      uiOutput('top_10_7'))),
                                      fluidRow(width=NULL,
-                                              column(width=10,
+                                              column(width=12,
                                                      uiOutput('top_10_8'))),
                                      fluidRow(width=NULL,
-                                              column(width=10,
+                                              column(width=12,
                                                      uiOutput('top_10_9'))),
                                      fluidRow(width=NULL,
-                                              column(width=10,
+                                              column(width=12,
                                                      uiOutput('top_10_10')))
                                      ))
                                      
                                      ),
-                                                     
-                                                     
-                                     #uiOutput("areas2focus_list",
-                                     #style = "height:475px; overflow-y: scroll;overflow-x: scroll;"),
-                                     # navPills(
-                                     #   id = "top_10s",
-                                     #   navPillsItem(
-                                     #     left = uiOutput('top_10_1'),
-                                     #     selected=F
-                                     #     #color = "green",
-                                     #     #right = 10
-                                     #   ),
-                                     #   navPillsItem(
-                                     #     left = uiOutput('top_10_2'),
-                                     #     selected=F
-                                     #     #color = "red",
-                                     #   ),
-                                     #   navPillsItem(
-                                     #     left = uiOutput('top_10_3'),
-                                     #     selected=F
-                                     #     #color = "green",
-                                     #     #right = 10
-                                     #   ),
-                                     #   navPillsItem(
-                                     #     left = uiOutput('top_10_4'),
-                                     #     selected=F
-                                     #     #color = "red",
-                                     #   ),
-                                     #   navPillsItem(
-                                     #     left = uiOutput('top_10_5'),
-                                     #     selected=F
-                                     #     #color = "green",
-                                     #     #right = 10
-                                     #   ),
-                                     #   navPillsItem(
-                                     #     left = uiOutput('top_10_6'),
-                                     #     selected=F
-                                     #     #color = "red",
-                                     #   ),
-                                     #   navPillsItem(
-                                     #     left = uiOutput('top_10_7'),
-                                     #     selected=F
-                                     #     #color = "green",
-                                     #     #right = 10
-                                     #   ),
-                                     #   navPillsItem(
-                                     #     left = uiOutput('top_10_8'),
-                                     #     selected=F
-                                     #     #color = "red",
-                                     #   ),
-                                     #   navPillsItem(
-                                     #     left = uiOutput('top_10_9'),
-                                     #     selected=F
-                                     #     #color = "green",
-                                     #     #right = 10
-                                     #   ),
-                                     #   navPillsItem(
-                                     #     left = uiOutput('top_10_10'),
-                                     #     selected=F
-                                     #     #color = "red",
-                                     #   )
-                                     #   )))),
                             tabPanel("Area demographics", 
                           # multi columned box - bame row
                           # -- shielding row ---
@@ -3535,7 +3476,7 @@ server = function(input, output, session) {
                             lat1 = as.numeric(curr_bbox["ymin"]),
                             lng2 = as.numeric(curr_bbox["xmax"]),
                             lat2 = as.numeric(curr_bbox["ymax"])) %>%
-                addLayersControl(baseGroups = c("Resilience of all local authorities","Resilience of high flood incident areas","Resilience of high flood risk areas"),
+                addLayersControl(baseGroups = c("Resilience of all local authorities"),
                                  overlayGroups = c("Latest flood warnings"),
                                  options= layersControlOptions(collapsed=T))
               
@@ -5205,7 +5146,8 @@ observe({
             #checkbox = TRUE,
             width="100%"
           ),
-          hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-4px"))
+          hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-4px"),
+          tags$br())
           #hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-25px"))
       })
       
@@ -5263,44 +5205,44 @@ observe({
       output$top_10_1 <- renderUI({
         #paste("1.", top102show[1,1], "-", top102show[1,3], "per 100k,", top102show[1,4], "cases,", top102show[1,7], sep=" ")
         #div(
-          p(id='1', tags$strong('1.'), top102show[1,1], ":", paste0( top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])))
+          p(style='margin-top:10px;margin-bottom:10px', id='top_1', tags$strong('1.'), paste0(top102show[1,1], ":"), top102show[1,3], "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])))
       })
       #style='margin-top:-10px;margin-bottom:-5px'
       #style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;'
       output$top_10_2 <- renderUI({
-        p(id='2', tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,3]), "per 100k,", top102show[2,4], "cases,", tags$strong(top102show[2,7], style = paste("color:", top102show[2,6])), ")")
+        p(style='margin-top:10px;margin-bottom:10px',id='top_2', tags$strong('2.'), paste0(top102show[2,1],":"), top102show[2,3], "per 100k,", top102show[2,4], "cases,", tags$strong(top102show[2,7], style = paste("color:", top102show[2,6])))
       })
 
       output$top_10_3 <- renderUI({
-        p(id='3', tags$strong('3.'), top102show[3,1],paste0( "(", top102show[3,3]), "per 100k,", top102show[3,4], "cases,", tags$strong(top102show[3,7], style = paste("color:", top102show[3,6])), ")")
+        p(style='margin-top:10px;margin-bottom:10px',id='top_3', tags$strong('3.'), paste0(top102show[3,1],":"), top102show[3,3], "per 100k,", top102show[3,4], "cases,", tags$strong(top102show[3,7], style = paste("color:", top102show[3,6])))
       })
 
       output$top_10_4 <- renderUI({
-        p(id='4', tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,3]), "per 100k,", top102show[4,4], "cases,", tags$strong(top102show[4,7], style = paste("color:", top102show[4,6])), ")")
+        p(style='margin-top:10px;margin-bottom:10px',id='top_4', tags$strong('4.'), paste0(top102show[4,1],":"), top102show[4,3], "per 100k,", top102show[4,4], "cases,", tags$strong(top102show[4,7], style = paste("color:", top102show[4,6])))
       })
 
       output$top_10_5 <- renderUI({
-        p(id='5', tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,3]), "per 100k,", top102show[5,4], "cases,", tags$strong(top102show[5,7], style = paste("color:", top102show[5,6])), ")")
+        p(style='margin-top:10px;margin-bottom:10px',id='top_5', tags$strong('5.'), paste0(top102show[5,1],":"), top102show[5,3], "per 100k,", top102show[5,4], "cases,", tags$strong(top102show[5,7], style = paste("color:", top102show[5,6])))
       })
 
       output$top_10_6 <- renderUI({
-        p(id='6', tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,3]), "per 100k,", top102show[6,4], "cases,", tags$strong(top102show[6,7], style = paste("color:", top102show[6,6])), ")")
+        p(style='margin-top:10px;margin-bottom:10px',id='top_6', tags$strong('6.'), paste0(top102show[6,1],":"), top102show[6,3], "per 100k,", top102show[6,4], "cases,", tags$strong(top102show[6,7], style = paste("color:", top102show[6,6])))
       })
 
       output$top_10_7 <- renderUI({
-        p(id='7', tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,3]), "per 100k,", top102show[7,4], "cases,", tags$strong(top102show[7,7], style = paste("color:", top102show[7,6])), ")")
+        p(style='margin-top:10px;margin-bottom:10px',id='top_7', tags$strong('7.'), paste0(top102show[7,1],":"),  top102show[7,3], "per 100k,", top102show[7,4], "cases,", tags$strong(top102show[7,7], style = paste("color:", top102show[7,6])))
       })
 
       output$top_10_8 <- renderUI({
-        p(id='8', tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,3]), "per 100k,", top102show[8,4], "cases,", tags$strong(top102show[8,7], style = paste("color:", top102show[8,6])), ")")
+        p(style='margin-top:10px;margin-bottom:10px',id='top_8', tags$strong('8.'), paste0(top102show[8,1],":"),  top102show[8,3], "per 100k,", top102show[8,4], "cases,", tags$strong(top102show[8,7], style = paste("color:", top102show[8,6])))
       })
 
       output$top_10_9 <- renderUI({
-        p(id='9', tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,3]), "per 100k,", top102show[9,4], "cases,", tags$strong(top102show[9,7], style = paste("color:", top102show[9,6])), ")")
+        p(style='margin-top:10px;margin-bottom:10px',id='top_9', tags$strong('9.'), paste0(top102show[9,1],":"), top102show[9,3], "per 100k,", top102show[9,4], "cases,", tags$strong(top102show[9,7], style = paste("color:", top102show[9,6])))
       })
 
       output$top_10_10 <- renderUI({
-        p(id='10', tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,3]),"per 100k,", top102show[10,4], "cases,", tags$strong(top102show[10,7], style = paste("color:", top102show[10,6])), ")")
+        p(style='margin-top:10px;margin-bottom:10px',id='top_10', tags$strong('10.'), paste0(top102show[10,1],":"), top102show[10,3], "per 100k,", top102show[10,4], "cases,", tags$strong(top102show[10,7], style = paste("color:", top102show[10,6])))
       })
       
     #   output$areas2focus_list <- renderUI({
@@ -5349,45 +5291,49 @@ observe({
                                          `% change in covid cases` == 0 ~ paste0(.$`% change in covid cases`,'%'),
                                          `% change in covid cases` < 0 ~ paste0(.$`% change in covid cases`,'%')))
       
+      # -- selected UI -- 
+      
       output$top_10_1 <- renderUI({
         #paste("1.", top102show[1,1], "-", top102show[1,3], "per 100k,", top102show[1,4], "cases,", top102show[1,7], sep=" ")
-        p(id='1', tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])), ")")
+        p(id='selected_1', style='background-color:#f0f0f0;margin-top:10px;margin-bottom:10px;padding-bottom:10px;padding-top:10px',
+           tags$strong(paste0(top102show[1,1], ":"), top102show[1,3], "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6]))))
       })
       
       output$top_10_2 <- renderUI({
+        #p(id='top_2', tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,3]), "per 100k,", top102show[2,4], "cases,", tags$strong(top102show[2,7], style = paste("color:", top102show[2,6])), ")")
       })
       
       output$top_10_3 <- renderUI({
+        #p(id='top_3', tags$strong('3.'), top102show[3,1],paste0( "(", top102show[3,3]), "per 100k,", top102show[3,4], "cases,", tags$strong(top102show[3,7], style = paste("color:", top102show[3,6])), ")")
       })
       
       output$top_10_4 <- renderUI({
-        
+        #p(id='top_4', tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,3]), "per 100k,", top102show[4,4], "cases,", tags$strong(top102show[4,7], style = paste("color:", top102show[4,6])), ")")
       })
       
       output$top_10_5 <- renderUI({
-        
+        #p(id='top_5', tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,3]), "per 100k,", top102show[5,4], "cases,", tags$strong(top102show[5,7], style = paste("color:", top102show[5,6])), ")")
       })
       
       output$top_10_6 <- renderUI({
-       
+        #p(id='top_6', tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,3]), "per 100k,", top102show[6,4], "cases,", tags$strong(top102show[6,7], style = paste("color:", top102show[6,6])), ")")
       })
       
       output$top_10_7 <- renderUI({
-       
+        #p(id='top_7', tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,3]), "per 100k,", top102show[7,4], "cases,", tags$strong(top102show[7,7], style = paste("color:", top102show[7,6])), ")")
       })
       
       output$top_10_8 <- renderUI({
-       
+        #p(id='top_8', tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,3]), "per 100k,", top102show[8,4], "cases,", tags$strong(top102show[8,7], style = paste("color:", top102show[8,6])), ")")
       })
       
       output$top_10_9 <- renderUI({
-        
+        #p(id='top_9', tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,3]), "per 100k,", top102show[9,4], "cases,", tags$strong(top102show[9,7], style = paste("color:", top102show[9,6])), ")")
       })
       
       output$top_10_10 <- renderUI({
-        
+        #p(id='top_10', tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,3]),"per 100k,", top102show[10,4], "cases,", tags$strong(top102show[10,7], style = paste("color:", top102show[10,6])), ")")
       })
-      
       
       # output$areas2focus_list <- renderUI({
       #   div( hr(),
@@ -5428,34 +5374,86 @@ observe({
               })
           
               top102show <- head(flooding_focus_list, 10)
+              
+              output$top_10_1 <- renderUI({
+          
+                p(style='margin-top:10px;margin-bottom:10px',id='top_1',tags$strong('1.'), paste0(top102show[1,1],":"), paste0(top102show[1,6], " incidents per 10K, ", top102show[1,5], " historical floods"))
+                
+                })
+              #style='margin-top:-10px;margin-bottom:-5px'
+              #style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;'
+              output$top_10_2 <- renderUI({
+                p(style='margin-top:10px;margin-bottom:10px',id='top_2',tags$strong('2.'), paste0(top102show[2,1],":"), paste0(top102show[2,6], " incidents per 10K, ", top102show[2,5], " historical floods"))
+                
+                
+              })
+              
+              output$top_10_3 <- renderUI({
+                p(style='margin-top:10px;margin-bottom:10px',id='top_3',tags$strong('3.'), paste0(top102show[3,1],":"), paste0(top102show[3,6], " incidents per 10K, ", top102show[3,5], " historical floods"))
+              
+                })
+              
+              output$top_10_4 <- renderUI({
+                p(style='margin-top:10px;margin-bottom:10px',id='top_4',tags$strong('4.'), paste0(top102show[4,1],":"), paste0(top102show[4,6], " incidents per 10K, ", top102show[4,5], " historical floods"))
+                
+              })
+              
+              output$top_10_5 <- renderUI({
+                p(style='margin-top:10px;margin-bottom:10px',id='top_5',tags$strong('5.'), paste0(top102show[5,1],":"), paste0(top102show[5,6], " incidents per 10K, ", top102show[5,5], " historical floods"))
+                
+              })
+              
+              output$top_10_6 <- renderUI({
+                p(style='margin-top:10px;margin-bottom:10px',id='top_6',tags$strong('6.'), paste0(top102show[6,1],":"), paste0(top102show[6,6], " incidents per 10K, ", top102show[6,5], " historical floods"))
+                
+              })
+              
+              output$top_10_7 <- renderUI({
+                p(style='margin-top:10px;margin-bottom:10px',id='top_7',tags$strong('7.'), paste0(top102show[7,1],":"), paste0(top102show[7,6], " incidents per 10K, ", top102show[7,5], " historical floods"))
+                
+              })
+              
+              output$top_10_8 <- renderUI({
+                p(style='margin-top:10px;margin-bottom:10px',id='top_8',tags$strong('8.'), paste0(top102show[8,1],":"), paste0(top102show[8,6], " incidents per 10K, ", top102show[8,5], " historical floods"))
+              })
+              
+              output$top_10_9 <- renderUI({
+                p(style='margin-top:10px;margin-bottom:10px',id='top_9',tags$strong('9.'), paste0(top102show[9,1],":"), paste0(top102show[9,6], " incidents per 10K, ", top102show[9,5], " historical floods"))
+                
+              })
+              
+              output$top_10_10 <- renderUI({
+                p(style='margin-top:10px;margin-bottom:10px',id='top_10',tags$strong('10.'), paste0(top102show[10,1],":"), paste0(top102show[10,6], " incidents per 10K, ", top102show[10,5], " historical floods"))
+                
+              })
           
           
-              # format text 
-              output$areas2focus_list <- renderUI({
-                div( hr(),
-                  # top 
-                  p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,6], ","), top102show[1,5],"historical floods)"),
-                  hr(),
-                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,6], ","), top102show[2,5],"historical floods)"),
-                 hr(),
-                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,6], ","), top102show[3,5],"historical floods)"),
-                 hr(),
-                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,6], ","), top102show[4,5],"historical floods)"),
-                 hr(),
-                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,6], ","), top102show[5,5],"historical floods)"),
-                 hr(),
-                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,6], ","), top102show[6,5],"historical floods)"),
-                 hr(),
-                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,6], ","), top102show[7,5],"historical floods)"),
-                 hr(),
-                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,6], ","), top102show[8,5],"historical floods)"),
-                 hr(),
-                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,6], ","), top102show[9,5],"historical floods)"),
-                 hr(),
-                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,6], ","), top102show[10,5],"historical floods)"),
-            )
-            
-          })
+          #     # format text 
+          #     output$areas2focus_list <- renderUI({
+          #       div( hr(),
+          #         # top 
+          #         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,6], ","), top102show[1,5],"historical floods)"),
+          #         hr(),
+          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,6], ","), top102show[2,5],"historical floods)"),
+          #        hr(),
+          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,6], ","), top102show[3,5],"historical floods)"),
+          #        hr(),
+          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,6], ","), top102show[4,5],"historical floods)"),
+          #        hr(),
+          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,6], ","), top102show[5,5],"historical floods)"),
+          #        hr(),
+          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,6], ","), top102show[6,5],"historical floods)"),
+          #        hr(),
+          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,6], ","), top102show[7,5],"historical floods)"),
+          #        hr(),
+          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,6], ","), top102show[8,5],"historical floods)"),
+          #        hr(),
+          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,6], ","), top102show[9,5],"historical floods)"),
+          #        hr(),
+          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,6], ","), top102show[10,5],"historical floods)"),
+          #   )
+          #   
+          # })
           
         }
         
@@ -5471,12 +5469,55 @@ observe({
           })
           
           
-          output$areas2focus_list <- renderUI({
-            div( hr(),
-                 # top 
-                 p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,6], ","), top102show[1,5],"historical floods)"),
-                 hr()
-            )
+          output$top_10_1 <- renderUI({
+            
+            p(id='top_1', style='background-color:#f0f0f0;margin-top:10px;margin-bottom:10px;padding-bottom:10px;padding-top:10px', tags$strong(paste0(top102show[1,1],":"), paste0(top102show[1,6], " incidents per 10K, ", top102show[1,5], " historical floods")))
+            
+          })
+          #style='margin-top:-10px;margin-bottom:-5px'
+          #style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;'
+          output$top_10_2 <- renderUI({
+           
+            
+            
+          })
+          
+          output$top_10_3 <- renderUI({
+           
+            
+          })
+          
+          output$top_10_4 <- renderUI({
+           
+            
+          })
+          
+          output$top_10_5 <- renderUI({
+           
+            
+          })
+          
+          output$top_10_6 <- renderUI({
+           
+            
+          })
+          
+          output$top_10_7 <- renderUI({
+            
+            
+          })
+          
+          output$top_10_8 <- renderUI({
+           
+          })
+          
+          output$top_10_9 <- renderUI({
+            
+            
+          })
+          
+          output$top_10_10 <- renderUI({
+            
             
           })
           
@@ -5503,34 +5544,87 @@ observe({
                 
                 top102show <- head(flooding_focus_list, 10)
                 
-                # format text 
-                output$areas2focus_list <- renderUI({
-                  div( hr(),
-                       # top 
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange')),
-                       hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), paste0(top102show[2,1],":"), tags$strong(top102show[2,7], "severe warnings,", top102show[2,8], "warnings,", style="color:red"), tags$strong(top102show[2,9],"alerts", style='color:orange')),
-                       hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), paste0(top102show[3,1],":"), tags$strong(top102show[3,7], "severe warnings,", top102show[3,8], "warnings,", style="color:red"), tags$strong(top102show[3,9],"alerts", style='color:orange')),
-                       hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), paste0(top102show[4,1],":"), tags$strong(top102show[4,7], "severe warnings,", top102show[4,8], "warnings,", style="color:red"), tags$strong(top102show[4,9],"alerts", style='color:orange')),
-                       hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), paste0(top102show[5,1],":"), tags$strong(top102show[5,7], "severe warnings,", top102show[5,8], "warnings,", style="color:red"), tags$strong(top102show[5,9],"alerts", style='color:orange')),
-                       hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), paste0(top102show[6,1],":"), tags$strong(top102show[6,7], "severe warnings,", top102show[6,8], "warnings,", style="color:red"), tags$strong(top102show[6,9],"alerts", style='color:orange')),
-                       hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), paste0(top102show[7,1],":"), tags$strong(top102show[7,7], "severe warnings,", top102show[7,8], "warnings,", style="color:red"), tags$strong(top102show[7,9],"alerts", style='color:orange')),
-                       hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), paste0(top102show[8,1],":"), tags$strong(top102show[8,7], "severe warnings,", top102show[8,8], "warnings,", style="color:red"), tags$strong(top102show[8,9],"alerts", style='color:orange')),
-                       hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), paste0(top102show[9,1],":"), tags$strong(top102show[9,7], "severe warnings,", top102show[9,8], "warnings,", style="color:red"), tags$strong(top102show[9,9],"alerts", style='color:orange')),
-                       hr(),
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), paste0(top102show[10,1],":"), tags$strong(top102show[10,7], "severe warnings,", top102show[10,8], "warnings,", style="color:red"), tags$strong(top102show[10,9],"alerts", style='color:orange')),
-                       hr()
-                  )
+                
+                output$top_10_1 <- renderUI({
+                  p(style='margin-top:10px;margin-bottom:10px',id='top_1', tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange'))
+                })
+                #style='margin-top:-10px;margin-bottom:-5px'
+                #style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;'
+                output$top_10_2 <- renderUI({
+                  p(style='margin-top:10px;margin-bottom:10px',id='top_2', tags$strong('2.'), paste0(top102show[2,1],":"), tags$strong(top102show[2,7], "severe warnings,", top102show[2,8], "warnings,", style="color:red"), tags$strong(top102show[2,9],"alerts", style='color:orange'))
+                  
                   
                 })
-               
+                
+                output$top_10_3 <- renderUI({
+                  p(style='margin-top:10px;margin-bottom:10px',id='top_3',tags$strong('3.'), paste0(top102show[3,1],":"), tags$strong(top102show[3,7], "severe warnings,", top102show[3,8], "warnings,", style="color:red"), tags$strong(top102show[3,9],"alerts", style='color:orange'))
+                  
+                })
+                
+                output$top_10_4 <- renderUI({
+                 
+                  p(style='margin-top:10px;margin-bottom:10px',id='top_4',tags$strong('4.'), paste0(top102show[4,1],":"), tags$strong(top102show[4,7], "severe warnings,", top102show[4,8], "warnings,", style="color:red"), tags$strong(top102show[4,9],"alerts", style='color:orange'))
+                })
+                
+                output$top_10_5 <- renderUI({
+                  p(style='margin-top:10px;margin-bottom:10px',id='top_5',tags$strong('5.'), paste0(top102show[5,1],":"), tags$strong(top102show[5,7], "severe warnings,", top102show[5,8], "warnings,", style="color:red"), tags$strong(top102show[5,9],"alerts", style='color:orange'))
+                  
+                })
+                
+                output$top_10_6 <- renderUI({
+                  p(style='margin-top:10px;margin-bottom:10px',id='top_6',tags$strong('6.'), paste0(top102show[6,1],":"), tags$strong(top102show[6,7], "severe warnings,", top102show[6,8], "warnings,", style="color:red"), tags$strong(top102show[6,9],"alerts", style='color:orange'))
+                  
+                })
+                
+                output$top_10_7 <- renderUI({
+                
+                  p(style='margin-top:10px;margin-bottom:10px',id='top_7',tags$strong('7.'), paste0(top102show[7,1],":"), tags$strong(top102show[7,7], "severe warnings,", top102show[7,8], "warnings,", style="color:red"), tags$strong(top102show[7,9],"alerts", style='color:orange'))
+                })
+                
+                output$top_10_8 <- renderUI({
+                  p(style='margin-top:10px;margin-bottom:10px',id='top_8', tags$strong('8.'), paste0(top102show[8,1],":"), tags$strong(top102show[8,7], "severe warnings,", top102show[8,8], "warnings,", style="color:red"), tags$strong(top102show[8,9],"alerts", style='color:orange'))
+                })
+                
+                output$top_10_9 <- renderUI({
+                  p(style='margin-top:10px;margin-bottom:10px',id='top_9',tags$strong('9.'), paste0(top102show[9,1],":"), tags$strong(top102show[9,7], "severe warnings,", top102show[9,8], "warnings,", style="color:red"), tags$strong(top102show[9,9],"alerts", style='color:orange'))
+                  
+                })
+                
+                output$top_10_10 <- renderUI({
+                  p(style='margin-top:10px;margin-bottom:10px',id='top_10',tags$strong('10.'), paste0(top102show[10,1],":"), tags$strong(top102show[10,7], "severe warnings,", top102show[10,8], "warnings,", style="color:red"), tags$strong(top102show[10,9],"alerts", style='color:orange'))
+                  
+                })
+                
+                
+                
+                # # format text 
+                # output$areas2focus_list <- renderUI({
+                #   div( hr(),
+                #        # top 
+                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange')),
+                #        hr(),
+                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), paste0(top102show[2,1],":"), tags$strong(top102show[2,7], "severe warnings,", top102show[2,8], "warnings,", style="color:red"), tags$strong(top102show[2,9],"alerts", style='color:orange')),
+                #        hr(),
+                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), paste0(top102show[3,1],":"), tags$strong(top102show[3,7], "severe warnings,", top102show[3,8], "warnings,", style="color:red"), tags$strong(top102show[3,9],"alerts", style='color:orange')),
+                #        hr(),
+                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), paste0(top102show[4,1],":"), tags$strong(top102show[4,7], "severe warnings,", top102show[4,8], "warnings,", style="color:red"), tags$strong(top102show[4,9],"alerts", style='color:orange')),
+                #        hr(),
+                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), paste0(top102show[5,1],":"), tags$strong(top102show[5,7], "severe warnings,", top102show[5,8], "warnings,", style="color:red"), tags$strong(top102show[5,9],"alerts", style='color:orange')),
+                #        hr(),
+                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), paste0(top102show[6,1],":"), tags$strong(top102show[6,7], "severe warnings,", top102show[6,8], "warnings,", style="color:red"), tags$strong(top102show[6,9],"alerts", style='color:orange')),
+                #        hr(),
+                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), paste0(top102show[7,1],":"), tags$strong(top102show[7,7], "severe warnings,", top102show[7,8], "warnings,", style="color:red"), tags$strong(top102show[7,9],"alerts", style='color:orange')),
+                #        hr(),
+                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), paste0(top102show[8,1],":"), tags$strong(top102show[8,7], "severe warnings,", top102show[8,8], "warnings,", style="color:red"), tags$strong(top102show[8,9],"alerts", style='color:orange')),
+                #        hr(),
+                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), paste0(top102show[9,1],":"), tags$strong(top102show[9,7], "severe warnings,", top102show[9,8], "warnings,", style="color:red"), tags$strong(top102show[9,9],"alerts", style='color:orange')),
+                #        hr(),
+                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), paste0(top102show[10,1],":"), tags$strong(top102show[10,7], "severe warnings,", top102show[10,8], "warnings,", style="color:red"), tags$strong(top102show[10,9],"alerts", style='color:orange')),
+                #        hr()
+                #   )
+                #   
+                # })
+                # 
                 
               }
               
@@ -5545,14 +5639,53 @@ observe({
                     hr(style = "border-top: 1px solid #000000;"))
                 })
                 
+                output$top_10_1 <- renderUI({
+                  p(id='top_1', style='background-color:#f0f0f0;margin-top:10px;margin-bottom:10px;padding-bottom:10px;padding-top:10px', tags$strong(paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange')))
+                })
+                #style='margin-top:-10px;margin-bottom:-5px'
+                #style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;'
+                output$top_10_2 <- renderUI({
+                  
+                  
+                  
+                })
                 
-                output$areas2focus_list <- renderUI({
-                  div( hr(),
-                       # top 
-                       p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange')),
-                       
-                       hr()
-                  )
+                output$top_10_3 <- renderUI({
+                 
+                  
+                })
+                
+                output$top_10_4 <- renderUI({
+                  
+                  
+                })
+                
+                output$top_10_5 <- renderUI({
+                 
+                  
+                })
+                
+                output$top_10_6 <- renderUI({
+                  
+                  
+                })
+                
+                output$top_10_7 <- renderUI({
+                  
+                  
+                })
+                
+                output$top_10_8 <- renderUI({
+                  
+                })
+                
+                output$top_10_9 <- renderUI({
+                  
+                  
+                })
+                
+                output$top_10_10 <- renderUI({
+                  
                   
                 })
                 
@@ -5581,34 +5714,83 @@ observe({
                   top102show <- top102show %>%
                     mutate(format_number = case_when(`% people in flood risk areas` > 0 ~ paste0(.$`% people in flood risk areas`,'%')))
                                                      
-                  
-                  
-                  # format text 
-                  output$areas2focus_list <- renderUI({
-                    div( hr(),
-                         # top 
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,10], ","), top102show[1,3],"people)"),
-                         hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,10], ","), top102show[2,3],"people)"),
-                         hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,10], ","), top102show[3,3],"people)"),
-                         hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,10], ","), top102show[4,3],"people)"),
-                         hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,10], ","), top102show[5,3],"people)"),
-                         hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,10], ","), top102show[6,3],"people)"),
-                         hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,10], ","), top102show[7,3],"people)"),
-                         hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,10], ","), top102show[8,3],"people)"),
-                         hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,10], ","), top102show[9,3],"people)"),
-                         hr(),
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,10], ","), top102show[10,3],"people)"),
-                    )
+                  output$top_10_1 <- renderUI({
+                    p(style='margin-top:10px;margin-bottom:10px',id='top_1', tags$strong('1.'), paste0(top102show[1,1],":"), paste0(top102show[1,10], ", ", format(as.numeric(top102show[1,3]), big.mark=",")," people"))
                     
                   })
+                  #style='margin-top:-10px;margin-bottom:-5px'
+                  #style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;'
+                  output$top_10_2 <- renderUI({
+                    p(style='margin-top:10px;margin-bottom:10px',id='top_2', tags$strong('2.'), paste0(top102show[2,1],":"), paste0(top102show[2,10], ", ", format(as.numeric(top102show[2,3]), big.mark=",")," people"))
+                    
+                    
+                  })
+                  
+                  output$top_10_3 <- renderUI({
+                    p(style='margin-top:10px;margin-bottom:10px',id='top_3', tags$strong('3.'), paste0(top102show[3,1],":"), paste0(top102show[3,10], ", ", format(as.numeric(top102show[3,3]), big.mark=",")," people"))
+                    
+                  })
+                  
+                  output$top_10_4 <- renderUI({
+                    p(style='margin-top:10px;margin-bottom:10px',id='top_4', tags$strong('4.'), paste0(top102show[4,1],":"), paste0(top102show[4,10], ", ", format(as.numeric(top102show[4,3]), big.mark=",")," people"))
+                    
+                  })
+                  
+                  output$top_10_5 <- renderUI({
+                    p(style='margin-top:10px;margin-bottom:10px',id='top_5', tags$strong('5.'), paste0(top102show[5,1],":"), paste0(top102show[5,10], ", ", format(as.numeric(top102show[5,3]), big.mark=",")," people"))
+                    
+                  })
+                  
+                  output$top_10_6 <- renderUI({
+                    p(style='margin-top:10px;margin-bottom:10px',id='top_6', tags$strong('6.'), paste0(top102show[6,1],":"), paste0(top102show[6,10], ", ", format(as.numeric(top102show[6,3]), big.mark=",")," people"))
+                    
+                  })
+                  
+                  output$top_10_7 <- renderUI({
+                    p(style='margin-top:10px;margin-bottom:10px',id='top_7', tags$strong('7.'), paste0(top102show[7,1],":"), paste0(top102show[7,10], ", ", format(as.numeric(top102show[7,3]), big.mark=",")," people"))
+                    
+                  })
+                  
+                  output$top_10_8 <- renderUI({
+                    p(style='margin-top:10px;margin-bottom:10px',id='top_8', tags$strong('8.'), paste0(top102show[8,1],":"), paste0(top102show[8,10], ", ", format(as.numeric(top102show[8,3]), big.mark=",")," people"))
+                  })
+                  
+                  output$top_10_9 <- renderUI({
+                    
+                    p(style='margin-top:10px;margin-bottom:10px',id='top_9', tags$strong('9.'), paste0(top102show[9,1],":"), paste0(top102show[9,10], ", ", format(as.numeric(top102show[9,3]), big.mark=",")," people"))
+                  })
+                  
+                  output$top_10_10 <- renderUI({
+                    
+                    p(style='margin-top:10px;margin-bottom:10px',id='top_10', tags$strong('10.'), paste0(top102show[10,1],":"), paste0(top102show[10,10], ", ", format(as.numeric(top102show[10,3]), big.mark=",")," people"))
+                  })
+                  
+                  # format text 
+                  # output$areas2focus_list <- renderUI({
+                  #   div( hr(),
+                  #        # top 
+                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,10], ","), top102show[1,3],"people)"),
+                  #        hr(),
+                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,10], ","), top102show[2,3],"people)"),
+                  #        hr(),
+                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,10], ","), top102show[3,3],"people)"),
+                  #        hr(),
+                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,10], ","), top102show[4,3],"people)"),
+                  #        hr(),
+                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,10], ","), top102show[5,3],"people)"),
+                  #        hr(),
+                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,10], ","), top102show[6,3],"people)"),
+                  #        hr(),
+                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,10], ","), top102show[7,3],"people)"),
+                  #        hr(),
+                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,10], ","), top102show[8,3],"people)"),
+                  #        hr(),
+                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,10], ","), top102show[9,3],"people)"),
+                  #        hr(),
+                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,10], ","), top102show[10,3],"people)"),
+                  #   )
+                  #   
+                  # })
                   
                   }
                 
@@ -5627,15 +5809,54 @@ observe({
                       hr(style = "border-top: 1px solid #000000;"))
                   })
                   
-                  
-                  output$areas2focus_list <- renderUI({
-                    div( hr(),
-                         # top 
-                         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,10], ","), top102show[1,3],"people)"),
-                         hr()
-                    )
+                  output$top_10_1 <- renderUI({
+                    p(id='top_1', style='background-color:#f0f0f0;margin-top:10px;margin-bottom:10px;padding-bottom:10px;padding-top:10px', tags$strong(paste0(top102show[1,1],":"), paste0(top102show[1,10], ", ", format(as.numeric(top102show[1,3]), big.mark=",")," people")))
+                  })
+                  #style='margin-top:-10px;margin-bottom:-5px'
+                  #style='margin-top:-10px;margin-bottom:-5px;margin-right:-5px;margin-left:-5px;padding-right:-10px;'
+                  output$top_10_2 <- renderUI({
                     
                   })
+                  
+                  output$top_10_3 <- renderUI({
+                    
+                    
+                  })
+                  
+                  output$top_10_4 <- renderUI({
+                    
+                    
+                  })
+                  
+                  output$top_10_5 <- renderUI({
+                    
+                    
+                  })
+                  
+                  output$top_10_6 <- renderUI({
+                    
+                    
+                  })
+                  
+                  output$top_10_7 <- renderUI({
+                    
+                    
+                  })
+                  
+                  output$top_10_8 <- renderUI({
+                    
+                  })
+                  
+                  output$top_10_9 <- renderUI({
+                    
+                    
+                  })
+                  
+                  output$top_10_10 <- renderUI({
+                    
+                    
+                  })
+                  
                   
                 }
                 
@@ -5669,43 +5890,297 @@ observe({
     }
   })
   
-  #areas2focus_zoom_in = reactiveValues(row_id=NA)
-  
-onclick("1",
-          print('testing')
+ 
+# --- users click on areas to focus list ---  
+onclick("top_1", {
+          #print('testing'),
+          row_wanted <- filtered_areas2focus_list()[1,]
+          print(row_wanted)
+          
+          lad_choices <- lad_uk2vuln_resilience %>%
+            filter(TacticalCell == row_wanted$Region) %>%
+             select('LAD19NM')
+          
+           lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+           lad_choices <- c('All local authorities in region', lad_choices)
+          
+          #
+          # # --- update select input ---
+           updateSelectInput(
+             session, "tactical_cell",
+             choices = tactical_cells,
+             selected = row_wanted$Region
+           )
+          
+           updateSelectInput(session, "lad_selected",
+                             choices = lad_choices,
+                             selected=row_wanted$`Local Authority`)
+
+          
+        }
+       
   )
   
+onclick("top_2", {
+  #print('testing'),
+  row_wanted <- filtered_areas2focus_list()[2,]
+  print(row_wanted)
   
-               
-    #update local authority select input which will hopefully update everything else. 
-    # print('testing'),
-    # 
-    # # Tactical cell lad in
-    # row_wanted <- filtered_areas2focus_list()[1,],
-    # 
-    # print(row_wanted)
-    # 
-    # # lad_choices <- lad_uk2vuln_resilience %>%
-    # #   filter(TacticalCell == tactical_cell_selected$TacticalCell) %>%
-    # #   select('LAD19NM'),
-    # # 
-    # # 
-    # # lad_choices <- sort(as.vector(lad_choices$LAD19NM)),
-    # # lad_choices <- c('All local authorities in region', lad_choices),
-    # # 
-    # # 
-    # # # --- update select input ---
-    # # updateSelectInput(
-    # #   session, "tactical_cell",
-    # #   choices = tactical_cells,
-    # #   selected = tactical_cell_selected$TacticalCell
-    # # ),
-    # # 
-    # # updateSelectInput(session, "lad_selected",
-    # #                   choices = lad_choices,
-    # #                   selected=tactical_cell_selected$LAD19NM)
-    # 
-    # )
+  lad_choices <- lad_uk2vuln_resilience %>%
+    filter(TacticalCell == row_wanted$Region) %>%
+    select('LAD19NM')
+  
+  lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+  lad_choices <- c('All local authorities in region', lad_choices)
+  
+  #
+  # # --- update select input ---
+  updateSelectInput(
+    session, "tactical_cell",
+    choices = tactical_cells,
+    selected = row_wanted$Region
+  )
+  
+  updateSelectInput(session, "lad_selected",
+                    choices = lad_choices,
+                    selected=row_wanted$`Local Authority`)
+  
+  
+}
+
+)
+
+onclick("top_3", {
+  #print('testing'),
+  row_wanted <- filtered_areas2focus_list()[3,]
+  print(row_wanted)
+  
+  lad_choices <- lad_uk2vuln_resilience %>%
+    filter(TacticalCell == row_wanted$Region) %>%
+    select('LAD19NM')
+  
+  lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+  lad_choices <- c('All local authorities in region', lad_choices)
+  
+  #
+  # # --- update select input ---
+  updateSelectInput(
+    session, "tactical_cell",
+    choices = tactical_cells,
+    selected = row_wanted$Region
+  )
+  
+  updateSelectInput(session, "lad_selected",
+                    choices = lad_choices,
+                    selected=row_wanted$`Local Authority`)
+  
+  
+}
+
+)
+
+onclick("top_4", {
+  #print('testing'),
+  row_wanted <- filtered_areas2focus_list()[4,]
+  print(row_wanted)
+  
+  lad_choices <- lad_uk2vuln_resilience %>%
+    filter(TacticalCell == row_wanted$Region) %>%
+    select('LAD19NM')
+  
+  lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+  lad_choices <- c('All local authorities in region', lad_choices)
+  
+  #
+  # # --- update select input ---
+  updateSelectInput(
+    session, "tactical_cell",
+    choices = tactical_cells,
+    selected = row_wanted$Region
+  )
+  
+  updateSelectInput(session, "lad_selected",
+                    choices = lad_choices,
+                    selected=row_wanted$`Local Authority`)
+  
+  
+}
+
+)
+
+onclick("top_5", {
+  #print('testing'),
+  row_wanted <- filtered_areas2focus_list()[5,]
+  print(row_wanted)
+  
+  lad_choices <- lad_uk2vuln_resilience %>%
+    filter(TacticalCell == row_wanted$Region) %>%
+    select('LAD19NM')
+  
+  lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+  lad_choices <- c('All local authorities in region', lad_choices)
+  
+  #
+  # # --- update select input ---
+  updateSelectInput(
+    session, "tactical_cell",
+    choices = tactical_cells,
+    selected = row_wanted$Region
+  )
+  
+  updateSelectInput(session, "lad_selected",
+                    choices = lad_choices,
+                    selected=row_wanted$`Local Authority`)
+  
+  
+}
+
+)
+
+onclick("top_6", {
+  #print('testing'),
+  row_wanted <- filtered_areas2focus_list()[6,]
+  print(row_wanted)
+  
+  lad_choices <- lad_uk2vuln_resilience %>%
+    filter(TacticalCell == row_wanted$Region) %>%
+    select('LAD19NM')
+  
+  lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+  lad_choices <- c('All local authorities in region', lad_choices)
+  
+  #
+  # # --- update select input ---
+  updateSelectInput(
+    session, "tactical_cell",
+    choices = tactical_cells,
+    selected = row_wanted$Region
+  )
+  
+  updateSelectInput(session, "lad_selected",
+                    choices = lad_choices,
+                    selected=row_wanted$`Local Authority`)
+  
+  
+}
+
+)
+
+onclick("top_7", {
+  #print('testing'),
+  row_wanted <- filtered_areas2focus_list()[7,]
+  print(row_wanted)
+  
+  lad_choices <- lad_uk2vuln_resilience %>%
+    filter(TacticalCell == row_wanted$Region) %>%
+    select('LAD19NM')
+  
+  lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+  lad_choices <- c('All local authorities in region', lad_choices)
+  
+  #
+  # # --- update select input ---
+  updateSelectInput(
+    session, "tactical_cell",
+    choices = tactical_cells,
+    selected = row_wanted$Region
+  )
+  
+  updateSelectInput(session, "lad_selected",
+                    choices = lad_choices,
+                    selected=row_wanted$`Local Authority`)
+  
+  
+}
+
+)
+
+onclick("top_8", {
+  #print('testing'),
+  row_wanted <- filtered_areas2focus_list()[8,]
+  print(row_wanted)
+  
+  lad_choices <- lad_uk2vuln_resilience %>%
+    filter(TacticalCell == row_wanted$Region) %>%
+    select('LAD19NM')
+  
+  lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+  lad_choices <- c('All local authorities in region', lad_choices)
+  
+  #
+  # # --- update select input ---
+  updateSelectInput(
+    session, "tactical_cell",
+    choices = tactical_cells,
+    selected = row_wanted$Region
+  )
+  
+  updateSelectInput(session, "lad_selected",
+                    choices = lad_choices,
+                    selected=row_wanted$`Local Authority`)
+  
+  
+}
+
+)
+
+onclick("top_9", {
+  #print('testing'),
+  row_wanted <- filtered_areas2focus_list()[9,]
+  print(row_wanted)
+  
+  lad_choices <- lad_uk2vuln_resilience %>%
+    filter(TacticalCell == row_wanted$Region) %>%
+    select('LAD19NM')
+  
+  lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+  lad_choices <- c('All local authorities in region', lad_choices)
+  
+  #
+  # # --- update select input ---
+  updateSelectInput(
+    session, "tactical_cell",
+    choices = tactical_cells,
+    selected = row_wanted$Region
+  )
+  
+  updateSelectInput(session, "lad_selected",
+                    choices = lad_choices,
+                    selected=row_wanted$`Local Authority`)
+  
+  
+}
+
+)
+
+onclick("top_10", {
+  #print('testing'),
+  row_wanted <- filtered_areas2focus_list()[10,]
+  print(row_wanted)
+  
+  lad_choices <- lad_uk2vuln_resilience %>%
+    filter(TacticalCell == row_wanted$Region) %>%
+    select('LAD19NM')
+  
+  lad_choices <- sort(as.vector(lad_choices$LAD19NM))
+  lad_choices <- c('All local authorities in region', lad_choices)
+  
+  #
+  # # --- update select input ---
+  updateSelectInput(
+    session, "tactical_cell",
+    choices = tactical_cells,
+    selected = row_wanted$Region
+  )
+  
+  updateSelectInput(session, "lad_selected",
+                    choices = lad_choices,
+                    selected=row_wanted$`Local Authority`)
+  
+  
+}
+
+)
   
   
   
