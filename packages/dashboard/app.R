@@ -5895,7 +5895,7 @@ observe({
 onclick("top_1", {
           #print('testing'),
           row_wanted <- filtered_areas2focus_list()[1,]
-          print(row_wanted)
+          #print(row_wanted)
           
           lad_choices <- lad_uk2vuln_resilience %>%
             filter(TacticalCell == row_wanted$Region) %>%
@@ -5924,7 +5924,7 @@ onclick("top_1", {
 onclick("top_2", {
   #print('testing'),
   row_wanted <- filtered_areas2focus_list()[2,]
-  print(row_wanted)
+  #print(row_wanted)
   
   lad_choices <- lad_uk2vuln_resilience %>%
     filter(TacticalCell == row_wanted$Region) %>%
@@ -5953,7 +5953,7 @@ onclick("top_2", {
 onclick("top_3", {
   #print('testing'),
   row_wanted <- filtered_areas2focus_list()[3,]
-  print(row_wanted)
+  #print(row_wanted)
   
   lad_choices <- lad_uk2vuln_resilience %>%
     filter(TacticalCell == row_wanted$Region) %>%
@@ -5982,7 +5982,7 @@ onclick("top_3", {
 onclick("top_4", {
   #print('testing'),
   row_wanted <- filtered_areas2focus_list()[4,]
-  print(row_wanted)
+  #print(row_wanted)
   
   lad_choices <- lad_uk2vuln_resilience %>%
     filter(TacticalCell == row_wanted$Region) %>%
@@ -6011,7 +6011,7 @@ onclick("top_4", {
 onclick("top_5", {
   #print('testing'),
   row_wanted <- filtered_areas2focus_list()[5,]
-  print(row_wanted)
+  #print(row_wanted)
   
   lad_choices <- lad_uk2vuln_resilience %>%
     filter(TacticalCell == row_wanted$Region) %>%
@@ -6040,7 +6040,7 @@ onclick("top_5", {
 onclick("top_6", {
   #print('testing'),
   row_wanted <- filtered_areas2focus_list()[6,]
-  print(row_wanted)
+  #print(row_wanted)
   
   lad_choices <- lad_uk2vuln_resilience %>%
     filter(TacticalCell == row_wanted$Region) %>%
@@ -6069,7 +6069,7 @@ onclick("top_6", {
 onclick("top_7", {
   #print('testing'),
   row_wanted <- filtered_areas2focus_list()[7,]
-  print(row_wanted)
+  #print(row_wanted)
   
   lad_choices <- lad_uk2vuln_resilience %>%
     filter(TacticalCell == row_wanted$Region) %>%
@@ -6098,7 +6098,7 @@ onclick("top_7", {
 onclick("top_8", {
   #print('testing'),
   row_wanted <- filtered_areas2focus_list()[8,]
-  print(row_wanted)
+  #print(row_wanted)
   
   lad_choices <- lad_uk2vuln_resilience %>%
     filter(TacticalCell == row_wanted$Region) %>%
@@ -6127,7 +6127,7 @@ onclick("top_8", {
 onclick("top_9", {
   #print('testing'),
   row_wanted <- filtered_areas2focus_list()[9,]
-  print(row_wanted)
+  #print(row_wanted)
   
   lad_choices <- lad_uk2vuln_resilience %>%
     filter(TacticalCell == row_wanted$Region) %>%
@@ -6156,7 +6156,7 @@ onclick("top_9", {
 onclick("top_10", {
   #print('testing'),
   row_wanted <- filtered_areas2focus_list()[10,]
-  print(row_wanted)
+  #print(row_wanted)
   
   lad_choices <- lad_uk2vuln_resilience %>%
     filter(TacticalCell == row_wanted$Region) %>%
