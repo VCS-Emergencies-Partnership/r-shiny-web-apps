@@ -1177,7 +1177,7 @@ server = function(input, output, session) {
             tags$br(),
             "The British Red Cross developed a series of indices to identify UK areas vulnerable 
             to the effects of COVID-19, and a resilience index which overlays capacity to cope.
-            Using statistical modelling of data from a range of", tags$a(hrefe="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/output/metadata_vi.csv", target="_blank", "(mostly open) sources,"), "the indices
+            Using statistical modelling of data from a range of", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/output/metadata_vi.csv", target="_blank", "(mostly open) sources,"), "the indices
             provide an area rating, which is then used to map areas of need. 
             Users can also explore different layers of the map based on vulnerability type, 
             by selecting the button in the top right corner of the map."),
