@@ -4248,6 +4248,7 @@ server = function(input, output, session) {
           
           # for echarts
           tc_avg_unem <- par_table_tc_avg %>% select(`tc_prop_unemployed_on_universal_credit_mean`) %>%
+            mutate(`tc_prop_unemployed_on_universal_credit_mean`=round(`tc_prop_unemployed_on_universal_credit_mean`,0)) %>%
             select('xAxis' = `tc_prop_unemployed_on_universal_credit_mean`) %>%
             as.list()
           
@@ -4276,6 +4277,8 @@ server = function(input, output, session) {
             )
           })
           
+          #print(tc_avg_unem)
+          #print(tc_unem_to_plot$Indicator)
           output$unemployment <- renderEcharts4r({
             # # Plot population statistics
             sec95 <- tc_unem_to_plot %>%
