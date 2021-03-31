@@ -462,9 +462,9 @@ body <- dashboardBody(
                            div(#p("Our", tags$strong("Data Working Group"), "meets fortnightly on a Thursday at 11am to help us prioritise
                             # what data and analysis to focus on next."),
                                #p(tags$strong("Join us"), "to lend your voice to the conversation."),
-                               p(tags$strong("Share data:"), tags$br(), "Get in touch with our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk")),
+                               p(tags$strong("Share data:"), tags$br(), "Get in touch with the Insight team", tags$a(href='https://vcsep.org.uk/contact-us', target="_blank", "here.")),
                                p(tags$strong("Feedback or make a request:"), tags$br(), "We welcome your thoughts on what data would be useful to help shape your support to those in need.
-                                  To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk"),
+                                  To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="https://vcsep.org.uk/contact-us", target="_blank", "https://vcsep.org.uk/contact-us"),
                                 p(tags$strong("Find out more:"), tags$br(), "To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")
                                  )
                                )
@@ -4248,6 +4248,7 @@ server = function(input, output, session) {
           
           # for echarts
           tc_avg_unem <- par_table_tc_avg %>% select(`tc_prop_unemployed_on_universal_credit_mean`) %>%
+            mutate(`tc_prop_unemployed_on_universal_credit_mean`=round(`tc_prop_unemployed_on_universal_credit_mean`,0)) %>%
             select('xAxis' = `tc_prop_unemployed_on_universal_credit_mean`) %>%
             as.list()
           
@@ -4276,6 +4277,8 @@ server = function(input, output, session) {
             )
           })
           
+          #print(tc_avg_unem)
+          #print(tc_unem_to_plot$Indicator)
           output$unemployment <- renderEcharts4r({
             # # Plot population statistics
             sec95 <- tc_unem_to_plot %>%
