@@ -7016,12 +7016,19 @@ onclick("top_10", {
             output$requests <- renderInfoBox({
             infoBox(
               "Requests for support", 
+              #HTML("<b>Requests for support</b> <button id=\"button\" type=\"button\" class=\"btn btn-primary btn-circle btn-circle-sm m-1 action-button\"><i class=\"fa fa-bar-chart\"></i></button>"),
+              #HTML("<b>Requests for support</b> <button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-circle btn-xs action-button\"><i class=\"fa fa-bar-chart\"></i></button>"),
+              #subtitle = 
               div(p(tags$strong(unique(total_requests_this_week$total_this_week), style="font-size:24pt"), 
                              "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
-                  p(unique(difference), "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;")),
+                  p(unique(difference), "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;",
+                  HTML("<button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-xs action-button\">dashboard</button>"))),
+            
               #"Requests", unique(to_print),
                 color = "purple", fill = F, icon=icon("fas fa-list")
+                
               )
+              
             })
            }
 
@@ -7053,7 +7060,8 @@ onclick("top_10", {
             "Requests for support", 
             div(p(tags$strong(total_requests_this_week$total_this_week, style="font-size:24pt"), 
                   "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
-                p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;")),
+                p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;",
+                  HTML("<button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-xs action-button\">dashboard</button>"))),
             #div(p("Previous 7 days:", total_requests_this_week$total_this_week, style = "font-size:12pt;margin-top:5px;"),
             #    p("Difference to last week:", difference, style = "font-size:10pt;color:#808080;margin-top:-10px;")),
             color = "purple", fill = F, icon=icon("fas fa-list")
@@ -7093,7 +7101,8 @@ onclick("top_10", {
               "Requests for support",
               div(p(tags$strong(total_requests_this_week$total_this_week, style="font-size:24pt"), 
                     "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
-                  p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;")),
+                  p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;",
+                    HTML("<button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-xs action-button\">dashboard</button>"))),
               #div(p("Previous 7 days:", total_requests_this_week$total_this_week, style = "font-size:12pt;margin-top:5px;"),
               #    p("Difference to last week:", difference, style = "font-size:10pt;color:#808080;margin-top:-10px;")),
               color = "purple", fill = F, icon=icon("fas fa-list")
@@ -7105,6 +7114,40 @@ onclick("top_10", {
   }
 
 })
+  
+  
+#
+observeEvent(input$rfs_button, {
+    #formattedBody = paste("Hi,", "please can I have access to the VCSEP requests for support dashboard.", "Thanks'", sep='\n')
+    #mailToLink = paste0("window.location.href='mailto:izzy.everal@gmail.com?subject=Request access to VCSEP RFS dashboard&body=", formattedBody)
+    #print(mailToLink)
+    showModal(modalDialog(
+      title = "You are about to leave this page to access an internal report",
+      div(
+          p("If you are a", tags$strong("member of the VCS Emergencies Partnership then please continue"), 
+          "or request access if you are unable to view the report."),
+          tags$br(),
+          p("If you are a", tags$strong("member of the public,"), "visit our
+            website to request support or to learn more about our work.")),
+      
+      
+      footer = tagList(
+        actionButton('rfs_continue',label='Continue', onclick ="window.open('https://dashboards.vcsep.org.uk/', '_blank')"),
+        actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
+        #actionButton('rfs_access',label='Request access', onclick=mailToLink),
+        actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
+        modalButton('Close')
+      )
+        
+        #div(HTML("<button id=\"continue_button\" type=\"button\" class=\"btn btn-primary btn-sm action-button\">Continue</button>"))
+      
+      
+    ))
+  })
+
+
+  
+    
 
 # --- Volunteer capacity ---
   observe({
