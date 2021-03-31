@@ -74,4 +74,11 @@ h1, h2, h3, h4 { font-weight: 400; }
   visibility: hidden;
 }
 
-
+.btn-circle.btn-xs {
+            width: 28px;
+            height: 28px;
+            padding: 6px 0px;
+            border-radius: 14px;
+            font-size: 8px;
+            text-align: center;
+        }
