@@ -7126,10 +7126,10 @@ observeEvent(input$rfs_button, {
     #mailToLink = paste0("window.location.href='mailto:izzy.everal@gmail.com?subject=Request access to VCSEP RFS dashboard&body=", formattedBody)
     #print(mailToLink)
     showModal(modalDialog(
-      title = "You are about to leave this page to access an internal report",
+      title = "You are about to leave this page to access an internal dashboard",
       div(
           p("If you are a", tags$strong("member of the VCS Emergencies Partnership then please continue"), 
-          "or request access if you are unable to view the report."),
+          "to view the internal dashboard."),
           tags$br(),
           p("If you are a", tags$strong("member of the public,"), "visit our
             website to request support or to learn more about our work.")),
@@ -7137,7 +7137,7 @@ observeEvent(input$rfs_button, {
       
       footer = tagList(
         actionButton('rfs_continue',label='Continue', onclick ="window.open('https://dashboards.vcsep.org.uk/', '_blank')"),
-        actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
+        #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
         #actionButton('rfs_access',label='Request access', onclick=mailToLink),
         actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
         modalButton('Close')
