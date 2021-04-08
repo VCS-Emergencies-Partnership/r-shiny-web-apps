@@ -2699,14 +2699,14 @@ server = function(input, output, session) {
             clearMarkerClusters() %>%
             clearMarkers() %>%
             #
-            addPolygons(data=tc_shp, layerId = ~TacticalCell,
-                        group='tactical cell boundary',
-                        stroke=T,
-                        weight = 0.7,
-                        opacity = 0.8,
-                        color = "black",
-                        dashArray = "0.1",
-                        fill=F) %>%
+            # addPolygons(data=tc_shp, layerId = ~TacticalCell,
+            #             group='tactical cell boundary',
+            #             stroke=T,
+            #             weight = 3,
+            #             opacity = 0.8,
+            #             color = "grey",
+            #             dashArray = "0.1",
+            #             fill=F) %>%
             addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                         group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
                         weight = ~weight_val,
@@ -2843,6 +2843,14 @@ server = function(input, output, session) {
                                   direction = "auto"
                                 )
                     ) %>%
+            addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                        group='tactical cell boundary',
+                        stroke=T,
+                        weight = 2,
+                        opacity = 0.8,
+                        color = "black",
+                        dashArray = "3",
+                        fill=F) %>%
                     flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                                 lat1 = as.numeric(curr_bbox["ymin"]),
                                 lng2 = as.numeric(curr_bbox["xmax"]),
@@ -2861,15 +2869,6 @@ server = function(input, output, session) {
               clearShapes() %>%
               clearMarkerClusters() %>%
               clearMarkers() %>%
-              #
-              addPolygons(data=tc_shp, layerId = ~TacticalCell,
-                          group='tactical cell boundary',
-                          stroke=T,
-                          weight = 0.7,
-                          opacity = 0.8,
-                          color = "black",
-                          dashArray = "0.1",
-                          fill=F) %>%
               
               addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                           group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
@@ -3007,6 +3006,14 @@ server = function(input, output, session) {
                             direction = "auto"
                           )
               ) %>%
+              addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                          group='tactical cell boundary',
+                          stroke=T,
+                          weight = 2,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "3",
+                          fill=F) %>%
               flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                           lat1 = as.numeric(curr_bbox["ymin"]),
                           lng2 = as.numeric(curr_bbox["xmax"]),
@@ -3025,16 +3032,6 @@ server = function(input, output, session) {
               clearShapes() %>%
               clearMarkerClusters() %>%
               clearMarkers() %>%
-              #
-              addPolygons(data=tc_shp, layerId = ~TacticalCell,
-                          group='tactical cell boundary',
-                          stroke=T,
-                          weight = 0.7,
-                          opacity = 0.8,
-                          color = "black",
-                          dashArray = "0.1",
-                          fill=F) %>%
-              
               addPolygons(data=lad_uk_most_vuln, layerId = ~res_id,
                           group="Resilience: vulnerability vs capacity to cope", fillColor = ~fill,
                           weight = ~weight_val, 
@@ -3171,6 +3168,14 @@ server = function(input, output, session) {
                             direction = "auto"
                           )
               ) %>%
+              addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                          group='tactical cell boundary',
+                          stroke=T,
+                          weight = 2,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "3",
+                          fill=F) %>%
               flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                           lat1 = as.numeric(curr_bbox["ymin"]),
                           lng2 = as.numeric(curr_bbox["xmax"]),
@@ -3204,15 +3209,6 @@ server = function(input, output, session) {
               clearShapes() %>%
               clearMarkers() %>%
               clearMarkerClusters() %>%
-              #
-              addPolygons(data=tc_shp, layerId = ~TacticalCell,
-                          group='tactical cell boundary',
-                          stroke=T,
-                          weight = 0.7,
-                          opacity = 0.8,
-                          color = "black",
-                          dashArray = "0.1",
-                          fill=F) %>%
               addPolygons(data=flood_all, layerId = ~floodres_id,
                           group="Resilience of local authority", fillColor = ~`fill`,
                           weight = ~weight_val,
@@ -3234,6 +3230,14 @@ server = function(input, output, session) {
                               textsize = "10px",
                               direction = "auto"
                           )) %>%
+              addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                          group='tactical cell boundary',
+                          stroke=T,
+                          weight = 2,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "3",
+                          fill=F) %>%
               flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                           lat1 = as.numeric(curr_bbox["ymin"]),
                           lng2 = as.numeric(curr_bbox["xmax"]),
@@ -3251,15 +3255,7 @@ server = function(input, output, session) {
             clearShapes() %>%
             clearMarkers() %>%
             clearMarkerClusters() %>%
-            #
-            addPolygons(data=tc_shp, layerId = ~TacticalCell,
-                        group='tactical cell boundary',
-                        stroke=T,
-                        weight = 0.7,
-                        opacity = 0.8,
-                        color = "black",
-                        dashArray = "0.1",
-                        fill=F) %>%
+
             addPolygons(data=flood_all, layerId = ~floodres_id,
                         group="Resilience of all local authorities", fillColor = ~`fill`,
                         weight = ~weight_val,
@@ -3280,6 +3276,14 @@ server = function(input, output, session) {
                           textsize = "10px",
                           direction = "auto"
                         ))  %>%
+            addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                        group='tactical cell boundary',
+                        stroke=T,
+                        weight = 2,
+                        opacity = 0.8,
+                        color = "black",
+                        dashArray = "3",
+                        fill=F) %>%
             flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                         lat1 = as.numeric(curr_bbox["ymin"]),
                         lng2 = as.numeric(curr_bbox["xmax"]),
@@ -3310,15 +3314,6 @@ server = function(input, output, session) {
             clearShapes() %>%
             clearMarkers() %>%
             clearMarkerClusters() %>%
-            #
-            addPolygons(data=tc_shp, layerId = ~TacticalCell,
-                        group='tactical cell boundary',
-                        stroke=T,
-                        weight = 0.7,
-                        opacity = 0.8,
-                        color = "black",
-                        dashArray = "0.1",
-                        fill=F) %>%
             addPolygons(data=flood_all, layerId = ~floodres_id,
                         group="Resilience of all local authorities", fillColor = ~fill,
                         weight = ~weight_val,
@@ -3346,6 +3341,14 @@ server = function(input, output, session) {
                               clusterOptions = markerClusterOptions(), label=filtered_flood_warning_labels(),
                               
                               ) %>%
+            addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                        group='tactical cell boundary',
+                        stroke=T,
+                        weight = 2,
+                        opacity = 0.8,
+                        color = "black",
+                        dashArray = "3",
+                        fill=F) %>%
            #addPolygons(data=plot_flood_warning_polygon, layerId=~`description`,
           #          group="Latest flood warnings", fillColor = ~warning_col,
            #         weight = 0.7,
@@ -3373,15 +3376,6 @@ server = function(input, output, session) {
               clearShapes() %>%
               clearMarkers() %>%
               clearMarkerClusters() %>%
-              #
-              addPolygons(data=tc_shp, layerId = ~TacticalCell,
-                          group='tactical cell boundary',
-                          stroke=T,
-                          weight = 0.7,
-                          opacity = 0.8,
-                          color = "black",
-                          dashArray = "0.1",
-                          fill=F) %>%
               addPolygons(data=flood_all, layerId = ~floodres_id,
                           group="Resilience of all local authorities", fillColor = ~fill,
                           weight = ~weight_val,
@@ -3409,6 +3403,14 @@ server = function(input, output, session) {
                                 clusterOptions = markerClusterOptions(), label=filtered_flood_warning_labels()
                                 #lng=~long, lat=~lat
               ) %>%
+              addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                          group='tactical cell boundary',
+                          stroke=T,
+                          weight = 2,
+                          opacity = 0.8,
+                          color = "black",
+                          dashArray = "3",
+                          fill=F) %>%
               #addPolygons(data=plot_flood_warning_polygon, layerId=~`description`,
               #            group="Latest flood warnings", fillColor = ~warning_col,
               #            weight = 0.7,
@@ -3434,15 +3436,6 @@ server = function(input, output, session) {
                 clearShapes() %>%
                 clearMarkers() %>%
                 clearMarkerClusters() %>%
-                #
-                addPolygons(data=tc_shp, layerId = ~TacticalCell,
-                            group='tactical cell boundary',
-                            stroke=T,
-                            weight = 0.7,
-                            opacity = 0.8,
-                            color = "black",
-                            dashArray = "0.1",
-                            fill=F) %>%
                 addPolygons(data=flood_all, layerId = ~floodres_id,
                             group="Resilience of all local authorities", fillColor = ~fill,
                             weight = ~weight_val,
@@ -3475,6 +3468,14 @@ server = function(input, output, session) {
                             color = "black",
                             dashArray = "0.1",
                             fillOpacity = 0.7) %>%
+                addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                            group='tactical cell boundary',
+                            stroke=T,
+                            weight = 2,
+                            opacity = 0.8,
+                            color = "black",
+                            dashArray = "3",
+                            fill=F) %>%
                 flyToBounds(lng1 = as.numeric(curr_bbox["xmin"]),
                             lat1 = as.numeric(curr_bbox["ymin"]),
                             lng2 = as.numeric(curr_bbox["xmax"]),
