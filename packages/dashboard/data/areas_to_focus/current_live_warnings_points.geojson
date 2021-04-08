@@ -10,7 +10,6 @@
 { "type": "Feature", "properties": { "floodAreaID": "064WAF6LittleStour" }, "geometry": { "type": "Point", "coordinates": [ 1.210789113483785, 51.301016822226217 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "052WAFNAR" }, "geometry": { "type": "Point", "coordinates": [ 0.490459878066433, 52.694156858367421 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "061FAG22GtSheff" }, "geometry": { "type": "Point", "coordinates": [ -1.433201316402239, 51.493699788990355 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "054WATBT2" }, "geometry": { "type": "Point", "coordinates": [ 1.578573916370916, 52.584052090625534 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "054WATBT1" }, "geometry": { "type": "Point", "coordinates": [ 1.566239616782151, 52.699129601069956 ] } }
 ]
 }
