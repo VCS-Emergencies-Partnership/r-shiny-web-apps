@@ -326,7 +326,12 @@ last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%
 
 # ---  dashboard --- #
 # --- header --- #
-header <- dashboardHeader(title = "VCSEP Insights", titleWidth = "300px")#,
+header <- dashboardHeader(title = "VCSEP Insights", titleWidth = "300px",
+                          tags$li(a(href = 'https://vcsep.org.uk/', target="_blank",
+                                    img(src = 'vcs-logo-text.png',
+                                        title = "Developed by", height = "30px"),
+                                    style = "padding-top:10px; padding-bottom:10px;"),
+                                  class = "dropdown"))#,
                               #dropdownMenu(
                               #  type = "notifications",
                               #  icon = icon("question-circle"),
@@ -895,10 +900,30 @@ body <- dashboardBody(
   tabItem(tabName='Help',
           column(width = 12,
                    tabBox(id='information about dashboards', width=NULL,
-                          tabPanel("Help - areas at risk in an emergency",
+                          tabPanel("About us",
+                                   uiOutput('about_us'),
+                                   style = "height:600px; overflow-y: scroll;overflow-x: scroll;"),
+                          tabPanel("Areas at risk in an emergency dashboard",
+                                   tabBox(id='help_areas_at_risk', width=NULL,
+                                          tabPanel("About",
                                    uiOutput('about_needs'),
                                   style = "height:600px; overflow-y: scroll;overflow-x: scroll;"
-                                  )))),
+                                  ),
+                                  tabPanel("Understanding the map",
+                                           uiOutput("understand_map_top"),
+                                           uiOutput("understand_map_middle"),
+                                           uiOutput("understand_map_bottom"),
+                                           style = "height:600px; overflow-y: scroll;overflow-x: scroll;"
+                                           ),
+                                  tabPanel("Emergency: Coronavirus",
+                                           uiOutput("emergency_covid"),
+                                           style = "height:600px; overflow-y: scroll;overflow-x: scroll;"),
+                                  tabPanel("Emergency: Flooding",
+                                           uiOutput("emergency_flooding"),
+                                           style = "height:600px; overflow-y: scroll;overflow-x: scroll;"),
+                                  tabPanel("Data and Licensing",
+                                           uiOutput("data_licensing"),
+                                                    style = "height:600px; overflow-y: scroll;overflow-x: scroll;")))))),
   tabItem(tabName = 'references',
           fluidRow(style="padding-right:100px;padding-left:100px;padding-top:20px;padding-bottom:20px",
                    # column 1
@@ -1085,6 +1110,53 @@ server = function(input, output, session) {
     
     if (input$sidebar_id == 'Help') {
       
+      # About us
+      output$about_us <- renderUI({
+        
+        div(h4(tags$strong("Last updated:")),
+            p("The dashboard was last updated at", last_updated_time, "on", last_updated_date),
+            tags$br(),
+            h4(tags$strong("Welcome to the Voluntary and Community Emergency Partnership Risk Indicator Tool")),
+            p("This tool seeks to inform preparedness work to reduce the impact of an emergency, 
+              should it occur. It’s not going to slap you in the face and tell you what to do, 
+              but hopefully, it will inspire questions and facilitate discussion. 
+              In its current form, the tool provides demographic estimates for different areas and
+              people. We’ve included top 10 lists and baseline information where we can, 
+              but these are based on sorting data and do not imply and expression of an opinion."),
+            tags$br(),
+            h4(tags$strong("Key questions our people have:")),
+            tags$li("Where is the need for support greatest?"),
+            tags$li("Who is in greatest need of support?"),
+            tags$li("What type of support do they need?"),
+            tags$li("How are those people and areas being supported?"),
+            tags$br(),
+            h4(tags$strong("Privacy and Cookies Policy")),
+            p("We use Google Analytics to collect information on visits and behaviour on the site, 
+              to help us improve our tool. 
+              This requires the use of cookies, and we give you the option to decline or accept these. 
+              The VCSEP privacy and cookies policies are avalailable", tags$a(href='https://vcsep.org.uk/privacy-policy', target="_blank", "here")),
+            tags$br(),
+            h4(tags$strong("Disclaimer")),
+            p("We work our best to ensure the regular update of the information included in this tool.
+              However, we are a very small team in the early development stage at the British Red Cross,
+              and we do not guarantee the accuracy of this information. 
+              See Data and licensing section for each dashboard for more information."),
+            tags$br(),
+            h4(tags$strong("Beta group to test and learn")),
+            p("We are in the early stages and ask for your patience, feedback and support 
+              for its continual development. We are testing insight for action around preparedness 
+              and response work with our partners in a beta group, including the insight from data 
+              sharing. This must be done sensitively so will take longer for it to reach public 
+              view to inform wider action to either prepare for, respond to, or help communities 
+              recover better from an emergency."),
+            tags$br(),
+            p(tags$a(href="https://vcsep.org.uk/",target="_blank",'Contact us'), "through our website")
+            
+        )
+        
+      })
+      
+      # About areas at risk dashboard
       output$about_needs <- renderUI({
         div(h4(tags$strong("Last updated:")),
           p("The dashboard was last updated at", last_updated_time, "on", last_updated_date),
@@ -1215,6 +1287,105 @@ server = function(input, output, session) {
           #  understanding of “People in need” during an emergency, and where such needs may be going unmet."))
           
         )
+      })
+      
+      
+      output$understand_map_top <- renderUI({
+        div(tags$br(), p("The British Red Cross developed a series of", 
+              tags$a(href="https://britishredcrosssociety.github.io/covid-19-vulnerability/",target="_blank","indices"), "to identify UK areas vulnerable 
+              to the effects of COVID-19, and a resilience index which overlays capacity to cope.
+              Using statistical modelling of data from a range of", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/output/metadata_vi.csv", target="_blank", "(mostly open) sources,"), "the indices
+              provide an area rating, which is then used to map areas of need.", tags$br(),
+              "Over time, we will also used the Indices of Multiple Deprivation and continue to develop bespoke maps."))
+      })
+      
+      output$understand_map_middle <- renderUI({
+        div(style="overflow:auto;",
+          tags$br(),
+        h4(tags$strong("Explore by resilience")),
+        h6(tags$strong('Hover over the legend to enlarge')),
+        p(img(src = "bivar-legend_v2.png", width = 225), style="float:left;"), 
+          tags$br(), 
+          tags$br(),
+          "The default map shows the BRC Resilience Index (vulnerability vs capacity to cope). 
+          The black highlights those areas that are most in need areas (i.e. highest vulnerability
+          and least capacity to cope). This lightens to grey for the least in need 
+          (i.e. lowest vulnerability and highest capacity). We selected this colour scheme to try
+          and avoid confusion with the RAG colour scheme that is commonly used in operational 
+          response.", style='float:left;')
+      })
+      
+      output$understand_map_bottom <- renderUI({
+        div(
+        tags$br(),
+        tags$br(),
+        h4(tags$strong("Explore by type of vulnerability")),
+        p("Users can also explore different layers of the map based on vulnerability type, by selecting the button in the top right corner of the map.
+        Data is shown by local authority, where purple indicates the most vulnerable, yellow the least vulnerable only (i.e. not resilience)",
+        tags$li("Economic vulnerability"),
+        tags$li("Socioeconomic vulnerability"),
+        tags$li("Social vulnerability"),
+        tags$li("Health/wellbeing vulnerability"),
+        tags$li("Clinical vulnerability"))
+        )
+        
+      })
+      
+      output$emergency_covid <- renderUI({
+        div(
+            h4(tags$strong("Areas to focus by:")),
+            p(tags$li("the highest number of cases per 100,000"),
+              tags$li("the greates % change in total covid cases over rolling 7-day period")),
+            tags$br(),
+            h4(tags$strong("Area demographics")),
+            p("Based on the indicators used in the BRC Vulnerability and Resilience
+              indices and complimented with open data.", tags$a(href='https://britishredcross.shinyapps.io/resilience-index/',target="_blank",'View the indices'),
+              "or", tags$a(href="https://vcsep.org.uk/",target="_blank",'Contact us'), "for more information"),
+            tags$br(),
+            h4(tags$strong("Map:")),
+            p("This displays the resilience (vulnerability vs capacity to cope) of an areas based on BRC Covid Resilience Index. 
+              Use the toggle below the zoom on the map to highlight the areas on the Areas to focus list"),
+            tags$br(),
+            h4(tags$strong("Covid cases per 100,000")),
+            p("A rolling 7-day average of positive covid tests for each local authority district
+              (lower tier local authority). To convert the rolling average of cases to average of 
+              cases per 100,000, the average number of cases is divided by the population of the
+              local authority district and multiplied by 100,000."),
+            tags$br(),
+            h4(tags$strong("Total covid cases")),
+            p("The total number of new cases (by specimen date) seen over the relevant 7 day period."),
+            tags$br(),
+            h4(tags$strong("% change in covid cases")),
+            p("The % change in new cases (by sepecimen date) between the most recent 
+              relevant 7-day period and the 7-day period prior to that."),
+            tags$br(),
+            h4(tags$strong("Rolling average")),
+            p("This is determined by averaging the number new cases by specimen date on the day itself, the 3 days prior and the 3 days after.
+              For this to be possible this data is the rolling average of 5 days prior to the current day (i.e. starting from 5 days prior to today - the 7 days prior to that).
+              The current relevant 7 day period is up to:", covid_data_date),
+            tags$br(),
+            h4(tags$strong("Source")),
+            p("For more information see", tags$a(href="https://coronavirus.data.gov.uk/", target="_blank", "https://coronavirus.data.gov.uk/."),
+              "This data contains Public Health England data © Crown copyright and database right 2020 and is available under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", " Open Government Licence v3.0."))
+            
+          )
+          
+        
+      })
+      
+      output$emergency_flooding <- renderUI({
+        div(
+          h4(tags$strong("Areas to focus by")),
+          p(tags$li("flood warnings ranked by severity of warning"),
+            tags$li("historical flood incidents per 10,000 people"),
+            tags$li("highest proportion of population living in flood risk areas")),
+          tags$br(),
+          h4(tags$strong("Map")),
+        )
+      })
+      
+      output$data_licensing <- renderUI({
+        
       })
       
     }
