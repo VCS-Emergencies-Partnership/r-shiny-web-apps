@@ -1,318 +1,318 @@
 LAD19CD,TacticalCell,areaName,areaType,date,newCasesBySpecimenDate,newCasesBySpecimenDateChangePercentage,newCasesBySpecimenDateRollingRate,newCasesBySpecimenDateRollingSum
-E06000001,North,Hartlepool,ltla,2021-04-09,3,-31.3,49.1,46
-E06000002,North,Middlesbrough,ltla,2021-04-09,7,-39.5,32.6,46
-E06000003,North,Redcar and Cleveland,ltla,2021-04-09,5,-55.6,14.6,20
-E06000004,North,Stockton-on-Tees,ltla,2021-04-09,6,-57.5,38.5,76
-E06000005,North,Darlington,ltla,2021-04-09,7,-37,43.1,46
-E06000006,North,Halton,ltla,2021-04-09,2,-42.5,17.8,23
-E06000007,North,Warrington,ltla,2021-04-09,16,8.8,35.2,74
-E06000008,North,Blackburn with Darwen,ltla,2021-04-09,16,3.8,72.1,108
-E06000009,North,Blackpool,ltla,2021-04-09,2,-32.1,13.6,19
-E06000010,North,"Kingston upon Hull, City of",ltla,2021-04-09,20,-39.2,63.9,166
-E06000011,North,East Riding of Yorkshire,ltla,2021-04-09,33,22.9,42.5,145
-E06000012,Central,North East Lincolnshire,ltla,2021-04-09,9,-35.7,45.1,72
-E06000013,Central,North Lincolnshire,ltla,2021-04-09,25,-20.4,72.6,125
-E06000014,North,York,ltla,2021-04-09,3,-38.2,10,21
-E06000015,Central,Derby,ltla,2021-04-09,8,-47.4,19.4,50
-E06000016,Central,Leicester,ltla,2021-04-09,47,-7.2,80.5,285
-E06000018,Central,Nottingham,ltla,2021-04-09,13,-4.3,33,110
-E06000017,Central,Rutland,ltla,2021-04-09,1,-36.8,30.1,12
-E06000019,Central,"Herefordshire, County of",ltla,2021-04-09,4,-41.5,12.4,24
-E06000020,Central,Telford and Wrekin,ltla,2021-04-09,2,3.1,18.3,33
-E06000021,Central,Stoke-on-Trent,ltla,2021-04-09,18,-6,55.4,142
-E06000022,South and the Channel Islands,Bath and North East Somerset,ltla,2021-04-09,2,50,14,27
-E06000023,South and the Channel Islands,"Bristol, City of",ltla,2021-04-09,18,-28.5,19,88
-E06000024,South and the Channel Islands,North Somerset,ltla,2021-04-09,5,-21.1,14,30
-E06000025,South and the Channel Islands,South Gloucestershire,ltla,2021-04-09,11,3,23.9,68
-E06000026,South and the Channel Islands,Plymouth,ltla,2021-04-09,0,-41.7,10.7,28
-E06000027,South and the Channel Islands,Torbay,ltla,2021-04-09,2,38.9,18.3,25
-E06000058,South and the Channel Islands,"Bournemouth, Christchurch and Poole",ltla,2021-04-09,6,-41.8,11.6,46
-E06000030,South and the Channel Islands,Swindon,ltla,2021-04-09,4,-37.7,32,71
-E06000031,Central,Peterborough,ltla,2021-04-09,19,-4.7,70.7,143
-E06000032,South East,Luton,ltla,2021-04-09,34,-13.6,86.4,184
-E06000033,South East,Southend-on-Sea,ltla,2021-04-09,8,-43.4,23.5,43
-E06000034,South East,Thurrock,ltla,2021-04-09,5,-2.7,20.6,36
-E06000035,South East,Medway,ltla,2021-04-09,9,-26.4,14,39
-E06000036,South and the Channel Islands,Bracknell Forest,ltla,2021-04-09,6,-22.5,25.3,31
-E06000037,South and the Channel Islands,West Berkshire,ltla,2021-04-09,7,-10.3,16.4,26
-E06000038,South and the Channel Islands,Reading,ltla,2021-04-09,4,23.7,29.1,47
-E06000039,South and the Channel Islands,Slough,ltla,2021-04-09,17,-7.2,68.9,103
-E06000040,South and the Channel Islands,Windsor and Maidenhead,ltla,2021-04-09,5,-10.2,29.1,44
-E06000041,South and the Channel Islands,Wokingham,ltla,2021-04-09,3,-42.1,12.9,22
-E06000042,South and the Channel Islands,Milton Keynes,ltla,2021-04-09,16,4,38.2,103
-E06000043,South East,Brighton and Hove,ltla,2021-04-09,1,-14,12.7,37
-E06000044,South East,Portsmouth,ltla,2021-04-09,7,-26.1,15.8,34
-E06000045,South East,Southampton,ltla,2021-04-09,25,-6.2,53.5,135
-E06000046,South East,Isle of Wight,ltla,2021-04-09,2,76.5,21.2,30
-E06000047,North,County Durham,ltla,2021-04-09,10,-47.8,22.4,119
-E06000049,North,Cheshire East,ltla,2021-04-09,7,-39.4,15.6,60
-E06000050,North,Cheshire West and Chester,ltla,2021-04-09,27,-17.2,21,72
-E06000051,Central,Shropshire,ltla,2021-04-09,4,-38.5,9.9,32
-E06000052,South and the Channel Islands,Cornwall and Isles of Scilly,ltla,2021-04-09,4,-30.8,7.9,45
+E06000001,North,Hartlepool,ltla,2021-04-10,2,-28.1,49.1,46
+E06000002,North,Middlesbrough,ltla,2021-04-10,7,-28.4,34,48
+E06000003,North,Redcar and Cleveland,ltla,2021-04-10,6,-35,19,26
+E06000004,North,Stockton-on-Tees,ltla,2021-04-10,7,-56.7,36,71
+E06000005,North,Darlington,ltla,2021-04-10,3,-49.3,35.6,38
+E06000006,North,Halton,ltla,2021-04-10,1,-35.3,17,22
+E06000007,North,Warrington,ltla,2021-04-10,4,8.7,35.7,75
+E06000008,North,Blackburn with Darwen,ltla,2021-04-10,12,-5.6,68.1,102
+E06000009,North,Blackpool,ltla,2021-04-10,2,-28.6,14.3,20
+E06000010,North,"Kingston upon Hull, City of",ltla,2021-04-10,22,-41,61.6,160
+E06000011,North,East Riding of Yorkshire,ltla,2021-04-10,14,28.4,43.7,149
+E06000012,Central,North East Lincolnshire,ltla,2021-04-10,11,-30.5,45.7,73
+E06000013,Central,North Lincolnshire,ltla,2021-04-10,11,-13.4,74.9,129
+E06000014,North,York,ltla,2021-04-10,3,-17.9,10.9,23
+E06000015,Central,Derby,ltla,2021-04-10,15,-30.2,23.3,60
+E06000016,Central,Leicester,ltla,2021-04-10,23,-14.5,74.8,265
+E06000018,Central,Nottingham,ltla,2021-04-10,8,-1,30.9,103
+E06000017,Central,Rutland,ltla,2021-04-10,2,-50,25,10
+E06000019,Central,"Herefordshire, County of",ltla,2021-04-10,2,-29.4,12.4,24
+E06000020,Central,Telford and Wrekin,ltla,2021-04-10,5,12.5,20,36
+E06000021,Central,Stoke-on-Trent,ltla,2021-04-10,11,0,55.4,142
+E06000022,South and the Channel Islands,Bath and North East Somerset,ltla,2021-04-10,2,42.1,14,27
+E06000023,South and the Channel Islands,"Bristol, City of",ltla,2021-04-10,15,-19.5,20.5,95
+E06000024,South and the Channel Islands,North Somerset,ltla,2021-04-10,2,-18.4,14.4,31
+E06000025,South and the Channel Islands,South Gloucestershire,ltla,2021-04-10,4,17.2,23.9,68
+E06000026,South and the Channel Islands,Plymouth,ltla,2021-04-10,1,-43.2,9.5,25
+E06000027,South and the Channel Islands,Torbay,ltla,2021-04-10,1,33.3,17.6,24
+E06000058,South and the Channel Islands,"Bournemouth, Christchurch and Poole",ltla,2021-04-10,8,-38.5,12.1,48
+E06000030,South and the Channel Islands,Swindon,ltla,2021-04-10,8,-39.6,30.2,67
+E06000031,Central,Peterborough,ltla,2021-04-10,14,8,73.2,148
+E06000032,South East,Luton,ltla,2021-04-10,30,-9.9,89.6,191
+E06000033,South East,Southend-on-Sea,ltla,2021-04-10,3,-45.8,21.3,39
+E06000034,South East,Thurrock,ltla,2021-04-10,4,11.8,21.8,38
+E06000035,South East,Medway,ltla,2021-04-10,6,-15.7,15.4,43
+E06000036,South and the Channel Islands,Bracknell Forest,ltla,2021-04-10,3,-23.1,24.5,30
+E06000037,South and the Channel Islands,West Berkshire,ltla,2021-04-10,1,-17.2,15.1,24
+E06000038,South and the Channel Islands,Reading,ltla,2021-04-10,8,48.6,32.1,52
+E06000039,South and the Channel Islands,Slough,ltla,2021-04-10,18,-8.5,71.6,107
+E06000040,South and the Channel Islands,Windsor and Maidenhead,ltla,2021-04-10,7,22,33,50
+E06000041,South and the Channel Islands,Wokingham,ltla,2021-04-10,6,-17.6,16.4,28
+E06000042,South and the Channel Islands,Milton Keynes,ltla,2021-04-10,4,-3.9,36.4,98
+E06000043,South East,Brighton and Hove,ltla,2021-04-10,8,7.3,15.1,44
+E06000044,South East,Portsmouth,ltla,2021-04-10,3,-7.9,16.3,35
+E06000045,South East,Southampton,ltla,2021-04-10,12,1.5,52.7,133
+E06000046,South East,Isle of Wight,ltla,2021-04-10,0,25,17.6,25
+E06000047,North,County Durham,ltla,2021-04-10,12,-49.5,20.4,108
+E06000049,North,Cheshire East,ltla,2021-04-10,6,-45.4,13.8,53
+E06000050,North,Cheshire West and Chester,ltla,2021-04-10,3,-5.3,21,72
+E06000051,Central,Shropshire,ltla,2021-04-10,2,-42,9,29
+E06000052,South and the Channel Islands,Cornwall and Isles of Scilly,ltla,2021-04-10,2,-41.8,6.8,39
 E06000053,South and the Channel Islands,NA,NA,NA,NA,NA,NA,NA
-E06000054,South and the Channel Islands,Wiltshire,ltla,2021-04-09,11,-1.1,18.2,91
-E06000055,South East,Bedford,ltla,2021-04-09,13,-21.3,21.4,37
-E06000056,South East,Central Bedfordshire,ltla,2021-04-09,9,-35,23.2,67
-E06000057,North,Northumberland,ltla,2021-04-09,13,-24.5,25.7,83
-E07000004,South and the Channel Islands,Aylesbury Vale,ltla,2021-04-09,12,19,24.6,50
-E07000005,South and the Channel Islands,Chiltern,ltla,2021-04-09,4,-21.7,18.7,18
-E07000006,South and the Channel Islands,South Bucks,ltla,2021-04-09,4,-30,19.9,14
-E07000007,South and the Channel Islands,Wycombe,ltla,2021-04-09,4,-6,27,47
-E07000008,Central,Cambridge,ltla,2021-04-09,11,14.3,25.6,32
-E07000009,Central,East Cambridgeshire,ltla,2021-04-09,3,-42.9,22.3,20
-E07000010,Central,Fenland,ltla,2021-04-09,6,10.2,53,54
-E07000011,Central,Huntingdonshire,ltla,2021-04-09,4,-50,13.5,24
-E07000012,Central,South Cambridgeshire,ltla,2021-04-09,3,-20,15.1,24
-E07000026,North,Allerdale,ltla,2021-04-09,2,-50,13.3,13
-E07000027,North,Barrow-in-Furness,ltla,2021-04-09,2,-5.6,25.4,17
-E07000028,North,Carlisle,ltla,2021-04-09,1,44.4,12,13
-E07000029,North,Copeland,ltla,2021-04-09,5,110,30.8,21
-E07000030,North,Eden,ltla,2021-04-09,0,-25,5.6,3
-E07000031,North,South Lakeland,ltla,2021-04-09,0,-50,4.8,5
-E07000032,Central,Amber Valley,ltla,2021-04-09,3,-53.8,9.4,12
-E07000033,Central,Bolsover,ltla,2021-04-09,1,-31,24.8,20
-E07000034,Central,Chesterfield,ltla,2021-04-09,7,-15.6,25.7,27
-E07000035,Central,Derbyshire Dales,ltla,2021-04-09,0,-81.8,2.8,2
-E07000036,Central,Erewash,ltla,2021-04-09,2,-40,18.2,21
-E07000037,Central,High Peak,ltla,2021-04-09,8,31,41,38
-E07000038,Central,North East Derbyshire,ltla,2021-04-09,5,25,44.4,45
-E07000039,Central,South Derbyshire,ltla,2021-04-09,5,-44.2,27,29
-E07000040,South and the Channel Islands,East Devon,ltla,2021-04-09,0,-52.9,5.5,8
-E07000041,South and the Channel Islands,Exeter,ltla,2021-04-09,5,-36.8,9.1,12
-E07000042,South and the Channel Islands,Mid Devon,ltla,2021-04-09,5,0,18.2,15
-E07000043,South and the Channel Islands,North Devon,ltla,2021-04-09,0,0,0,0
-E07000044,South and the Channel Islands,South Hams,ltla,2021-04-09,1,-14.3,6.9,6
-E07000045,South and the Channel Islands,Teignbridge,ltla,2021-04-09,3,20,8.9,12
-E07000046,South and the Channel Islands,Torridge,ltla,2021-04-09,1,0,2.9,2
-E07000047,South and the Channel Islands,West Devon,ltla,2021-04-09,0,-40,5.4,3
-E06000059,South and the Channel Islands,Dorset,ltla,2021-04-09,5,71.1,17.2,65
-E07000061,South East,Eastbourne,ltla,2021-04-09,0,-56.7,12.5,13
-E07000062,South East,Hastings,ltla,2021-04-09,0,-50,3.2,3
-E07000063,South East,Lewes,ltla,2021-04-09,0,-46.2,6.8,7
-E07000064,South East,Rother,ltla,2021-04-09,0,-75,2.1,2
-E07000065,South East,Wealden,ltla,2021-04-09,2,-66.7,6.8,11
-E07000066,South East,Basildon,ltla,2021-04-09,4,-13.8,13.4,25
-E07000067,South East,Braintree,ltla,2021-04-09,2,-21.1,9.8,15
-E07000069,South East,Castle Point,ltla,2021-04-09,3,18.8,21,19
-E07000068,South East,Brentwood,ltla,2021-04-09,3,16.7,18.2,14
-E07000070,South East,Chelmsford,ltla,2021-04-09,2,-54.5,8.4,15
-E07000071,South East,Colchester,ltla,2021-04-09,3,-51.4,9.2,18
-E07000072,South East,Epping Forest,ltla,2021-04-09,1,-42.1,8.4,11
-E07000073,South East,Harlow,ltla,2021-04-09,2,38.5,20.7,18
-E07000074,South East,Maldon,ltla,2021-04-09,0,-50,7.7,5
-E07000075,South East,Rochford,ltla,2021-04-09,2,16.7,16,14
-E07000076,South East,Tendring,ltla,2021-04-09,3,-50,12.3,18
-E07000077,South East,Uttlesford,ltla,2021-04-09,1,-40,6.6,6
-E07000078,South and the Channel Islands,Cheltenham,ltla,2021-04-09,1,27.3,12,14
-E07000079,South and the Channel Islands,Cotswold,ltla,2021-04-09,4,-30,7.8,7
-E07000080,South and the Channel Islands,Forest of Dean,ltla,2021-04-09,1,-42.9,4.6,4
-E07000081,South and the Channel Islands,Gloucester,ltla,2021-04-09,5,-10.5,13.2,17
-E07000082,South and the Channel Islands,Stroud,ltla,2021-04-09,0,-73.3,3.3,4
-E07000083,South and the Channel Islands,Tewkesbury,ltla,2021-04-09,1,20,12.6,12
-E07000084,South East,Basingstoke and Deane,ltla,2021-04-09,5,-24.4,19.3,34
-E07000085,South East,East Hampshire,ltla,2021-04-09,0,-53.3,5.7,7
-E07000086,South East,Eastleigh,ltla,2021-04-09,1,-64.4,15.7,21
-E07000087,South East,Fareham,ltla,2021-04-09,1,-21.1,12.9,15
-E07000088,South East,Gosport,ltla,2021-04-09,2,-50,10.6,9
-E07000089,South East,Hart,ltla,2021-04-09,1,-68.4,12.4,12
-E07000090,South East,Havant,ltla,2021-04-09,2,-8.3,17.4,22
-E07000091,South East,New Forest,ltla,2021-04-09,2,-41.2,11.1,20
-E07000092,South East,Rushmoor,ltla,2021-04-09,0,0,15.9,15
-E07000093,South East,Test Valley,ltla,2021-04-09,5,5.3,31.7,40
-E07000094,South East,Winchester,ltla,2021-04-09,1,-11.1,12.8,16
-E07000095,South East,Broxbourne,ltla,2021-04-09,2,33.3,20.6,20
-E07000096,South East,Dacorum,ltla,2021-04-09,3,-46.8,16.2,25
-E07000098,South East,Hertsmere,ltla,2021-04-09,0,-5.9,15.2,16
-E07000099,South East,North Hertfordshire,ltla,2021-04-09,5,-29,16.5,22
-E07000102,South East,Three Rivers,ltla,2021-04-09,2,-37.8,24.6,23
-E07000103,South East,Watford,ltla,2021-04-09,2,-40.5,25.9,25
-E07000105,South East,Ashford,ltla,2021-04-09,1,-58.1,10,13
-E07000106,South East,Canterbury,ltla,2021-04-09,16,44,21.8,36
-E07000107,South East,Dartford,ltla,2021-04-09,4,-24.4,30.2,34
-E07000108,South East,Dover,ltla,2021-04-09,2,-55.6,6.8,8
-E07000109,South East,Gravesham,ltla,2021-04-09,2,6.7,15,16
-E07000110,South East,Maidstone,ltla,2021-04-09,4,-15,9.9,17
-E07000111,South East,Sevenoaks,ltla,2021-04-09,3,-16.7,12.4,15
-E07000112,South East,Folkestone and Hythe,ltla,2021-04-09,2,-20,3.5,4
-E07000113,South East,Swale,ltla,2021-04-09,4,-49,17.3,26
-E07000114,South East,Thanet,ltla,2021-04-09,1,-37.8,16.2,23
-E07000115,South East,Tonbridge and Malling,ltla,2021-04-09,2,-60.9,6.8,9
-E07000116,South East,Tunbridge Wells,ltla,2021-04-09,0,-66.7,6.7,8
-E07000117,North,Burnley,ltla,2021-04-09,2,-61.2,21.4,19
-E07000118,North,Chorley,ltla,2021-04-09,6,-40,40.6,48
-E07000119,North,Fylde,ltla,2021-04-09,5,50,22.3,18
-E07000120,North,Hyndburn,ltla,2021-04-09,2,-12.2,44.4,36
-E07000121,North,Lancaster,ltla,2021-04-09,4,-24.4,21.2,31
-E07000122,North,Pendle,ltla,2021-04-09,2,-14.8,25,23
-E07000123,North,Preston,ltla,2021-04-09,5,-44.1,43.3,62
-E07000124,North,Ribble Valley,ltla,2021-04-09,0,-40.9,21.4,13
-E07000125,North,Rossendale,ltla,2021-04-09,3,-8.7,29.4,21
-E07000126,North,South Ribble,ltla,2021-04-09,8,26.8,46.9,52
-E07000127,North,West Lancashire,ltla,2021-04-09,0,-47.5,18.4,21
-E07000128,North,Wyre,ltla,2021-04-09,2,-21.4,9.8,11
-E07000129,Central,Blaby,ltla,2021-04-09,6,-2.2,44.3,45
-E07000130,Central,Charnwood,ltla,2021-04-09,9,-16.7,43,80
-E07000131,Central,Harborough,ltla,2021-04-09,2,-18.8,13.9,13
-E07000132,Central,Hinckley and Bosworth,ltla,2021-04-09,4,-55.2,34.5,39
-E07000133,Central,Melton,ltla,2021-04-09,10,0,64.4,33
-E07000134,Central,North West Leicestershire,ltla,2021-04-09,3,-38.1,25.1,26
-E07000135,Central,Oadby and Wigston,ltla,2021-04-09,4,-36.8,42.1,24
-E07000136,Central,Boston,ltla,2021-04-09,12,3.6,81.2,57
-E07000137,Central,East Lindsey,ltla,2021-04-09,1,-43.3,24,34
-E07000138,Central,Lincoln,ltla,2021-04-09,3,-63.3,11.1,11
-E07000139,Central,North Kesteven,ltla,2021-04-09,4,-32.3,18,21
-E07000140,Central,South Holland,ltla,2021-04-09,7,-25.8,69.5,66
-E07000141,Central,South Kesteven,ltla,2021-04-09,11,-33.3,50.6,72
-E07000142,Central,West Lindsey,ltla,2021-04-09,0,-52.5,29.3,28
-E07000143,Central,Breckland,ltla,2021-04-09,4,-59,11.4,16
-E07000144,Central,Broadland,ltla,2021-04-09,0,-90,3.8,5
-E07000145,Central,Great Yarmouth,ltla,2021-04-09,0,12.5,9.1,9
-E07000146,Central,King's Lynn and West Norfolk,ltla,2021-04-09,7,8.3,25.8,39
-E07000147,Central,North Norfolk,ltla,2021-04-09,0,-66.7,2.9,3
-E07000148,Central,Norwich,ltla,2021-04-09,0,20,12.8,18
-E07000149,Central,South Norfolk,ltla,2021-04-09,4,-22.6,17,24
-E07000150,Central,Corby,ltla,2021-04-09,7,-32.7,96.9,70
-E07000151,Central,Daventry,ltla,2021-04-09,3,-51.3,22.1,19
-E07000152,Central,East Northamptonshire,ltla,2021-04-09,7,-25.5,40.2,38
-E07000153,Central,Kettering,ltla,2021-04-09,9,-30.3,45.2,46
-E07000154,Central,Northampton,ltla,2021-04-09,10,-17.1,47.6,107
-E07000155,Central,South Northamptonshire,ltla,2021-04-09,1,-44.4,15.9,15
-E07000156,Central,Wellingborough,ltla,2021-04-09,7,13.2,75.3,60
-E07000164,North,Hambleton,ltla,2021-04-09,1,-57.9,8.7,8
-E07000163,North,Craven,ltla,2021-04-09,1,-25.9,35,20
-E07000165,North,Harrogate,ltla,2021-04-09,3,55.6,17.4,28
-E07000166,North,Richmondshire,ltla,2021-04-09,1,-42.9,14.9,8
-E07000168,North,Scarborough,ltla,2021-04-09,6,-46.3,26.7,29
-E07000167,North,Ryedale,ltla,2021-04-09,2,550,23.5,13
-E07000169,North,Selby,ltla,2021-04-09,7,-42.6,34.2,31
-E07000170,Central,Ashfield,ltla,2021-04-09,4,-43.4,23.5,30
-E07000171,Central,Bassetlaw,ltla,2021-04-09,2,-32.7,29.8,35
-E07000172,Central,Broxtowe,ltla,2021-04-09,3,-69.1,14.9,17
-E07000173,Central,Gedling,ltla,2021-04-09,8,-9.3,41.6,49
-E07000174,Central,Mansfield,ltla,2021-04-09,9,1.9,98.8,108
-E07000175,Central,Newark and Sherwood,ltla,2021-04-09,4,-39.4,35.1,43
-E07000176,Central,Rushcliffe,ltla,2021-04-09,0,-66.7,5.9,7
-E07000177,South and the Channel Islands,Cherwell,ltla,2021-04-09,5,-24.1,14.6,22
-E07000178,South and the Channel Islands,Oxford,ltla,2021-04-09,7,-17.9,36.1,55
-E07000179,South and the Channel Islands,South Oxfordshire,ltla,2021-04-09,9,-26.9,26.7,38
-E07000180,South and the Channel Islands,Vale of White Horse,ltla,2021-04-09,2,-42.9,17.6,24
-E07000181,South and the Channel Islands,West Oxfordshire,ltla,2021-04-09,1,-68.3,11.7,13
-E07000187,South and the Channel Islands,Mendip,ltla,2021-04-09,2,72.7,16.4,19
-E07000188,South and the Channel Islands,Sedgemoor,ltla,2021-04-09,3,-36.4,22.7,28
-E07000189,South and the Channel Islands,South Somerset,ltla,2021-04-09,3,-44.8,19,32
-E07000246,South and the Channel Islands,Somerset West and Taunton,ltla,2021-04-09,0,-32,11,17
-E07000192,Central,Cannock Chase,ltla,2021-04-09,2,-54.5,9.9,10
-E07000193,Central,East Staffordshire,ltla,2021-04-09,4,-36.5,27.6,33
-E07000194,Central,Lichfield,ltla,2021-04-09,6,-42.9,19.1,20
-E07000195,Central,Newcastle-under-Lyme,ltla,2021-04-09,6,-47.5,16.2,21
-E07000196,Central,South Staffordshire,ltla,2021-04-09,0,-33.3,12.5,14
-E07000197,Central,Stafford,ltla,2021-04-09,4,11.8,13.8,19
-E07000198,Central,Staffordshire Moorlands,ltla,2021-04-09,6,-55.3,17.3,17
-E07000199,Central,Tamworth,ltla,2021-04-09,2,-46,35.2,27
-E07000200,Central,Babergh,ltla,2021-04-09,0,-18.2,9.8,9
-E07000245,Central,West Suffolk,ltla,2021-04-09,0,-44.2,13.4,24
-E07000202,Central,Ipswich,ltla,2021-04-09,14,-10.7,48.9,67
-E07000203,Central,Mid Suffolk,ltla,2021-04-09,3,-10.5,16.4,17
-E07000244,Central,East Suffolk,ltla,2021-04-09,4,-14,14.8,37
-E07000207,South East,Elmbridge,ltla,2021-04-09,1,-50,9.5,13
-E07000208,South East,Epsom and Ewell,ltla,2021-04-09,1,-50,17.4,14
-E07000209,South East,Guildford,ltla,2021-04-09,3,16.7,9.4,14
-E07000211,South East,Reigate and Banstead,ltla,2021-04-09,1,-20,13.4,20
-E07000210,South East,Mole Valley,ltla,2021-04-09,2,14.3,18.3,16
-E07000212,South East,Runnymede,ltla,2021-04-09,2,-22.2,15.7,14
-E07000213,South East,Spelthorne,ltla,2021-04-09,2,-39.4,20,20
-E07000214,South East,Surrey Heath,ltla,2021-04-09,2,0,13.4,12
-E07000215,South East,Tandridge,ltla,2021-04-09,0,-50,5.7,5
-E07000216,South East,Waverley,ltla,2021-04-09,2,62.5,10.3,13
-E07000217,South East,Woking,ltla,2021-04-09,4,-35.9,24.8,25
-E07000218,Central,North Warwickshire,ltla,2021-04-09,6,-50,46,30
-E07000219,Central,Nuneaton and Bedworth,ltla,2021-04-09,7,-41.4,26.2,34
-E07000220,Central,Rugby,ltla,2021-04-09,9,-6.7,51.4,56
-E07000221,Central,Stratford-on-Avon,ltla,2021-04-09,0,-20.9,26.1,34
-E07000222,Central,Warwick,ltla,2021-04-09,4,-25,18.8,27
-E07000223,South East,Adur,ltla,2021-04-09,3,20,18.7,12
-E07000224,South East,Arun,ltla,2021-04-09,4,22.9,26.7,43
-E07000225,South East,Chichester,ltla,2021-04-09,0,-44,11.6,14
-E07000226,South East,Crawley,ltla,2021-04-09,1,-42.9,14.2,16
-E07000227,South East,Horsham,ltla,2021-04-09,1,-22.2,9.7,14
-E07000228,South East,Mid Sussex,ltla,2021-04-09,2,-17.6,9.3,14
-E07000229,South East,Worthing,ltla,2021-04-09,2,-27.3,14.5,16
-E07000234,Central,Bromsgrove,ltla,2021-04-09,1,-50,10,10
-E07000235,Central,Malvern Hills,ltla,2021-04-09,0,-66.7,5.1,4
-E07000236,Central,Redditch,ltla,2021-04-09,3,-55.6,23.5,20
-E07000237,Central,Worcester,ltla,2021-04-09,0,-57.6,13.8,14
-E07000238,Central,Wychavon,ltla,2021-04-09,2,-72.9,10,13
-E07000239,Central,Wyre Forest,ltla,2021-04-09,3,-56.1,17.8,18
-E07000240,South East,St Albans,ltla,2021-04-09,6,19,16.8,25
-E07000241,South East,Welwyn Hatfield,ltla,2021-04-09,1,-51.5,13,16
-E07000242,South East,East Hertfordshire,ltla,2021-04-09,3,11.8,12.7,19
-E07000243,South East,Stevenage,ltla,2021-04-09,5,-53.7,21.6,19
-E08000001,North,Bolton,ltla,2021-04-09,11,-33.8,50.4,145
-E08000002,North,Bury,ltla,2021-04-09,7,-40.4,32.5,62
-E08000003,North,Manchester,ltla,2021-04-09,49,-29.6,50.8,281
-E08000004,North,Oldham,ltla,2021-04-09,21,-22.7,60.3,143
-E08000005,North,Rochdale,ltla,2021-04-09,18,-13.1,62.5,139
-E08000006,North,Salford,ltla,2021-04-09,13,-31.6,40.2,104
-E08000007,North,Stockport,ltla,2021-04-09,16,-28.7,40.6,119
-E08000008,North,Tameside,ltla,2021-04-09,12,-50.6,38.4,87
-E08000009,North,Trafford,ltla,2021-04-09,6,-36.6,32.9,78
-E08000010,North,Wigan,ltla,2021-04-09,15,-17.6,47.2,155
-E08000011,North,Knowsley,ltla,2021-04-09,5,-26.3,18.6,28
-E08000012,North,Liverpool,ltla,2021-04-09,7,-21.6,17.5,87
-E08000013,North,St. Helens,ltla,2021-04-09,4,3.9,29.3,53
-E08000014,North,Sefton,ltla,2021-04-09,5,-31.5,18.1,50
-E08000015,North,Wirral,ltla,2021-04-09,3,-51.6,9.3,30
-E08000016,North,Barnsley,ltla,2021-04-09,21,-19,88.3,218
-E08000017,North,Doncaster,ltla,2021-04-09,36,-29.9,80.5,251
-E08000018,North,Rotherham,ltla,2021-04-09,39,-16.3,79.1,210
-E08000019,North,Sheffield,ltla,2021-04-09,48,-26.8,68.6,401
-E08000021,North,Newcastle upon Tyne,ltla,2021-04-09,19,-45.2,32,97
-E08000022,North,North Tyneside,ltla,2021-04-09,8,-21.2,39.4,82
-E08000023,North,South Tyneside,ltla,2021-04-09,1,-67.3,11.3,17
-E08000024,North,Sunderland,ltla,2021-04-09,7,-26.2,32.4,90
-E08000025,Central,Birmingham,ltla,2021-04-09,56,-36.6,29,331
-E08000026,Central,Coventry,ltla,2021-04-09,18,-30.5,28.8,107
-E08000027,Central,Dudley,ltla,2021-04-09,10,-40.9,30.2,97
-E08000028,Central,Sandwell,ltla,2021-04-09,12,-27,42,138
-E08000029,Central,Solihull,ltla,2021-04-09,13,-18.7,28.2,61
-E08000030,Central,Walsall,ltla,2021-04-09,19,-32.1,43.8,125
-E08000031,Central,Wolverhampton,ltla,2021-04-09,13,-41.2,34.2,90
-E08000032,North,Bradford,ltla,2021-04-09,68,2.1,88.6,478
-E08000033,North,Calderdale,ltla,2021-04-09,5,-40.6,29.8,63
-E08000034,North,Kirklees,ltla,2021-04-09,41,-1.5,74.6,328
-E08000035,North,Leeds,ltla,2021-04-09,60,-27.2,63,500
-E08000036,North,Wakefield,ltla,2021-04-09,35,-24.5,81.5,284
-E08000037,North,Gateshead,ltla,2021-04-09,4,-52.4,19.3,39
-E09000002,London,Barking and Dagenham,ltla,2021-04-09,10,-26.5,28.7,61
+E06000054,South and the Channel Islands,Wiltshire,ltla,2021-04-10,3,-6.7,16.8,84
+E06000055,South East,Bedford,ltla,2021-04-10,6,2.5,23.7,41
+E06000056,South East,Central Bedfordshire,ltla,2021-04-10,6,-26.1,23.6,68
+E06000057,North,Northumberland,ltla,2021-04-10,8,-16,26.1,84
+E07000004,South and the Channel Islands,Aylesbury Vale,ltla,2021-04-10,5,27.5,25.1,51
+E07000005,South and the Channel Islands,Chiltern,ltla,2021-04-10,1,-5,19.8,19
+E07000006,South and the Channel Islands,South Bucks,ltla,2021-04-10,5,-10,25.6,18
+E07000007,South and the Channel Islands,Wycombe,ltla,2021-04-10,9,42.5,32.7,57
+E07000008,Central,Cambridge,ltla,2021-04-10,5,25.9,27.2,34
+E07000009,Central,East Cambridgeshire,ltla,2021-04-10,2,-34.4,23.4,21
+E07000010,Central,Fenland,ltla,2021-04-10,5,-7.7,47.1,48
+E07000011,Central,Huntingdonshire,ltla,2021-04-10,4,-34.9,15.7,28
+E07000012,Central,South Cambridgeshire,ltla,2021-04-10,3,-7.4,15.7,25
+E07000026,North,Allerdale,ltla,2021-04-10,4,-33.3,16.4,16
+E07000027,North,Barrow-in-Furness,ltla,2021-04-10,1,5.9,26.8,18
+E07000028,North,Carlisle,ltla,2021-04-10,1,55.6,12.9,14
+E07000029,North,Copeland,ltla,2021-04-10,0,80,26.4,18
+E07000030,North,Eden,ltla,2021-04-10,1,-25,5.6,3
+E07000031,North,South Lakeland,ltla,2021-04-10,1,-50,4.8,5
+E07000032,Central,Amber Valley,ltla,2021-04-10,1,-57.7,8.6,11
+E07000033,Central,Bolsover,ltla,2021-04-10,1,-45.2,21.1,17
+E07000034,Central,Chesterfield,ltla,2021-04-10,3,3.6,27.6,29
+E07000035,Central,Derbyshire Dales,ltla,2021-04-10,0,-81.8,2.8,2
+E07000036,Central,Erewash,ltla,2021-04-10,3,-42.9,17.3,20
+E07000037,Central,High Peak,ltla,2021-04-10,2,27.6,39.9,37
+E07000038,Central,North East Derbyshire,ltla,2021-04-10,8,17.5,46.3,47
+E07000039,Central,South Derbyshire,ltla,2021-04-10,0,-62.3,18.6,20
+E07000040,South and the Channel Islands,East Devon,ltla,2021-04-10,1,-52.9,5.5,8
+E07000041,South and the Channel Islands,Exeter,ltla,2021-04-10,3,-18.8,9.9,13
+E07000042,South and the Channel Islands,Mid Devon,ltla,2021-04-10,3,14.3,19.4,16
+E07000043,South and the Channel Islands,North Devon,ltla,2021-04-10,1,-90,1,1
+E07000044,South and the Channel Islands,South Hams,ltla,2021-04-10,2,33.3,9.2,8
+E07000045,South and the Channel Islands,Teignbridge,ltla,2021-04-10,1,0,8.2,11
+E07000046,South and the Channel Islands,Torridge,ltla,2021-04-10,0,0,2.9,2
+E07000047,South and the Channel Islands,West Devon,ltla,2021-04-10,1,-20,7.2,4
+E06000059,South and the Channel Islands,Dorset,ltla,2021-04-10,3,34.9,15.3,58
+E07000061,South East,Eastbourne,ltla,2021-04-10,1,-68.8,9.6,10
+E07000062,South East,Hastings,ltla,2021-04-10,1,-33.3,4.3,4
+E07000063,South East,Lewes,ltla,2021-04-10,2,-53.3,6.8,7
+E07000064,South East,Rother,ltla,2021-04-10,0,-83.3,1,1
+E07000065,South East,Wealden,ltla,2021-04-10,1,-62.1,6.8,11
+E07000066,South East,Basildon,ltla,2021-04-10,5,16,15.5,29
+E07000067,South East,Braintree,ltla,2021-04-10,2,23.1,10.5,16
+E07000069,South East,Castle Point,ltla,2021-04-10,4,61.5,23.2,21
+E07000068,South East,Brentwood,ltla,2021-04-10,2,15.4,19.5,15
+E07000070,South East,Chelmsford,ltla,2021-04-10,1,-50,7.8,14
+E07000071,South East,Colchester,ltla,2021-04-10,3,-42.4,9.8,19
+E07000072,South East,Epping Forest,ltla,2021-04-10,1,-52.6,6.8,9
+E07000073,South East,Harlow,ltla,2021-04-10,1,28.6,20.7,18
+E07000074,South East,Maldon,ltla,2021-04-10,0,-50,7.7,5
+E07000075,South East,Rochford,ltla,2021-04-10,3,88.9,19.5,17
+E07000076,South East,Tendring,ltla,2021-04-10,4,-42.4,13,19
+E07000077,South East,Uttlesford,ltla,2021-04-10,1,-22.2,7.7,7
+E07000078,South and the Channel Islands,Cheltenham,ltla,2021-04-10,3,36.4,12.9,15
+E07000079,South and the Channel Islands,Cotswold,ltla,2021-04-10,0,-22.2,7.8,7
+E07000080,South and the Channel Islands,Forest of Dean,ltla,2021-04-10,2,-28.6,5.8,5
+E07000081,South and the Channel Islands,Gloucester,ltla,2021-04-10,0,0,13.2,17
+E07000082,South and the Channel Islands,Stroud,ltla,2021-04-10,1,-66.7,3.3,4
+E07000083,South and the Channel Islands,Tewkesbury,ltla,2021-04-10,1,-23.1,10.5,10
+E07000084,South East,Basingstoke and Deane,ltla,2021-04-10,3,-25.6,18.1,32
+E07000085,South East,East Hampshire,ltla,2021-04-10,3,-33.3,8.2,10
+E07000086,South East,Eastleigh,ltla,2021-04-10,1,-69.6,12.7,17
+E07000087,South East,Fareham,ltla,2021-04-10,2,14.3,13.8,16
+E07000088,South East,Gosport,ltla,2021-04-10,1,-37.5,11.8,10
+E07000089,South East,Hart,ltla,2021-04-10,3,-62.9,13.4,13
+E07000090,South East,Havant,ltla,2021-04-10,3,4.5,18.2,23
+E07000091,South East,New Forest,ltla,2021-04-10,0,-45.2,9.4,17
+E07000092,South East,Rushmoor,ltla,2021-04-10,4,20,19,18
+E07000093,South East,Test Valley,ltla,2021-04-10,4,22.9,34.1,43
+E07000094,South East,Winchester,ltla,2021-04-10,3,21.4,13.6,17
+E07000095,South East,Broxbourne,ltla,2021-04-10,4,50,21.6,21
+E07000096,South East,Dacorum,ltla,2021-04-10,5,-47.8,15.5,24
+E07000098,South East,Hertsmere,ltla,2021-04-10,3,-22.2,13.3,14
+E07000099,South East,North Hertfordshire,ltla,2021-04-10,0,-33.3,15,20
+E07000102,South East,Three Rivers,ltla,2021-04-10,2,-30.6,26.8,25
+E07000103,South East,Watford,ltla,2021-04-10,6,-51.1,23.8,23
+E07000105,South East,Ashford,ltla,2021-04-10,1,-66.7,7.7,10
+E07000106,South East,Canterbury,ltla,2021-04-10,10,95.5,26,43
+E07000107,South East,Dartford,ltla,2021-04-10,7,-18.2,32,36
+E07000108,South East,Dover,ltla,2021-04-10,1,-30.8,7.6,9
+E07000109,South East,Gravesham,ltla,2021-04-10,2,6.2,15.9,17
+E07000110,South East,Maidstone,ltla,2021-04-10,1,-15,9.9,17
+E07000111,South East,Sevenoaks,ltla,2021-04-10,1,-15.8,13.3,16
+E07000112,South East,Folkestone and Hythe,ltla,2021-04-10,0,33.3,3.5,4
+E07000113,South East,Swale,ltla,2021-04-10,2,-40.5,16.7,25
+E07000114,South East,Thanet,ltla,2021-04-10,3,-46.2,14.8,21
+E07000115,South East,Tonbridge and Malling,ltla,2021-04-10,0,-71.4,4.5,6
+E07000116,South East,Tunbridge Wells,ltla,2021-04-10,1,-61.9,6.7,8
+E07000117,North,Burnley,ltla,2021-04-10,7,-52.3,23.6,21
+E07000118,North,Chorley,ltla,2021-04-10,7,-39.4,36.4,43
+E07000119,North,Fylde,ltla,2021-04-10,2,54.5,21,17
+E07000120,North,Hyndburn,ltla,2021-04-10,4,0,46.9,38
+E07000121,North,Lancaster,ltla,2021-04-10,1,-6.2,20.5,30
+E07000122,North,Pendle,ltla,2021-04-10,5,0,29.3,27
+E07000123,North,Preston,ltla,2021-04-10,7,-34.7,46.1,66
+E07000124,North,Ribble Valley,ltla,2021-04-10,4,-36.4,23,14
+E07000125,North,Rossendale,ltla,2021-04-10,0,-42.3,21,15
+E07000126,North,South Ribble,ltla,2021-04-10,9,11.4,44.2,49
+E07000127,North,West Lancashire,ltla,2021-04-10,5,-35.3,19.2,22
+E07000128,North,Wyre,ltla,2021-04-10,3,-14.3,10.7,12
+E07000129,Central,Blaby,ltla,2021-04-10,3,-4.4,42.4,43
+E07000130,Central,Charnwood,ltla,2021-04-10,8,-23.4,38.7,72
+E07000131,Central,Harborough,ltla,2021-04-10,0,-31.2,11.7,11
+E07000132,Central,Hinckley and Bosworth,ltla,2021-04-10,6,-40,37.1,42
+E07000133,Central,Melton,ltla,2021-04-10,2,6.7,62.5,32
+E07000134,Central,North West Leicestershire,ltla,2021-04-10,4,-9.7,27,28
+E07000135,Central,Oadby and Wigston,ltla,2021-04-10,7,-23.7,50.9,29
+E07000136,Central,Boston,ltla,2021-04-10,4,18.4,82.7,58
+E07000137,Central,East Lindsey,ltla,2021-04-10,1,-51.8,19.1,27
+E07000138,Central,Lincoln,ltla,2021-04-10,1,-54.2,11.1,11
+E07000139,Central,North Kesteven,ltla,2021-04-10,1,-47.1,15.4,18
+E07000140,Central,South Holland,ltla,2021-04-10,5,-19.3,70.5,67
+E07000141,Central,South Kesteven,ltla,2021-04-10,4,-36.3,45.6,65
+E07000142,Central,West Lindsey,ltla,2021-04-10,2,-58.2,24,23
+E07000143,Central,Breckland,ltla,2021-04-10,2,-47.1,12.9,18
+E07000144,Central,Broadland,ltla,2021-04-10,0,-88.1,3.8,5
+E07000145,Central,Great Yarmouth,ltla,2021-04-10,1,-30,7,7
+E07000146,Central,King's Lynn and West Norfolk,ltla,2021-04-10,4,-14.3,23.8,36
+E07000147,Central,North Norfolk,ltla,2021-04-10,1,-55.6,3.8,4
+E07000148,Central,Norwich,ltla,2021-04-10,2,26.7,13.5,19
+E07000149,Central,South Norfolk,ltla,2021-04-10,1,-47.2,13.5,19
+E07000150,Central,Corby,ltla,2021-04-10,6,-36.6,88.6,64
+E07000151,Central,Daventry,ltla,2021-04-10,4,-50,23.3,20
+E07000152,Central,East Northamptonshire,ltla,2021-04-10,2,-47.4,31.7,30
+E07000153,Central,Kettering,ltla,2021-04-10,11,-21,48.1,49
+E07000154,Central,Northampton,ltla,2021-04-10,5,-16.1,44.1,99
+E07000155,Central,South Northamptonshire,ltla,2021-04-10,5,-34.6,18,17
+E07000156,Central,Wellingborough,ltla,2021-04-10,10,5.1,77.8,62
+E07000164,North,Hambleton,ltla,2021-04-10,1,-58.8,7.6,7
+E07000163,North,Craven,ltla,2021-04-10,3,-12.5,36.8,21
+E07000165,North,Harrogate,ltla,2021-04-10,5,52.6,18,29
+E07000166,North,Richmondshire,ltla,2021-04-10,0,-38.5,14.9,8
+E07000168,North,Scarborough,ltla,2021-04-10,0,-54.9,21.1,23
+E07000167,North,Ryedale,ltla,2021-04-10,4,180,25.3,14
+E07000169,North,Selby,ltla,2021-04-10,10,-17.4,41.9,38
+E07000170,Central,Ashfield,ltla,2021-04-10,2,-39.6,22.7,29
+E07000171,Central,Bassetlaw,ltla,2021-04-10,8,-22,33.2,39
+E07000172,Central,Broxtowe,ltla,2021-04-10,2,-66.7,14.9,17
+E07000173,Central,Gedling,ltla,2021-04-10,2,-19.6,38.2,45
+E07000174,Central,Mansfield,ltla,2021-04-10,10,1.9,98.8,108
+E07000175,Central,Newark and Sherwood,ltla,2021-04-10,2,-43.3,31,38
+E07000176,Central,Rushcliffe,ltla,2021-04-10,1,-63.2,5.9,7
+E07000177,South and the Channel Islands,Cherwell,ltla,2021-04-10,1,-21.4,14.6,22
+E07000178,South and the Channel Islands,Oxford,ltla,2021-04-10,3,-27.5,32.8,50
+E07000179,South and the Channel Islands,South Oxfordshire,ltla,2021-04-10,0,-46.6,21.8,31
+E07000180,South and the Channel Islands,Vale of White Horse,ltla,2021-04-10,3,-39,18.4,25
+E07000181,South and the Channel Islands,West Oxfordshire,ltla,2021-04-10,1,-66.7,10.8,12
+E07000187,South and the Channel Islands,Mendip,ltla,2021-04-10,3,72.7,16.4,19
+E07000188,South and the Channel Islands,Sedgemoor,ltla,2021-04-10,2,-43.5,21.1,26
+E07000189,South and the Channel Islands,South Somerset,ltla,2021-04-10,0,-42,17.2,29
+E07000246,South and the Channel Islands,Somerset West and Taunton,ltla,2021-04-10,2,-21.7,11.6,18
+E07000192,Central,Cannock Chase,ltla,2021-04-10,0,-47.4,9.9,10
+E07000193,Central,East Staffordshire,ltla,2021-04-10,7,-32.7,29.2,35
+E07000194,Central,Lichfield,ltla,2021-04-10,0,-42.4,18.1,19
+E07000195,Central,Newcastle-under-Lyme,ltla,2021-04-10,4,-34.2,19.3,25
+E07000196,Central,South Staffordshire,ltla,2021-04-10,3,-11.1,14.2,16
+E07000197,Central,Stafford,ltla,2021-04-10,2,-10.5,12.4,17
+E07000198,Central,Staffordshire Moorlands,ltla,2021-04-10,3,-48.6,19.3,19
+E07000199,Central,Tamworth,ltla,2021-04-10,0,-38.1,33.9,26
+E07000200,Central,Babergh,ltla,2021-04-10,1,-38.5,8.7,8
+E07000245,Central,West Suffolk,ltla,2021-04-10,0,-44.7,11.7,21
+E07000202,Central,Ipswich,ltla,2021-04-10,7,-15.8,46.7,64
+E07000203,Central,Mid Suffolk,ltla,2021-04-10,1,-22.2,13.5,14
+E07000244,Central,East Suffolk,ltla,2021-04-10,5,11.4,15.6,39
+E07000207,South East,Elmbridge,ltla,2021-04-10,1,-59.3,8,11
+E07000208,South East,Epsom and Ewell,ltla,2021-04-10,0,-40.9,16.1,13
+E07000209,South East,Guildford,ltla,2021-04-10,7,81.8,13.4,20
+E07000211,South East,Reigate and Banstead,ltla,2021-04-10,2,-17.4,12.8,19
+E07000210,South East,Mole Valley,ltla,2021-04-10,0,-20,13.8,12
+E07000212,South East,Runnymede,ltla,2021-04-10,1,-12.5,15.7,14
+E07000213,South East,Spelthorne,ltla,2021-04-10,3,-41.2,20,20
+E07000214,South East,Surrey Heath,ltla,2021-04-10,1,30,14.6,13
+E07000215,South East,Tandridge,ltla,2021-04-10,0,-44.4,5.7,5
+E07000216,South East,Waverley,ltla,2021-04-10,0,33.3,9.5,12
+E07000217,South East,Woking,ltla,2021-04-10,6,-41.9,24.8,25
+E07000218,Central,North Warwickshire,ltla,2021-04-10,4,-36.7,47.5,31
+E07000219,Central,Nuneaton and Bedworth,ltla,2021-04-10,7,-36.4,26.9,35
+E07000220,Central,Rugby,ltla,2021-04-10,1,-7.1,47.7,52
+E07000221,Central,Stratford-on-Avon,ltla,2021-04-10,0,-26.8,23.1,30
+E07000222,Central,Warwick,ltla,2021-04-10,1,-41,16,23
+E07000223,South East,Adur,ltla,2021-04-10,1,-8.3,17.1,11
+E07000224,South East,Arun,ltla,2021-04-10,2,31.2,26.1,42
+E07000225,South East,Chichester,ltla,2021-04-10,2,-42.3,12.4,15
+E07000226,South East,Crawley,ltla,2021-04-10,5,-28.6,17.8,20
+E07000227,South East,Horsham,ltla,2021-04-10,2,-26.3,9.7,14
+E07000228,South East,Mid Sussex,ltla,2021-04-10,3,0,10.6,16
+E07000229,South East,Worthing,ltla,2021-04-10,3,-19,15.4,17
+E07000234,Central,Bromsgrove,ltla,2021-04-10,0,-50,9,9
+E07000235,Central,Malvern Hills,ltla,2021-04-10,3,-22.2,8.9,7
+E07000236,Central,Redditch,ltla,2021-04-10,3,-47.5,24.6,21
+E07000237,Central,Worcester,ltla,2021-04-10,1,-50,13.8,14
+E07000238,Central,Wychavon,ltla,2021-04-10,0,-73.9,9.3,12
+E07000239,Central,Wyre Forest,ltla,2021-04-10,1,-69,12.8,13
+E07000240,South East,St Albans,ltla,2021-04-10,4,22.7,18.2,27
+E07000241,South East,Welwyn Hatfield,ltla,2021-04-10,6,-56.8,13,16
+E07000242,South East,East Hertfordshire,ltla,2021-04-10,1,12.5,12,18
+E07000243,South East,Stevenage,ltla,2021-04-10,3,-50,20.5,18
+E08000001,North,Bolton,ltla,2021-04-10,9,-38.7,46.3,133
+E08000002,North,Bury,ltla,2021-04-10,5,-38.8,31.4,60
+E08000003,North,Manchester,ltla,2021-04-10,36,-20.9,53.4,295
+E08000004,North,Oldham,ltla,2021-04-10,16,-17.3,60.3,143
+E08000005,North,Rochdale,ltla,2021-04-10,8,-13.1,59.8,133
+E08000006,North,Salford,ltla,2021-04-10,7,-25.5,39.4,102
+E08000007,North,Stockport,ltla,2021-04-10,9,-30.7,38.5,113
+E08000008,North,Tameside,ltla,2021-04-10,10,-49.1,37.5,85
+E08000009,North,Trafford,ltla,2021-04-10,15,-26.4,34.1,81
+E08000010,North,Wigan,ltla,2021-04-10,15,-12.5,46.9,154
+E08000011,North,Knowsley,ltla,2021-04-10,6,-11.4,20.5,31
+E08000012,North,Liverpool,ltla,2021-04-10,5,-25.2,16.1,80
+E08000013,North,St. Helens,ltla,2021-04-10,3,13.3,28.2,51
+E08000014,North,Sefton,ltla,2021-04-10,8,-17.9,19.9,55
+E08000015,North,Wirral,ltla,2021-04-10,5,-44.1,10.2,33
+E08000016,North,Barnsley,ltla,2021-04-10,33,-13.7,89.5,221
+E08000017,North,Doncaster,ltla,2021-04-10,36,-19.5,83.4,260
+E08000018,North,Rotherham,ltla,2021-04-10,16,-17,75.4,200
+E08000019,North,Sheffield,ltla,2021-04-10,42,-28.1,65.1,381
+E08000021,North,Newcastle upon Tyne,ltla,2021-04-10,17,-37.5,34.7,105
+E08000022,North,North Tyneside,ltla,2021-04-10,6,-7.8,39.9,83
+E08000023,North,South Tyneside,ltla,2021-04-10,2,-65.2,10.6,16
+E08000024,North,Sunderland,ltla,2021-04-10,4,-19.6,29.5,82
+E08000025,Central,Birmingham,ltla,2021-04-10,40,-29.6,29.8,340
+E08000026,Central,Coventry,ltla,2021-04-10,10,-35.5,26.9,100
+E08000027,Central,Dudley,ltla,2021-04-10,4,-41.6,28,90
+E08000028,Central,Sandwell,ltla,2021-04-10,19,-23,42.9,141
+E08000029,Central,Solihull,ltla,2021-04-10,4,-22.2,25.9,56
+E08000030,Central,Walsall,ltla,2021-04-10,11,-33.1,41.7,119
+E08000031,Central,Wolverhampton,ltla,2021-04-10,10,-48.4,31.5,83
+E08000032,North,Bradford,ltla,2021-04-10,72,7,90.6,489
+E08000033,North,Calderdale,ltla,2021-04-10,15,-44,28.8,61
+E08000034,North,Kirklees,ltla,2021-04-10,34,6.5,75,330
+E08000035,North,Leeds,ltla,2021-04-10,48,-28,60.9,483
+E08000036,North,Wakefield,ltla,2021-04-10,32,-27.2,77.5,270
+E08000037,North,Gateshead,ltla,2021-04-10,5,-49.4,19.8,40
+E09000002,London,Barking and Dagenham,ltla,2021-04-10,7,-17.9,30.1,64
 E09000001,London,NA,NA,NA,NA,NA,NA,NA
-E09000003,London,Barnet,ltla,2021-04-09,17,-11.4,25.5,101
-E09000004,London,Bexley,ltla,2021-04-09,5,-61.8,16.9,42
-E09000005,London,Brent,ltla,2021-04-09,14,4.8,26.7,88
-E09000006,London,Bromley,ltla,2021-04-09,2,-40.7,9.6,32
-E09000007,London,Camden,ltla,2021-04-09,10,-13.6,14.1,38
-E09000008,London,Croydon,ltla,2021-04-09,14,19.6,17.3,67
-E09000009,London,Ealing,ltla,2021-04-09,16,-25.7,30.4,104
-E09000010,London,Enfield,ltla,2021-04-09,8,-15.9,15.9,53
-E09000011,London,Greenwich,ltla,2021-04-09,5,-48.6,12.5,36
-E09000012,London,Hackney and City of London,ltla,2021-04-09,11,64.3,23.7,69
-E09000013,London,Hammersmith and Fulham,ltla,2021-04-09,3,-37,15.7,29
-E09000014,London,Haringey,ltla,2021-04-09,7,-56.9,10.4,28
-E09000015,London,Harrow,ltla,2021-04-09,38,12.6,42.6,107
-E09000016,London,Havering,ltla,2021-04-09,7,-42.2,14.3,37
-E09000017,London,Hillingdon,ltla,2021-04-09,18,1.6,42.4,130
-E09000018,London,Hounslow,ltla,2021-04-09,14,2,38.3,104
-E09000019,London,Islington,ltla,2021-04-09,6,-8.3,18.1,44
-E09000020,London,Kensington and Chelsea,ltla,2021-04-09,5,-34.4,25.6,40
-E09000021,London,Kingston upon Thames,ltla,2021-04-09,4,-30,23.7,42
-E09000022,London,Lambeth,ltla,2021-04-09,8,-33.9,11.3,37
-E09000023,London,Lewisham,ltla,2021-04-09,3,-22.9,12.1,37
-E09000024,London,Merton,ltla,2021-04-09,8,-37.3,17.9,37
-E09000025,London,Newham,ltla,2021-04-09,22,1.8,32.8,116
-E09000026,London,Redbridge,ltla,2021-04-09,19,-2,31.5,96
-E09000027,London,Richmond upon Thames,ltla,2021-04-09,4,-21.4,22.2,44
-E09000028,London,Southwark,ltla,2021-04-09,5,-47.9,7.8,25
-E09000029,London,Sutton,ltla,2021-04-09,1,-34.1,13.1,27
-E09000030,London,Tower Hamlets,ltla,2021-04-09,17,-18.9,23.7,77
-E09000031,London,Waltham Forest,ltla,2021-04-09,10,-33.8,18.4,51
-E09000032,London,Wandsworth,ltla,2021-04-09,9,-30.5,20,66
-E09000033,London,Westminster,ltla,2021-04-09,14,43.1,27.9,73
+E09000003,London,Barnet,ltla,2021-04-10,17,-5.3,27,107
+E09000004,London,Bexley,ltla,2021-04-10,7,-64.2,15.7,39
+E09000005,London,Brent,ltla,2021-04-10,12,9.8,27.3,90
+E09000006,London,Bromley,ltla,2021-04-10,3,-37.7,9.9,33
+E09000007,London,Camden,ltla,2021-04-10,5,-9.5,14.1,38
+E09000008,London,Croydon,ltla,2021-04-10,7,26.9,17.1,66
+E09000009,London,Ealing,ltla,2021-04-10,9,-19.5,30.1,103
+E09000010,London,Enfield,ltla,2021-04-10,5,-31.3,13.8,46
+E09000011,London,Greenwich,ltla,2021-04-10,4,-44.8,12.8,37
+E09000012,London,Hackney and City of London,ltla,2021-04-10,6,52.3,23,67
+E09000013,London,Hammersmith and Fulham,ltla,2021-04-10,5,-26.7,17.8,33
+E09000014,London,Haringey,ltla,2021-04-10,3,-52.6,10.1,27
+E09000015,London,Harrow,ltla,2021-04-10,5,14,42.2,106
+E09000016,London,Havering,ltla,2021-04-10,3,-46,13.1,34
+E09000017,London,Hillingdon,ltla,2021-04-10,17,0.8,42.7,131
+E09000018,London,Hounslow,ltla,2021-04-10,13,2.9,39,106
+E09000019,London,Islington,ltla,2021-04-10,5,-16,17.3,42
+E09000020,London,Kensington and Chelsea,ltla,2021-04-10,3,-28.1,26.3,41
+E09000021,London,Kingston upon Thames,ltla,2021-04-10,13,-11.9,29.3,52
+E09000022,London,Lambeth,ltla,2021-04-10,5,-24.5,12.3,40
+E09000023,London,Lewisham,ltla,2021-04-10,4,-6.8,13.4,41
+E09000024,London,Merton,ltla,2021-04-10,6,-29.1,18.9,39
+E09000025,London,Newham,ltla,2021-04-10,11,4.6,32.3,114
+E09000026,London,Redbridge,ltla,2021-04-10,12,2.2,31.1,95
+E09000027,London,Richmond upon Thames,ltla,2021-04-10,6,-33.3,20.2,40
+E09000028,London,Southwark,ltla,2021-04-10,2,-46.8,7.8,25
+E09000029,London,Sutton,ltla,2021-04-10,5,-32.6,14.1,29
+E09000030,London,Tower Hamlets,ltla,2021-04-10,5,-12.6,23.4,76
+E09000031,London,Waltham Forest,ltla,2021-04-10,4,-25.7,18.8,52
+E09000032,London,Wandsworth,ltla,2021-04-10,19,-17.9,23.7,78
+E09000033,London,Westminster,ltla,2021-04-10,10,32.1,28.3,74
