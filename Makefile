@@ -1,13 +1,13 @@
 PACKAGES = packages/*
 STACKS = environments
 
+.PHONY: build down run server tf-doc
+
 build:
 	docker-compose build ${PACKAGE}
-.PHONY: build
 
 down:
 	docker-compose down
-.PHONY: down
 
 run:
 	docker-compose run \
@@ -15,11 +15,9 @@ run:
 		--service-ports \
 		${PACKAGE} \
 		${CMD}
-.PHONY: run
 
 serve:
 	docker-compose up 
-.PHONY: serve
 
 tf-doc:
 	# Requires Terraform Docs
@@ -30,4 +28,3 @@ tf-doc:
   			./infrastructure/$${dir} \
   			> ./infrastructure/$${dir}/README.md; \
   	done
-.PHONY: tf-doc
