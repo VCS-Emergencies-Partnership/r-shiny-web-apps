@@ -1,7 +1,7 @@
 ARG R_VERSION=4.0.2
 FROM rocker/shiny:${R_VERSION}
 
-ARG SRV_DIR="/srv/shiny-server"
+ARG SRV_DIR="/srv/shiny-server/"
 
 # Install application-specific dependencies and then
 # clean up the apt cache to reduce the image size
@@ -21,12 +21,14 @@ WORKDIR ${SRV_DIR}
 COPY packrat/packrat.lock ./packrat/
 RUN Rscript -e "packrat::init(infer.dependencies=FALSE, \
                               enter=TRUE, \
-                              restart=FALSE)); \
+                              restart=FALSE); \
                 packrat::restore()"
 
 # Use custom shiny-server config
 COPY ./shiny-customized.config /etc/shiny-server/shiny-server.conf
-USER shiny
 
 # Copy application code and data into shiny dir
-COPY . ${SRV_DIR}
+COPY *.R functions.r google-analytics.html shiny-server.sh styles.css .Rprofile ${SRV_DIR}
+
+COPY data ${SRV_DIR}/data
+COPY www ${SRV_DIR}/www
