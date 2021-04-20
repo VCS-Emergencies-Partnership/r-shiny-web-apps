@@ -3,7 +3,7 @@
 echo HELLO WE ARE RUNNING
 
 mkdir -p /var/log/shiny-server
-chown shiny.shiny /var/log/shiny-server
+chown shiny.shiny /var/log/shiny-server /var/lib/shiny-server/
 
 #env > /home/shiny/.Renviron
 cp /srv/shiny-server/.Renviron /home/shiny/.Renviron
