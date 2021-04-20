@@ -3622,403 +3622,93 @@ server = function(input, output, session) {
                  'eng_total_fuel_poor_households',
                  'eng_prop_households_fuel_poor',
                  'eng_rate_per_1000',
-                 #'eng_total_homeless',
-                 #'proprotion_homeless',
                  'eng_total_unemployed_on_ucred',
                  'prop_eng_pop_unemployed_on_ucred',
                  'total_shielding_eng',
                  'proportion_total_shielding_Eng') 
         
-        # --- England BAME stats ---
-        bame_to_plot  <- eng_table %>% select('england_proportion_bame') %>%
-          pivot_longer(`england_proportion_bame`, names_to = "Indicator", values_to = "proportion")
-        
-        bame_to_plot <- bame_to_plot %>% filter(!is.na(proportion)) %>%
-          unique() %>% mutate('proportion'=round(proportion,0))
-
-        bame_to_show <- paste0(round(bame_to_plot$proportion,0), "%")
-        
+        # --- National BAME Statistics ---
         output$bame_population_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-            #hr(),
-            p(bame_to_show, 
-            tags$br(),
-            "of the population are BAME"
-          )
-          )
-
+          ethnicity_stats_eng_text(eng_table)
         })
         
         output$bame_population <- renderEcharts4r({
-        # # Plot population statistics
-        bame <- bame_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1, showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              #e_mark_line(data=eng_avg_bame, symbol = "none", lineStyle = list(color = "black")) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-
+          ethnicity_stats_eng_plot(eng_table)
                   })
 
-        # --- Section 95 Support ---
-        eng_sec95_to_write <- eng_table %>% select('eng_people_recieving_section_95_support','prop_eng_receiving_section_95_support') %>%
-          unique()
-        
-        eng_sec95_to_plot <- eng_sec95_to_write %>% select('prop_eng_receiving_section_95_support') %>%
-          pivot_longer('prop_eng_receiving_section_95_support', names_to = "Indicator", values_to = "proportion")
-        
-        eng_sec95_to_plot <- eng_sec95_to_plot %>% filter(!is.na(proportion)) %>%
-          unique()
-        
-        eng_sec95_to_write <- eng_sec95_to_write %>% filter(!is.na(eng_people_recieving_section_95_support) & !is.na('prop_eng_receiving_section_95_support'))
-        
-        write_eng_sec95 <- paste0("(",eng_sec95_to_write$prop_eng_receiving_section_95_support,"% of the population)")
-        
+        # --- National Section 95 Support statistics ---
         output$section95_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), tags$br(),
-                "people receiving support whilst seeking asylum (Section 95 support)")
-              #p(tags$strong('No. of people receiving Section 95 support:'), format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), "people", tags$br(), write_eng_sec95)
-          )
+          sec95_stats_eng_text(eng_table)
         })
         
         output$section95 <- renderEcharts4r({
                       # # Plot population statistics
-                      sec95 <- eng_sec95_to_plot %>%
-                        e_charts(x = Indicator) %>%
-                        e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-                        e_labels(position = "right", color='black') %>%
-                        e_color(c('purple')) %>%
-                        #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-                        #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-                        #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
-                        e_hide_grid_lines() %>%
-                        e_flip_coords() %>%
-                        e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
-
-                        #e_rm_axis(axis="x") %>%
-                        #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-                        e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-                        e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-                        e_y_axis(show=F) %>%
-                        e_legend(FALSE)
-
+                      sec95_stats_eng_plot(eng_table)
                     })
         
-        # --- homelessness ---
-        eng_homeless_to_write <- eng_table %>% select('eng_rate_per_1000') %>%
-          unique()
-        
-        eng_homeless_to_plot <- eng_homeless_to_write %>% select('eng_rate_per_1000') %>%
-          pivot_longer('eng_rate_per_1000', names_to = "Indicator", values_to = "proportion")
-        
-        eng_homeless_to_plot <- eng_homeless_to_plot %>% filter(!is.na(proportion)) %>%
-          unique() %>%
-          mutate('proportion'=round(proportion,2))
-        
-        eng_homeless_to_write <- eng_homeless_to_write %>% filter(!is.na('eng_rate_per_1000'))
-        
-        write_eng_homeless <- paste0("(",eng_homeless_to_write$eng_rate_per_1000," homelessness rate per 1000)")
-        
-
+        # ---National  homelessness ---
         output$homeless_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(format(round(eng_homeless_to_write$eng_rate_per_1000,2), big.mark=',', scientific = F), tags$br(),
-                'homeless people per 1000')
-              #p(tags$strong('No. of people homeless:'), format(eng_homeless_to_write$eng_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_eng_homeless),
-          )
+          homelessness_stats_eng_text(eng_table)  
         })
         
         output$homeless <- renderEcharts4r({
-          # Plot population statistics
-          sec95 <- eng_homeless_to_plot %>%
-            e_charts(x = Indicator) %>%
-            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-            e_labels(position = "right", color='black') %>%
-            e_color(c('purple')) %>%
-            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
-            e_hide_grid_lines() %>%
-            e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
-
-            #e_rm_axis(axis="x") %>%
-            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-            e_x_axis(position='top', axisLabel=list(show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1000, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1000) %>%
-            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-            e_y_axis(show=F) %>%
-            e_legend(FALSE)
-          
+          homelessness_stats_eng_plot(eng_table)  
         })
         
-        
-        # --- fuel poverty ---
-        
-        eng_fuelp_to_write <- eng_table %>% select('eng_total_fuel_poor_households','eng_prop_households_fuel_poor') %>%
-          unique()
-        
-        eng_fuelp_to_plot <- eng_fuelp_to_write %>% select('eng_prop_households_fuel_poor') %>%
-          pivot_longer('eng_prop_households_fuel_poor', names_to = "Indicator", values_to = "proportion")
-        
-        eng_fuelp_to_plot <- eng_fuelp_to_plot %>% filter(!is.na(proportion)) %>%
-          unique() %>%
-          mutate('proportion'=round(proportion,0))
-        
-        eng_fuelp_to_write <- eng_fuelp_to_write %>% filter(!is.na(eng_total_fuel_poor_households) & !is.na('eng_prop_households_fuel_poor'))
-        
-        write_eng_fuelp <- paste0("(",eng_fuelp_to_write$eng_prop_households_fuel_poor,"% of households)")
-        
-
+        # --- National fuel poverty ---
         output$fuelp_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(format(eng_fuelp_to_write$eng_total_fuel_poor_households, big.mark=',', scientific = F),
-                tags$br(),
-                "households in fuel poverty"
-              )
-              #p(tags$strong('No. of households in fuel poverty:'), format(eng_fuelp_to_write$eng_total_fuel_poor_households, big.mark=',', scientific = F), "households", tags$br(), write_eng_fuelp),
-          )
+          fuelp_stats_eng_text(eng_table)
         })
         
         output$fuelp <- renderEcharts4r({
-          # # Plot population statistics
-          fuelp_t <- eng_fuelp_to_plot %>%
-            e_charts(x = Indicator) %>%
-            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-            e_labels(position = "right", color='black') %>%
-            e_color(c('purple')) %>%
-            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
-            e_hide_grid_lines() %>%
-            e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
-            
-            #e_rm_axis(axis="x") %>%
-            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-            e_y_axis(show=F) %>%
-            e_legend(FALSE)
-          
+          fuelp_stats_eng_plot(eng_table)
         })
 
-        # ---- unemployed ---
-        
-        eng_unem_to_write <- eng_table %>% select('eng_total_unemployed_on_ucred','prop_eng_pop_unemployed_on_ucred') %>%
-          unique()
-        
-        eng_unem_to_plot <- eng_unem_to_write %>% select('prop_eng_pop_unemployed_on_ucred') %>%
-          pivot_longer('prop_eng_pop_unemployed_on_ucred', names_to = "Indicator", values_to = "proportion")
-        
-        eng_unem_to_plot <- eng_unem_to_plot %>% filter(!is.na(proportion)) %>%
-          unique() %>%
-          mutate('proportion'=round(proportion,0))
-        
-        eng_unem_to_write <- eng_unem_to_write %>% filter(!is.na(eng_total_unemployed_on_ucred) & !is.na('prop_eng_pop_unemployed_on_ucred'))
-        
-        write_eng_unem <- paste0("(",eng_unem_to_write$prop_eng_pop_unemployed_on_ucred,"% of people)")
-        
-        
-        
+        # ---- National unemployed ----
         output$unemployment_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(format(eng_unem_to_write$eng_total_unemployed_on_ucred, big.mark=',', scientific = F),
-                tags$br(),
-                "people unemployed on universal credit"
-              )
-              #p(tags$strong('No. of people unemployed receiving universal credit:'), format(eng_unem_to_write$eng_total_unemployed_on_ucred, big.mark=',', scientific = F), "people", tags$br(), write_eng_unem)
-          )
+          unemployment_stats_eng_text(eng_table)  
         })
         
         output$unemployment <- renderEcharts4r({
-          # # Plot population statistics
-          unem_t <- eng_unem_to_plot %>%
-            e_charts(x = Indicator) %>%
-            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-            e_labels(position = "right", color='black') %>%
-            e_color(c('purple')) %>%
-            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
-            e_hide_grid_lines() %>%
-            e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
-            
-            #e_rm_axis(axis="x") %>%
-            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-            e_y_axis(show=F) %>%
-            e_legend(FALSE)
-          
+          unemployment_stats_eng_plot(eng_table)  
         })
 
+        
+        # ---- National Tactical cell ----    
         output$digital_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(tags$strong('Data not currently available at national level for digital exclusion'))
-          )
+          ditigal_exclusion_eng_text(eng_table)
         })
         
         # clear plot nothing
         output$digital <- renderEcharts4r({
-          
         })
         
-        # --- people shielding ---
-        
-        eng_shielding_to_write <- eng_table %>% select('total_shielding_eng','proportion_total_shielding_Eng') %>%
-          unique()
-        
-        eng_shielding_to_plot <- eng_shielding_to_write %>% select('proportion_total_shielding_Eng') %>%
-          pivot_longer('proportion_total_shielding_Eng', names_to = "Indicator", values_to = "proportion")
-        
-        eng_shielding_to_plot <- eng_shielding_to_plot %>% filter(!is.na(proportion)) %>%
-          unique()
-        
-        eng_shielding_to_write <- eng_shielding_to_write %>% filter(!is.na(total_shielding_eng) & !is.na('proportion_total_shielding_Eng'))
-        
-        write_eng_shielding <- paste0("(",eng_shielding_to_write$proportion_total_shielding_Eng,"% of people)")
-        
-        
-
+        # --- National people shielding ---
         output$shielding_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(format(eng_shielding_to_write$total_shielding_eng, big.mark=',', scientific = F),
-                tags$br(),
-                "people clinically extremely vulnerable")
-              #p(tags$strong('No. of people clinically extremely vulnerable:'), format(eng_shielding_to_write$total_shielding_eng, big.mark=',', scientific = F), "people", tags$br(), write_eng_shielding)
-          )
+          shielding_eng_text(eng_table)
         })
         
         output$shielding_f <- renderEcharts4r({
-          # # Plot population statistics
-          shielding_t <- eng_shielding_to_plot %>%
-            e_charts(x = Indicator) %>%
-            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-            e_labels(position = "right", color='black') %>%
-            e_color(c('purple')) %>%
-            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
-            e_hide_grid_lines() %>%
-            e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
-            
-            #e_rm_axis(axis="x") %>%
-            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-            e_y_axis(show=F) %>%
-            e_legend(FALSE)
-          
+          shielding_eng_plot(eng_table)
         })
+      }
 
-
-        #
-
-        #output$people_at_risk <- DT::renderDataTable({
-        #  DT::datatable(curr_table,
-                      #caption = htmltools::tags$caption( style = 'caption-side: top; text-align: left; color:black; font-size:125% ;',title_needed),
-        #              options = list(
-        #                paging=FALSE
-        #              ))
-        #    })
-          }
 
       else {
         # summary for tactical cell
         if (input$lad_selected == 'All local authorities in region') {
-          #Tactical cell
-          tc = input$tactical_cell
-          title_needed <- paste0('People at risk in Tactical Cell: ', tc)
-          #print('tactical cell test')
-
-          # --- people at risk ----
 
           # --- population demographics ---
-          #bame <- curr_table %>% select('TacticalCell',`int_Fuel Poor Households`,`perc_Fuel Poor Households`)
-          bame_to_plot <- curr_table %>% select(`tc_proportion`)
-
-          # transpose dataframe
-          bame_to_plot  <- bame_to_plot %>% pivot_longer(`tc_proportion`, names_to = "Indicator", values_to = "proportion") %>%
-            unique() %>% filter(!is.na(proportion)) %>% 
-            mutate('proportion'=round(proportion,0))
-
-          # for echarts
-          tc_avg_bame <- par_table_tc_avg %>% select(`tc_proportion_mean`) %>%
-            mutate(`tc_proportion`=round(`tc_proportion_mean`,0)) %>%
-            select('xAxis' = `tc_proportion`) %>%
-            as.list()
-          
-          # for echarts colour
-          tc_avg_stdev_bame <- par_table_tc_avg %>% 
-            select(`tc_proportion_mean`, `tc_proportion_stdev`) %>%
-            mutate('plus_stdev'=round(`tc_proportion_mean`,1)+round(`tc_proportion_stdev`,1)) %>%
-            mutate('minus_stdev'=round(`tc_proportion_mean`,1) - round(`tc_proportion_stdev`,1)) 
-          
-          
-          tc_bame_plot_colour <- bame_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_bame$plus_stdev & proportion >= tc_avg_stdev_bame$minus_stdev) ~ 'orange',
-                                                                                 proportion >= tc_avg_stdev_bame$plus_stdev ~ 'red',
-                                                                                 proportion <= tc_avg_stdev_bame$minus_stdev ~ 'green'))
-          
-          
-          # to format percentage
-          bame_to_show <- paste0(round(bame_to_plot$proportion,0), "%")
-
-          # label to sho
-          label_to_show <- paste(round(par_table_tc_avg$`tc_proportion_mean`,0), '%', '\n','(regional avg)')
+    
+          # ---- Tactical Cell level BAME ----
           
           output$bame_population_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(bame_to_show,
-                  tags$br(),
-                  'of the population are BAME')
-                #p(tags$strong('Proportion of population who are BAME:'), bame_to_show)
-                
-            )
+            ethnicity_stats_mac_text(curr_table, par_table_tc_avg)
           })
           
           output$bame_population <- renderEcharts4r({
             # # Plot population statistics
-            bame <- bame_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1, showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(tc_bame_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=tc_avg_bame, symbol = "none", lineStyle = list(color = "black"), title=label_to_show, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            ethnicity_stats_mac_plot(curr_table, par_table_tc_avg)
           })
 
           # --- section 95 support ----
