@@ -22,7 +22,7 @@ readRenviron(".Renviron")
 
 options(shiny.trace = F)
 
-source("./functions.r")
+source("./functions.R")
 
 # function for table sorting 
 clearSorting <- function(proxy) {
