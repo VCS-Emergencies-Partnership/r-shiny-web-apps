@@ -3608,7 +3608,6 @@ server = function(input, output, session) {
     if (input$sidebar_id == 'unmetneed') {
       # -- this will get tactical cell table --
       curr_table <- filterpar_tab()
-      #print(curr_table)
 
       if (input$tactical_cell == '-- England --') {
         
