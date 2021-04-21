@@ -11,9 +11,9 @@ down:
 
 run:
 	docker-compose run \
-		--rm \
 		--service-ports \
-		${PACKAGE} \
+		# See https://github.com/rocker-org/shiny/issues/79
+		--rm ${PACKAGE} /usr/bin/shiny-server \
 		${CMD}
 
 serve:
