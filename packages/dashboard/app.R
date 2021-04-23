@@ -387,7 +387,8 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   useShinyjs(),
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-  tags$head(includeCSS("styles.css")), #includeHTML("google-analytics.html")),
+  tags$head(includeCSS("styles.css"), includeHTML("cookie_consent_v2.html"), 
+            includeHTML("webicon.html")), #includeHTML("google-analytics.html")),
   tags$script(src='socket_timeout.js'),
   #tags$head(HTML("<title> VCSEP Unmet needs platform </title>")),
 
@@ -936,102 +937,6 @@ server = function(input, output, session) {
     test <- input$alive_count
   })
   
-  # # obeserve if first tab is selected
-  # observe({
-  # 
-  #   req(input$sidebar_id)
-  # 
-  #   if (input$sidebar_id == 'home') {
-  #     output$welcome <- renderUI({
-  # 
-  #       div(
-  #         h2(tags$strong('Insights from the Emergencies Partnership')),
-  #         hr(),
-  #         h4('Bringing together data to', tags$strong('improve collaboration'), 'across the voluntary and community sector,',
-  #            tags$strong('before,'), tags$strong('during,'), "and", tags$strong('after'), "an", tags$strong("emergency"), ""),
-  #         br()
-  #       )
-  #     })
-      
-        
-        # output$welcome_about <- renderUI({
-        #   div(
-        #     p(tags$strong('Purpose:')),
-        #     p('In times of an emergency, this platform seeks to answer the key question of "where is the need greatest?"'),
-        #     p('It helps responders who want to target their limited resource in areas of greatest risk and least capacity to respond. 
-        #       The tools is also useful for those wanting estimates of people at risk and in need to support their 
-        #       influencing and advocacy efforts across a range of themes.'),
-        #     #br(),
-        #     br(),
-        #     p(tags$strong('Scope:')),
-        #     p('The platform attempts to provide a fuller picture of unmet need before, 
-        #       during and after an emergency. To do this, we highlight areas of high vulnerability 
-        #       and least resilience based on the British Red Cross’ and show this alongside service reach.'),
-        #     p('Our hope is that by combining data from across the sector, we get a fuller picture of where there 
-        #       is unmet need. For example, where requests for support have come through to our partners that haven’t
-        #       been met. This could be through support line calls that have been signposted elsewhere, or requests 
-        #       for hardship support that have not been met.'),
-        #     br(),
-        #     p(tags$strong('About the data:')),
-        #     p('We use open source and private data from our contributing partners to answer key 
-        #     questions that inform emergency preparedness, response and recovery. 
-        #     This includes numbers and rates of people at risk, reach of services by activity or support 
-        #     type, and area ranks by vulnerability or capacity.'),
-        #     p('We prioritize data that can be either mapped geographically or shown over time to highlight
-        #     areas at risk and changes in unmet need. Where the data allows, we aim to show this to as 
-        #     granular level as possible without including personally identifiable information. 
-        #     At present, we show data by region, local authority and middle super output area.')
-        #   )
-        # })
-
-        #   br(),
-        #   h3(tags$strong('Get involved')),
-        #   p("Our Data Working Group meets fortnightly on a Thursday at 11am to help us prioritise
-        #     what data and analysis to focus on next. Join us to lend your voice to the conversation."),
-        #   br(),
-        #   h3(tags$strong('Share data')),
-        #   p("Use our", tags$a(href="https://ingest.vcsep.org.uk/", target="_blank","Data App"), "or get in touch with
-        #     our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk")),
-        #   br(),
-        #   h3(tags$strong('Feedback or make a request')),
-        #   p("We welcome your thoughts on what data would be useful to help shape your support to those in need.
-        #     To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk")),
-        #   br(),
-        #   h3(tags$strong('Find out more')),
-        #   p("To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")),
-        # 
-        #   br(),
-        #   br(),
-        #   p(tags$strong(tags$i("This platform is still in the early stages of development. Some features may not work properly, but are coming soon.")), style="color:blue")
-        # 
-        # )
-      
-# 
-#       # --- plot list of contributors ---
-#       output$members <- renderUI({
-#         div(
-#           tags$ul(tags$li(tags$a(href="https://www.bitc.org.uk/", target="_blank","Business in the Community")),
-#                 tags$li(tags$a(href="https://www.childrenscommissioner.gov.uk/", target="_blank","Children’s Commissioner for England")),
-#                 tags$li(tags$a(href="https://www.citizensadvice.org.uk/", target="_blank","Citizens Advice")),
-#                 tags$li(tags$a(href="https://www.cruse.org.uk/", target="_blank","Cruse")),
-#                 tags$li(tags$a(href="https://fareshare.org.uk/", target="_blank","FareShare")),
-#                 tags$li(tags$a(href="https://foodfoundation.org.uk/", target="_blank","Food Foundation")),
-#                 tags$li(tags$a(href="https://www.foodaidnetwork.org.uk/", target="_blank","Independent Food Aid Network")),
-#                 tags$li(tags$a(href="https://www.mind.org.uk/", target="_blank","Mind")),
-#                 tags$li(tags$a(href="https://www.re-act.org.uk/", target="_blank","RE:ACT")),
-#                 tags$li(tags$a(href="https://www.stepchange.org/", target="_blank","Stepchange")),
-#                 tags$li(tags$a(href="https://www.themix.org.uk/", target="_blank","The Mix")),
-#                 tags$li(tags$a(href="https://www.turn2us.org.uk/", target="_blank","Turn2Us")),
-#                 tags$li(tags$a(href="https://www.victimsupport.org.uk/", target="_blank","Victim Support")),
-#                 tags$li(tags$a(href="https://volunteeringmatters.org.uk/", target="_blank","Volunteering Matters")))
-#         )
-# 
-#       })
-# 
-#     }
-# 
-#   })
-
 
   # --- observe if references tab selected ---
   observe({
