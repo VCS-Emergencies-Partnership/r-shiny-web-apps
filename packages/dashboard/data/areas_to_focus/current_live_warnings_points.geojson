@@ -4,7 +4,6 @@
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
 { "type": "Feature", "properties": { "floodAreaID": "062FAGKimptonGW" }, "geometry": { "type": "Point", "coordinates": [ -0.311013397480704, 51.862736172825514 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "062FAGFlamstdGW" }, "geometry": { "type": "Point", "coordinates": [ -0.448428721943919, 51.816006972299782 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "052FAGNEWMARKET" }, "geometry": { "type": "Point", "coordinates": [ 0.404846937624049, 52.244398510594728 ] } }
 ]
 }
