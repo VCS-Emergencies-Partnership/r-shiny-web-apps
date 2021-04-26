@@ -326,25 +326,42 @@ last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%
 
 # ---  dashboard --- #
 # --- header --- #
-header <- dashboardHeader(title = "VCSEP Insights", titleWidth = "300px")#,
-                              #dropdownMenu(
-                              #  type = "notifications",
-                              #  icon = icon("question-circle"),
-                              #  badgeStatus = NULL,
-                              #  headerText = "Help"))
+header <- dashboardHeader(title = "VCS Emergencies Toolkit", titleWidth = "300px",
+                         tags$li(class = "dropdown", 
+                                   tags$li(class="dropdown",
+                                   actionLink("home", "Home", icon=icon("home"))),
+                                  tags$li(class="dropdown",
+                                          actionLink("RI_tool","Risk Indicator Tool", icon=icon("fas fa-map-signs"))
+                                  ),
+                                 tags$li(class="dropdown",
+                                         actionLink("e_catalogue", "Resource catalouge", icon=icon("fas fa-book-open"))),
+                                 tags$li(class="dropdown",
+                                         actionLink("internal_reports", "Internal reports", icon=icon("fas fa-lock"))),
+                                 tags$li(class="dropdown",
+                                         actionLink("community_assets", "Community assets webmap", icon=icon("fas fa-map-marked"), 
+                                                    onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')")),
+                                 tags$li(class="dropdown",
+                                         actionLink("help", "Help", icon=icon("far fa-question-circle"))),
+                                 tags$li(class="dropdown",
+                                         actionLink("references", "References", icon=icon('fas fa-feather-alt')))
+                                 ))
+                  
 
 
 # --- side bar --- #
 sidebar <- dashboardSidebar(
   width = "300px",
-  minified = F,
+  minified = T,
+  collapsed=T,
   tags$style(HTML(".sidebar-menu li a { font-size: 16px; }")),
   sidebarMenu(id="sidebar_id",
+              
               # -- Home page ---
               menuItem('Home', tabName='home', icon=icon("home")),
               # -- Unmet need insight -- binoculars
-              menuItem("Insight", icon = icon("binoculars"), tabName = "insight", startExpanded = T,
-                       menuSubItem(HTML("Areas at risk in an emergency"), tabName="unmetneed", icon=icon("fas fa-map-signs"))),
+              menuItem("Toolkits", icon = icon("binoculars"), tabName = "insight", startExpanded = T,
+                       menuSubItem(HTML("Risk Indicator Tool"), tabName="unmetneed", icon=icon("fas fa-map-signs")),
+                       menuSubItem(HTML("Resource catalouge"), tabName="resource_catalogue", icon=icon("fas fa-book-open"))),
               # -- trying conditional panel ---
               conditionalPanel(condition = "input.sidebar_id == 'unmetneed'", 
                                div(style="text-align: justify;",
@@ -365,15 +382,7 @@ sidebar <- dashboardSidebar(
 
                                ),
                                
-                               uiOutput("secondSelection")
-
-                             
-              ),
-
-              #menuItem(HTML("Emergencies Partnership<br/>Statistics"), tabName='vcs_usage', startExpanded = F, icon=icon('balance-scale-right'),
-              #         menuSubItem("Requests", tabName='request_data'),
-              #         menuSubItem("Pulse Check", tabName="pulse_check"),
-              #         menuSubItem("Volunteer Capacity", tabName="vol_capacity")),
+                               uiOutput("secondSelection")),
               menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
               menuItem("References", tabName='references', icon=icon('fas fa-feather-alt')),
 
@@ -392,194 +401,43 @@ body <- dashboardBody(
             tags$link(rel="icon",  sizes="16X16", href="img/favicon-16x16.png"),
             tags$link(rel="apple-touch-icon", sizes="180x180", href="img/img/apple-touch-icon.png"),
             tags$link(rel="manifest", href="img/site.webmanifest")),
-            #includeHTML("webicon.html")), #includeHTML("google-analytics.html")),
-  tags$script(src='socket_timeout.js'),
-  #tags$head(HTML("<title> VCSEP Unmet needs platform </title>")),
-
   tabItems(
     # --- Home page ---
     tabItem(tabName="home", selected=T,
             # - row 1 -
             fluidRow(style="padding-right:20px",
               # column 1
-              column(width = 8,
-                     box(width=NULL, headerBorder = F,
-                       #uiOutput('welcome'),
-                       div(
-                         h2(tags$strong('Insights from the Emergencies Partnership')),
-                         hr(),
-                         h4('Bringing together data to', tags$strong('improve collaboration'), 'across the voluntary and community sector,',
-                            tags$strong('before,'), tags$strong('during,'), "and", tags$strong('after'), "an", tags$strong("emergency"), ""),
-                         br(),
-                         p("View the latest insight", tags$strong('underneath the insights tab'), 'in the sidebar')
-                       ),
-                       textOutput("keep_alive"),
-                       style = "height:650px; overflow-y: scroll;overflow-x: scroll;margin-top:-50px;padding-top:-50px", footer=div(
-                         p(tags$strong(tags$i("This platform is still in the early stages of development. 
-                               Some features may not work properly, but are coming soon.")), 
-                           style="color:blue")),
-                       accordion(id='accordion1',
-                         accordionItem(
-                           id=1,
-                           title='About',
-                           collapse=T,
-                           div(
-                             p(tags$strong('Purpose:')),
-                             p('In times of an emergency, this platform seeks to answer the key question of "where is the need greatest?"'),
-                             p('It helps responders who want to target their limited resource in areas of greatest risk and least capacity to respond.
-              The tools is also useful for those wanting estimates of people at risk and in need to support their
-              influencing and advocacy efforts across a range of themes.'),
-                             #br(),
-                             br(),
-                             p(tags$strong('Scope:')),
-                             p('The platform attempts to provide a fuller picture of unmet need before,
-              during and after an emergency. To do this, we highlight areas of high vulnerability
-              and least resilience based on the British Red Cross’ and show this alongside service reach.'),
-                             p('Our hope is that by combining data from across the sector, we get a fuller picture of where there
-              is unmet need. For example, where requests for support have come through to our partners that haven’t
-              been met. This could be through support line calls that have been signposted elsewhere, or requests
-              for hardship support that have not been met.'),
-                             br(),
-                             p(tags$strong('About the data:')),
-                             p('We use open source and private data from our contributing partners to answer key
-            questions that inform emergency preparedness, response and recovery.
-            This includes numbers and rates of people at risk, reach of services by activity or support
-            type, and area ranks by vulnerability or capacity.'),
-                             p('We prioritize data that can be either mapped geographically or shown over time to highlight
-            areas at risk and changes in unmet need. Where the data allows, we aim to show this to as
-            granular level as possible without including personally identifiable information.
-            At present, we show data by region, local authority and middle super output area.')
-                           )
-                         ),
-                         # accordionItem(
-                         #   id=2,
-                         #   title='View insight',
-                         #   collapsed=F,
-                         #   div(
-                         #     p("View the latest insight", tags$strong('underneath the insights tab'), 'in the sidebar')
-                         #   )
-                         #   #uiOutput('welcome_insight')
-                         #   ),
-                         accordionItem(
-                           id=3,
-                           title='Get involved',
-                           collapsed=F,
-                           div(#p("Our", tags$strong("Data Working Group"), "meets fortnightly on a Thursday at 11am to help us prioritise
-                            # what data and analysis to focus on next."),
-                               #p(tags$strong("Join us"), "to lend your voice to the conversation."),
-                               p(tags$strong("Share data:"), tags$br(), "Get in touch with the Insight team", tags$a(href='https://vcsep.org.uk/contact-us', target="_blank", "here.")),
-                               p(tags$strong("Feedback or make a request:"), tags$br(), "We welcome your thoughts on what data would be useful to help shape your support to those in need.
-                                  To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="https://vcsep.org.uk/contact-us", target="_blank", "https://vcsep.org.uk/contact-us"),
-                                p(tags$strong("Find out more:"), tags$br(), "To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")
-                                 )
-                               )
-                           )
-                         )
-                        )
-                       )
-                     ),
-             #             accordionItem(
-             #               id=4,
-             #               title='Share data',
-             #               collapsed=T,
-             #               div(
-             #                 p("Use our", tags$a(href="https://ingest.vcsep.org.uk/", target="_blank","Data App"), "or get in touch with
-             # our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk"))
-             #               )
-             #              ),
-             #        
-             #             accordionItem(
-             #               id=5,
-             #               title='Feedback or make a request',
-             #               collapsed=T,
-             #               div(
-             #               p("We welcome your thoughts on what data would be useful to help shape your support to those in need.
-             #                      To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk")
-             #                     )
-             #             )
-             #            ),
-             #             accordionItem(
-             #               id=6,
-             #               title='Find out more',
-             #               collapsed=T,
-             #               div(p("To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")
-             #                     )
-             #              
-             #                  )
-             #              )
-             #           )
-             #          )
-              #         ),
-
+              column(width = 9,
+                     
+                     h1("Welcome to the Emergencies Partnership Toolkit"),
+                              h4("the public interface to the Voluntary Communtiry Sector Emergencies Partnership toolkit - sharing insight and resources amongst the VCS."),
+                     hr(),
+                     fluidRow(  
+                     column(width=4, 
+                              box(title="Internal reports")),
+                       column(width=4,
+                              box(title="Webmap")),
+                       column(width=4,
+                              box(title="VCS toolkits"))),
+                       fluidRow(
+                     column(width=6,
+                            box(title="Where we're working", width=NULL)),
+                     column(width=6,
+                            box(title="Latest concerns raised by our network", width=NULL)
+                            ))),
+                    
               # column 2
-              column(width = 4,
+              column(width = 3,
                 # - Row 1 -
                 fluidRow(
                   tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
-                  box( width=NULL, headerBorder = F, #height='175px',
+                  box(title='Latest news', width=NULL, headerBorder = F, #height='175px',
                       a(class="twitter-timeline", href="https://twitter.com/vcsep"),
                       style = "height:698px; overflow-y: scroll;overflow-x: scroll;;margin-top:-20px;padding-top:-20px")
-                      #uiOutput('twitter'))
                 )
               )
             )
           ),
-    #             # - Row 2 -
-    #             fluidRow(
-    #               box(title='Data store', width=NULL,
-    #                   style = "height:175px; overflow-y: scroll;overflow-x: scroll;",
-    #                   marginTop=T,
-    #                   fluidRow(
-    #                     column(width=12, height='110px',
-    #                            #box 
-    #                              descriptionBlock(
-    #                               #number = div("26"), 
-    #                               #numberColor = "green", 
-    #                               #numberIcon = "fas fa-caret-up",
-    #                               header= '26',
-    #                               #header_icon = "fa fa-caret-up",
-    #                               text = 'datasets',
-    #                               rightBorder = F,
-    #                               marginBottom = T
-    #                            )
-    #                         
-    #                     )
-    #                   ),
-    #                   fluidRow(
-    #                     column(width=6, height='110px',
-    #                            descriptionBlock(
-    #                              number="46%",
-    #                              numberColor = 'green',
-    #                              numberIcon = "fas fa-caret-up",
-    #                              header='12',
-    #                              text = 'VCS sources',
-    #                              rightBorder = F,
-    #                              marginBottom = F
-    #                            )
-    #                         ),
-    #                     column(width=6, height='110px',
-    #                            descriptionBlock(
-    #                              number="54%",
-    #                              #numberColor = 'green',
-    #                              #numberIcon = "fas fa-caret-up",
-    #                              header='14',
-    #                              text = 'Open sources',
-    #                              rightBorder = F,
-    #                              marginBottom = F
-    #                            )
-    #                     )
-    #                   )
-    #               )
-    #             ),
-    #             # - Row 3 -
-    #             fluidRow(
-    #               box(title='Data contributors', width=NULL, #height='220px
-    #                   uiOutput('members'),
-    #                   style = "height:175px; overflow-y: scroll;overflow-x: scroll;")
-    #             )
-    #           )
-    #         )
-    # ),
 
     # -- areas in need --
     tabItem(tabName = "unmetneed",
@@ -802,56 +660,6 @@ body <- dashboardBody(
                         )
                       #)
                     ),
-
-                      #echarts4rOutput('total_population',height='60px'),
-                    #   uiOutput('bame_population_text'),
-                    #   echarts4rOutput('bame_population', height='40px'),
-                    #          uiOutput('section95_text'),
-                    #          echarts4rOutput('section95', height='40px'),
-                    #          uiOutput('homeless_text'),
-                    #          echarts4rOutput('homeless', height='40px'),
-                    #          uiOutput('fuelp_text'),
-                    #          echarts4rOutput('fuelp',height='40px'),
-                    #          uiOutput('unemployment_text'),
-                    #          echarts4rOutput('unemployment',height='40px'),
-                    #          uiOutput('digital_text'),
-                    #          echarts4rOutput('digital',height='40px'),
-                    #          uiOutput('shielding_text'),
-                    #          echarts4rOutput('shielding_f',height='40px'),
-                    #          style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
-                    #        )
-                    #      )
-                    #    ),
-                    # 
-                      #   fluidRow(
-                      #   column(width = 12,
-                      #        box(
-                      #           width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                      #            title = "People in need", align = "center", #height = "600px"
-                      #            uiOutput('people_in_Need'),
-                      #            style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
-                      #          )
-                      #       )
-                      # 
-                      # ),
-                      # organisations in area 
-                  #   fluidRow(
-                  #     column(width = 12,
-                  #       box(
-                  #         width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                  #         title = "Local organisations", align = "left",
-                  #         fluidRow( 
-                  #           column(width=12,
-                  #                  uiOutput("search_needed", height='50px'))),
-                  #         fluidRow(
-                  #           column(width=12,
-                  #         #height = "600px"
-                  #         uiOutput('local_orgs_ui', height='250px'))),
-                  #         #scroll;overflow-x: scroll;"
-                  #         style = "height:500px; overflow-y: scroll;overflow-x: scroll;"
-                  #     )
-                  #   )
-                  # )
                 ),
 
               # column - 2
@@ -890,13 +698,6 @@ body <- dashboardBody(
         )
     ),
 
-  # - Request
-  # tabItem(tabName = 'request_data',
-  #        h2("Request stats")),
-  #tabItem(tabName = 'pulse_check',
-  #        h2("Pulse stats")),
-  #tabItem(tabName = 'vol_capacity',
-  #        h2("volunteer capacity analysis")),
   tabItem(tabName='Help',
           column(width = 12,
                    tabBox(id='information about dashboards', width=NULL,
@@ -934,21 +735,43 @@ ui <- function(request) {
 # ---- server ---- #
 server = function(input, output, session) {
 
-  # testing 
-  output$keep_alive <- renderText({
-    req(input$alive_count)
-    input$alive_count
-    test <- input$alive_count
+  observeEvent(input$home, {
+    newtab <- switch(input$sidebar_id, "home")
+    print(newtab)
+    updateTabItems(session, "sidebar_id", newtab)
+    
   })
   
+  
+  observeEvent(input$references, {
+    newtab <- switch(input$sidebar_id, "references")
+    print(newtab)
+    updateTabItems(session, "sidebar_id", newtab)
 
+  })
+  
+  observeEvent(input$RI_tool, {
+    newtab <- switch(input$sidebar_id, "unmetneed")
+    print(newtab)
+    updateTabItems(session, "sidebar_id", newtab)
+    
+  })
+  
+  
+  observeEvent(input$help, {
+    newtab <- switch(input$sidebar_id, "Help")
+    print(newtab)
+    updateTabItems(session, "sidebar_id", newtab)
+    
+  })
+  
   # --- observe if references tab selected ---
-  observe({
+  observeEvent(input$references, {
 
-    req(input$sidebar_id)
+    #req(input$sidebar_id)
 
-    if (input$sidebar_id == 'references') {
-
+    #if (input$sidebar_id == 'references') {
+      
       output$refs <- renderUI({
         div(
           h2(tags$strong("Data contributors")),
@@ -961,28 +784,12 @@ server = function(input, output, session) {
             "Data is also included in the platform from",
             tags$a(href="https://www.ons.gov.uk/", target="_blank", "Office of National Statistics"), "and", tags$a(href="https://digital.nhs.uk/", target="_blank", "NHS Digital"), "shared under an", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence.")),
             
-          br(),
-          # tags$ul(tags$li(tags$a(href="https://www.redcross.org.uk/", target="_blank","British Red Cross")),
-          #         tags$li(tags$a(href="https://www.bitc.org.uk/", target="_blank","Business in the Community")),
-          #         tags$li(tags$a(href="https://www.childrenscommissioner.gov.uk/", target="_blank","Children’s Commissioner for England")),
-          #         tags$li(tags$a(href="https://www.citizensadvice.org.uk/", target="_blank","Citizens Advice")),
-          #         tags$li(tags$a(href="https://www.cruse.org.uk/", target="_blank","Cruse")),
-          #         tags$li(tags$a(href="https://fareshare.org.uk/", target="_blank","FareShare")),
-          #         tags$li(tags$a(href="https://foodfoundation.org.uk/", target="_blank","Food Foundation")),
-          #         tags$li(tags$a(href="https://www.foodaidnetwork.org.uk/", target="_blank","Independent Food Aid Network")),
-          #         tags$li(tags$a(href="https://www.mind.org.uk/", target="_blank","Mind")),
-          #         tags$li(tags$a(href="https://www.re-act.org.uk/", target="_blank","RE:ACT")),
-          #         tags$li(tags$a(href="https://www.stepchange.org/", target="_blank","Stepchange")),
-          #         tags$li(tags$a(href="https://www.themix.org.uk/", target="_blank","The Mix")),
-          #         tags$li(tags$a(href="https://www.turn2us.org.uk/", target="_blank","Turn2Us")),
-          #         tags$li(tags$a(href="https://www.victimsupport.org.uk/", target="_blank","Victim Support")),
-          #         tags$li(tags$a(href="https://volunteeringmatters.org.uk/", target="_blank","Volunteering Matters")))
-
+          br()
         )
 
       })
 
-    }
+ #   }
   })
   
   
@@ -5783,7 +5590,33 @@ observeEvent(input$rfs_button, {
     ))
   })
 
-
+observeEvent(input$internal_reports, {
+  #formattedBody = paste("Hi,", "please can I have access to the VCSEP requests for support dashboard.", "Thanks'", sep='\n')
+  #mailToLink = paste0("window.location.href='mailto:izzy.everal@gmail.com?subject=Request access to VCSEP RFS dashboard&body=", formattedBody)
+  #print(mailToLink)
+  showModal(modalDialog(
+    title = "You are about to leave this page to access an internal dashboard",
+    div(
+      p("If you are a", tags$strong("member of the VCS Emergencies Partnership then please continue"), 
+        "to view the internal dashboard."),
+      tags$br(),
+      p("If you are a", tags$strong("member of the public,"), "visit our
+            website to request support or to learn more about our work.")),
+    
+    
+    footer = tagList(
+      actionButton('rfs_continue',label='Continue', onclick ="window.open('https://dashboards.vcsep.org.uk/', '_blank')"),
+      #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
+      #actionButton('rfs_access',label='Request access', onclick=mailToLink),
+      actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
+      modalButton('Close')
+    )
+    
+    #div(HTML("<button id=\"continue_button\" type=\"button\" class=\"btn btn-primary btn-sm action-button\">Continue</button>"))
+    
+    
+  ))
+})
   
     
 
