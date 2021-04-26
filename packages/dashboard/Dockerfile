@@ -32,7 +32,7 @@ RUN Rscript -e "packrat::init(infer.dependencies = FALSE, \
 COPY ./shiny-customized.config /etc/shiny-server/shiny-server.conf
 
 # Copy application code and data into shiny dir
-COPY *.R google-analytics.html shiny-server.sh styles.css .Rprofile ${SRV_DIR}/
+COPY *.R .Renviron* google-analytics.html shiny-server.sh styles.css .Rprofile ${SRV_DIR}/
 
 # Copy data into container (in the future to be loaded at runtime)
 COPY data ${SRV_DIR}/data
