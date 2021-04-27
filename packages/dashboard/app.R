@@ -124,6 +124,8 @@ tactical_cells <- area_lookup_tc2lad %>% filter(TacticalCell != 'Wales' & Tactic
 tactical_cells <- unique(tactical_cells$TacticalCell)
 tactical_cells <- c('-- England --', tactical_cells)
 
+#lads_needed <- unique(lad_uk2vuln_resilience$lad19nm)
+#lads_needed <- c('All local authorities in region', sort(lads_needed))
 
 # --- Metadata ----
 # --- people at risk data ---
@@ -324,7 +326,7 @@ last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%
 
 # ---  dashboard --- #
 # --- header --- #
-header <- dashboardHeader(title = "VCS Emergencies Toolkit", titleWidth = "300px",
+header <- dashboardHeader(title = "", titleWidth = "300px",
                          tags$li(class = "dropdown", 
                                    tags$li(class="dropdown",
                                    actionLink("home", "Home", icon=icon("home"))),
@@ -332,11 +334,11 @@ header <- dashboardHeader(title = "VCS Emergencies Toolkit", titleWidth = "300px
                                           actionLink("RI_tool","Risk Indicator Tool", icon=icon("fas fa-map-signs"))
                                   ),
                                  tags$li(class="dropdown",
-                                         actionLink("e_catalogue", "'Open' insight catalouge", icon=icon("fas fa-book-open"))),
+                                         actionLink("e_catalogue", "Insight catalouge", icon=icon("fas fa-book-open"))),
                                  tags$li(class="dropdown",
                                          actionLink("internal_reports", "Internal reports", icon=icon("fas fa-lock"))),
                                  tags$li(class="dropdown",
-                                         actionLink("community_assets", "Community assets webmap", icon=icon("fas fa-map-marked"), 
+                                         actionLink("community_assets", "Community assets map", icon=icon("fas fa-map-marked"), 
                                                     onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')")),
                                  tags$li(class="dropdown",
                                          actionLink("help", "Help", icon=icon("far fa-question-circle"))),
@@ -360,28 +362,9 @@ sidebar <- dashboardSidebar(
               menuItem(HTML("Risk Indicator Tool"), tabName="unmetneed", icon=icon("fas fa-map-signs")),
               
               # -- trying conditional panel ---
-              conditionalPanel(condition = "input.sidebar_id == 'unmetneed'", 
-                               div(style="text-align: justify;",
-                                   br(),
-                               p("This dashboard is to help answer the",tags$br(), "question of what",
-                                 tags$strong("areas and people"), tags$br(), "would be/are at risk should the", tags$br(),
-                                tags$strong("emergency"), "scenario selected occur")),
-                               selectInput("theme",
-                                           label="Select an emergency",
-                                           #choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
-                                           choices = sort(c("Covid-19","Flooding")),
-                                           selected="Covid-19"),
-                               
-                               selectInput("tactical_cell",
-                                           label = "Choose Region",
-                                           choices = sort(tactical_cells),
-                                            selected = "-- England --"
-
-                               ),
-                               
-                               uiOutput("secondSelection")),
-              menuItem(HTML("'Open' insight catalouge"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
-              menuItem(HTML("Internal reports"), tabName="internal_reports", icon=icon("fas fa-lock")),
+              
+              menuItem(HTML("Insight catalouge"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
+              menuItem(HTML("Internal reports"), tabName="internal_reports_from_sidebar", icon=icon("fas fa-lock")),
               menuItem(HTML("Community assets web map"), tabName="community_assets", icon=icon("fas fa-map-marked")),
     
               menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
@@ -406,43 +389,58 @@ body <- dashboardBody(
     # --- Home page ---
     tabItem(tabName="home", selected=T,
             # - row 1 -
-            fluidRow(style="padding-right:20px",
+            fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:20px",
               # column 1
-              column(width = 9,
+              column(width = 10,
                      h1("Welcome to the Emergencies Partnership Toolkit"),
-                              h4("the public interface to the Voluntary Communtiry Sector Emergencies Partnership toolkit - sharing insight and resources amongst the VCS."),
-                     hr(),
-                     fluidRow(  
-                     column(width=3, 
-                              box(title="Internal reports",width=NULL,
-                                  collapsible = T, collapsed=T)),
-                       column(width=3,
-                              box(title="Community assets webmap",width=NULL,
-                                  collapsible = T, collapsed=T)),
-                       column(width=3,
-                              box(title="Risk indicator tool", width=NULL,
-                                  collapsible = T, collapsed=T)),
+                              h4("Sharing insight and resources amongst the VCS to help before, during and after an emergency."),
+              ),
+              column(width = 2,
+                     div(img(src = "vcs-logo-text.png", width = 350),
+                         style="position:fixed; padding-right:20px; padding-left:20px;padding-top:0px;padding-bottom:50px"))),
+              # row two
+              fluidRow(style="padding-right:20px; padding-left:20px",  
+                     
                      column(width=3,
-                            box(title="'Open' insight catalogue",width=NULL, 
-                                collapsible = T, collapsed=T))),
-                  fluidRow(
-                     column(width=6,
+                            box(title=actionLink("RI_tool_box","Risk Indicator Tool"), width=NULL,
+                                collapsible = T, collapsed=T,
+                                icon = icon("fas fa-map-signs"))),
+                     
+                     column(width=3,
+                            box(title="Insight catalogue",width=NULL, 
+                                collapsible = T, collapsed=T,
+                                icon = icon("fas fa-book-open"))),
+                    
+                    column(width=3, 
+                        box(title=actionLink("internal_reports_from_box", "Internal reports"),
+                          width=NULL,
+                          collapsible = T, 
+                          collapsed=T,
+                            icon = icon("fas fa-lock"))),
+            
+                       column(width=3,
+                              box(title=actionLink("community_assets", "Community assets map", 
+                                                   onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')")
+                                  ,width=NULL,
+                                  collapsible = T, collapsed=T,
+                                  icon=icon("fas fa-map-marked")))),
+                      
+              # row three 
+                  fluidRow(style="padding-right:20px; padding-left:20px",
+                     column(width=4,
                             box(title="Where we're working", width=NULL,
                                 leafletOutput('home_map', height = "400px"))),
-                     column(width=6,
+                     column(width=4,
                             box(title="Latest concerns raised by our network", width=NULL,
-                                echarts4rOutput('concerns', height="400px"))
-                            ))),
-                    
-              # column 2
-              column(width = 3,
-                # - Row 1 -
-                fluidRow(
+                                echarts4rOutput('concerns', height="400px"))),
+                      
+                    column(width = 4,
                   tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
                   box(title='Latest news', width=NULL, headerBorder = F, #height='175px',
                       a(class="twitter-timeline", href="https://twitter.com/vcsep"),
-                      style = "height:698px; overflow-y: scroll;overflow-x: scroll;;margin-top:-20px;padding-top:-20px")
-                )
+                      style = "height:440px; overflow-y: scroll;overflow-x: scroll;;margin-top:-20px;padding-top:-20px")
+                
+                
               )
             )
           ),
@@ -451,10 +449,34 @@ body <- dashboardBody(
     tabItem(tabName = "unmetneed",
   # - row 1 -
   fluidRow(
-    infoBoxOutput("requests", width = 4),
-    infoBoxOutput("pulse", width = 4),
-    infoBoxOutput("vols", width = 4)
-  ),
+    column(width=12,
+        panel(
+            width=NULL,
+            header=NULL,
+            height='30px',
+            fluidRow(
+              column(width = 3,
+            div(h4(tags$strong("Risk indicator tool")),
+                p("This tool is to help answer the question of what",
+                tags$strong("areas and people"), "would be/are at risk should the",
+                                   tags$strong("emergency"), "scenario selected occur"))),
+            column(width=3,
+                    selectInput("theme",
+                                         label="1. Select an emergency",
+                                         #choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
+                                         choices = sort(c("Covid-19","Flooding")),
+                                         selected="Covid-19")),
+            
+            column(width=3,
+                             selectInput("tactical_cell",
+                                         label = "2. Choose a region",
+                                         choices = sort(tactical_cells),
+                                         selected = "-- England --")),
+            column(width=3,
+                
+                    uiOutput("secondSelection")),
+                             
+                             )))),
     # - row 2  -
       fluidRow(
       # - column 1 -
@@ -728,7 +750,6 @@ server = function(input, output, session) {
 
   observeEvent(input$home, {
     newtab <- switch(input$sidebar_id, "home")
-    print(newtab)
     updateTabItems(session, "sidebar_id", newtab)
     
   })
@@ -736,14 +757,18 @@ server = function(input, output, session) {
   
   observeEvent(input$references, {
     newtab <- switch(input$sidebar_id, "references")
-    print(newtab)
     updateTabItems(session, "sidebar_id", newtab)
 
   })
   
   observeEvent(input$RI_tool, {
     newtab <- switch(input$sidebar_id, "unmetneed")
-    print(newtab)
+    updateTabItems(session, "sidebar_id", newtab)
+    
+  })
+  
+  observeEvent(input$RI_tool_box, {
+    newtab <- switch(input$sidebar_id, "unmetneed")
     updateTabItems(session, "sidebar_id", newtab)
     
   })
@@ -985,9 +1010,12 @@ server = function(input, output, session) {
     addCircleMarkers(data=requests_home, 
                      lng=requests_home$longitude, 
                      lat=requests_home$latitude,
-                     radius=requests_home$request_status_radius,
-                     color=requests_home$request_status_col,
-                     fillOpacity = requests_home$request_status_opacity,
+                     #radius=requests_home$request_status_radius,
+                     #color=requests_home$request_status_col,
+                     #fillOpacity = requests_home$request_status_opacity,
+                     radius=4,
+                     color='blue',
+                     fillOpacity=0.6,
                      stroke=F)
                #clusterOptions = markerClusterOptions())
     
@@ -1018,12 +1046,18 @@ server = function(input, output, session) {
   # --- Respond to users input on location ----
   # ---- Respond to users tactical cell ----
   filteredLA <- reactive({
-    lad_uk2areas2vulnerability %>% filter(TacticalCell == input$tactical_cell)
+    if(input$tactical_cell == '-- England --') {
+      lad_uk2areas2vulnerability
+    }
     
+    else {
+        lad_uk2areas2vulnerability %>% filter(TacticalCell == input$tactical_cell)
+    }
   })
   
-  observe({
-    
+
+  
+  observe( {
     if (input$tactical_cell == '-- England --') {
       output$secondSelection <- renderUI({
         #lads2select <- unique(lad_uk2vuln_resilience$Name)
@@ -1057,16 +1091,14 @@ server = function(input, output, session) {
         })
         
       }
-      
-      
-      
     }
-    
   })
   
-  # 
-  showtop10_or_all <- reactiveValues(display_wanted='show_all')
+
   
+  
+  # --- button on map ---
+  showtop10_or_all <- reactiveValues(display_wanted='show_all')
   observeEvent(input$my_easy_button, {
     showtop10_or_all$display_wanted <- input$my_easy_button
   })
@@ -1979,24 +2011,6 @@ server = function(input, output, session) {
   })
   
   
-#   # for second selection
-#   filteredLA <- reactive({
-#     selected <- lad_uk2vuln_resilience %>% filter(TacticalCell == input$tactical_cell)
-#   })
-#   
-#   
-#   # second selection 
-#   observe({
-#   # ---- Adjust LAD options based on tactical cell ---
-#   output$secondSelection <- renderUI({
-#     lads2select <- unique(filteredLA()$Name)
-#     #print(lads2select)
-#     #lads2select <- order(lads2select)
-#     #print(lads2select)
-#     lads2select <- c('All local authorities in region', sort(lads2select))
-#     selectInput("lad_selected", "Local Authority", choices = lads2select, selected='All local authorities in region')
-#   })
-# })
 
 
   filterpar_tab <- reactive({
@@ -2366,55 +2380,12 @@ server = function(input, output, session) {
     
   })
   
-  
-
-
 
   # --- Requests ----
   filtered_requests <- reactive({
     requests_tc <- requests %>% filter(TacticalCell==input$tactical_cell)
 
   })
-
-  # --- Volunteer capacity ---
-  #filtered_volunteers <- reactive({
-  #  volunteers_tc <- volunteers %>% filter(TacticalCell==input$tactical_cell)
-
-#  })
-  
-  
-  # # --- local organisation --- 
-  # filtered_local_organisations <- reactive({
-  #   
-  #   req(input$sidebar_id)
-  #   if(input$sidebar_id == 'unmetneed') {
-  #     
-  #     if (input$tactical_cell == '-- England --') {
-  #      local_orgs <- local_organisations %>% select('Organisation name'=Name, 'Address', 
-  #                                                   'Website'=link, "Phone number"="Phone_number", 
-  #                                                   "Local authority"='LAD19NM', 
-  #                                                   "Region"='TacticalCell') %>%
-  #        arrange(`Organisation name`)
-  #     }
-  #     else {
-  #       if(input$lad_selected == 'All local authorities in region') {
-  #           local_orgs <- local_organisations %>% filter(TacticalCell == input$tactical_cell) %>% 
-  #             select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
-  #                   "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
-  #             arrange(`Organisation name`)
-  #       }
-  #       
-  #       else{
-  #         local_orgs <- local_organisations %>% filter(LAD19NM == input$lad_selected) %>% 
-  #           select('Organisation name'=Name, 'Address', 'Website'=link, "Phone number"="Phone_number", 
-  #                  "Local authority"='LAD19NM', "Region"='TacticalCell') %>%
-  #           arrange(`Organisation name`)
-  #       }
-  #     }
-  #     
-  #   }
-  #   
-  # })
 
 
   # --- Generate Map ----
@@ -4389,7 +4360,6 @@ onclick("top_1", {
                              choices = lad_choices,
                              selected=row_wanted$`Local Authority`)
 
-          
         }
        
   )
@@ -4696,8 +4666,24 @@ onclick("top_10", {
   observe({
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
+      print('here')
+      print(input$tactical_cell)
+      print(input$lad_selected)
  
       # if user has tactical cell selected
+      if (input$tactical_cell == '-- England --' & is.null(input$lad_selected)) {
+        print("WHAT THE F IS THE PROBLEM")
+          output$secondSelection <- renderUI({
+              #lads2select <- unique(lad_uk2vuln_resilience$Name)
+            #lads2select <- c('All local authorities in region',sort(lads2select))
+            lads2select <- c('All local authorities in region')
+          selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+      })
+      
+      }
+      
+      else {
+      
       #print(input$lad_selected)
       if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
         # update reactive values 
@@ -4730,9 +4716,6 @@ onclick("top_10", {
           dd_areas2focus$l <- input$lad_selected
           dd_areas2focus$t <- input$tactical_cell
           dd_areas2focus$d <- lad_filtered_areas2focus
-          
-          #print('this should be showing')
-          #print(lad_filtered_areas2focus)
         
           DT::replaceData(proxy, lad_filtered_areas2focus) 
           
@@ -4749,6 +4732,7 @@ onclick("top_10", {
         
       }
       
+      }
     }
     
   })
@@ -4842,6 +4826,35 @@ onclick("top_10", {
     req(input$sidebar_id)
     if(input$sidebar_id == 'unmetneed') {
       
+      # sometimes this hasn't been initiated so causes error
+      if(is.null(input$lad_selected)) {
+        output$secondSelection <- renderUI({
+          #lads2select <- unique(lad_uk2vuln_resilience$Name)
+          #lads2select <- c('All local authorities in region',sort(lads2select))
+          lads2select <- c('All local authorities in region')
+          selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+        })
+        
+        # search either whole tactical cell or all of engalnd
+        bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+        # create search of charity database 
+        output$search_needed <- renderUI({
+          # search bar
+          searchInput(inputId = "search_term", 
+                      label = "Search CharityBase for charities with a particular purpose",
+                      placeholder = 'i.e emergency response',
+                      btnSearch = icon("search"), 
+                      btnReset = icon("remove"), 
+                      value='',
+                      width = "100%")
+        })
+        
+        output$expand_search_needed <- renderUI({
+        })
+      }
+      
+      else {
+      
       # provide option for expanded search if lad selected
       if(input$lad_selected != 'All local authorities in region') {
         
@@ -4876,27 +4889,7 @@ onclick("top_10", {
         
         })
       }
-      
-      else {
-        # sometimes this hasn't been initiated so causes error
-        if(is.null(input$lad_selected)) {
-        # search either whole tactical cell or all of engalnd
-        bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
-        # create search of charity database 
-        output$search_needed <- renderUI({
-          # search bar
-          searchInput(inputId = "search_term", 
-                      label = "Search CharityBase for charities with a particular purpose",
-                      placeholder = 'i.e emergency response',
-                      btnSearch = icon("search"), 
-                      btnReset = icon("remove"), 
-                      value='',
-                      width = "100%")
-        })
         
-        output$expand_search_needed <- renderUI({
-        })
-        }
         
         else {
             # search either whole tactical cell or all of engalnd
@@ -4927,7 +4920,7 @@ onclick("top_10", {
     # - does the call take too long
     charities_found <- withTimeout({
                 findcharities(bounding_wanted, '')
-      }, timeout = 2)
+      }, timeout = 1)
     },
     error = function(e) {
       charities_found <- NULL
@@ -5017,7 +5010,7 @@ onclick("top_10", {
           # - does the call take too long
           charities_found <- withTimeout({
             findcharities(bounding_wanted, input$search_term)
-          }, timeout = 2)
+          }, timeout = 1)
         },
         error = function(e) {
           charities_found <- NULL
@@ -5045,7 +5038,7 @@ onclick("top_10", {
             # - does the call take too long
             charities_found <- withTimeout({
               findcharities(bounding_wanted, input$search_term)
-            }, timeout = 2)
+            }, timeout = 1)
           },
           error = function(e) {
             charities_found <- NULL
@@ -5124,7 +5117,7 @@ onclick("top_10", {
           # - does the call take too long
           charities_found <- withTimeout({
             findcharities(bounding_wanted, input$search_term)
-          }, timeout = 2)
+          }, timeout = 1)
         },
         error = function(e) {
           charities_found <- NULL
@@ -5147,7 +5140,7 @@ onclick("top_10", {
             # - does the call take too long
             charities_found <- withTimeout({
               findcharities(bounding_wanted, input$search_term)
-            }, timeout = 2)
+            }, timeout = 1)
           },
           error = function(e) {
             charities_found <- NULL
@@ -5260,7 +5253,7 @@ onclick("top_10", {
         # - does the call take too long
         charities_found <- withTimeout({
           findcharities(bounding_wanted, input$search_term)
-        }, timeout = 2)
+        }, timeout = 1)
       },
       error = function(e) {
         charities_found <- NULL
@@ -5301,7 +5294,7 @@ onclick("top_10", {
           # - does the call take too long
           charities_found <- withTimeout({
             findcharities(bounding_wanted, input$search_term)
-          }, timeout = 2)
+          }, timeout = 1)
         },
         error = function(e) {
           charities_found <- NULL
@@ -5323,8 +5316,6 @@ onclick("top_10", {
               tags$br(),
               'Pleas try again by searching for a cause in the search box'))
       })
-      
-     
       
     }
     
@@ -5368,431 +5359,21 @@ onclick("top_10", {
   
   
   
-  
-  
-  # 
-  # # local organisations 
-  # observe({
-  #   req(input$sidebar_id)
-  #   if(input$sidebar_id == 'unmetneed') {
-  #     #if (input$tactical_cell == '-- England --') {
-  #     #  output$region_needed <-  renderUI({
-  #     #    div(p(tags$strong("Please select a region or local authority"), tags$br(),
-  #     #         tags$strong("to view the navca members in the area")))
-  #     #    })
-  #     #}
-  #     #else {
-  #   
-  #       
-  # # all lads in tcs wanted
-  # output$local_orgs <- DT::renderDataTable({
-  #   #Sys.sleep(1.5)
-  #   DT::datatable(filtered_local_organisations(), filter=list(position='top'), escape=F,
-  #                 selection =c('single'),
-  #                 options = list(dom='tp', #should remove top search box the p includes paging
-  #                                paging = T,
-  #                                pageLength=5,
-  #                                lengthMenu = c(5, 10, 15, 20),
-  #                                scrollX=T,
-  #                                scrollY='250px',
-  #                                autoWidth = T,
-  #                                columnDefs = list(list(width = '150px', targets = c(1,2))),
-  #                                initComplete = htmlwidgets::JS(
-  #                                  "function(settings, json) {",
-  #                                  paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
-  #                                  "}")
-  #                 )) }, escape=F)
-  #     #}
-  # 
-  #   }
-  # 
-  # })
-  
-  # # ---- volunteer capacity areas to focus ----
-  #
-  # observe({
-  #   volunteers_available <- filtered_volunteers()
-  #   vulnerability <- filteredVI()
-  #   vulnerability <- vulnerability %>% select('LAD19CD', 'Name',`Vulnerability quintile`)
-  #
-  #
-  #   # - join to vulnerability
-  #   volunteers2vulnerability <- left_join(vulnerability, volunteers_available, by='LAD19CD', keep=F) %>%
-  #     st_drop_geometry() %>%
-  #     rename('Overall Vulnerability' = `Vulnerability quintile`) %>%
-  #     mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-  #               mean_score >= 2.5 ~ 'Low',
-  #               (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-  #               is.na(mean_score) ~ 'Data unavailable')) %>%
-  #     select('Name', 'Overall Vulnerability', 'Volunteer capacity', 'Score'=mean_score)
-  #
-  #   # - order
-  #   volunteers2vulnerability <- volunteers2vulnerability %>% arrange(-`Overall Vulnerability`, -Score)
-  #
-  #   output$volunteers <- DT::renderDataTable({
-  #     DT::datatable(volunteers2vulnerability,
-  #                   options = list(
-  #                  paging =FALSE
-  #                 ))
-  # })
-  #
-  # })
 
-
-
-  # ---- VCS INDICATORS -----
-
-  # --- observe requests ---
-  observe({
-
-    # --- which tab is selected ---
-    req(input$sidebar_id)
-    if (input$sidebar_id == 'unmetneed') {
-
-      requests_status <- filtered_requests()
-
-      if(is.null(input$lad_selected)) {
-        output$requests <- renderInfoBox({
-          infoBox(
-            "Requests",
-              color = "navy", fill = F, icon=icon("glyphicon-th-list", lib='glyphicon')
-             )
-            })
-          }
-
-      else {
-
-         if (input$tactical_cell == '-- England --') {
-
-            # tactical cell total
-            total_requests_this_week <- requests %>%
-            mutate('last_week_requests_no_na' = replace_na(total_requests_last_week, 0)) %>%
-            mutate(total_this_week = sum(last_week_requests_no_na)) %>%
-            select('TacticalCell','total_this_week') %>%
-            unique()
-
-            total_requests_week_previous <- requests %>%
-            mutate('previous_week_requests_no_na' = replace_na(total_requests_previous_week, 0)) %>%
-            mutate(total_previous_week = sum(previous_week_requests_no_na, na.rm=T)) %>%
-            select('TacticalCell','total_previous_week') %>%
-            unique()
-
-
-            difference <- as.numeric(total_requests_this_week$total_this_week) - as.numeric(total_requests_week_previous$total_previous_week)
-            difference <- sprintf("%+3d", difference)
-
-            to_print <- paste("Previous 7 days:", total_requests_this_week$total_this_week, "Difference to last week:",difference, sep="\n")
-
-            # because it sums for each tactical cell need to do unique
-            #print(to_print)
-
-            output$requests <- renderInfoBox({
-            infoBox(
-              "Requests for support", 
-              #HTML("<b>Requests for support</b> <button id=\"button\" type=\"button\" class=\"btn btn-primary btn-circle btn-circle-sm m-1 action-button\"><i class=\"fa fa-bar-chart\"></i></button>"),
-              #HTML("<b>Requests for support</b> <button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-circle btn-xs action-button\"><i class=\"fa fa-bar-chart\"></i></button>"),
-              #subtitle = 
-              div(p(tags$strong(unique(total_requests_this_week$total_this_week), style="font-size:24pt"), 
-                             "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
-                  p(unique(difference), "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;",
-                  HTML("<button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-xs action-button\">dashboard</button>"))),
-            
-              #"Requests", unique(to_print),
-                color = "purple", fill = F, icon=icon("fas fa-list")
-                
-              )
-              
-            })
-           }
-
-        else {
-
-          if (input$lad_selected == 'All local authorities in region') {
-
-          # tactical cell total
-          total_requests_this_week <- requests_status %>%
-            mutate('last_week_requests_no_na' = replace_na(total_requests_last_week, 0)) %>%
-            mutate(total_this_week = sum(last_week_requests_no_na)) %>%
-            select('TacticalCell','total_this_week') %>%
-            unique()
-
-          total_requests_week_previous <- requests_status %>%
-            mutate('previous_week_requests_no_na' = replace_na(total_requests_previous_week, 0)) %>%
-            mutate(total_previous_week = sum(previous_week_requests_no_na, na.rm=T)) %>%
-            select('TacticalCell','total_previous_week') %>%
-            unique()
-
-
-          difference <- as.numeric(total_requests_this_week$total_this_week) - as.numeric(total_requests_week_previous$total_previous_week)
-          difference <- sprintf("%+3d", difference)
-
-          to_print <- paste("Previous 7 days:", total_requests_this_week$total_this_week, "Difference to last week:",difference, sep="\n")
-
-          output$requests <- renderInfoBox({
-          infoBox(
-            "Requests for support", 
-            div(p(tags$strong(total_requests_this_week$total_this_week, style="font-size:24pt"), 
-                  "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
-                p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;",
-                  HTML("<button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-xs action-button\">dashboard</button>"))),
-            #div(p("Previous 7 days:", total_requests_this_week$total_this_week, style = "font-size:12pt;margin-top:5px;"),
-            #    p("Difference to last week:", difference, style = "font-size:10pt;color:#808080;margin-top:-10px;")),
-            color = "purple", fill = F, icon=icon("fas fa-list")
-                )
-          })
-
-          }
-
-        else {
-          # look up lad name
-          lad_name <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% unique()
-
-          # plot lad level
-          lad_requests <- requests_status %>% filter(LAD19CD==lad_name$LAD19CD)
-
-          # tactical cell total
-          total_requests_this_week <- lad_requests %>%
-           mutate('last_week_requests_no_na' = replace_na(total_requests_last_week, 0)) %>%
-            mutate(total_this_week = sum(last_week_requests_no_na)) %>%
-            select('TacticalCell','total_this_week') %>%
-            unique()
-
-          total_requests_week_previous <- lad_requests %>%
-            mutate('previous_week_requests_no_na' = replace_na(total_requests_previous_week, 0)) %>%
-            mutate(total_previous_week = sum(previous_week_requests_no_na, na.rm=T)) %>%
-            select('TacticalCell','total_previous_week') %>%
-            unique()
-
-          difference <- as.numeric(total_requests_this_week$total_this_week) - as.numeric(total_requests_week_previous$total_previous_week)
-          difference <- sprintf("%+3d", difference)
-
-          to_print <- paste("Previous 7 days:", total_requests_this_week$total_this_week, "Difference to last week:",difference, sep="\n")
-
-          output$requests <- renderInfoBox({
-            infoBox(
-              #"Requests", to_print,
-              "Requests for support",
-              div(p(tags$strong(total_requests_this_week$total_this_week, style="font-size:24pt"), 
-                    "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
-                  p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;",
-                    HTML("<button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-xs action-button\">dashboard</button>"))),
-              #div(p("Previous 7 days:", total_requests_this_week$total_this_week, style = "font-size:12pt;margin-top:5px;"),
-              #    p("Difference to last week:", difference, style = "font-size:10pt;color:#808080;margin-top:-10px;")),
-              color = "purple", fill = F, icon=icon("fas fa-list")
-                )
-            })
-          }
-       }
-    }
-  }
-
-})
-  
-  
-#
-observeEvent(input$rfs_button, {
-    #formattedBody = paste("Hi,", "please can I have access to the VCSEP requests for support dashboard.", "Thanks'", sep='\n')
-    #mailToLink = paste0("window.location.href='mailto:izzy.everal@gmail.com?subject=Request access to VCSEP RFS dashboard&body=", formattedBody)
-    #print(mailToLink)
-    showModal(modalDialog(
-      title = "You are about to leave this page to access an internal dashboard",
-      div(
-          p("If you are a", tags$strong("member of the VCS Emergencies Partnership then please continue"), 
-          "to view the internal dashboard."),
-          tags$br(),
-          p("If you are a", tags$strong("member of the public,"), "visit our
-            website to request support or to learn more about our work.")),
-      
-      
-      footer = tagList(
-        actionButton('rfs_continue',label='Continue', onclick ="window.open('https://dashboards.vcsep.org.uk/', '_blank')"),
-        #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
-        #actionButton('rfs_access',label='Request access', onclick=mailToLink),
-        actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
-        modalButton('Close')
-      )
-        
-        #div(HTML("<button id=\"continue_button\" type=\"button\" class=\"btn btn-primary btn-sm action-button\">Continue</button>"))
-      
-      
-    ))
-  })
 
 observeEvent(input$internal_reports, {
-  #formattedBody = paste("Hi,", "please can I have access to the VCSEP requests for support dashboard.", "Thanks'", sep='\n')
-  #mailToLink = paste0("window.location.href='mailto:izzy.everal@gmail.com?subject=Request access to VCSEP RFS dashboard&body=", formattedBody)
-  #print(mailToLink)
-  showModal(modalDialog(
-    title = "You are about to leave this page to access an internal dashboard",
-    div(
-      p("If you are a", tags$strong("member of the VCS Emergencies Partnership then please continue"), 
-        "to view the internal dashboard."),
-      tags$br(),
-      p("If you are a", tags$strong("member of the public,"), "visit our
-            website to request support or to learn more about our work.")),
-    
-    
-    footer = tagList(
-      actionButton('rfs_continue',label='Continue', onclick ="window.open('https://dashboards.vcsep.org.uk/', '_blank')"),
-      #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
-      #actionButton('rfs_access',label='Request access', onclick=mailToLink),
-      actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
-      modalButton('Close')
-    )
-    
-    #div(HTML("<button id=\"continue_button\" type=\"button\" class=\"btn btn-primary btn-sm action-button\">Continue</button>"))
-    
-    
-  ))
+  internal_report_link()
 })
-  
+
+observeEvent(input$internal_reports_from_box, {
+  internal_report_link()
+})
+
+observeEvent(req(input$sidebar_id == 'internal_reports_from_sidebar'), {
+  internal_report_link()
+})
     
 
-# --- Volunteer capacity ---
-  observe({
-
-    req(input$sidebar_id)
-    if (input$sidebar_id == 'unmetneed') {
-      
-      # -- coming soon -- 
-      output$vols <- renderInfoBox({
-        infoBox(
-          "Volunteer Presence",
-          div(p('Coming Soon', style = "font-size:12pt;margin-top:5px;")),
-          color = "purple", fill = F, icon=icon('fas fa-hands-helping')
-        )
-      })
-    }
-    
-  })
-
-# 
-#       volunteer_capacity <- filtered_volunteers()
-# 
-#       if(is.null(input$lad_selected)) {
-#         output$vols <- renderInfoBox({
-#          infoBox(
-#             "Volunteer Presence",
-#             color = "navy", fill = F,
-#             )
-#           })
-#         }
-# 
-#       else {
-# 
-#         if (input$tactical_cell == '-- England --') {
-# 
-#           avg_score <- volunteers %>%
-#             mutate(avg_over_area = round(mean(mean_score, na.rm=TRUE),1)) %>% select('avg_over_area') %>%
-#             unique() %>% mutate(colour = case_when(avg_over_area <= 1.5 ~ 'green',
-#                                                  avg_over_area >= 2.5 ~ 'red',
-#                                                  (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'orange',
-#                                                  is.na(avg_over_area) ~ 'navy')) %>%
-#             mutate(to_print = case_when(is.na(avg_over_area) ~ 'No data available',
-#                                       TRUE ~ as.character(.$avg_over_area))) %>%
-#             mutate('Volunteer capacity' = case_when(avg_over_area <= 1.5 ~ 'High',
-#                                                   avg_over_area >= 2.5 ~ 'Low',
-#                                                   (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'Medium',
-#                                                   is.na(avg_over_area) ~ 'Data unavailable'))
-# 
-# 
-# 
-#           output$vols <- renderInfoBox({
-#             infoBox(
-#               "Volunteer presence", 
-#               div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
-#               color = avg_score$colour, fill = F, icon=icon('hands-helping')
-#                 )
-#               })
-#             }
-# 
-#         else {
-# 
-#         # -- Tactical cell level --
-#           if (input$lad_selected == 'All local authorities in region') {
-# 
-#             #print(volunteer_capacity)
-# 
-#             # -- calculate average of others
-#             avg_score <- volunteer_capacity %>%
-#             mutate(avg_over_area = round(mean(mean_score, na.rm=TRUE),1)) %>% select('avg_over_area') %>%
-#             unique() %>% mutate(colour = case_when(avg_over_area <= 1.5 ~ 'green',
-#                                                  avg_over_area >= 2.5 ~ 'red',
-#                                                  (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'orange',
-#                                                  is.na(avg_over_area) ~ 'navy')) %>%
-#             mutate(to_print = case_when(is.na(avg_over_area) ~ 'No data available',
-#                                       TRUE ~ as.character(.$avg_over_area))) %>%
-#             mutate('Volunteer capacity' = case_when(avg_over_area <= 1.5 ~ 'High',
-#                                                   avg_over_area >= 2.5 ~ 'Low',
-#                                                   (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'Medium',
-#                                                   is.na(avg_over_area) ~ 'Data unavailable'))
-# 
-# 
-# 
-#             output$vols <- renderInfoBox({
-#             infoBox(
-#             "Volunteer presence", 
-#             div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
-#               color = avg_score$colour, fill = F, icon=icon('hands-helping')
-#                 )
-#               })
-#              }
-# 
-#           else {
-#           # --- lad level ---
-# 
-#             # look up lad name
-#             lad_name <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% unique()
-# 
-#             # plot lad level
-#             lad_volunteers <- volunteer_capacity %>% filter(LAD19CD==lad_name$LAD19CD)
-# 
-#             #print(lad_volunteers)
-# 
-#             # -- calculate average of others
-#             avg_score <- lad_volunteers %>%
-#              mutate(colour = case_when(mean_score <= 1.5 ~ 'green',
-#                                                  mean_score >= 2.5 ~ 'red',
-#                                                  (mean_score >1.5 & mean_score < 2.5) ~ 'orange',
-#                                     is.na(mean_score) ~ 'navy')) %>%
-#               mutate(to_print = case_when(is.na(mean_score) ~ 'No data available',
-#                                       TRUE ~ as.character(.$mean_score))) %>%
-#               mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-#                                                   mean_score >= 2.5 ~ 'Low',
-#                                                   (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-#                                                   is.na(mean_score) ~ 'Data unavailable'))
-# 
-# 
-#             #print(avg_score)
-# 
-#               output$vols <- renderInfoBox({
-#                 infoBox(
-#                   "Volunteer presence", 
-#                   div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
-#                     color = avg_score$colour, fill = F, icon=icon('hands-helping')
-#                   )
-#                 })
-#               }
-#             }
-#         }
-#     }
-#   })
-
-
-  # --- pulse survey ---
-  observe({
-    req(input$sidebar_id)
-    if (input$sidebar_id == 'unmetneed') {
-
-      output$pulse <- renderInfoBox({
-      infoBox(
-        "Pulse", 
-        div(p('Coming Soon', style = "font-size:12pt;margin-top:5px;")),
-        color = "purple", fill = F, icon = icon("fas fa-bullseye")
-        )
-      })
-    }
-  })
 }
 
 
