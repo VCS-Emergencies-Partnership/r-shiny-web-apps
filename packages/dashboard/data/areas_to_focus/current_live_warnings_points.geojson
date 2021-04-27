@@ -4,6 +4,11 @@
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
 { "type": "Feature", "properties": { "floodAreaID": "062FAGKimptonGW" }, "geometry": { "type": "Point", "coordinates": [ -0.311013397480704, 51.862736172825514 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "052FAGNEWMARKET" }, "geometry": { "type": "Point", "coordinates": [ 0.404846937624049, 52.244398510594728 ] } }
+{ "type": "Feature", "properties": { "floodAreaID": "052FAGNEWMARKET" }, "geometry": { "type": "Point", "coordinates": [ 0.404846937624049, 52.244398510594728 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "112WATSOM1" }, "geometry": { "type": "Point", "coordinates": [ -3.59987488061468, 51.219299760874179 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "113WACT2A" }, "geometry": { "type": "Point", "coordinates": [ -4.154659355631669, 51.077319727045314 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "011WACN6" }, "geometry": { "type": "Point", "coordinates": [ -2.909711796884933, 54.201172589766806 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "112WATAVN1" }, "geometry": { "type": "Point", "coordinates": [ -2.656895424406651, 51.475024491217724 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "052WATCSTHUN" }, "geometry": { "type": "Point", "coordinates": [ 0.484433604968858, 52.927273401676118 ] } }
 ]
 }
