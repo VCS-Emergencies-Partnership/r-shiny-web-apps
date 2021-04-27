@@ -311,11 +311,9 @@ requests <- requests %>%
   select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
 
 
-volunteers <- read_feather('data/vcs_indicators/volunteer-capacity-lad19CD-tc.feather')
-
-
-# -- local organisations --
-local_organisations <- read_feather('./data/navca_members_2019.feather')
+# -- for home page maybe replacing initial requests --
+requests_home <- read_feather("data/vcs_indicators/all_requests.feather")
+pulse <- read_feather("data/vcs_indicators/pulse_check_summary.feather")
 
 ### --- update time --- 
 time_of_update <- Sys.time()
@@ -334,7 +332,7 @@ header <- dashboardHeader(title = "VCS Emergencies Toolkit", titleWidth = "300px
                                           actionLink("RI_tool","Risk Indicator Tool", icon=icon("fas fa-map-signs"))
                                   ),
                                  tags$li(class="dropdown",
-                                         actionLink("e_catalogue", "Resource catalouge", icon=icon("fas fa-book-open"))),
+                                         actionLink("e_catalogue", "'Open' insight catalouge", icon=icon("fas fa-book-open"))),
                                  tags$li(class="dropdown",
                                          actionLink("internal_reports", "Internal reports", icon=icon("fas fa-lock"))),
                                  tags$li(class="dropdown",
@@ -358,10 +356,9 @@ sidebar <- dashboardSidebar(
               
               # -- Home page ---
               menuItem('Home', tabName='home', icon=icon("home")),
-              # -- Unmet need insight -- binoculars
-              menuItem("Toolkits", icon = icon("binoculars"), tabName = "insight", startExpanded = T,
-                       menuSubItem(HTML("Risk Indicator Tool"), tabName="unmetneed", icon=icon("fas fa-map-signs")),
-                       menuSubItem(HTML("Resource catalouge"), tabName="resource_catalogue", icon=icon("fas fa-book-open"))),
+              # -- Unmet need insight --
+              menuItem(HTML("Risk Indicator Tool"), tabName="unmetneed", icon=icon("fas fa-map-signs")),
+              
               # -- trying conditional panel ---
               conditionalPanel(condition = "input.sidebar_id == 'unmetneed'", 
                                div(style="text-align: justify;",
@@ -383,12 +380,16 @@ sidebar <- dashboardSidebar(
                                ),
                                
                                uiOutput("secondSelection")),
+              menuItem(HTML("'Open' insight catalouge"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
+              menuItem(HTML("Internal reports"), tabName="internal_reports", icon=icon("fas fa-lock")),
+              menuItem(HTML("Community assets web map"), tabName="community_assets", icon=icon("fas fa-map-marked")),
+    
               menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
-              menuItem("References", tabName='references', icon=icon('fas fa-feather-alt')),
+              menuItem("References", tabName='references', icon=icon('fas fa-feather-alt'))
 
 
   # - display vcsep logo -
-  div(p("Developed by"), img(src = "vcs-logo-text.png", width = 225),style="position:fixed; bottom:0; padding:15px; text-align: center;")
+  #div(p("Developed by"), img(src = "vcs-logo-text.png", width = 225),style="position:fixed; bottom:0; padding:15px; text-align: center;")
     
   )
 )
@@ -408,22 +409,29 @@ body <- dashboardBody(
             fluidRow(style="padding-right:20px",
               # column 1
               column(width = 9,
-                     
                      h1("Welcome to the Emergencies Partnership Toolkit"),
                               h4("the public interface to the Voluntary Communtiry Sector Emergencies Partnership toolkit - sharing insight and resources amongst the VCS."),
                      hr(),
                      fluidRow(  
-                     column(width=4, 
-                              box(title="Internal reports")),
-                       column(width=4,
-                              box(title="Webmap")),
-                       column(width=4,
-                              box(title="VCS toolkits"))),
-                       fluidRow(
+                     column(width=3, 
+                              box(title="Internal reports",width=NULL,
+                                  collapsible = T, collapsed=T)),
+                       column(width=3,
+                              box(title="Community assets webmap",width=NULL,
+                                  collapsible = T, collapsed=T)),
+                       column(width=3,
+                              box(title="Risk indicator tool", width=NULL,
+                                  collapsible = T, collapsed=T)),
+                     column(width=3,
+                            box(title="'Open' insight catalogue",width=NULL, 
+                                collapsible = T, collapsed=T))),
+                  fluidRow(
                      column(width=6,
-                            box(title="Where we're working", width=NULL)),
+                            box(title="Where we're working", width=NULL,
+                                leafletOutput('home_map', height = "400px"))),
                      column(width=6,
-                            box(title="Latest concerns raised by our network", width=NULL)
+                            box(title="Latest concerns raised by our network", width=NULL,
+                                echarts4rOutput('concerns', height="400px"))
                             ))),
                     
               # column 2
@@ -451,23 +459,6 @@ body <- dashboardBody(
       fluidRow(
       # - column 1 -
       column(width = 4,
-              #box(width = NULL, collapsible=T, collapsed=T,
-              #    title='About this dashboard', 
-              #    uiOutput('about_needs'),
-              #    style = "height:325px; overflow-y: scroll;overflow-x: scroll;"),
-             
-              # row  -
-              #    fluidRow(
-                    # column 1
-              #      column(width = 12,
-                  # - row 2 (action areas) -
-              #    box( width = NULL,  collapsible = T, collapsed=F,
-              #      title = "Areas to focus", #height='400px',
-              #        withSpinner(DT::dataTableOutput('areas2focus', height='325px')),
-              #        style = "height:400px; overflow-y: scroll;overflow-x: scroll;"
-              #        )
-             #)),
-
                       # - row 3 -
                       fluidRow( 
                         # - column 1 -
@@ -975,16 +966,53 @@ server = function(input, output, session) {
           )
         ))
     
-    
-    
-    #%>%
-        # Add button to reset zoom - breaks other icons 
-        #addEasyButton(easyButton(
-        #  icon = "fas fa-globe", title = "Reset zoom level",
-        #  onClick = JS("function(btn, map){ map.setZoom(6); }"))) 
     })
   # to prevent map error in js console - not sure if necessary
   outputOptions(output,"map",suspendWhenHidden=FALSE)
+  
+  output$home_map <- renderLeaflet ({
+      leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
+    setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # maybe could Fenny drayton to make map sclighly closer initially --> centre map on lat = 54.00366, lng = -2.547855 Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                group='tactical cell boundary',
+                stroke=T,
+                weight = 1,
+                opacity = 0.8,
+                color = "red",
+                dashArray = "3",
+                fill=F) %>%
+    addCircleMarkers(data=requests_home, 
+                     lng=requests_home$longitude, 
+                     lat=requests_home$latitude,
+                     radius=requests_home$request_status_radius,
+                     color=requests_home$request_status_col,
+                     fillOpacity = requests_home$request_status_opacity,
+                     stroke=F)
+               #clusterOptions = markerClusterOptions())
+    
+  })
+  
+  # pulse major concerns
+  output$concerns <- renderEcharts4r({
+    
+    pulse <- pulse %>% arrange(-desc(proportion_respondents)) 
+    
+    concerns_pulse <- pulse %>%
+      e_charts(x = clean_groups) %>%
+      e_bar(proportion_respondents, bar_width=1, showBackground=T) %>%
+      #e_labels(position = "right", color='black') %>%
+      e_color(c('red')) %>%
+      e_hide_grid_lines() %>%
+      e_flip_coords() %>%
+      e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='90%') %>%
+      e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+      e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
+      e_y_axis(show=T) %>%
+      e_legend(FALSE)
+    
+  })
+    
 
 
   # --- Respond to users input on location ----
