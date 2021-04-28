@@ -317,6 +317,9 @@ requests <- requests %>%
 requests_home <- read_feather("data/vcs_indicators/all_requests.feather")
 pulse <- read_feather("data/vcs_indicators/pulse_check_summary.feather")
 
+# latest insight
+vac_data <- read_feather("data/areas_to_focus/vaccination_rate.feather")
+
 ### --- update time --- 
 time_of_update <- Sys.time()
 time_and_date <- str_split(time_of_update, " ")
@@ -389,7 +392,7 @@ body <- dashboardBody(
     # --- Home page ---
     tabItem(tabName="home", selected=T,
             # - row 1 -
-            fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:20px",
+            fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",
               # column 1
               column(width = 10,
                      h1("Welcome to the Emergencies Partnership Toolkit"),
@@ -399,46 +402,61 @@ body <- dashboardBody(
                      div(img(src = "vcs-logo-text.png", width = 350),
                          style="position:fixed; padding-right:20px; padding-left:20px;padding-top:0px;padding-bottom:50px"))),
               # row two
-              fluidRow(style="padding-right:20px; padding-left:20px",  
+              fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:20px",  
                      
                      column(width=3,
                             box(title=actionLink("RI_tool_box","Risk Indicator Tool"), width=NULL,
                                 collapsible = T, collapsed=T,
-                                icon = icon("fas fa-map-signs"))),
+                                icon = icon("fas fa-map-signs"),
+                                p("The Risk indicator tool shows...
+                                  click on the header to go to the tool"))),
                      
                      column(width=3,
                             box(title="Insight catalogue",width=NULL, 
                                 collapsible = T, collapsed=T,
-                                icon = icon("fas fa-book-open"))),
+                                icon = icon("fas fa-book-open"),
+                                p("The Insight catalogue lists publicly available resources...
+                                  click on the header to go to the tool"))),
                     
                     column(width=3, 
                         box(title=actionLink("internal_reports_from_box", "Internal reports"),
                           width=NULL,
                           collapsible = T, 
                           collapsed=T,
-                            icon = icon("fas fa-lock"))),
+                            icon = icon("fas fa-lock"),
+                          p("Internal reports are for VCS members.
+                          Current reports include the RFS, Pulse survey and vaccine uptake.
+                                  click on the header to go to the tool"))),
             
                        column(width=3,
                               box(title=actionLink("community_assets", "Community assets map", 
                                                    onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')")
                                   ,width=NULL,
                                   collapsible = T, collapsed=T,
-                                  icon=icon("fas fa-map-marked")))),
+                                  icon=icon("fas fa-map-marked"),
+                                  p("Community assets map allows you to explore and understand 
+                                    assets in your area..
+                                    click on the title to go to the tool")))),
                       
               # row three 
-                  fluidRow(style="padding-right:20px; padding-left:20px",
+                  fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:20px",
                      column(width=4,
                             box(title="Where we're working", width=NULL,
-                                leafletOutput('home_map', height = "400px"))),
+                                leafletOutput('home_map', height = "450px"))),
                      column(width=4,
                             box(title="Latest concerns raised by our network", width=NULL,
+                                uiOutput("latest_concerns_headline", height='50px', width=NULL),
+                                
                                 echarts4rOutput('concerns', height="400px"))),
                       
                     column(width = 4,
-                  tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
-                  box(title='Latest news', width=NULL, headerBorder = F, #height='175px',
-                      a(class="twitter-timeline", href="https://twitter.com/vcsep"),
-                      style = "height:440px; overflow-y: scroll;overflow-x: scroll;;margin-top:-20px;padding-top:-20px")
+                           box(title="Latest insight", width=NULL,
+                               uiOutput("latest_insight_headline", height='50px'),
+                               echarts4rOutput("latest_insight", height="400px"))
+                  #tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
+                  #box(header=F, width=NULL, headerBorder = F, #height='175px',
+                   #   a(class="twitter-timeline", href="https://twitter.com/vcsep"),
+                   #   style = "height:450px; overflow-y: scroll;overflow-x: scroll;;margin-top:-40px;padding-top:-40px")
                 
                 
               )
@@ -448,7 +466,7 @@ body <- dashboardBody(
     # -- areas in need --
     tabItem(tabName = "unmetneed",
   # - row 1 -
-  fluidRow(
+  fluidRow(style="padding-right:20px; padding-left:20px",
     column(width=12,
         panel(
             width=NULL,
@@ -478,7 +496,7 @@ body <- dashboardBody(
                              
                              )))),
     # - row 2  -
-      fluidRow(
+      fluidRow(style="padding-right:20px; padding-left:20px",
       # - column 1 -
       column(width = 4,
                       # - row 3 -
@@ -1021,20 +1039,77 @@ server = function(input, output, session) {
     
   })
   
+  output$latest_concerns_headline <- renderUI({
+    max_in_need <- pulse %>% arrange(-desc(proportion_respondents))
+    max_in_need <- tail(max_in_need, 1)
+    
+    div(
+    p(
+    tags$strong(paste0(max_in_need$proportion_respondents,"%")), "of respondents
+                  reported", tags$strong(max_in_need$clean_groups), "as greatest concern
+                  in the next 14 days.",
+    tags$em(paste0("(source latest pulse check survey)"))))
+    
+  })
+  
   # pulse major concerns
   output$concerns <- renderEcharts4r({
     
-    pulse <- pulse %>% arrange(-desc(proportion_respondents)) 
+    pulse <- pulse %>% arrange(-desc(proportion_respondents))
     
     concerns_pulse <- pulse %>%
       e_charts(x = clean_groups) %>%
       e_bar(proportion_respondents, bar_width=1, showBackground=T) %>%
       #e_labels(position = "right", color='black') %>%
-      e_color(c('red')) %>%
+      #e_color(c('red')) %>%
+      #e_title('Respondents concerns in next 14 days (%)') %>%
       e_hide_grid_lines() %>%
       e_flip_coords() %>%
-      e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='90%') %>%
-      e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+      e_grid(containLabel = TRUE, left=30, right=30, top=20, bottom=5, height='90%') %>%
+      e_x_axis(name='% respondents', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+      e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
+      e_y_axis(show=T) %>%
+      e_axis_labels(x="% respondents") %>%
+      e_legend(FALSE)
+    
+  })
+  
+  
+ output$latest_insight_headline <- renderUI({
+   vac_second_dose_highest <- vac_data %>%
+     filter(dose=="second_dose")
+   
+   
+   
+   vac_second_dose_highest <- vac_second_dose_highest %>%
+     arrange(-desc(prop_of_population)) %>%
+     tail(n=1)
+   
+   #print(vac_second_dose_highest)
+   
+   div(
+       p(tags$strong(paste0(vac_second_dose_highest$prop_of_population, "%")),
+         "of those", tags$strong(vac_second_dose_highest$age_range),
+         "have received both doses of vaccine against COVID-19", 
+         tags$em(paste0("(see vaccine uptake dashboard)"))
+         ))
+   
+})
+  
+  output$latest_insight <- renderEcharts4r({
+    #pulse <- pulse %>% arrange(-desc(proportion_respondents)) 
+    
+    vaccines <- vac_data %>%
+      group_by(dose) %>%
+      e_charts(x = age_range) %>%
+      e_bar(prop_of_population, bar_width=1, showBackground=T) %>%
+      #e_labels(position = "right", color='black') %>%
+      #e_color(c('red')) %>%
+      e_hide_grid_lines() %>%
+      #e_title("% population vaccinated", fontsize=12) %>%
+      e_flip_coords() %>%
+      e_grid(containLabel = TRUE, left=30, right=30, top=20, bottom=5, height='90%') %>%
+      e_x_axis(name='% populoation', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
       e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
       e_y_axis(show=T) %>%
       e_legend(FALSE)
@@ -1063,7 +1138,7 @@ server = function(input, output, session) {
         #lads2select <- unique(lad_uk2vuln_resilience$Name)
         #lads2select <- c('All local authorities in region',sort(lads2select))
         lads2select <- c('All local authorities in region')
-        selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+        selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected='All local authorities in region')
       })
     }
     
@@ -1075,7 +1150,7 @@ server = function(input, output, session) {
           lads2select <- unique(filteredLA()$Name)
           lads2select <- c('All local authorities in region',sort(lads2select))
           #print(dd_areas2focus$l)
-          selectInput("lad_selected", "Local authority district", choices = lads2select, selected=dd_areas2focus$l)
+          selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected=dd_areas2focus$l)
         })
         
       }
@@ -1087,7 +1162,7 @@ server = function(input, output, session) {
         output$secondSelection <- renderUI({
           lads2select <- unique(filteredLA()$Name)
           lads2select <- c('All local authorities in region',sort(lads2select))
-          selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+          selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected='All local authorities in region')
         })
         
       }
@@ -4677,7 +4752,7 @@ onclick("top_10", {
               #lads2select <- unique(lad_uk2vuln_resilience$Name)
             #lads2select <- c('All local authorities in region',sort(lads2select))
             lads2select <- c('All local authorities in region')
-          selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+          selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected='All local authorities in region')
       })
       
       }
@@ -4832,7 +4907,7 @@ onclick("top_10", {
           #lads2select <- unique(lad_uk2vuln_resilience$Name)
           #lads2select <- c('All local authorities in region',sort(lads2select))
           lads2select <- c('All local authorities in region')
-          selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+          selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected='All local authorities in region')
         })
         
         # search either whole tactical cell or all of engalnd
@@ -4920,7 +4995,7 @@ onclick("top_10", {
     # - does the call take too long
     charities_found <- withTimeout({
                 findcharities(bounding_wanted, '')
-      }, timeout = 1)
+      }, timeout = 0.5)
     },
     error = function(e) {
       charities_found <- NULL
@@ -5010,7 +5085,7 @@ onclick("top_10", {
           # - does the call take too long
           charities_found <- withTimeout({
             findcharities(bounding_wanted, input$search_term)
-          }, timeout = 1)
+          }, timeout = 0.5)
         },
         error = function(e) {
           charities_found <- NULL
@@ -5038,7 +5113,7 @@ onclick("top_10", {
             # - does the call take too long
             charities_found <- withTimeout({
               findcharities(bounding_wanted, input$search_term)
-            }, timeout = 1)
+            }, timeout = 0.5)
           },
           error = function(e) {
             charities_found <- NULL
@@ -5117,7 +5192,7 @@ onclick("top_10", {
           # - does the call take too long
           charities_found <- withTimeout({
             findcharities(bounding_wanted, input$search_term)
-          }, timeout = 1)
+          }, timeout = 0.5)
         },
         error = function(e) {
           charities_found <- NULL
@@ -5140,7 +5215,7 @@ onclick("top_10", {
             # - does the call take too long
             charities_found <- withTimeout({
               findcharities(bounding_wanted, input$search_term)
-            }, timeout = 1)
+            }, timeout = 0.5)
           },
           error = function(e) {
             charities_found <- NULL
@@ -5253,7 +5328,7 @@ onclick("top_10", {
         # - does the call take too long
         charities_found <- withTimeout({
           findcharities(bounding_wanted, input$search_term)
-        }, timeout = 1)
+        }, timeout = 0.5)
       },
       error = function(e) {
         charities_found <- NULL
