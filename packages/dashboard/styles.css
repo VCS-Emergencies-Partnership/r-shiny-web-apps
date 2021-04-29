@@ -6,7 +6,13 @@ h1, h2, h3, h4 { font-weight: 400; }
 
 #sidebarItemExpanded {
   padding: 0 10px 10px 10px;
+  
 }
+
+#sidebarCollapsed {
+  min-width: 60px!important;
+}
+
 
 .outer {
   position: fixed;
@@ -82,3 +88,16 @@ h1, h2, h3, h4 { font-weight: 400; }
             font-size: 8px;
             text-align: center;
         }
+        
+
+.navbar-custom-menu {
+    float: left!important;
+} 
+
+.navbar-static-top {
+  overflow: auto;
+}
+
+
+
+
