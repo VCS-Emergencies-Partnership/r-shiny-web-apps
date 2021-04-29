@@ -322,9 +322,14 @@ pulse <- read_feather("data/vcs_indicators/pulse_check_summary.feather")
 vac_data <- read_feather("data/areas_to_focus/vaccination_rate.feather")
 
 ### --- update time --- 
-time_of_update <- Sys.time()
-time_and_date <- str_split(time_of_update, " ")
+Sys.setenv(TZ = "Europe/London")
+#for help section
+time <- str_split(as.POSIXct(Sys.time()), " ")[[1]][2]
+
+# for flood areas to focus
+time_and_date <- str_split(as.POSIXct(Sys.time()), " ")
 last_updated_time <- paste0(time_and_date[[1]][2],",")
+# for both
 last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%d"), "%d/%m/%Y"))
 
 
@@ -686,17 +691,36 @@ body <- dashboardBody(
   tabItem(tabName='Help',
           column(width = 12,
                    tabBox(id='information about dashboards', width=NULL,
-                          tabPanel("Help - areas at risk in an emergency",
+                          tabPanel("About us",
+                                   uiOutput('about_us'),
+                                   style = "height:600px; overflow-y: scroll;overflow-x: scroll;"),
+                          tabPanel("Areas at risk in an emergency dashboard",
+                                   tabBox(id='help_areas_at_risk', width=NULL,
+                                          tabPanel("About",
                                    uiOutput('about_needs'),
                                   style = "height:600px; overflow-y: scroll;overflow-x: scroll;"
-                                  )))),
+                                  ),
+                                  tabPanel("Understanding the map",
+                                           uiOutput("understand_map_top"),
+                                           uiOutput("understand_map_middle"),
+                                           uiOutput("understand_map_bottom"),
+                                           style = "height:600px; overflow-y: scroll;overflow-x: scroll;"
+                                           ),
+                                  tabPanel("Emergency: Coronavirus",
+                                           uiOutput("emergency_covid"),
+                                           style = "height:600px; overflow-y: scroll;overflow-x: scroll;"),
+                                  tabPanel("Emergency: Flooding",
+                                           uiOutput("emergency_flooding"),
+                                           style = "height:600px; overflow-y: scroll;overflow-x: scroll;")
+                                  ))))),
   tabItem(tabName = 'references',
-          fluidRow(style="padding-right:100px;padding-left:100px;padding-top:20px;padding-bottom:20px",
+          fluidRow(#style="padding-right:100px;padding-left:100px;padding-top:20px;padding-bottom:20px",
                    # column 1
                    column(width = 12,
                           box(width=NULL, headerBorder=F,
-                              uiOutput('refs'),
-                              style = "height:650px; overflow-y: scroll;overflow-x: scroll;margin-top:-50px;padding-top:-50px"
+                              uiOutput('refs_header', style="height:50px;margin-top:-50px;padding-top:-50px"),
+                              uiOutput('refs',
+                              style = "height:700px; overflow-y: scroll;overflow-x: scroll;")
                               #style = 'overflow-y:scroll; height: calc(100vh - 200px) !important;'
                           )))
     )
@@ -731,6 +755,7 @@ server = function(input, output, session) {
     newtab <- switch(input$sidebar_id, "references")
     updateTabItems(session, "sidebar_id", newtab)
 
+
   })
   
   observeEvent(input$RI_tool, {
@@ -754,23 +779,22 @@ server = function(input, output, session) {
   })
   
   # --- observe if references tab selected ---
-  observeEvent(input$references, {
+  observe({
+
+    req(input$sidebar_id)
+
+    if (input$sidebar_id == 'references') {
+      
+      output$refs_header <- renderUI({
+        div(h3(tags$strong("Data, licenses and privacy policy")),
+            hr())  
+      })
+      
       output$refs <- renderUI({
-        div(
-          h2(tags$strong("Data contributors")),
-          hr(),
-          p("We make use of a range of data sources to bring you this insight,
-            including", tags$strong("data that is open source"), "as well as", tags$strong("data from our contributing partners.")),
-          p("The platform uses data and code from the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", 'British Red Cross COVID-19 Vulnerability Index,'), tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", 'British Red Cross Resilience Index'), "and the British Red Cross Local Lockdown tool. 
-            The code from these tools is distributed under GPL-3 (GNU GENERAL PUBLIC LICENSE version 3). Outputs related to the vulnerability index (e.g., vulnerability scores) are distributed under CC-BY-4.0 (Creative Commons Attribution 4.0 International), unless otherwise stated."),
-          p(
-            "Data is also included in the platform from",
-            tags$a(href="https://www.ons.gov.uk/", target="_blank", "Office of National Statistics"), "and", tags$a(href="https://digital.nhs.uk/", target="_blank", "NHS Digital"), "shared under an", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence.")),
-            
-          br()
-        )
+        create_data_license_help()
 
       })
+    }
 
   })
   
@@ -782,130 +806,35 @@ server = function(input, output, session) {
     
     if (input$sidebar_id == 'Help') {
       
-      output$about_needs <- renderUI({
-        div(h4(tags$strong("Last updated:")),
-          p("The dashboard was last updated at", last_updated_time, "on", last_updated_date),
-          tags$br(),
-          
-          # -- about section ---
-          h4(tags$strong('About:')),
-          p("This tool highlights areas that are in greatest need across a range of emergencies and gives information to support outreach in those areas (e.g. people at risk by demographic). 
-            It has been designed with and for members of the Voluntary and Community Emergencies Sector Partnership to inform their emergency preparedness and response efforts, who’s four key questions are:"),
-          
-          tags$li("Where is the need for support greatest?"),
-          tags$li("Who is in greatest need of support?"),
-          tags$li("What type of support do they need?"),
-          tags$li("How are those people and areas being supported?"),
-          tags$br(),
-          
-          p("We utilise a range of sources (see references tab) to answer these questions, including the",
-            tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "British Red Cross Resilience Index,"),
-            "which ranks the resilience of an area based on its vulnerability to a range of factors against an areas ability to cope."),
-          
-          tags$br(),
-          h4(tags$strong("Areas to focus:")),
-             p("Highlights 10 areas where an emergency is most prevalent in England and by region. 
-               It is intended to support our multiagency network to focus their outreach and response efforts in those areas that are most impacted by an emergency.
-               To view the the resilience of just these areas select the toggle below the zoom buttons on the map."),
-            h5(tags$strong("Covid-19:", style="color:blue")),
-               p("View the top 10 areas with either the highest number of cases per 100,000 or an area with the greatest  % change in total covid cases over a rolling 7 day period. 
-                This current relevant 7 day period is up to:", covid_data_date), 
-               
-               p(
-               tags$li(tags$strong("Covid cases per 100,000:"), "a rolling 7-day average of positive covid tests for each local authority district (lower tier local authority). 
-                       To convert the rolling average of cases to average of cases per 100,000, the average number of cases is divided by the population of the local authority district and multiplied by 100,000."),
-               tags$br(),
-               tags$li(tags$strong("Total covid cases:"), "the total number of new cases (by specimen date) seen over the relevant 7 day period ."),
-               tags$br(),
-               tags$li(tags$strong('% change in covid cases:'), 'the % change in new cases (by specimen date) between the most recent relevant 7-day period and the 7-day period prior to that.'),
-               tags$br(),
-               tags$li(tags$strong("Rolling average:"), "This is determined by averaging the number new cases by specimen date on the day itself, the 3 days prior and the 3 days after.
-                       For this to be possible this data is the rolling average of 5 days prior to the current day (i.e. starting from 5 days prior to today - the 7 days prior to that).")),
-              
-               p(tags$strong("Frequency of update:"), "Data is updated daily but note 5-day lag due to rolling average."),
-               p(tags$strong("Source:"), "For more information see", tags$a(href="https://coronavirus.data.gov.uk/", target="_blank", "https://coronavirus.data.gov.uk/."),
-                  "This data contains Public Health England data © Crown copyright and database right 2020 and is available under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", " Open Government Licence v3.0.")),
-          #tags$br(),
-          h5(tags$strong("Flooding:", style="color:blue")),
-          p("View the top 10 areas with either the most flood warnings ranked by severity of warning, 
-            the most historical flood incidents per 10,000 people, or with the highest proportion of population living in flood risk areas."),
-          p(tags$li(tags$strong('Flood warnings and alerts:'), "local authority districts are deemed to be affected by a flood alert or warning if the predicted most extreme scenario (represented by the flood outline provided by the environment agency) overlaps their local authority district. 
-                    On occasions the flood outline shown in the app may not appear to overlay a local authority. This is to help the performance of the app by reducing the complexity of the flood outline thereby reducing the file size.
-                    When there are no flood warnings active the areas are ordered by number of historical flood incidents per 10,000 people.", 
-                    tags$strong("Caveat:"), "- currently these warnings are updated daily as opposed to every 15 minutes as per the environment agency - we aim to change this in an upcoming release."),
-            tags$br(),
-            tags$li(tags$strong("Historical flood events per 10,000 people:"), "Historical flood incidents are determined by the number of Fire and Rescue Service call outs to flooding incidents."),
-            tags$br(),
-            tags$li(tags$strong("Proportion of the population living in flood risk areas:"), "This shows the proportion of the population of each local authority district living in areas where there is a greater than 1% chance a year of flooding.
-                    This is calculated by determining the number of people living in the flood zones defined by the environment agency. ")),
-            
-          p(tags$strong("Frequency of update:"), "TBC"),
-          p(tags$strong("Source:"), 
-            "The", tags$a(href="https://flood-warning-information.service.gov.uk/warnings",target="_blank", "environment agency"), "flood warnings and alerts are available under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", " Open Government Licence v3.0."),
-            tags$br(),
-            "This representation of historical flood incidents is based upon the BRC Resilience index, released under the GLP-v3 licence. The code is available",
-            tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "here."),
-            "The areas at greater than 1% chance of flooding were defined by the",tags$a(href="https://data.gov.uk/dataset/bad20199-6d39-4aad-8564-26a46778fd94/risk-of-flooding-from-rivers-and-sea", target="_blank", "environment agency risk of flooding from rivers and sea"),"This representation of the proportion of people living in flood risk areas is based upon the BRC resilience index, released under the GLP-v3 licence. The code is available",
-            tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "here.")),
-            tags$br(),
-          
-          
-          
-          h4(tags$strong("Areas at Risk - interpreting the map:")), 
-          tags$br(),
-          p(img(src = "bivar-legend_v2.png", width = 225, style="float:left;text-align:left;vertical-align:middle;"),
-          "We use a map to answer the key question of “where is the need greatest”. 
-            You’ll notice a legend in the bottom left corner of the map, with 9 different colours
-            to show the varying levels of greatest need. The colour pallet has been specifically chosen 
-            to a) avoid confusing with Red, Amber and Green which is typically used to assess performance,
-            and b) as it is a recommended", 
-            tags$a(href="https://nowosad.github.io/post/cbc-bp2/", target="_blank", "color-blind friendly pallet.")),
-          
-         p(
-         "Darker colours reflect those areas in greater need of support, with Black highlighting areas thought to be in greatest need. 
-           By this we mean, what areas have the most vulnerability to an emergency with the least capacity to cope, should an emergency occur." 
-           
-          ),#For each emergency, the areas flagged as being in greatest need will differ, depending on the indicators chosen to understand vulnerability and resilience.",
-         tags$br(),
-         tags$br(),
-           
-          h4(tags$strong("Map layers:")), 
-          p(tags$strong("Covid-19 emergency map:", style="color:blue"),
-            tags$br(),
-            "The British Red Cross developed a series of indices to identify UK areas vulnerable 
-            to the effects of COVID-19, and a resilience index which overlays capacity to cope.
-            Using statistical modelling of data from a range of", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/output/metadata_vi.csv", target="_blank", "(mostly open) sources,"), "the indices
-            provide an area rating, which is then used to map areas of need. 
-            Users can also explore different layers of the map based on vulnerability type, 
-            by selecting the button in the top right corner of the map."),
-            p("These layers include:",
-              tags$br(),
-          
-            tags$li(tags$strong(tags$em("Resilience: vulnerablity vs capacity to cope: ")), "This layer shows the", tags$a(href="https://britishredcross.shinyapps.io/resilience-index/", target="_blank", 'British Red Cross resilience index.'), 
-                    "This shows the vulnerability vs the capacity to cope with an emergency of local authority districts in England. 
-                    The ", tags$strong("black", style="color:#000000"), "highlights those areas that are", tags$strong("most in need - highest vulnerability and least capacity to cope." , style="color:#000000")), 
-                                                                             #tags$strong("The brightest red", style="color:#AE3A4E"), "indicates areas that are", tags$strong("highly vulnerable but have high capactiy to cope.",style="color:#AE3A4E"), 
-                                                                             #tags$strong("The darker blue", style="color:#4885C1"), "indicates", tags$strong("low vulnerability but low capacity to cope.", style="color:#4885C1"), 
-                                                                             tags$strong("The lightest gray", style="color:#d9d9d9"), "indicates", tags$strong("the least in need - lowest vulnerability and highest capactiy.", style="color:#d9d9d9"), 
-                    "We selected this colour scheme to try and avoid confusion with the RAG colour scheme that is commonly used in operational response."), 
-                        
-                        tags$li(tags$strong(tags$em("Economic vulnerability:")), "This layer shows the economic vulnerability of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
-                        tags$br(),
-                        tags$li(tags$strong(tags$em("Socioeconomic vulnerability:")), "This layer shows the socioecomic vulnerability of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
-                        tags$br(),
-                        tags$li(tags$strong(tags$em("Social vulnerability:")), "This layer shows the social vulnerability (i.e barriers to housing and services, poor living environment etc.) of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
-                        tags$br(),
-                        tags$li(tags$strong(tags$em("Health/wellbeing vulnerability:")), "This layer shows the health/wellbeing vulnerability (i.e mental health and loneliness etc.) of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
-                        tags$br(),
-                        tags$li(tags$strong(tags$em("Clinical vulnerability:")), "This layer shows the clinical vulnerability (i.e underlying health conditions etc.) of local authority districts based upon the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/README.md", target="_blank", "BRC vulnerability index."), "Purple indicates the most vulnerable, yellow the least vulnerable"),
-          tags$br(),              
-          p(tags$strong("Flooding emergency map layers:", style="color:blue"),
-                        tags$li(tags$strong(tags$em("Resilience of all local authorities:")), "This shows the BRC Resilience index (vulnerability vs capacity to cope) using the same colour scheme as the for the same layer on the Covid-19 data."),
-                        tags$br(),
-                        tags$li(tags$strong(tags$em("Flood warnings/alerts:")), "The points and polygons displayed show the flood warnings and alerts from the", tags$a(href="https://flood-warning-information.service.gov.uk/warnings", target="_blank","environment agency"), "as of", last_updated_time, last_updated_date)),
-
-        )
+      # About us
+      output$about_us <- renderUI({
+        create_about_us(time, last_updated_date)
       })
+      
+      # About areas at risk dashboard
+      output$about_needs <- renderUI({
+        create_about_areas_at_risk(time, last_updated_date)
+    })
+      
+      output$understand_map_top <- renderUI({
+        create_map_help_top()
+      })
+      
+      output$understand_map_middle <- renderUI({
+        create_map_help_middle()
+      })
+      
+      output$understand_map_bottom <- renderUI({
+        create_map_help_bottom()
+      })
+      
+      output$emergency_covid <- renderUI({
+        create_emergency_covid(covid_data_date)   
+      })
+      
+      output$emergency_flooding <- renderUI({
+        create_flooding_help()
+        })
       
     }
     
@@ -1819,6 +1748,7 @@ server = function(input, output, session) {
     }
   })
   
+
   
   filtered_flood_resilience_labels <- reactive({
     
@@ -1895,7 +1825,6 @@ server = function(input, output, session) {
                    lapply(htmltools::HTML)
     
   })
-  
   
 
 
