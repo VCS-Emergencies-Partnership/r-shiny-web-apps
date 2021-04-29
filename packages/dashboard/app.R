@@ -393,15 +393,18 @@ body <- dashboardBody(
     # --- Home page ---
     tabItem(tabName="home", selected=T,
             # - row 1 -
-            fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",
+            fluidRow(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
+            panel(
+                #fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:20px",
               # column 1
-              column(width = 10,
+              column(width = 9,
                      h1("Welcome to the Emergencies Partnership Toolkit"),
                               h4("Sharing insight and resources amongst the VCS to help before, during and after an emergency."),
               ),
-              column(width = 2,
-                     div(img(src = "vcs-logo-text.png", width = 350),
-                         style="position:fixed; padding-right:20px; padding-left:20px;padding-top:0px;padding-bottom:50px"))),
+              column(width = 3,
+                     div(img(src = "vcsep_logo_line.jpg", width = 250, 
+                             style="align:center;margin-left:-40px;"))))),
+                         #style="position:fixed; padding-right:20px; padding-left:20px;padding-top:0px;padding-bottom:50px"))),
               # row two
               fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:20px",  
                      
@@ -409,15 +412,22 @@ body <- dashboardBody(
                             box(title=actionLink("RI_tool_box","Risk Indicator Tool"), width=NULL,
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-map-signs"),
-                                p("The Risk indicator tool shows...
-                                  click on the header to go to the tool"))),
+                                p("The Risk indicator tool shows you key statistics about an
+                                emergency along with the BRC Vulnerability and Resilience
+                                indices and key area demographics to aide the planning and
+                                response to an emergency.",tags$br(),
+                                  tags$br(),
+                                tags$em(tags$strong("click on the title to go to the tool"))))),
                      
                      column(width=3,
                             box(title="Insight catalogue",width=NULL, 
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-book-open"),
-                                p("The Insight catalogue lists publicly available resources...
-                                  click on the header to go to the tool"))),
+                                p("The Insight catalogue is a collection of useful
+                                  publicly available insight resources that could be of use to
+                                  the VCS community.", tags$br(),
+                                  tags$br(),
+                                  tags$strong(tags$em("click on the title to go to the tool"))))),
                     
                     column(width=3, 
                         box(title=actionLink("internal_reports_from_box", "Partnership insight"),
@@ -425,9 +435,13 @@ body <- dashboardBody(
                           collapsible = T, 
                           collapsed=T,
                             icon = icon("fas fa-lock"),
-                          p("Internal reports are for VCS members.
-                          Current reports include the RFS, Pulse survey and vaccine uptake.
-                                  click on the header to go to the tool"))),
+                          p("These are internal reports and insight for VCS EP members.
+                          Current reports include:",
+                            tags$li("The Request for support dashboard"),
+                            tags$li("The pulse survey dashboard"),
+                            tags$li("Vaccine uptake dashobard"),
+                            tags$br(),
+                                 tags$strong(tags$em("click on the title to go to the tool"))))),
             
                        column(width=3,
                               box(title=actionLink("community_assets", "Community assets map", 
@@ -436,25 +450,27 @@ body <- dashboardBody(
                                   collapsible = T, collapsed=T,
                                   icon=icon("fas fa-map-marked"),
                                   p("Community assets map allows you to explore and understand 
-                                    assets in your area..
-                                    click on the title to go to the tool")))),
+                                    assets in your area.", tags$br(),
+                                    tags$br(),
+                                    tags$strong(tags$em("click on the title to go to the tool")))))),
                       
               # row three 
-                  fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:20px",
+                  fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",
                      column(width=4,
-                            box(title="Where we're working", width=NULL,
-                                uiOutput("home_map_headlines", height='60px'),
-                                leafletOutput('home_map', height = "400px"))),
+                            box(title="Where we're working", width=NULL, #height='80vh',
+                                style='overflow-y: scroll;',
+                                uiOutput("home_map_headlines", height='40vh'),
+                                leafletOutput('home_map', height = "60vh"))),
                      column(width=4,
-                            box(title="Latest concerns raised by our network", width=NULL,
-                                uiOutput("latest_concerns_headline", height='60px', width=NULL),
+                            box(title="What our network is telling us", width=NULL,
+                                uiOutput("latest_concerns_headline", height='40vh', width=NULL),
                                 
-                                echarts4rOutput('concerns', height="400px"))),
+                                echarts4rOutput('concerns', height="60vh"))),
                       
                     column(width = 4,
                            box(title="Latest insight", width=NULL,
-                               uiOutput("latest_insight_headline", height='60px'),
-                               echarts4rOutput("latest_insight", height="400px"))
+                               uiOutput("latest_insight_headline", height='40vh'),
+                               echarts4rOutput("latest_insight", height="60vh"))
               )
             )
           ),
@@ -474,20 +490,19 @@ body <- dashboardBody(
                 p("This tool is to help answer the question of what",
                 tags$strong("areas and people"), "would be/are at risk should the",
                                    tags$strong("emergency"), "scenario selected occur"))),
-            column(width=3,
+            column(width=3, style='padding-top:20px',
                     selectInput("theme",
                                          label="1. Select an emergency",
                                          #choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
                                          choices = sort(c("Covid-19","Flooding")),
                                          selected="Covid-19")),
             
-            column(width=3,
+            column(width=3, style='padding-top:20px',
                              selectInput("tactical_cell",
                                          label = "2. Choose a region",
                                          choices = sort(tactical_cells),
                                          selected = "-- England --")),
-            column(width=3,
-                
+            column(width=3,style='padding-top:20px',
                     uiOutput("secondSelection")),
                              
                              )))),
@@ -938,27 +953,9 @@ server = function(input, output, session) {
   # to prevent map error in js console - not sure if necessary
   outputOptions(output,"map",suspendWhenHidden=FALSE)
   
-  count <- 0
-  autoInvalidate <- reactiveTimer(15000)
-  
-  
-  # to change highlights
-  observeEvent(autoInvalidate(), {
-     if(input$sidebar_id == 'home') {
-       
-       if (count > 2) {
-          count <<- 1
-       }
-       else {
-         count <<- count + 1
-       }
-      }
-   })
   
   output$home_map_headlines <- renderUI({
-    autoInvalidate()
-    print(count)
-    rfs_highlights(requests_home, count)
+    rfs_highlights(requests_home, 1)
     
   })
   
@@ -997,7 +994,7 @@ server = function(input, output, session) {
     max_in_need <- tail(max_in_need, 1)
     
     div(
-    p(
+    p(style="font-size:14px;",
     tags$strong(paste0(max_in_need$proportion_respondents,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
                   reported", tags$strong(max_in_need$clean_names), "as a concern
                   in the next 14 days.",
