@@ -124,6 +124,8 @@ tactical_cells <- area_lookup_tc2lad %>% filter(TacticalCell != 'Wales' & Tactic
 tactical_cells <- unique(tactical_cells$TacticalCell)
 tactical_cells <- c('-- England --', tactical_cells)
 
+#lads_needed <- unique(lad_uk2vuln_resilience$lad19nm)
+#lads_needed <- c('All local authorities in region', sort(lads_needed))
 
 # --- Metadata ----
 # --- people at risk data ---
@@ -311,11 +313,13 @@ requests <- requests %>%
   select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
 
 
-volunteers <- read_feather('data/vcs_indicators/volunteer-capacity-lad19CD-tc.feather')
+# -- for home page maybe replacing initial requests --
+requests_home <- read_feather("data/vcs_indicators/all_requests.feather")
+pulse <- read_feather("data/vcs_indicators/pulse_check_summary.feather")
 
 
-# -- local organisations --
-local_organisations <- read_feather('./data/navca_members_2019.feather')
+# latest insight
+vac_data <- read_feather("data/areas_to_focus/vaccination_rate.feather")
 
 ### --- update time --- 
 Sys.setenv(TZ = "Europe/London")
@@ -331,65 +335,53 @@ last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%
 
 # ---  dashboard --- #
 # --- header --- #
-header <- dashboardHeader(title = "VCSEP Insights", titleWidth = "300px",
-                          tags$li(a(href = 'https://vcsep.org.uk/', target="_blank",
-                                    img(src = 'vcs-logo-text.png',
-                                        title = "Developed by", height = "30px"),
-                                    style = "padding-top:10px; padding-bottom:10px;"),
-                                  class = "dropdown"))#,
-                              #dropdownMenu(
-                              #  type = "notifications",
-                              #  icon = icon("question-circle"),
-                              #  badgeStatus = NULL,
-                              #  headerText = "Help"))
+header <- dashboardHeader(title = "", titleWidth = "300px",
+                         tags$li(class = "dropdown", 
+                                   tags$li(class="dropdown",
+                                   actionLink("home", "Home", icon=icon("home"))),
+                                  tags$li(class="dropdown",
+                                          actionLink("RI_tool","Risk Indicator Tool", icon=icon("fas fa-map-signs"))
+                                  ),
+                                 tags$li(class="dropdown",
+                                         actionLink("e_catalogue", "Insight catalouge", icon=icon("fas fa-book-open"))),
+                                 tags$li(class="dropdown",
+                                         actionLink("internal_reports", "Partnership insight", icon=icon("fas fa-lock"))),
+                                 tags$li(class="dropdown",
+                                         actionLink("community_assets", "Community assets map", icon=icon("fas fa-map-marked"), 
+                                                    onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')")),
+                                 tags$li(class="dropdown",
+                                         actionLink("help", "Help", icon=icon("far fa-question-circle"))),
+                                 tags$li(class="dropdown",
+                                         actionLink("references", "References", icon=icon('fas fa-feather-alt')))
+                                 ))
+                  
 
 
 # --- side bar --- #
 sidebar <- dashboardSidebar(
   width = "300px",
-  minified = F,
+  minified = T,
+  collapsed=T,
   tags$style(HTML(".sidebar-menu li a { font-size: 16px; }")),
   sidebarMenu(id="sidebar_id",
+              
               # -- Home page ---
               menuItem('Home', tabName='home', icon=icon("home")),
-              # -- Unmet need insight -- binoculars
-              menuItem("Insight", icon = icon("binoculars"), tabName = "insight", startExpanded = T,
-                       menuSubItem(HTML("Areas at risk in an emergency"), tabName="unmetneed", icon=icon("fas fa-map-signs"))),
+              # -- Unmet need insight --
+              menuItem(HTML("Risk Indicator Tool"), tabName="unmetneed", icon=icon("fas fa-map-signs")),
+              
               # -- trying conditional panel ---
-              conditionalPanel(condition = "input.sidebar_id == 'unmetneed'", 
-                               div(style="text-align: justify;",
-                                   br(),
-                               p("This dashboard is to help answer the",tags$br(), "question of what",
-                                 tags$strong("areas and people"), tags$br(), "would be/are at risk should the", tags$br(),
-                                tags$strong("emergency"), "scenario selected occur")),
-                               selectInput("theme",
-                                           label="Select an emergency",
-                                           #choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
-                                           choices = sort(c("Covid-19","Flooding")),
-                                           selected="Covid-19"),
-                               
-                               selectInput("tactical_cell",
-                                           label = "Choose Region",
-                                           choices = sort(tactical_cells),
-                                            selected = "-- England --"
-
-                               ),
-                               
-                               uiOutput("secondSelection")
-
-                             
-              ),
-
-              #menuItem(HTML("Emergencies Partnership<br/>Statistics"), tabName='vcs_usage', startExpanded = F, icon=icon('balance-scale-right'),
-              #         menuSubItem("Requests", tabName='request_data'),
-              #         menuSubItem("Pulse Check", tabName="pulse_check"),
-              #         menuSubItem("Volunteer Capacity", tabName="vol_capacity")),
+              
+              menuItem(HTML("Insight catalouge"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
+              menuItem(HTML("Partnership insight"), tabName="internal_reports_from_sidebar", icon=icon("fas fa-lock")),
+              menuItem(HTML("Community assets web map"), tabName="community_assets", icon=icon("fas fa-map-marked")),
+    
               menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
-              menuItem("References", tabName='references', icon=icon('fas fa-feather-alt')),
+              menuItem("References", tabName='references', icon=icon('fas fa-feather-alt'))
 
 
   # - display vcsep logo -
-  div(p("Developed by"), img(src = "vcs-logo-text.png", width = 225),style="position:fixed; bottom:0; padding:15px; text-align: center;")
+  #div(p("Developed by"), img(src = "vcs-logo-text.png", width = 225),style="position:fixed; bottom:0; padding:15px; text-align: center;")
     
   )
 )
@@ -397,224 +389,132 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   useShinyjs(),
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-  tags$head(includeCSS("styles.css")), #includeHTML("google-analytics.html")),
-  tags$script(src='socket_timeout.js'),
-  #tags$head(HTML("<title> VCSEP Unmet needs platform </title>")),
-
+  tags$head(includeCSS("styles.css"), includeHTML("cookie_consent_v2.html"),
+            tags$link(rel="icon", sizes="32X32", href="img/favicon-32x32.png"),
+            tags$link(rel="icon",  sizes="16X16", href="img/favicon-16x16.png"),
+            tags$link(rel="apple-touch-icon", sizes="180x180", href="img/img/apple-touch-icon.png"),
+            tags$link(rel="manifest", href="img/site.webmanifest")),
   tabItems(
     # --- Home page ---
     tabItem(tabName="home", selected=T,
             # - row 1 -
-            fluidRow(style="padding-right:20px",
+            fluidRow(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
+            panel(
+                #fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:20px",
               # column 1
-              column(width = 8,
-                     box(width=NULL, headerBorder = F,
-                       #uiOutput('welcome'),
-                       div(
-                         h2(tags$strong('Insights from the Emergencies Partnership')),
-                         hr(),
-                         h4('Bringing together data to', tags$strong('improve collaboration'), 'across the voluntary and community sector,',
-                            tags$strong('before,'), tags$strong('during,'), "and", tags$strong('after'), "an", tags$strong("emergency"), ""),
-                         br(),
-                         p("View the latest insight", tags$strong('underneath the insights tab'), 'in the sidebar')
-                       ),
-                       textOutput("keep_alive"),
-                       style = "height:650px; overflow-y: scroll;overflow-x: scroll;margin-top:-50px;padding-top:-50px", footer=div(
-                         p(tags$strong(tags$i("This platform is still in the early stages of development. 
-                               Some features may not work properly, but are coming soon.")), 
-                           style="color:blue")),
-                       accordion(id='accordion1',
-                         accordionItem(
-                           id=1,
-                           title='About',
-                           collapse=T,
-                           div(
-                             p(tags$strong('Purpose:')),
-                             p('In times of an emergency, this platform seeks to answer the key question of "where is the need greatest?"'),
-                             p('It helps responders who want to target their limited resource in areas of greatest risk and least capacity to respond.
-              The tools is also useful for those wanting estimates of people at risk and in need to support their
-              influencing and advocacy efforts across a range of themes.'),
-                             #br(),
-                             br(),
-                             p(tags$strong('Scope:')),
-                             p('The platform attempts to provide a fuller picture of unmet need before,
-              during and after an emergency. To do this, we highlight areas of high vulnerability
-              and least resilience based on the British Red Cross’ and show this alongside service reach.'),
-                             p('Our hope is that by combining data from across the sector, we get a fuller picture of where there
-              is unmet need. For example, where requests for support have come through to our partners that haven’t
-              been met. This could be through support line calls that have been signposted elsewhere, or requests
-              for hardship support that have not been met.'),
-                             br(),
-                             p(tags$strong('About the data:')),
-                             p('We use open source and private data from our contributing partners to answer key
-            questions that inform emergency preparedness, response and recovery.
-            This includes numbers and rates of people at risk, reach of services by activity or support
-            type, and area ranks by vulnerability or capacity.'),
-                             p('We prioritize data that can be either mapped geographically or shown over time to highlight
-            areas at risk and changes in unmet need. Where the data allows, we aim to show this to as
-            granular level as possible without including personally identifiable information.
-            At present, we show data by region, local authority and middle super output area.')
-                           )
-                         ),
-                         # accordionItem(
-                         #   id=2,
-                         #   title='View insight',
-                         #   collapsed=F,
-                         #   div(
-                         #     p("View the latest insight", tags$strong('underneath the insights tab'), 'in the sidebar')
-                         #   )
-                         #   #uiOutput('welcome_insight')
-                         #   ),
-                         accordionItem(
-                           id=3,
-                           title='Get involved',
-                           collapsed=F,
-                           div(#p("Our", tags$strong("Data Working Group"), "meets fortnightly on a Thursday at 11am to help us prioritise
-                            # what data and analysis to focus on next."),
-                               #p(tags$strong("Join us"), "to lend your voice to the conversation."),
-                               p(tags$strong("Share data:"), tags$br(), "Get in touch with the Insight team", tags$a(href='https://vcsep.org.uk/contact-us', target="_blank", "here.")),
-                               p(tags$strong("Feedback or make a request:"), tags$br(), "We welcome your thoughts on what data would be useful to help shape your support to those in need.
-                                  To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="https://vcsep.org.uk/contact-us", target="_blank", "https://vcsep.org.uk/contact-us"),
-                                p(tags$strong("Find out more:"), tags$br(), "To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")
-                                 )
-                               )
-                           )
-                         )
-                        )
-                       )
-                     ),
-             #             accordionItem(
-             #               id=4,
-             #               title='Share data',
-             #               collapsed=T,
-             #               div(
-             #                 p("Use our", tags$a(href="https://ingest.vcsep.org.uk/", target="_blank","Data App"), "or get in touch with
-             # our Data Team at", tags$a(href='insight@vcsep.org.uk', target="_blank", "insight@vcsep.org.uk"))
-             #               )
-             #              ),
-             #        
-             #             accordionItem(
-             #               id=5,
-             #               title='Feedback or make a request',
-             #               collapsed=T,
-             #               div(
-             #               p("We welcome your thoughts on what data would be useful to help shape your support to those in need.
-             #                      To feedback, make a request, or if you have any questions please get in touch with us at", tags$a(href="insight@vcsep.org.uk", target="_blank", "insight@vcsep.org.uk")
-             #                     )
-             #             )
-             #            ),
-             #             accordionItem(
-             #               id=6,
-             #               title='Find out more',
-             #               collapsed=T,
-             #               div(p("To learn more about the work of the VCS Emergencies Partnership, visit us at", tags$a(href="https://vcsep.org.uk/", target="_blank", "vcsep.org.uk")
-             #                     )
-             #              
-             #                  )
-             #              )
-             #           )
-             #          )
-              #         ),
-
-              # column 2
-              column(width = 4,
-                # - Row 1 -
-                fluidRow(
-                  tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
-                  box( width=NULL, headerBorder = F, #height='175px',
-                      a(class="twitter-timeline", href="https://twitter.com/vcsep"),
-                      style = "height:698px; overflow-y: scroll;overflow-x: scroll;;margin-top:-20px;padding-top:-20px")
-                      #uiOutput('twitter'))
-                )
+              column(width = 9,
+                     h1("Welcome to the Emergencies Partnership Toolkit"),
+                              h4("Sharing insight and resources amongst the VCS to help before, during and after an emergency."),
+              ),
+              column(width = 3,
+                     div(img(src = "vcsep_logo_line.jpg", width = 250, 
+                             style="align:center;margin-left:-40px;"))))),
+                         #style="position:fixed; padding-right:20px; padding-left:20px;padding-top:0px;padding-bottom:50px"))),
+              # row two
+              fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:20px",  
+                     
+                     column(width=3,
+                            box(title=actionLink("RI_tool_box","Risk Indicator Tool"), width=NULL,
+                                collapsible = T, collapsed=T,
+                                icon = icon("fas fa-map-signs"),
+                                p("The Risk indicator tool shows you key statistics about an
+                                emergency along with the BRC Vulnerability and Resilience
+                                indices and key area demographics to aide the planning and
+                                response to an emergency.",tags$br(),
+                                  tags$br(),
+                                tags$em(tags$strong("click on the title to go to the tool"))))),
+                     
+                     column(width=3,
+                            box(title="Insight catalogue",width=NULL, 
+                                collapsible = T, collapsed=T,
+                                icon = icon("fas fa-book-open"),
+                                p("The Insight catalogue is a collection of useful
+                                  publicly available insight resources that could be of use to
+                                  the VCS community.", tags$br(),
+                                  tags$br(),
+                                  tags$strong(tags$em("click on the title to go to the tool"))))),
+                    
+                    column(width=3, 
+                        box(title=actionLink("internal_reports_from_box", "Partnership insight"),
+                          width=NULL,
+                          collapsible = T, 
+                          collapsed=T,
+                            icon = icon("fas fa-lock"),
+                          p("These are internal reports and insight for VCS EP members.
+                          Current reports include:",
+                            tags$li("The Request for support dashboard"),
+                            tags$li("The pulse survey dashboard"),
+                            tags$li("Vaccine uptake dashobard"),
+                            tags$br(),
+                                 tags$strong(tags$em("click on the title to go to the tool"))))),
+            
+                       column(width=3,
+                              box(title=actionLink("community_assets", "Community assets map", 
+                                                   onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')")
+                                  ,width=NULL,
+                                  collapsible = T, collapsed=T,
+                                  icon=icon("fas fa-map-marked"),
+                                  p("Community assets map allows you to explore and understand 
+                                    assets in your area.", tags$br(),
+                                    tags$br(),
+                                    tags$strong(tags$em("click on the title to go to the tool")))))),
+                      
+              # row three 
+                  fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",
+                     column(width=4,
+                            box(title="Where we're working", width=NULL, #height='80vh',
+                                style='overflow-y: scroll;',
+                                uiOutput("home_map_headlines", height='40vh'),
+                                leafletOutput('home_map', height = "60vh"))),
+                     column(width=4,
+                            box(title="What our network is telling us", width=NULL,
+                                uiOutput("latest_concerns_headline", height='40vh', width=NULL),
+                                
+                                echarts4rOutput('concerns', height="60vh"))),
+                      
+                    column(width = 4,
+                           box(title="Latest insight", width=NULL,
+                               uiOutput("latest_insight_headline", height='40vh'),
+                               echarts4rOutput("latest_insight", height="60vh"))
               )
             )
           ),
-    #             # - Row 2 -
-    #             fluidRow(
-    #               box(title='Data store', width=NULL,
-    #                   style = "height:175px; overflow-y: scroll;overflow-x: scroll;",
-    #                   marginTop=T,
-    #                   fluidRow(
-    #                     column(width=12, height='110px',
-    #                            #box 
-    #                              descriptionBlock(
-    #                               #number = div("26"), 
-    #                               #numberColor = "green", 
-    #                               #numberIcon = "fas fa-caret-up",
-    #                               header= '26',
-    #                               #header_icon = "fa fa-caret-up",
-    #                               text = 'datasets',
-    #                               rightBorder = F,
-    #                               marginBottom = T
-    #                            )
-    #                         
-    #                     )
-    #                   ),
-    #                   fluidRow(
-    #                     column(width=6, height='110px',
-    #                            descriptionBlock(
-    #                              number="46%",
-    #                              numberColor = 'green',
-    #                              numberIcon = "fas fa-caret-up",
-    #                              header='12',
-    #                              text = 'VCS sources',
-    #                              rightBorder = F,
-    #                              marginBottom = F
-    #                            )
-    #                         ),
-    #                     column(width=6, height='110px',
-    #                            descriptionBlock(
-    #                              number="54%",
-    #                              #numberColor = 'green',
-    #                              #numberIcon = "fas fa-caret-up",
-    #                              header='14',
-    #                              text = 'Open sources',
-    #                              rightBorder = F,
-    #                              marginBottom = F
-    #                            )
-    #                     )
-    #                   )
-    #               )
-    #             ),
-    #             # - Row 3 -
-    #             fluidRow(
-    #               box(title='Data contributors', width=NULL, #height='220px
-    #                   uiOutput('members'),
-    #                   style = "height:175px; overflow-y: scroll;overflow-x: scroll;")
-    #             )
-    #           )
-    #         )
-    # ),
 
     # -- areas in need --
     tabItem(tabName = "unmetneed",
   # - row 1 -
-  fluidRow(
-    infoBoxOutput("requests", width = 4),
-    infoBoxOutput("pulse", width = 4),
-    infoBoxOutput("vols", width = 4)
-  ),
+  fluidRow(style="padding-right:20px; padding-left:20px",
+    column(width=12,
+        panel(
+            width=NULL,
+            header=NULL,
+            height='30px',
+            fluidRow(
+              column(width = 3,
+            div(h4(tags$strong("Risk indicator tool")),
+                p("This tool is to help answer the question of what",
+                tags$strong("areas and people"), "would be/are at risk should the",
+                                   tags$strong("emergency"), "scenario selected occur"))),
+            column(width=3, style='padding-top:20px',
+                    selectInput("theme",
+                                         label="1. Select an emergency",
+                                         #choices = sort(c("Covid-19","Winter Pressures","Economic Hardship", "Mental Health","Flooding","Food Insecurity")),
+                                         choices = sort(c("Covid-19","Flooding")),
+                                         selected="Covid-19")),
+            
+            column(width=3, style='padding-top:20px',
+                             selectInput("tactical_cell",
+                                         label = "2. Choose a region",
+                                         choices = sort(tactical_cells),
+                                         selected = "-- England --")),
+            column(width=3,style='padding-top:20px',
+                    uiOutput("secondSelection")),
+                             
+                             )))),
     # - row 2  -
-      fluidRow(
+      fluidRow(style="padding-right:20px; padding-left:20px",
       # - column 1 -
       column(width = 4,
-              #box(width = NULL, collapsible=T, collapsed=T,
-              #    title='About this dashboard', 
-              #    uiOutput('about_needs'),
-              #    style = "height:325px; overflow-y: scroll;overflow-x: scroll;"),
-             
-              # row  -
-              #    fluidRow(
-                    # column 1
-              #      column(width = 12,
-                  # - row 2 (action areas) -
-              #    box( width = NULL,  collapsible = T, collapsed=F,
-              #      title = "Areas to focus", #height='400px',
-              #        withSpinner(DT::dataTableOutput('areas2focus', height='325px')),
-              #        style = "height:400px; overflow-y: scroll;overflow-x: scroll;"
-              #        )
-             #)),
-
                       # - row 3 -
                       fluidRow( 
                         # - column 1 -
@@ -638,9 +538,6 @@ body <- dashboardBody(
                                      # top 10 options
                                      fluidRow(width=NULL,
                                      column(width=12, style = "height:450px; overflow-y: scroll;overflow-x: scroll;",
-                                    # fluidRow(width=NULL,
-                                    #          column(width=12,
-                                    #                 uiOutput('selected_area'))), 
                                     fluidRow(width=NULL,
                                               column(width=12,
                                                      uiOutput('top_10_1'))),
@@ -681,12 +578,6 @@ body <- dashboardBody(
                                    column(
                                      width = 12,
                                      uiOutput('shielding_text'),
-                                     #  rightBorder=T,
-                                     #  marginBottom=T
-                                     #),
-                                     
-                                     #column(
-                                     #   width = 6,
                                      echarts4rOutput('shielding_f', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
@@ -698,18 +589,7 @@ body <- dashboardBody(
                               column(
                                 width = 12,
                                 uiOutput('section95_text'),
-                                #uiOutput('homeless_text', height='40px'),
-                                #echarts4rOutput('homeless', height='40px'),
-                              #  rightBorder=T,
-                              #  marginBottom=T
-                              #),
-
-                              #column(
-                              #  width = 6,
                                 echarts4rOutput('section95', height='40px'),
-                                #uiOutput('fuelp_text'),
-                                #echarts4rOutput('fuelp',height='40px'),
-                                #echarts4rOutput('homeless', height='40px'),
                                 rightBorder=F,
                                 marginBottom =T
                               )
@@ -720,12 +600,6 @@ body <- dashboardBody(
                                    column(
                                      width = 12,
                                      uiOutput('homeless_text'),
-                                  #   rightBorder=T,
-                                  #   marginBottom=T
-                                  # ),
-                                   
-                                   #column(
-                                  #   width = 6,
                                      echarts4rOutput('homeless', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
@@ -737,12 +611,6 @@ body <- dashboardBody(
                                    column(
                                      width = 12,
                                      uiOutput('fuelp_text'),
-                                  #   rightBorder=T,
-                                  #   marginBottom=T
-                                  # ),
-                                   
-                                  # column(
-                                   #  width = 6,
                                      echarts4rOutput('fuelp', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
@@ -754,15 +622,7 @@ body <- dashboardBody(
                                    column(
                                      width = 12,
                                      uiOutput('unemployment_text'),
-                                    # rightBorder=T,
-                                   #  marginBottom=T
-                                  # ),
-                                   
-                                 #  column(
-                                 #    width = 6,
                                      echarts4rOutput('unemployment', height='40px'),
-                                 #    rightBorder=F,
-                                 #    marginBottom =T
                                    )
                           ),
                           
@@ -771,12 +631,6 @@ body <- dashboardBody(
                                    column(
                                      width = 12,
                                      uiOutput('digital_text'),
-                                   #  rightBorder=T,
-                                  #   marginBottom=T
-                                  # ),
-                                   
-                                  # column(
-                                  #   width = 6,
                                      echarts4rOutput('digital', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
@@ -788,13 +642,6 @@ body <- dashboardBody(
                                    column(
                                      width = 12,
                                      uiOutput('bame_population_text', height='40px'),
-                                     #echarts4rOutput('bame_population', height='40px'),
-                                     #    rightBorder=F,
-                                     #    marginBottom=T
-                                     #),
-                                     
-                                     #column(
-                                     #  width = 6,
                                      echarts4rOutput('bame_population', height='40px'),
                                      rightBorder=F,
                                      marginBottom =T
@@ -805,58 +652,7 @@ body <- dashboardBody(
                           )
                           
                         )
-                      #)
                     ),
-
-                      #echarts4rOutput('total_population',height='60px'),
-                    #   uiOutput('bame_population_text'),
-                    #   echarts4rOutput('bame_population', height='40px'),
-                    #          uiOutput('section95_text'),
-                    #          echarts4rOutput('section95', height='40px'),
-                    #          uiOutput('homeless_text'),
-                    #          echarts4rOutput('homeless', height='40px'),
-                    #          uiOutput('fuelp_text'),
-                    #          echarts4rOutput('fuelp',height='40px'),
-                    #          uiOutput('unemployment_text'),
-                    #          echarts4rOutput('unemployment',height='40px'),
-                    #          uiOutput('digital_text'),
-                    #          echarts4rOutput('digital',height='40px'),
-                    #          uiOutput('shielding_text'),
-                    #          echarts4rOutput('shielding_f',height='40px'),
-                    #          style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
-                    #        )
-                    #      )
-                    #    ),
-                    # 
-                      #   fluidRow(
-                      #   column(width = 12,
-                      #        box(
-                      #           width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                      #            title = "People in need", align = "center", #height = "600px"
-                      #            uiOutput('people_in_Need'),
-                      #            style = "height:300px; overflow-y: scroll;overflow-x: scroll;"
-                      #          )
-                      #       )
-                      # 
-                      # ),
-                      # organisations in area 
-                  #   fluidRow(
-                  #     column(width = 12,
-                  #       box(
-                  #         width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                  #         title = "Local organisations", align = "left",
-                  #         fluidRow( 
-                  #           column(width=12,
-                  #                  uiOutput("search_needed", height='50px'))),
-                  #         fluidRow(
-                  #           column(width=12,
-                  #         #height = "600px"
-                  #         uiOutput('local_orgs_ui', height='250px'))),
-                  #         #scroll;overflow-x: scroll;"
-                  #         style = "height:500px; overflow-y: scroll;overflow-x: scroll;"
-                  #     )
-                  #   )
-                  # )
                 ),
 
               # column - 2
@@ -871,8 +667,6 @@ body <- dashboardBody(
                       tabPanel('Areas at risk', 
                       withSpinner(leafletOutput("map", height = "550px"))),
                       tabPanel("Find local resources",
-                                # width = NULL, collapsible = T, collapsed=T,#solidHeader = TRUE, status='primary',
-                                # title = "Local organisations", align = "left",
                                  fluidRow( 
                                    column(width=8,
                                           uiOutput("search_needed", height='50px')),
@@ -882,9 +676,8 @@ body <- dashboardBody(
                                 
                                  fluidRow(
                                    column(width=12,
-                                          #height = "600px"
                                           uiOutput('local_orgs_ui', height='350px'))),
-                                 #scroll;overflow-x: scroll;"
+                                 
                                  style = "height:550px; overflow-y: scroll;overflow-x: scroll;"
                                ),
                       tabPanel('Areas to focus table', 
@@ -895,13 +688,6 @@ body <- dashboardBody(
         )
     ),
 
-  # - Request
-  # tabItem(tabName = 'request_data',
-  #        h2("Request stats")),
-  #tabItem(tabName = 'pulse_check',
-  #        h2("Pulse stats")),
-  #tabItem(tabName = 'vol_capacity',
-  #        h2("volunteer capacity analysis")),
   tabItem(tabName='Help',
           column(width = 12,
                    tabBox(id='information about dashboards', width=NULL,
@@ -958,16 +744,40 @@ ui <- function(request) {
 # ---- server ---- #
 server = function(input, output, session) {
 
-  # testing 
-  output$keep_alive <- renderText({
-    req(input$alive_count)
-    input$alive_count
-    test <- input$alive_count
+  observeEvent(input$home, {
+    newtab <- switch(input$sidebar_id, "home")
+    updateTabItems(session, "sidebar_id", newtab)
+    
   })
   
+  
+  observeEvent(input$references, {
+    newtab <- switch(input$sidebar_id, "references")
+    updateTabItems(session, "sidebar_id", newtab)
 
 
-
+  })
+  
+  observeEvent(input$RI_tool, {
+    newtab <- switch(input$sidebar_id, "unmetneed")
+    updateTabItems(session, "sidebar_id", newtab)
+    
+  })
+  
+  observeEvent(input$RI_tool_box, {
+    newtab <- switch(input$sidebar_id, "unmetneed")
+    updateTabItems(session, "sidebar_id", newtab)
+    
+  })
+  
+  
+  observeEvent(input$help, {
+    newtab <- switch(input$sidebar_id, "Help")
+    print(newtab)
+    updateTabItems(session, "sidebar_id", newtab)
+    
+  })
+  
   # --- observe if references tab selected ---
   observe({
 
@@ -984,8 +794,8 @@ server = function(input, output, session) {
         create_data_license_help()
 
       })
-
     }
+
   })
   
   
@@ -993,7 +803,6 @@ server = function(input, output, session) {
   observe({
     
     req(input$sidebar_id)
-    #print(input$sidebar_id)
     
     if (input$sidebar_id == 'Help') {
       
@@ -1025,7 +834,7 @@ server = function(input, output, session) {
       
       output$emergency_flooding <- renderUI({
         create_flooding_help()
-      })
+        })
       
     }
     
@@ -1069,33 +878,146 @@ server = function(input, output, session) {
           )
         ))
     
-    
-    
-    #%>%
-        # Add button to reset zoom - breaks other icons 
-        #addEasyButton(easyButton(
-        #  icon = "fas fa-globe", title = "Reset zoom level",
-        #  onClick = JS("function(btn, map){ map.setZoom(6); }"))) 
     })
   # to prevent map error in js console - not sure if necessary
   outputOptions(output,"map",suspendWhenHidden=FALSE)
+  
+  
+  output$home_map_headlines <- renderUI({
+    rfs_highlights(requests_home, 1)
+    
+  })
+  
+  output$home_map <- renderLeaflet ({
+    
+    requests_home_no_na <- requests_home %>%
+      filter(!is.na(admin_district_code))
+    
+    leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
+    setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # maybe could Fenny drayton to make map sclighly closer initially --> centre map on lat = 54.00366, lng = -2.547855 Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addPolygons(data=tc_shp, layerId = ~TacticalCell,
+                group='tactical cell boundary',
+                stroke=T,
+                weight = 1,
+                opacity = 0.8,
+                color = "red",
+                dashArray = "3",
+                fill=F) %>%
+    addCircleMarkers(data=requests_home_no_na, 
+                     lng=requests_home_no_na$longitude, 
+                     lat=requests_home_no_na$latitude,
+                     #radius=requests_home$request_status_radius,
+                     #color=requests_home$request_status_col,
+                     #fillOpacity = requests_home$request_status_opacity,
+                     radius=4,
+                     color='blue',
+                     fillOpacity=0.6,
+                     stroke=F)
+               #clusterOptions = markerClusterOptions())
+    
+  })
+  
+  output$latest_concerns_headline <- renderUI({
+    max_in_need <- pulse %>% arrange(-desc(proportion_respondents))
+    max_in_need <- tail(max_in_need, 1)
+    
+    div(
+    p(style="font-size:14px;",
+    tags$strong(paste0(max_in_need$proportion_respondents,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
+                  reported", tags$strong(max_in_need$clean_names), "as a concern
+                  in the next 14 days.",
+    tags$em(paste0("(source latest pulse check survey)"))))
+    
+  })
+  
+  # pulse major concerns
+  output$concerns <- renderEcharts4r({
+    
+    pulse <- pulse %>% arrange(-desc(proportion_respondents))
+    
+    concerns_pulse <- pulse %>%
+      e_charts(x = clean_names) %>%
+      e_bar(proportion_respondents, bar_width=1, showBackground=T) %>%
+      #e_labels(position = "right", color='black') %>%
+      #e_color(c('red')) %>%
+      #e_title('Respondents concerns in next 14 days (%)') %>%
+      e_hide_grid_lines() %>%
+      e_flip_coords() %>%
+      e_grid(containLabel = TRUE, left=30, right=30, top=20, bottom=5, height='90%') %>%
+      e_x_axis(name='% respondents', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+      e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
+      e_y_axis(show=T) %>%
+      e_axis_labels(x="% respondents") %>%
+      e_legend(FALSE)
+    
+  })
+  
+  
+ output$latest_insight_headline <- renderUI({
+   vac_second_dose_highest <- vac_data %>%
+     filter(dose=='Second dose')
+   
+   
+   
+   vac_second_dose_highest <- vac_second_dose_highest %>%
+     arrange(-desc(prop_of_population)) %>%
+     tail(n=1)
+   
+   #print(vac_second_dose_highest)
+   
+   div(
+       p(tags$strong(paste0(vac_second_dose_highest$prop_of_population, "%")),
+         "of those aged", tags$strong(vac_second_dose_highest$age_range),
+         "have received both doses of vaccine against COVID-19", 
+         tags$em(paste0("(vaccine uptake dashboard)"))
+         ))
+   
+})
+  
+  output$latest_insight <- renderEcharts4r({
+    #pulse <- pulse %>% arrange(-desc(proportion_respondents)) 
+    
+    vaccines <- vac_data %>%
+      group_by(dose) %>%
+      e_charts(x = age_range) %>%
+      e_bar(prop_of_population, bar_width=1, showBackground=T) %>%
+      #e_labels(position = "right", color='black') %>%
+      #e_color(c('red')) %>%
+      e_hide_grid_lines() %>%
+      #e_title("% population vaccinated", fontsize=12) %>%
+      e_flip_coords() %>%
+      e_grid(containLabel = TRUE, left=30, right=30, top=20, bottom=5, height='90%') %>%
+      e_x_axis(name='% populoation', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+      e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
+      e_y_axis(show=T) %>%
+      e_legend(show=F)
+    
+  })
+    
 
 
   # --- Respond to users input on location ----
   # ---- Respond to users tactical cell ----
   filteredLA <- reactive({
-    lad_uk2areas2vulnerability %>% filter(TacticalCell == input$tactical_cell)
+    if(input$tactical_cell == '-- England --') {
+      lad_uk2areas2vulnerability
+    }
     
+    else {
+        lad_uk2areas2vulnerability %>% filter(TacticalCell == input$tactical_cell)
+    }
   })
   
-  observe({
-    
+
+  
+  observe( {
     if (input$tactical_cell == '-- England --') {
       output$secondSelection <- renderUI({
         #lads2select <- unique(lad_uk2vuln_resilience$Name)
         #lads2select <- c('All local authorities in region',sort(lads2select))
         lads2select <- c('All local authorities in region')
-        selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+        selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected='All local authorities in region')
       })
     }
     
@@ -1107,7 +1029,7 @@ server = function(input, output, session) {
           lads2select <- unique(filteredLA()$Name)
           lads2select <- c('All local authorities in region',sort(lads2select))
           #print(dd_areas2focus$l)
-          selectInput("lad_selected", "Local authority district", choices = lads2select, selected=dd_areas2focus$l)
+          selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected=dd_areas2focus$l)
         })
         
       }
@@ -1119,20 +1041,18 @@ server = function(input, output, session) {
         output$secondSelection <- renderUI({
           lads2select <- unique(filteredLA()$Name)
           lads2select <- c('All local authorities in region',sort(lads2select))
-          selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+          selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected='All local authorities in region')
         })
         
       }
-      
-      
-      
     }
-    
   })
   
-  # 
-  showtop10_or_all <- reactiveValues(display_wanted='show_all')
+
   
+  
+  # --- button on map ---
+  showtop10_or_all <- reactiveValues(display_wanted='show_all')
   observeEvent(input$my_easy_button, {
     showtop10_or_all$display_wanted <- input$my_easy_button
   })
@@ -1635,8 +1555,6 @@ server = function(input, output, session) {
   })
 
   
-
-  # 
   # - if you want all - 
   filtered_areas_at_risk_flooding_resilience <- reactive({
     # which tab is selected:
@@ -1830,7 +1748,7 @@ server = function(input, output, session) {
     }
   })
   
- 
+
   
   filtered_flood_resilience_labels <- reactive({
     
@@ -2277,9 +2195,6 @@ server = function(input, output, session) {
     
   })
   
-  
-
-
 
   # --- Requests ----
   filtered_requests <- reactive({
@@ -3223,7 +3138,6 @@ server = function(input, output, session) {
     if (input$sidebar_id == 'unmetneed') {
       # -- this will get tactical cell table --
       curr_table <- filterpar_tab()
-      #print(curr_table)
 
       if (input$tactical_cell == '-- England --') {
         
@@ -3237,837 +3151,148 @@ server = function(input, output, session) {
                  'eng_total_fuel_poor_households',
                  'eng_prop_households_fuel_poor',
                  'eng_rate_per_1000',
-                 #'eng_total_homeless',
-                 #'proprotion_homeless',
                  'eng_total_unemployed_on_ucred',
                  'prop_eng_pop_unemployed_on_ucred',
                  'total_shielding_eng',
                  'proportion_total_shielding_Eng') 
         
-        # --- England BAME stats ---
-        bame_to_plot  <- eng_table %>% select('england_proportion_bame') %>%
-          pivot_longer(`england_proportion_bame`, names_to = "Indicator", values_to = "proportion")
-        
-        bame_to_plot <- bame_to_plot %>% filter(!is.na(proportion)) %>%
-          unique() %>% mutate('proportion'=round(proportion,0))
-
-        bame_to_show <- paste0(round(bame_to_plot$proportion,0), "%")
-        
+        # --- National BAME Statistics ---
         output$bame_population_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-            #hr(),
-            p(bame_to_show, 
-            tags$br(),
-            "of the population are BAME"
-          )
-          )
-
+          ethnicity_stats_eng_text(eng_table)
         })
         
         output$bame_population <- renderEcharts4r({
-        # # Plot population statistics
-        bame <- bame_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1, showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c('purple')) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              #e_mark_line(data=eng_avg_bame, symbol = "none", lineStyle = list(color = "black")) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-
+          ethnicity_stats_eng_plot(eng_table)
                   })
 
-        # --- Section 95 Support ---
-        eng_sec95_to_write <- eng_table %>% select('eng_people_recieving_section_95_support','prop_eng_receiving_section_95_support') %>%
-          unique()
-        
-        eng_sec95_to_plot <- eng_sec95_to_write %>% select('prop_eng_receiving_section_95_support') %>%
-          pivot_longer('prop_eng_receiving_section_95_support', names_to = "Indicator", values_to = "proportion")
-        
-        eng_sec95_to_plot <- eng_sec95_to_plot %>% filter(!is.na(proportion)) %>%
-          unique()
-        
-        eng_sec95_to_write <- eng_sec95_to_write %>% filter(!is.na(eng_people_recieving_section_95_support) & !is.na('prop_eng_receiving_section_95_support'))
-        
-        write_eng_sec95 <- paste0("(",eng_sec95_to_write$prop_eng_receiving_section_95_support,"% of the population)")
-        
+        # --- National Section 95 Support statistics ---
         output$section95_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), tags$br(),
-                "people receiving support whilst seeking asylum (Section 95 support)")
-              #p(tags$strong('No. of people receiving Section 95 support:'), format(eng_sec95_to_write$eng_people_recieving_section_95_support, big.mark=',', scientific = F), "people", tags$br(), write_eng_sec95)
-          )
+          sec95_stats_eng_text(eng_table)
         })
         
         output$section95 <- renderEcharts4r({
                       # # Plot population statistics
-                      sec95 <- eng_sec95_to_plot %>%
-                        e_charts(x = Indicator) %>%
-                        e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-                        e_labels(position = "right", color='black') %>%
-                        e_color(c('purple')) %>%
-                        #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-                        #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-                        #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
-                        e_hide_grid_lines() %>%
-                        e_flip_coords() %>%
-                        e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
-
-                        #e_rm_axis(axis="x") %>%
-                        #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-                        e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-                        e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-                        e_y_axis(show=F) %>%
-                        e_legend(FALSE)
-
+                      sec95_stats_eng_plot(eng_table)
                     })
         
-        # --- homelessness ---
-        eng_homeless_to_write <- eng_table %>% select('eng_rate_per_1000') %>%
-          unique()
-        
-        eng_homeless_to_plot <- eng_homeless_to_write %>% select('eng_rate_per_1000') %>%
-          pivot_longer('eng_rate_per_1000', names_to = "Indicator", values_to = "proportion")
-        
-        eng_homeless_to_plot <- eng_homeless_to_plot %>% filter(!is.na(proportion)) %>%
-          unique() %>%
-          mutate('proportion'=round(proportion,2))
-        
-        eng_homeless_to_write <- eng_homeless_to_write %>% filter(!is.na('eng_rate_per_1000'))
-        
-        write_eng_homeless <- paste0("(",eng_homeless_to_write$eng_rate_per_1000," homelessness rate per 1000)")
-        
-
+        # ---National  homelessness ---
         output$homeless_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(format(round(eng_homeless_to_write$eng_rate_per_1000,2), big.mark=',', scientific = F), tags$br(),
-                'homeless people per 1000')
-              #p(tags$strong('No. of people homeless:'), format(eng_homeless_to_write$eng_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_eng_homeless),
-          )
+          homelessness_stats_eng_text(eng_table)  
         })
         
         output$homeless <- renderEcharts4r({
-          # Plot population statistics
-          sec95 <- eng_homeless_to_plot %>%
-            e_charts(x = Indicator) %>%
-            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-            e_labels(position = "right", color='black') %>%
-            e_color(c('purple')) %>%
-            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
-            e_hide_grid_lines() %>%
-            e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
-
-            #e_rm_axis(axis="x") %>%
-            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-            e_x_axis(position='top', axisLabel=list(show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1000, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1000) %>%
-            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-            e_y_axis(show=F) %>%
-            e_legend(FALSE)
-          
+          homelessness_stats_eng_plot(eng_table)  
         })
         
-        
-        # --- fuel poverty ---
-        
-        eng_fuelp_to_write <- eng_table %>% select('eng_total_fuel_poor_households','eng_prop_households_fuel_poor') %>%
-          unique()
-        
-        eng_fuelp_to_plot <- eng_fuelp_to_write %>% select('eng_prop_households_fuel_poor') %>%
-          pivot_longer('eng_prop_households_fuel_poor', names_to = "Indicator", values_to = "proportion")
-        
-        eng_fuelp_to_plot <- eng_fuelp_to_plot %>% filter(!is.na(proportion)) %>%
-          unique() %>%
-          mutate('proportion'=round(proportion,0))
-        
-        eng_fuelp_to_write <- eng_fuelp_to_write %>% filter(!is.na(eng_total_fuel_poor_households) & !is.na('eng_prop_households_fuel_poor'))
-        
-        write_eng_fuelp <- paste0("(",eng_fuelp_to_write$eng_prop_households_fuel_poor,"% of households)")
-        
-
+        # --- National fuel poverty ---
         output$fuelp_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(format(eng_fuelp_to_write$eng_total_fuel_poor_households, big.mark=',', scientific = F),
-                tags$br(),
-                "households in fuel poverty"
-              )
-              #p(tags$strong('No. of households in fuel poverty:'), format(eng_fuelp_to_write$eng_total_fuel_poor_households, big.mark=',', scientific = F), "households", tags$br(), write_eng_fuelp),
-          )
+          fuelp_stats_eng_text(eng_table)
         })
         
         output$fuelp <- renderEcharts4r({
-          # # Plot population statistics
-          fuelp_t <- eng_fuelp_to_plot %>%
-            e_charts(x = Indicator) %>%
-            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-            e_labels(position = "right", color='black') %>%
-            e_color(c('purple')) %>%
-            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
-            e_hide_grid_lines() %>%
-            e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
-            
-            #e_rm_axis(axis="x") %>%
-            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-            e_y_axis(show=F) %>%
-            e_legend(FALSE)
-          
+          fuelp_stats_eng_plot(eng_table)
         })
 
-        # ---- unemployed ---
-        
-        eng_unem_to_write <- eng_table %>% select('eng_total_unemployed_on_ucred','prop_eng_pop_unemployed_on_ucred') %>%
-          unique()
-        
-        eng_unem_to_plot <- eng_unem_to_write %>% select('prop_eng_pop_unemployed_on_ucred') %>%
-          pivot_longer('prop_eng_pop_unemployed_on_ucred', names_to = "Indicator", values_to = "proportion")
-        
-        eng_unem_to_plot <- eng_unem_to_plot %>% filter(!is.na(proportion)) %>%
-          unique() %>%
-          mutate('proportion'=round(proportion,0))
-        
-        eng_unem_to_write <- eng_unem_to_write %>% filter(!is.na(eng_total_unemployed_on_ucred) & !is.na('prop_eng_pop_unemployed_on_ucred'))
-        
-        write_eng_unem <- paste0("(",eng_unem_to_write$prop_eng_pop_unemployed_on_ucred,"% of people)")
-        
-        
-        
+        # ---- National unemployed ----
         output$unemployment_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(format(eng_unem_to_write$eng_total_unemployed_on_ucred, big.mark=',', scientific = F),
-                tags$br(),
-                "people unemployed on universal credit"
-              )
-              #p(tags$strong('No. of people unemployed receiving universal credit:'), format(eng_unem_to_write$eng_total_unemployed_on_ucred, big.mark=',', scientific = F), "people", tags$br(), write_eng_unem)
-          )
+          unemployment_stats_eng_text(eng_table)  
         })
         
         output$unemployment <- renderEcharts4r({
-          # # Plot population statistics
-          unem_t <- eng_unem_to_plot %>%
-            e_charts(x = Indicator) %>%
-            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-            e_labels(position = "right", color='black') %>%
-            e_color(c('purple')) %>%
-            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
-            e_hide_grid_lines() %>%
-            e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
-            
-            #e_rm_axis(axis="x") %>%
-            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-            e_y_axis(show=F) %>%
-            e_legend(FALSE)
-          
+          unemployment_stats_eng_plot(eng_table)  
         })
 
+        
+        # ---- National Tactical cell ----    
         output$digital_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(tags$strong('Data not currently available at national level for digital exclusion'))
-          )
+          digital_exclusion_eng_text(eng_table)
         })
         
         # clear plot nothing
         output$digital <- renderEcharts4r({
-          
         })
         
-        # --- people shielding ---
-        
-        eng_shielding_to_write <- eng_table %>% select('total_shielding_eng','proportion_total_shielding_Eng') %>%
-          unique()
-        
-        eng_shielding_to_plot <- eng_shielding_to_write %>% select('proportion_total_shielding_Eng') %>%
-          pivot_longer('proportion_total_shielding_Eng', names_to = "Indicator", values_to = "proportion")
-        
-        eng_shielding_to_plot <- eng_shielding_to_plot %>% filter(!is.na(proportion)) %>%
-          unique()
-        
-        eng_shielding_to_write <- eng_shielding_to_write %>% filter(!is.na(total_shielding_eng) & !is.na('proportion_total_shielding_Eng'))
-        
-        write_eng_shielding <- paste0("(",eng_shielding_to_write$proportion_total_shielding_Eng,"% of people)")
-        
-        
-
+        # --- National people shielding ---
         output$shielding_text <- renderUI({
-          div(style= " text-align: center;margin-top:5px;",
-              #hr(),
-              p(format(eng_shielding_to_write$total_shielding_eng, big.mark=',', scientific = F),
-                tags$br(),
-                "people clinically extremely vulnerable")
-              #p(tags$strong('No. of people clinically extremely vulnerable:'), format(eng_shielding_to_write$total_shielding_eng, big.mark=',', scientific = F), "people", tags$br(), write_eng_shielding)
-          )
+          shielding_eng_text(eng_table)
         })
         
         output$shielding_f <- renderEcharts4r({
-          # # Plot population statistics
-          shielding_t <- eng_shielding_to_plot %>%
-            e_charts(x = Indicator) %>%
-            e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-            e_labels(position = "right", color='black') %>%
-            e_color(c('purple')) %>%
-            #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-            #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-            #e_mark_line(data=eng_avg_section95, symbol = "none", lineStyle = list(color = "black")) %>%
-            e_hide_grid_lines() %>%
-            e_flip_coords() %>%
-            e_grid(containLabel = TRUE, left=30, right=30, top=5, bottom=5, height='60%') %>%
-            
-            #e_rm_axis(axis="x") %>%
-            #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-            e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-            e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-            e_y_axis(show=F) %>%
-            e_legend(FALSE)
-          
+          shielding_eng_plot(eng_table)
         })
+      }
 
-
-        #
-
-        #output$people_at_risk <- DT::renderDataTable({
-        #  DT::datatable(curr_table,
-                      #caption = htmltools::tags$caption( style = 'caption-side: top; text-align: left; color:black; font-size:125% ;',title_needed),
-        #              options = list(
-        #                paging=FALSE
-        #              ))
-        #    })
-          }
 
       else {
         # summary for tactical cell
         if (input$lad_selected == 'All local authorities in region') {
-          #Tactical cell
-          tc = input$tactical_cell
-          title_needed <- paste0('People at risk in Tactical Cell: ', tc)
-          #print('tactical cell test')
-
-          # --- people at risk ----
 
           # --- population demographics ---
-          #bame <- curr_table %>% select('TacticalCell',`int_Fuel Poor Households`,`perc_Fuel Poor Households`)
-          bame_to_plot <- curr_table %>% select(`tc_proportion`)
-
-          # transpose dataframe
-          bame_to_plot  <- bame_to_plot %>% pivot_longer(`tc_proportion`, names_to = "Indicator", values_to = "proportion") %>%
-            unique() %>% filter(!is.na(proportion)) %>% 
-            mutate('proportion'=round(proportion,0))
-
-          # for echarts
-          tc_avg_bame <- par_table_tc_avg %>% select(`tc_proportion_mean`) %>%
-            mutate(`tc_proportion`=round(`tc_proportion_mean`,0)) %>%
-            select('xAxis' = `tc_proportion`) %>%
-            as.list()
-          
-          # for echarts colour
-          tc_avg_stdev_bame <- par_table_tc_avg %>% 
-            select(`tc_proportion_mean`, `tc_proportion_stdev`) %>%
-            mutate('plus_stdev'=round(`tc_proportion_mean`,1)+round(`tc_proportion_stdev`,1)) %>%
-            mutate('minus_stdev'=round(`tc_proportion_mean`,1) - round(`tc_proportion_stdev`,1)) 
-          
-          
-          tc_bame_plot_colour <- bame_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_bame$plus_stdev & proportion >= tc_avg_stdev_bame$minus_stdev) ~ 'orange',
-                                                                                 proportion >= tc_avg_stdev_bame$plus_stdev ~ 'red',
-                                                                                 proportion <= tc_avg_stdev_bame$minus_stdev ~ 'green'))
-          
-          
-          # to format percentage
-          bame_to_show <- paste0(round(bame_to_plot$proportion,0), "%")
-
-          # label to sho
-          label_to_show <- paste(round(par_table_tc_avg$`tc_proportion_mean`,0), '%', '\n','(regional avg)')
-          
+          # ---- Tactical Cell level BAME ----
           output$bame_population_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(bame_to_show,
-                  tags$br(),
-                  'of the population are BAME')
-                #p(tags$strong('Proportion of population who are BAME:'), bame_to_show)
-                
-            )
+            ethnicity_stats_mac_text(curr_table, par_table_tc_avg)
           })
           
           output$bame_population <- renderEcharts4r({
             # # Plot population statistics
-            bame <- bame_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1, showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(tc_bame_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=tc_avg_bame, symbol = "none", lineStyle = list(color = "black"), title=label_to_show, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            ethnicity_stats_mac_plot(curr_table, par_table_tc_avg)
           })
 
-          # --- section 95 support ----
-          tc_sec95_to_write <- curr_table %>% select(`tc_People receiving Section 95 support`,'tc_prop_people_recieving_section_95_support') %>%
-            unique()
-          
-          tc_sec95_to_plot <- tc_sec95_to_write %>% select('tc_prop_people_recieving_section_95_support') %>%
-            pivot_longer('tc_prop_people_recieving_section_95_support', names_to = "Indicator", values_to = "proportion")
-          
-          tc_sec95_to_plot <- tc_sec95_to_plot %>% filter(!is.na(proportion)) %>%
-            unique()
-          
-          tc_sec95_to_write <- tc_sec95_to_write %>% filter(!is.na(`tc_People receiving Section 95 support`) & !is.na('tc_prop_people_recieving_section_95_support'))
-  
-          write_tc_sec95 <- paste0("(",tc_sec95_to_write$tc_prop_people_recieving_section_95_support,"% of the population)")
-  
-          # for echarts
-          tc_avg_section95 <- par_table_tc_avg %>% select('tc_prop_people_recieving_section_95_support_mean') %>%
-            select('xAxis' = 'tc_prop_people_recieving_section_95_support_mean') %>%
-            as.list()
-          
-        
-          
-          tc_avg_stdev_sec95 <- par_table_tc_avg %>% 
-            select('tc_prop_people_recieving_section_95_support_mean', 'tc_prop_people_recieving_section_95_support_stdev') %>%
-            mutate('plus_stdev'=round(tc_prop_people_recieving_section_95_support_mean,2)+round(tc_prop_people_recieving_section_95_support_stdev,2)) %>%
-            mutate('minus_stdev'=round(tc_prop_people_recieving_section_95_support_mean,2)- round(tc_prop_people_recieving_section_95_support_stdev,2)) 
-          
-          
-          
-          tc_sec95_plot_colour <- tc_sec95_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_sec95$plus_stdev & proportion >= tc_avg_stdev_sec95$minus_stdev) ~ 'orange',
-                                                                                   proportion >= tc_avg_stdev_sec95$plus_stdev ~ 'red',
-                                                                                   proportion <= tc_avg_stdev_sec95$minus_stdev ~ 'green'))
-          
-        
-          
-          tc_sec95_for_avg = paste0(par_table_tc_avg$tc_prop_people_recieving_section_95_support_mean, '%', '\n','(regional avg)')
-                  
+          # --- Tactical cell level section 95 support ----
           output$section95_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(format(tc_sec95_to_write$`tc_People receiving Section 95 support`, big.mark=',', scientific = F),
-                  tags$br(),
-                  'people receiving support whilst seeking asylum (Section 95 support)')
-                #p(tags$strong('No. of people receiving Section 95 support:'), format(tc_sec95_to_write$`tc_People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_tc_sec95)
-            )
+            sec95_stats_mac_text(curr_table, par_table_tc_avg)
           })
           
           output$section95 <- renderEcharts4r({
-            # # Plot population statistics
-            sec95 <- tc_sec95_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(tc_sec95_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=tc_avg_section95, symbol = "none", lineStyle = list(color = "black"), title=tc_sec95_for_avg, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            sec95_stats_mac_plot(curr_table, par_table_tc_avg)
           })
           
-          
           # --- homeless ----
-          tc_homeless_to_write <- curr_table %>% select(`tc_Homelessness (rate per 1000)`) %>%
-            unique()
-          
-          tc_homeless_to_plot <- tc_homeless_to_write %>% select(`tc_Homelessness (rate per 1000)`) %>%
-            pivot_longer(`tc_Homelessness (rate per 1000)`, names_to = "Indicator", values_to = "proportion")
-          
-          tc_homeless_to_plot <- tc_homeless_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>% mutate('proportion'=round(proportion,2))
-          
-          tc_homeless_to_write <- tc_homeless_to_write %>% filter(!is.na(`tc_Homelessness (rate per 1000)`))
-          
-          write_tc_homeless <- paste0("(",tc_homeless_to_write$`tc_Homelessness (rate per 1000)`,"homelessness rate per 1000)")
-          
-          # for echarts
-          tc_avg_homeless <- par_table_tc_avg %>% select(`tc_Homelessness (rate per 1000)_mean`) %>%
-            select('xAxis' = `tc_Homelessness (rate per 1000)_mean`) %>%
-            as.list()
-          
-          tc_avg_stdev_homeless <- par_table_tc_avg %>% 
-            select(`tc_Homelessness (rate per 1000)_mean`, `tc_Homelessness (rate per 1000)_stdev`) %>%
-            mutate('plus_stdev'=round(`tc_Homelessness (rate per 1000)_mean`,2)+round(`tc_Homelessness (rate per 1000)_stdev`,2)) %>%
-            mutate('minus_stdev'=round(`tc_Homelessness (rate per 1000)_mean`,2)- round(`tc_Homelessness (rate per 1000)_stdev`,2)) 
-          
-          
-          
-          tc_homeless_plot_colour <- tc_homeless_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_homeless$plus_stdev & proportion >= tc_avg_stdev_homeless$minus_stdev) ~ 'orange',
-                                                                                     proportion >= tc_avg_stdev_homeless$plus_stdev ~ 'red',
-                                                                                     proportion <= tc_avg_stdev_homeless$minus_stdev ~ 'green'))
-          
-          
-        
-          
-          tc_homeless_for_avg = paste0(round(par_table_tc_avg$`tc_Homelessness (rate per 1000)_mean`,2), '\n','(regional avg)')
-          
           output$homeless_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(format(round(tc_homeless_to_write$`tc_Homelessness (rate per 1000)`,2), big.mark=',', scientific = F),
-                  tags$br(),
-                  "homeless per 1000")
-                #p(tags$strong('No. of homeless people:'), format(tc_homeless_to_write$tc_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_tc_homeless)
-            )
+            homelessness_stats_mac_text(curr_table, par_table_tc_avg)
           })
           
           output$homeless <- renderEcharts4r({
-            # # Plot population statistics
-            sec95 <- tc_homeless_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(tc_homeless_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=tc_avg_homeless, symbol = "none", lineStyle = list(color = "black"), title=tc_homeless_for_avg, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(show=T, fontSize=8, formatter = "{value}\nper 1000",showMinLabel=F, fontWeight='bold', margin=2),min=0, max=20, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=20) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            homelessness_stats_mac_plot(curr_table, par_table_tc_avg)
           })
           
-
-#           # --- fuel_poverty ---
-          
-          tc_fuelp_to_write <- curr_table %>% select(`tc_Number of households in fuel poverty1`,'tc_prop_households_fuel_poor') %>%
-            unique()
-          
-          tc_fuelp_to_plot <- tc_fuelp_to_write %>% select('tc_prop_households_fuel_poor') %>%
-            pivot_longer('tc_prop_households_fuel_poor', names_to = "Indicator", values_to = "proportion") 
-          
-          tc_fuelp_to_plot <- tc_fuelp_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>%
-            mutate('proportion'=round(proportion,0))
-          
-          tc_fuelp_to_write <- tc_fuelp_to_write %>% 
-            filter(!is.na(`tc_Number of households in fuel poverty1`) & !is.na('tc_prop_households_fuel_poor')) %>%
-            mutate(`tc_Number of households in fuel poverty1`=round(`tc_Number of households in fuel poverty1`,0))
-          
-          write_tc_fuelp <- paste0("(",tc_fuelp_to_write$tc_prop_households_fuel_poor,"% of households)")
-          
-          # for echarts
-          tc_avg_fuelp <- par_table_tc_avg %>% select(`tc_prop_households_fuel_poor_mean`) %>%
-            mutate(`tc_prop_households_fuel_poor`=round(`tc_prop_households_fuel_poor_mean`,0)) %>%
-            select('xAxis' = `tc_prop_households_fuel_poor_mean`) %>%
-            as.list()
-          
-          tc_avg_stdev_fuelp <- par_table_tc_avg %>% 
-            select(`tc_prop_households_fuel_poor_mean`, `tc_prop_households_fuel_poor_stdev`) %>%
-            mutate('plus_stdev'=round(`tc_prop_households_fuel_poor_mean`,2)+round(`tc_prop_households_fuel_poor_stdev`,2)) %>%
-            mutate('minus_stdev'=round(`tc_prop_households_fuel_poor_mean`,2)- round(`tc_prop_households_fuel_poor_stdev`,2)) 
-          
-          
-          
-          tc_fuelp_plot_colour <- tc_fuelp_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_fuelp$plus_stdev & proportion >= tc_avg_stdev_fuelp$minus_stdev) ~ 'orange',
-                                                                                           proportion >= tc_avg_stdev_fuelp$plus_stdev ~ 'red',
-                                                                                           proportion <= tc_avg_stdev_fuelp$minus_stdev ~ 'green'))
-          
-          
-          
-          tc_fuelp_for_avg = paste0(round(par_table_tc_avg$tc_prop_households_fuel_poor_mean,0), '%', '\n','(regional avg)')
-          
+           # --- fuel_poverty ---
           output$fuelp_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(format(tc_fuelp_to_write$`tc_Number of households in fuel poverty1`, big.mark=',', scientific = F),
-                  tags$br(),
-                  'households in fuel poverty')
-                #p(tags$strong('No. of households in fuel poverty:'), format(tc_fuelp_to_write$`tc_Number of households in fuel poverty1`, big.mark=',', scientific = F), "households", tags$br(), write_tc_fuelp)
-            )
+            fuelp_stats_mac_text(curr_table, par_table_tc_avg) 
           })
           
           output$fuelp <- renderEcharts4r({
-            # # Plot population statistics
-            sec95 <- tc_fuelp_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(tc_fuelp_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=tc_avg_fuelp, symbol = "none", lineStyle = list(color = "black"), title=tc_fuelp_for_avg, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=25, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=25) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            fuelp_stats_mac_plot(curr_table, par_table_tc_avg) 
           })
 
-#           # --- Unemployment ---
-          tc_unem_to_write <- curr_table %>% select(`tc_Not in employment`,'tc_prop_unemployed_on_universal_credit') %>%
-            unique()
-          
-          tc_unem_to_plot <- tc_unem_to_write %>% select('tc_prop_unemployed_on_universal_credit') %>%
-            pivot_longer('tc_prop_unemployed_on_universal_credit', names_to = "Indicator", values_to = "proportion") 
-          
-          tc_unem_to_plot <- tc_unem_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>%
-            mutate('proportion'=round(proportion,0))
-          
-          tc_unem_to_write <- tc_unem_to_write %>% filter(!is.na(`tc_Not in employment`) & !is.na('tc_prop_unemployed_on_universal_credit'))
-          
-          write_tc_unem <- paste0("(",tc_unem_to_write$tc_prop_unemployed_on_universal_credit,"% of people)")
-          
-          # for echarts
-          tc_avg_unem <- par_table_tc_avg %>% select(`tc_prop_unemployed_on_universal_credit_mean`) %>%
-            mutate(`tc_prop_unemployed_on_universal_credit_mean`=round(`tc_prop_unemployed_on_universal_credit_mean`,0)) %>%
-            select('xAxis' = `tc_prop_unemployed_on_universal_credit_mean`) %>%
-            as.list()
-          
-          tc_avg_stdev_unem <- par_table_tc_avg %>% 
-            select(`tc_prop_unemployed_on_universal_credit_mean`, `tc_prop_unemployed_on_universal_credit_stdev`) %>%
-            mutate('plus_stdev'=round(`tc_prop_unemployed_on_universal_credit_mean`,2)+round(`tc_prop_unemployed_on_universal_credit_stdev`,2)) %>%
-            mutate('minus_stdev'=round(`tc_prop_unemployed_on_universal_credit_mean`,2)- round(`tc_prop_unemployed_on_universal_credit_stdev`,2)) 
-          
-          
-          
-          tc_unem_plot_colour <- tc_unem_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_unem$plus_stdev & proportion >= tc_avg_stdev_unem$minus_stdev) ~ 'orange',
-                                                                                     proportion >= tc_avg_stdev_unem$plus_stdev ~ 'red',
-                                                                                     proportion <= tc_avg_stdev_unem$minus_stdev ~ 'green'))
-          
-          #print(tc_unem_plot_colour)
-          
-          tc_unem_for_avg = paste0(round(par_table_tc_avg$tc_prop_unemployed_on_universal_credit_mean,0), '%', '\n','(regional avg)')
-          
+          # --- Unemployment ---
           output$unemployment_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(format(tc_unem_to_write$`tc_Not in employment`, big.mark=',', scientific = F),
-                  tags$br(),
-                  "people unemployed on universal credit")
-                #p(tags$strong('No. of people unemployed receiving universal credit:'), format(tc_unem_to_write$`tc_Not in employment`, big.mark=',', scientific = F), "people", tags$br(), write_tc_unem)
-            )
+            unemployment_stats_mac_text(curr_table, par_table_tc_avg)
           })
           
-          #print(tc_avg_unem)
-          #print(tc_unem_to_plot$Indicator)
           output$unemployment <- renderEcharts4r({
-            # # Plot population statistics
-            sec95 <- tc_unem_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(tc_unem_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=tc_avg_unem, symbol = "none", lineStyle = list(color = "black"), title=tc_unem_for_avg,label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=10, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=10) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            unemployment_stats_mac_plot(curr_table, par_table_tc_avg)
           })
           
           
           # --- Digital exclusion ---
-          tc_de_to_write <- curr_table %>% select('tc_percent_digitally_excluded') %>%
-            unique()
-          
-          tc_de_to_plot <- tc_de_to_write %>% select('tc_percent_digitally_excluded') %>%
-            pivot_longer('tc_percent_digitally_excluded', names_to = "Indicator", values_to = "proportion")
-          
-          tc_de_to_plot <- tc_de_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>%
-            mutate('proportion'=round(proportion,0))
-          
-          tc_de_to_write <- tc_de_to_write %>% filter(!is.na(tc_percent_digitally_excluded))
-          
-          write_tc_de <- paste0(round(tc_de_to_write$tc_percent_digitally_excluded,0), "%")
-          
-         
-          # for echarts
-          tc_avg_de <- par_table_tc_avg %>% select('tc_percent_digitally_excluded_mean') %>%
-            #mutate('tc_percent_digitally_excluded'=round(tc_percent_digitally_excluded,0))
-            select('xAxis' = `tc_percent_digitally_excluded_mean`) %>%
-            mutate('xAxis' = round(xAxis,0)) %>%
-            as.list()
-          
-          tc_avg_de <- par_table_tc_avg %>% select('tc_percent_digitally_excluded_mean') %>%
-            #mutate('tc_percent_digitally_excluded'=round(tc_percent_digitally_excluded,0))
-            select('xAxis' = `tc_percent_digitally_excluded_mean`) %>%
-            mutate('xAxis' = round(xAxis,0)) %>%
-            as.list()
-          
-          tc_avg_stdev_de <- par_table_tc_avg %>% 
-            select(`tc_percent_digitally_excluded_mean`, `tc_percent_digitally_excluded_stdev`) %>%
-            mutate('plus_stdev'=round(`tc_percent_digitally_excluded_mean`,2)+round(`tc_percent_digitally_excluded_stdev`,2)) %>%
-            mutate('minus_stdev'=round(`tc_percent_digitally_excluded_mean`,2)- round(`tc_percent_digitally_excluded_stdev`,2)) 
-          
-          
-          
-          tc_de_plot_colour <- tc_de_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_de$plus_stdev & proportion >= tc_avg_stdev_de$minus_stdev) ~ 'orange',
-                                                                                   proportion >= tc_avg_stdev_de$plus_stdev ~ 'red',
-                                                                                   proportion <= tc_avg_stdev_de$minus_stdev ~ 'green'))
-          
-         
-          
-          tc_de_for_avg = paste0(round(par_table_tc_avg$tc_percent_digitally_excluded_mean,0), '%', '\n','(regional avg)')
-          
           output$digital_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(write_tc_de,
-                  tags$br(),
-                  "neighbourhoods in 20% most digitally excluded")
-                #p(tags$strong('Proportion of neighbourhoods in the 20% most digitally excluded:'), write_tc_de)
-            )
+            digital_exclusion_mac_text(curr_table, par_table_tc_avg) 
           })
           
           output$digital <- renderEcharts4r({
-            # # Plot population statistics
-            sec95 <- tc_de_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(tc_de_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=tc_avg_de, symbol = "none", lineStyle = list(color = "black"), title=tc_de_for_avg, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            digital_exclusion_mac_plot(curr_table, par_table_tc_avg)
           })
           
 
           # --- Shielding ---
-          tc_shielding_to_write <- curr_table %>% select(`tc_Clinically extremely vulnerable`,`tc_Clinically vulnerable proportion of population`) %>%
-            unique()
-          
-          tc_shielding_to_plot <- tc_shielding_to_write %>% select(`tc_Clinically vulnerable proportion of population`) %>%
-            pivot_longer(`tc_Clinically vulnerable proportion of population`, names_to = "Indicator", values_to = "proportion")
-          
-          tc_shielding_to_plot <- tc_shielding_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>%
-            mutate('proportion'=round(proportion,0))
-          
-          tc_shielding_to_write <- tc_shielding_to_write %>% filter(!is.na(`tc_Clinically extremely vulnerable`) & !is.na(`tc_Clinically vulnerable proportion of population`))
-          
-          write_tc_shielding <- paste0("(",tc_shielding_to_write$`tc_Clinically vulnerable proportion of population`,"% of the population)")
-          
-          # for echarts
-          tc_avg_shielding <- par_table_tc_avg %>% 
-            select(`tc_Clinically vulnerable proportion of population_mean`) %>%
-            select('xAxis' = `tc_Clinically vulnerable proportion of population_mean`) %>%
-            mutate('xAxis' = round(xAxis,0)) %>%
-            as.list()
-          
-          tc_avg_stdev_shielding <- par_table_tc_avg %>% 
-            select(`tc_Clinically vulnerable proportion of population_mean`, `tc_Clinically vulnerable proportion of population_stdev`) %>%
-            mutate('plus_stdev'=round(`tc_Clinically vulnerable proportion of population_mean`,2)+round(`tc_Clinically vulnerable proportion of population_stdev`,2)) %>%
-            mutate('minus_stdev'=round(`tc_Clinically vulnerable proportion of population_mean`,2)- round(`tc_Clinically vulnerable proportion of population_stdev`,2)) 
-          
-          
-          
-          tc_shielding_plot_colour <- tc_shielding_to_plot %>% mutate("rag_rating"=case_when((proportion <=  tc_avg_stdev_shielding$plus_stdev & proportion >= tc_avg_stdev_shielding$minus_stdev) ~ 'orange',
-                                                                               proportion >= tc_avg_stdev_shielding$plus_stdev ~ 'red',
-                                                                               proportion <= tc_avg_stdev_shielding$minus_stdev ~ 'green'))
-          
-          
-          
-          
-          tc_shielding_for_avg = paste0(round(par_table_tc_avg$`tc_Clinically vulnerable proportion of population_mean`,0), '%', '\n','(regional avg)')
-          
           output$shielding_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(format(tc_shielding_to_write$`tc_Clinically extremely vulnerable`, big.mark=',', scientific = F),
-                  tags$br(),
-                  'people clinically extremely vulnerable')
-                #p(tags$strong('No. of people clinically extremely vulnerable:'), format(tc_shielding_to_write$`tc_Clinically extremely vulnerable`, big.mark=',', scientific = F), "people", tags$br(), write_tc_shielding)
-            )
+            shielding_mac_text(curr_table, par_table_tc_avg)
           })
           
           output$shielding_f <- renderEcharts4r({
-            # # Plot population statistics
-            sec95 <- tc_shielding_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(tc_shielding_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=tc_avg_shielding, symbol = "none", lineStyle = list(color = "black"), title=tc_shielding_for_avg, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=25, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=25) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            shielding_mac_plot(curr_table, par_table_tc_avg)
           })
-          
 
          }
   
@@ -4075,656 +3300,72 @@ server = function(input, output, session) {
         # -- just local authority -- #
         # -------------------------- #
         else {
-          #print('lad section')
-          
-          lad_of_interest <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% st_drop_geometry()
-          #print(lad_of_interest$LAD19CD)
+          lad_of_interest <- lad_uk2areas2vulnerability %>% 
+            filter(Name == input$lad_selected) %>% 
+            select('LAD19CD') %>% st_drop_geometry()
           
           # --- population demographics ---
-          #bame <- curr_table %>% select('TacticalCell',`int_Fuel Poor Households`,`perc_Fuel Poor Households`)
-          lad_bame_to_plot <- curr_table %>% select('LAD19CD',`Percentage of population who are ethnic minority`) %>%
-            filter(LAD19CD == lad_of_interest$LAD19CD)
-          
-          
-          # transpose dataframe
-          lad_bame_to_plot  <- lad_bame_to_plot %>% pivot_longer(`Percentage of population who are ethnic minority`, names_to = "Indicator", values_to = "proportion") %>%
-            unique() %>% filter(!is.na(proportion)) %>%
-            mutate('proportion'=round(proportion,0))
-          
-          #print(lad_bame_to_plot)
-          
-          # for echarts
-          lad_avg_bame <- par_table_lad_avg %>% select(`Percentage of population who are ethnic minority_mean`) %>%
-            select('xAxis' = `Percentage of population who are ethnic minority_mean`) %>%
-            mutate('xAxis'= round(xAxis,0)) %>%
-            as.list()
-          
-          # for echarts colour
-          lad_avg_stdev_bame <- par_table_lad_avg %>% 
-            select(`Percentage of population who are ethnic minority_mean`, `Percentage of population who are ethnic minority_stdev`) %>%
-            mutate('plus_stdev'=round(`Percentage of population who are ethnic minority_mean`,1)+round(`Percentage of population who are ethnic minority_stdev`,1)) %>%
-            mutate('minus_stdev'=round(`Percentage of population who are ethnic minority_mean`,1) - round(`Percentage of population who are ethnic minority_stdev`,1)) 
-          
-          
-          bame_plot_colour <- lad_bame_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_bame$plus_stdev & proportion >= lad_avg_stdev_bame$minus_stdev) ~ 'orange',
-                                                                            proportion >= lad_avg_stdev_bame$plus_stdev ~ 'red',
-                                                                            proportion <= lad_avg_stdev_bame$minus_stdev ~ 'green'))
-          
-          #print('colours')
-          #print(glimpse(plot_colour))
-          
-          # to format percentage
-          lad_bame_to_show <- paste0(round(lad_bame_to_plot$proportion,0), "%")
-          
-          # label to sho
-          lad_label_to_show <- paste0(round(par_table_lad_avg$`Percentage of population who are ethnic minority_mean`,0), '%', '\n','(eng avg)')
-          
-        
-          
-          if (dim(lad_bame_to_plot)[1] != 0) {
-          
           output$bame_population_text <- renderUI({
-            div(style= "text-align: center;margin-top:5px;",
-                #hr(),
-                p(lad_bame_to_show,
-                  tags$br(),
-                  'of the population are BAME')
-                #p(tags$strong('Proportion of population who are BAME:'), lad_bame_to_show)
-                
-            )
+            ethnicity_stats_lad_text(curr_table, par_table_lad_avg, lad_of_interest)
           })
           
           output$bame_population <- renderEcharts4r({
-            # # Plot population statistics
-            bame <- lad_bame_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1, showBackground=T, label=list(show=T, color='black', position='right')) %>%
-              #e_labels(position = "right", color='black') %>%
-              e_color(c(bame_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=lad_avg_bame, symbol = "none", lineStyle = list(color = "black"), title=lad_label_to_show, label=list(formatter='label',fontSize=10)) %>%
-
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            ethnicity_stats_lad_plot(curr_table, par_table_lad_avg, lad_of_interest)
           })
           
-          }
-          
-          else {
-            
-            lad_bame_to_show <- "Data unavailable"
-            
-            # -- no data --
-            output$bame_population_text <- renderUI({
-              div(style= "text-align: center;margin-top:5px;",
-                  #hr(),
-                  p(lad_bame_to_show,
-                    tags$br(),
-                    'for % of the population who are BAME')
-                  #p(tags$strong('Proportion of population who are BAME:'), lad_bame_to_show)
-                  
-              )
-            })
-            
-            output$bame_population <- renderEcharts4r({
-              # remove other plot but don't plot anything
-            })
-            
-          }
-          
           # --- section 95 support ----
-          lad_sec95_to_write <- curr_table %>% select('LAD19CD',`People receiving Section 95 support`,'lad_prop_recieving_section_95_support') %>%
-            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
-            unique()
-          
-          lad_sec95_to_plot <- lad_sec95_to_write %>% select('lad_prop_recieving_section_95_support') %>%
-            pivot_longer('lad_prop_recieving_section_95_support', names_to = "Indicator", values_to = "proportion")
-          
-          lad_sec95_to_plot <- lad_sec95_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() 
-          
-          lad_sec95_to_write <- lad_sec95_to_write %>% filter(!is.na(`People receiving Section 95 support`) & !is.na('lad_prop_recieving_section_95_support'))
-          
-          write_lad_sec95 <- paste0("(",lad_sec95_to_write$lad_prop_recieving_section_95_support,"% of the population)")
-          
-          # for echarts
-          lad_avg_section95 <- par_table_lad_avg %>% select(`lad_prop_recieving_section_95_support_mean`) %>%
-            select('xAxis' = `lad_prop_recieving_section_95_support_mean`) %>%
-            as.list()
-          
-          lad_avg_stdev_sec95 <- par_table_lad_avg %>% 
-            select(`lad_prop_recieving_section_95_support_mean`, `lad_prop_recieving_section_95_support_stdev`) %>%
-            mutate('plus_stdev'=round(`lad_prop_recieving_section_95_support_mean`,1)+round(`lad_prop_recieving_section_95_support_stdev`,1)) %>%
-            mutate('minus_stdev'=round(`lad_prop_recieving_section_95_support_mean`,1) - round(`lad_prop_recieving_section_95_support_stdev`,1)) 
-          
-          
-          sec95_plot_colour <- lad_sec95_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_sec95$plus_stdev & proportion >= lad_avg_stdev_sec95$minus_stdev) ~ 'orange',
-                                                                            proportion >= lad_avg_stdev_sec95$plus_stdev ~ 'red',
-                                                                            proportion <= lad_avg_stdev_sec95$minus_stdev ~ 'green'))
-          
-          
-          lad_sec95_for_avg = paste0(round(par_table_lad_avg$lad_prop_recieving_section_95_support_mean,2), '%', '\n','(eng avg)')
-          
-          if(dim(lad_sec95_to_plot)[1] != 0) {
-          
           output$section95_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F),
-                  tags$br(),
-                  'people receiving support whilst seeking asylum (Section 95 support)')
-                #p(tags$strong('No. of people receiving Section 95 support:'), format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_lad_sec95)
-
-            )
+            sec95_stats_lad_text(curr_table, par_table_lad_avg, lad_of_interest)
           })
           
           output$section95 <- renderEcharts4r({
-            # # Plot population statistics
-            sec95 <- lad_sec95_to_plot %>%
-
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(sec95_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=lad_avg_section95, symbol = "none", lineStyle = list(color = "black"), title=lad_sec95_for_avg,label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=1, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=1) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            sec95_stats_lad_plot(curr_table, par_table_lad_avg, lad_of_interest)
           })
-
-          }
-          
-          else {
-            output$section95_text <- renderUI({
-              div(style= " text-align: center;margin-top:5px;",
-                  #hr(),
-                  p("Data unavailable",
-                    tags$br(),
-                    'people receiving support whilst seeking asylum (Section 95 support)')
-                  #p(tags$strong('No. of people receiving Section 95 support:'), format(lad_sec95_to_write$`People receiving Section 95 support`, big.mark=',', scientific = F), "people", tags$br(), write_lad_sec95)
-              )
-            })
-            
-            output$section95 <- renderEcharts4r({
-              
-            })
-            
-          }
-          
           
           # --- homeless ----
-          lad_homeless_to_write <- curr_table %>% select('LAD19CD',`Homelessness (rate per 1000)`) %>%
-            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
-            unique()
-          
-          lad_homeless_to_plot <- lad_homeless_to_write %>% select(`Homelessness (rate per 1000)`) %>%
-            pivot_longer(`Homelessness (rate per 1000)`, names_to = "Indicator", values_to = "proportion")
-          
-          lad_homeless_to_plot <- lad_homeless_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>%
-            mutate('proportion'=round(proportion,2))
-          
-          lad_homeless_to_write <- lad_homeless_to_write %>% filter(!is.na(`Homelessness (rate per 1000)`))
-          
-          write_lad_homeless <- paste0("(",lad_homeless_to_write$`Homelessness (rate per 1000)`,"homelessness per 1000)")
-          
-          # for echarts
-          lad_avg_homeless <- par_table_lad_avg %>% select(`Homelessness (rate per 1000)_mean`) %>%
-            select('xAxis' = `Homelessness (rate per 1000)_mean`) %>%
-            as.list()
-          
-          lad_avg_stdev_homeless <- par_table_lad_avg %>% 
-            select(`Homelessness (rate per 1000)_mean`, `Homelessness (rate per 1000)_stdev`) %>%
-            mutate('plus_stdev'=round(`Homelessness (rate per 1000)_mean`,2)+round(`Homelessness (rate per 1000)_stdev`,2)) %>%
-            mutate('minus_stdev'=round(`Homelessness (rate per 1000)_mean`,2) - round(`Homelessness (rate per 1000)_stdev`,2)) 
-          
-          
-          homeless_plot_colour <- lad_homeless_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_homeless$plus_stdev & proportion >= lad_avg_stdev_homeless$minus_stdev) ~ 'orange',
-                                                                             proportion >= lad_avg_stdev_homeless$plus_stdev ~ 'red',
-                                                                             proportion <= lad_avg_stdev_homeless$minus_stdev ~ 'green'))
-          
-          
-          
-          lad_homeless_for_avg = paste0(round(par_table_lad_avg$`Homelessness (rate per 1000)_mean`,2), '\n','(eng avg)')
-          
-          
-          if(dim(lad_homeless_to_plot)[1] != 0) {
-
-          
           output$homeless_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(format(round(lad_homeless_to_write$`Homelessness (rate per 1000)`,2), big.mark=',', scientific = F),
-                  tags$br(),
-                  'homeless per 1000')
-                #p(tags$strong('No. of homeless people:'), format(lad_homeless_to_write$lad_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_lad_homeless)
-            )
+            homelessness_stats_lad_text(curr_table, par_table_lad_avg, lad_of_interest)
           })
           
           output$homeless <- renderEcharts4r({
-            # # Plot population statistics
-            sec95 <- lad_homeless_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(homeless_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=lad_avg_homeless, symbol = "none", lineStyle = list(color = "black"), title=lad_homeless_for_avg, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2, suffix='per 1000'),min=0, max=20, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=20) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            homelessness_stats_lad_plot(curr_table, par_table_lad_avg, lad_of_interest)
           })
-          }
-          
-          else {
-            
-            output$homeless_text <- renderUI({
-              div(style= " text-align: center;margin-top:5px;",
-                  #hr(),
-                  p("Data unavailable",
-                    tags$br(),
-                    'for homeless people')
-                  #p(tags$strong('No. of homeless people:'), format(lad_homeless_to_write$lad_total_homeless, big.mark=',', scientific = F), "people", tags$br(), write_lad_homeless)
-              )
-            })
-            
-            output$homeless <- renderEcharts4r({
-          
-            })
-            
-          }
           
           # --- fuel_poverty ---
-          
-          lad_fuelp_to_write <- curr_table %>% select('LAD19CD',`Number of households in fuel poverty1`,`Proportion of households fuel poor (%)`) %>%
-            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
-            unique()
-          
-          lad_fuelp_to_plot <- lad_fuelp_to_write %>% select(`Proportion of households fuel poor (%)`) %>%
-            pivot_longer(`Proportion of households fuel poor (%)`, names_to = "Indicator", values_to = "proportion")
-          
-          lad_fuelp_to_plot <- lad_fuelp_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>%
-            mutate('proportion'=round(proportion,0))
-          
-          
-          lad_fuelp_to_write <- lad_fuelp_to_write %>% filter(!is.na(`Number of households in fuel poverty1`) & !is.na(`Proportion of households fuel poor (%)`))
-            
-          
-          write_lad_fuelp <- paste0("(",lad_fuelp_to_write$`Proportion of households fuel poor (%)`,"% of households)")
-          
-          # for echarts
-          lad_avg_fuelp <- par_table_lad_avg %>% select(`Proportion of households fuel poor (%)_mean`) %>%
-            select('xAxis' = `Proportion of households fuel poor (%)_mean`) %>%
-            mutate('xAxis'=round(xAxis,0)) %>%
-            as.list()
-          
-          
-          lad_avg_stdev_fuelp <- par_table_lad_avg %>% 
-            select(`Proportion of households fuel poor (%)_mean`, `Proportion of households fuel poor (%)_stdev`) %>%
-            mutate('plus_stdev'=round(`Proportion of households fuel poor (%)_mean`,1)+round(`Proportion of households fuel poor (%)_stdev`,1)) %>%
-            mutate('minus_stdev'=round(`Proportion of households fuel poor (%)_mean`,1) - round(`Proportion of households fuel poor (%)_stdev`,1)) 
-          
-          
-          fuelp_plot_colour <- lad_fuelp_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_fuelp$plus_stdev & proportion >= lad_avg_stdev_fuelp$minus_stdev) ~ 'orange',
-                                                                                proportion >= lad_avg_stdev_fuelp$plus_stdev ~ 'red',
-                                                                                proportion <= lad_avg_stdev_fuelp$minus_stdev ~ 'green'))
-          
-         
-          
-          lad_fuelp_for_avg = paste0(round(par_table_lad_avg$`Proportion of households fuel poor (%)_mean`,0), '%', '\n','(eng avg)')
-          
-          if (dim(lad_fuelp_to_plot)[1] != 0) {
           output$fuelp_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(format(round(lad_fuelp_to_write$`Number of households in fuel poverty1`,0), big.mark=',', scientific = F),
-                  tags$br(),
-                  "households in fuel poverty")
-                #p(tags$strong('No. of households in fuel poverty:'), format(lad_fuelp_to_write$`Number of households in fuel poverty1`, big.mark=',', scientific = F), "households", tags$br(), write_lad_fuelp)
-
-            )
+            fuelp_stats_lad_text(curr_table, par_table_lad_avg, lad_of_interest)
           })
           
           output$fuelp <- renderEcharts4r({
-            # # Plot population statistics
-            lad_fuelp <-  lad_fuelp_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(fuelp_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=lad_avg_fuelp, symbol = "none", lineStyle = list(color = "black"), title=lad_fuelp_for_avg, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=25, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=25) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            fuelp_stats_lad_plot(curr_table, par_table_lad_avg, lad_of_interest)
           })
 
-          }
-          
-          else {
-            
-            output$fuelp_text <- renderUI({
-              div(style= " text-align: center;margin-top:5px;",
-                  #hr(),
-                  p("Data unavailable",
-                    tags$br(),
-                    "for households in fuel poverty")
-                  #p(tags$strong('No. of households in fuel poverty:'), format(lad_fuelp_to_write$`Number of households in fuel poverty1`, big.mark=',', scientific = F), "households", tags$br(), write_lad_fuelp)
-              )
-            })
-            
-            output$fuelp <- renderEcharts4r({
-              
-            })
-            
-          }
-          
           #--- Unemployment ---
-          lad_unem_to_write <- curr_table %>% select('LAD19CD',`Not in employment`,'lad_prop_unemployed_on_ucred') %>%
-            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
-            unique()
-          
-          lad_unem_to_plot <- lad_unem_to_write %>% select('lad_prop_unemployed_on_ucred') %>%
-            pivot_longer('lad_prop_unemployed_on_ucred', names_to = "Indicator", values_to = "proportion")
-          
-          lad_unem_to_plot <- lad_unem_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>%
-            mutate('proportion'=round(proportion,0))
-          
-          lad_unem_to_write <- lad_unem_to_write %>% filter(!is.na(`Not in employment`) & !is.na('lad_prop_unemployed_on_ucred'))
-          
-          write_lad_unem <- paste0("(",lad_unem_to_write$lad_prop_unemployed_on_ucred,"% of people)")
-          
-          # for echarts
-          lad_avg_unem <- par_table_lad_avg %>% select(`lad_prop_unemployed_on_ucred_mean`) %>%
-            select('xAxis' = `lad_prop_unemployed_on_ucred_mean`) %>%
-            mutate('xAxis'=round(xAxis,0)) %>%
-            as.list()
-          
-          lad_avg_stdev_unem <- par_table_lad_avg %>% 
-            select(`lad_prop_unemployed_on_ucred_mean`, `lad_prop_unemployed_on_ucred_stdev`) %>%
-            mutate('plus_stdev'=round(`lad_prop_unemployed_on_ucred_mean`,1)+round(`lad_prop_unemployed_on_ucred_stdev`,1)) %>%
-            mutate('minus_stdev'=round(`lad_prop_unemployed_on_ucred_mean`,1) - round(`lad_prop_unemployed_on_ucred_stdev`,1)) 
-          
-          
-          unem_plot_colour <- lad_unem_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_unem$plus_stdev & proportion >= lad_avg_stdev_unem$minus_stdev) ~ 'orange',
-                                                                             proportion >= lad_avg_stdev_unem$plus_stdev ~ 'red',
-                                                                             proportion <= lad_avg_stdev_unem$minus_stdev ~ 'green'))
-          
-          
-          
-          lad_unem_for_avg = paste0(round(par_table_lad_avg$lad_prop_unemployed_on_ucred_mean,0), '%', '\n','(eng avg)')
-          
-          if (dim(lad_unem_to_plot)[1] != 0) {
-          
           output$unemployment_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-           p(format(lad_unem_to_write$`Not in employment`, big.mark=',', scientific = F),
-                  tags$br(),
-                  'people unemployed on universal credit')
-                #p(tags$strong('No. of people unemployed receiving universal credit:'), format(lad_unem_to_write$`Not in employment`, big.mark=',', scientific = F), "people", tags$br(), write_lad_unem)
-            )
+            unemployment_stats_lad_text(curr_table, par_table_lad_avg, lad_of_interest)
           })
           
           output$unemployment <- renderEcharts4r({
-            # # Plot population statistics
-            lad_unem <- lad_unem_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(unem_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=lad_avg_unem, symbol = "none", lineStyle = list(color = "black"), title=lad_unem_for_avg, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=10, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=10) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            unemployment_stats_lad_plot(curr_table, par_table_lad_avg, lad_of_interest)
           })
           
-          }
-          
-          else {
-            output$unemployment_text <- renderUI({
-              div(style= " text-align: center;margin-top:5px;",
-                  #hr(),
-                  p('Data unavailable',
-                    tags$br(),
-                    'for people unemployed on universal credit')
-                  #p(tags$strong('No. of people unemployed receiving universal credit:'), format(lad_unem_to_write$`Not in employment`, big.mark=',', scientific = F), "people", tags$br(), write_lad_unem)
-              )
-            })
-            
-            output$unemployment <- renderEcharts4r({
-              
-            })
-          }
-          
           # --- Digital exclusion ---
-          lad_de_to_write <- curr_table %>% select('LAD19CD','percent_digitally_excluded') %>%
-            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
-            unique()
-          
-          lad_de_to_plot <- lad_de_to_write %>% select('percent_digitally_excluded') %>%
-            pivot_longer('percent_digitally_excluded', names_to = "Indicator", values_to = "proportion")
-          
-          lad_de_to_plot <- lad_de_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>% 
-            mutate('proportion'=round(proportion,2))
-          
-          lad_de_to_write <- lad_de_to_write %>% filter(!is.na('percent_digitally_excluded'))
-          
-          write_lad_de <- paste0(round(lad_de_to_write$percent_digitally_excluded,2), "%")
-          
-          # for echarts
-          lad_avg_de <- par_table_lad_avg %>% select(`percent_digitally_excluded_mean`) %>%
-            select('xAxis' = `percent_digitally_excluded_mean`) %>%
-            mutate('xAxis'=round(xAxis,0)) %>%
-            as.list()
-          
-          lad_avg_stdev_de <- par_table_lad_avg %>% 
-            select(`percent_digitally_excluded_mean`, `percent_digitally_excluded_stdev`) %>%
-            mutate('plus_stdev'=round(`percent_digitally_excluded_mean`,1)+round(`percent_digitally_excluded_stdev`,1)) %>%
-            mutate('minus_stdev'=round(`percent_digitally_excluded_mean`,1) - round(`percent_digitally_excluded_stdev`,1)) 
-          
-          
-          de_plot_colour <- lad_de_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_de$plus_stdev & proportion >= lad_avg_stdev_de$minus_stdev) ~ 'orange',
-                                                                            proportion >= lad_avg_stdev_de$plus_stdev ~ 'red',
-                                                                            proportion <= lad_avg_stdev_de$minus_stdev ~ 'green'))
-          
-          
-          
-          lad_de_for_avg = paste0(round(par_table_lad_avg$percent_digitally_excluded_mean,0), '%', '\n','(eng avg)')
-        
-          if (dim(lad_de_to_plot)[1] != 0) {
-
-          
           output$digital_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(write_lad_de,
-                  tags$br(),
-                  'neighbourhoods in the 20% most digitally excluded')
-                #p(tags$strong('Proportion of neighbourhoods in the 20% most digitally excluded:'), write_lad_de)
-            )
+            digital_exclusion_lad_text(curr_table, par_table_lad_avg, lad_of_interest)
           })
           
           output$digital <- renderEcharts4r({
-            # # Plot population statistics
-            lad_de <- lad_de_to_plot %>%
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(de_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=lad_avg_de, symbol = "none", lineStyle = list(color = "black"), title=lad_de_for_avg, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            digital_exclusion_lad_plot(curr_table, par_table_lad_avg, lad_of_interest)
           })
-          }
-          
-          else{
-            output$digital_text <- renderUI({
-              div(style= " text-align: center;margin-top:5px;",
-                  #hr(),
-                  p("Data unavailable",
-                    tags$br(),
-                    'for neighbourhoods in the 20% most digitally excluded')
-                  #p(tags$strong('Proportion of neighbourhoods in the 20% most digitally excluded:'), write_lad_de)
-              )
-            })
-            
-            output$digital <- renderEcharts4r({
-              
-            })
-          }
-          
           
           # --- Shielding ---
-          lad_shielding_to_write <- curr_table %>% select('LAD19CD',`Clinically extremely vulnerable`,`Proportion Clinically extremely vulnerable`) %>%
-            filter(LAD19CD == lad_of_interest$LAD19CD) %>%
-            unique()
-          
-          lad_shielding_to_plot <- lad_shielding_to_write %>% select(`Proportion Clinically extremely vulnerable`) %>%
-            pivot_longer(`Proportion Clinically extremely vulnerable`, names_to = "Indicator", values_to = "proportion")
-          
-          lad_shielding_to_plot <- lad_shielding_to_plot %>% filter(!is.na(proportion)) %>%
-            unique() %>%
-            mutate('proportion'=round(proportion,0))
-          
-          lad_shielding_to_write <- lad_shielding_to_write %>% filter(!is.na(`Clinically extremely vulnerable`) & !is.na(`Proportion Clinically extremely vulnerable`))
-          
-          write_lad_shielding <- paste0("(",lad_shielding_to_write$`Proportion Clinically extremely vulnerable`,"% of the population)")
-          
-          # for echarts
-          lad_avg_shielding <- par_table_lad_avg %>% select(`Proportion Clinically extremely vulnerable_mean`) %>%
-            select('xAxis' = `Proportion Clinically extremely vulnerable_mean`) %>%
-            mutate('xAxis'=round(xAxis,0)) %>%
-            as.list()
-          
-          lad_avg_stdev_shielding <- par_table_lad_avg %>% 
-            select(`Proportion Clinically extremely vulnerable_mean`, `Proportion Clinically extremely vulnerable_stdev`) %>%
-            mutate('plus_stdev'=round(`Proportion Clinically extremely vulnerable_mean`,1)+round(`Proportion Clinically extremely vulnerable_stdev`,1)) %>%
-            mutate('minus_stdev'=round(`Proportion Clinically extremely vulnerable_mean`,1) - round(`Proportion Clinically extremely vulnerable_stdev`,1)) 
-          
-          
-          shielding_plot_colour <- lad_shielding_to_plot %>% mutate("rag_rating"=case_when((proportion <=  lad_avg_stdev_shielding$plus_stdev & proportion >= lad_avg_stdev_shielding$minus_stdev) ~ 'orange',
-                                                                          proportion >= lad_avg_stdev_shielding$plus_stdev ~ 'red',
-                                                                          proportion <= lad_avg_stdev_shielding$minus_stdev ~ 'green'))
-          
-          
-          lad_sheilding_for_avg = paste0(round(par_table_lad_avg$`Proportion Clinically extremely vulnerable_mean`,0), '%', '\n','(eng avg)')
-          
-          if (dim(lad_shielding_to_plot)[1] != 0) {
-          
           output$shielding_text <- renderUI({
-            div(style= " text-align: center;margin-top:5px;",
-                #hr(),
-                p(format(lad_shielding_to_write$`Clinically extremely vulnerable`, big.mark=',', scientific = F),
-                  tags$br(),
-                  'people clinically extremely vulnerable')
-                #p(tags$strong('No. of people clinically extremely vulnerable:'), format(lad_shielding_to_write$`Clinically extremely vulnerable`, big.mark=',', scientific = F), "people", tags$br(), write_lad_shielding)
-            )
+            shielding_lad_text(curr_table, par_table_lad_avg, lad_of_interest)
           })
           
           output$shielding_f <- renderEcharts4r({
-            # # Plot population statistics
-            sec95 <- lad_shielding_to_plot %>%
-
-              e_charts(x = Indicator) %>%
-              e_bar(proportion, bar_width=0.1,showBackground=T) %>%
-              e_labels(position = "right", color='black') %>%
-              e_color(c(shielding_plot_colour$rag_rating)) %>%
-              #e_scatter(england_avg, name = "National avg", symbolSize = 8) %>%
-              #e_mark_line(data = list(xAxis=eng_avg), title='National Avg') %>%
-              e_mark_line(data=lad_avg_shielding, symbol = "none", lineStyle = list(color = "black"), title=lad_sheilding_for_avg, label=list(formatter='label',fontSize=10)) %>%
-              e_hide_grid_lines() %>%
-              e_flip_coords() %>%
-              e_grid(containLabel = TRUE, left=30, right=30, top=10, bottom=5, height='60%') %>%
-              
-              #e_rm_axis(axis="x") %>%
-              #e_x_axis(axisLabel = list(interval = 0, rotate = 45, formatter = "{value}%", show=F), name = "Percentage of population (%)", nameLocation = "middle", nameGap = 35) %>%
-              e_x_axis(position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=25, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=25) %>%
-              e_y_axis(axisLabel = list(interval = 0, show = F)) %>%
-              e_y_axis(show=F) %>%
-              e_legend(FALSE)
-            
+            shielding_lad_plot(curr_table, par_table_lad_avg, lad_of_interest)
           })
-          
-          }
-          
-          else {
-            output$shielding_text <- renderUI({
-              div(style= " text-align: center;margin-top:5px;",
-                  #hr(),
-                  p('Data unavailable',
-                    tags$br(),
-                    'for people clinically extremely vulnerable')
-                  #p(tags$strong('No. of people clinically extremely vulnerable:'), format(lad_shielding_to_write$`Clinically extremely vulnerable`, big.mark=',', scientific = F), "people", tags$br(), write_lad_shielding)
-              )
-            })
-            
-            output$shielding_f <- renderEcharts4r({
-            })
-          }
-      
         }
       }
     }
@@ -4734,7 +3375,6 @@ server = function(input, output, session) {
 store_rank_wanted <- reactiveValues(rank_wanted_covid ='cases per 100,000  ', rank_wanted_flooding = 'Flood warnings/alerts')
 
   
-
 observe({
   if(input$theme == 'Covid-19') {
   # set up options for areas to focus lists
@@ -4957,16 +3597,6 @@ observe({
         #p(id='top_10', tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,3]),"per 100k,", top102show[10,4], "cases,", tags$strong(top102show[10,7], style = paste("color:", top102show[10,6])), ")")
       })
       
-      # output$areas2focus_list <- renderUI({
-      #   div( hr(),
-      #        # top 
-      #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "per 100k,", top102show[1,4], "cases,", tags$strong(top102show[1,7], style = paste("color:", top102show[1,6])), ")"),
-      #        #p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,3]), "cases,", tags$strong(top102show[1,6], style = paste("color:", top102show[1,5])), ")"),
-      #        hr()
-      #   )
-      #   
-      # })
-      
       }
     } # end of covid 
     
@@ -5048,34 +3678,6 @@ observe({
                 p(style='margin-top:10px;margin-bottom:10px',id='top_10',tags$strong('10.'), paste0(top102show[10,1],":"), paste0(top102show[10,6], " incidents per 10K, ", top102show[10,5], " historical floods"))
                 
               })
-          
-          
-          #     # format text 
-          #     output$areas2focus_list <- renderUI({
-          #       div( hr(),
-          #         # top 
-          #         p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,6], ","), top102show[1,5],"historical floods)"),
-          #         hr(),
-          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,6], ","), top102show[2,5],"historical floods)"),
-          #        hr(),
-          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,6], ","), top102show[3,5],"historical floods)"),
-          #        hr(),
-          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,6], ","), top102show[4,5],"historical floods)"),
-          #        hr(),
-          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,6], ","), top102show[5,5],"historical floods)"),
-          #        hr(),
-          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,6], ","), top102show[6,5],"historical floods)"),
-          #        hr(),
-          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,6], ","), top102show[7,5],"historical floods)"),
-          #        hr(),
-          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,6], ","), top102show[8,5],"historical floods)"),
-          #        hr(),
-          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,6], ","), top102show[9,5],"historical floods)"),
-          #        hr(),
-          #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,6], ","), top102show[10,5],"historical floods)"),
-          #   )
-          #   
-          # })
           
         }
         
@@ -5215,37 +3817,6 @@ observe({
                   
                 })
                 
-                
-                
-                # # format text 
-                # output$areas2focus_list <- renderUI({
-                #   div( hr(),
-                #        # top 
-                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange')),
-                #        hr(),
-                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), paste0(top102show[2,1],":"), tags$strong(top102show[2,7], "severe warnings,", top102show[2,8], "warnings,", style="color:red"), tags$strong(top102show[2,9],"alerts", style='color:orange')),
-                #        hr(),
-                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), paste0(top102show[3,1],":"), tags$strong(top102show[3,7], "severe warnings,", top102show[3,8], "warnings,", style="color:red"), tags$strong(top102show[3,9],"alerts", style='color:orange')),
-                #        hr(),
-                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), paste0(top102show[4,1],":"), tags$strong(top102show[4,7], "severe warnings,", top102show[4,8], "warnings,", style="color:red"), tags$strong(top102show[4,9],"alerts", style='color:orange')),
-                #        hr(),
-                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), paste0(top102show[5,1],":"), tags$strong(top102show[5,7], "severe warnings,", top102show[5,8], "warnings,", style="color:red"), tags$strong(top102show[5,9],"alerts", style='color:orange')),
-                #        hr(),
-                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), paste0(top102show[6,1],":"), tags$strong(top102show[6,7], "severe warnings,", top102show[6,8], "warnings,", style="color:red"), tags$strong(top102show[6,9],"alerts", style='color:orange')),
-                #        hr(),
-                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), paste0(top102show[7,1],":"), tags$strong(top102show[7,7], "severe warnings,", top102show[7,8], "warnings,", style="color:red"), tags$strong(top102show[7,9],"alerts", style='color:orange')),
-                #        hr(),
-                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), paste0(top102show[8,1],":"), tags$strong(top102show[8,7], "severe warnings,", top102show[8,8], "warnings,", style="color:red"), tags$strong(top102show[8,9],"alerts", style='color:orange')),
-                #        hr(),
-                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), paste0(top102show[9,1],":"), tags$strong(top102show[9,7], "severe warnings,", top102show[9,8], "warnings,", style="color:red"), tags$strong(top102show[9,9],"alerts", style='color:orange')),
-                #        hr(),
-                #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), paste0(top102show[10,1],":"), tags$strong(top102show[10,7], "severe warnings,", top102show[10,8], "warnings,", style="color:red"), tags$strong(top102show[10,9],"alerts", style='color:orange')),
-                #        hr()
-                #   )
-                #   
-                # })
-                # 
-                
               }
               
               # for focus list selected just show a local authority
@@ -5384,33 +3955,6 @@ observe({
                     p(style='margin-top:10px;margin-bottom:10px',id='top_10', tags$strong('10.'), paste0(top102show[10,1],":"), paste0(top102show[10,10], ", ", format(as.numeric(top102show[10,3]), big.mark=",")," people"))
                   })
                   
-                  # format text 
-                  # output$areas2focus_list <- renderUI({
-                  #   div( hr(),
-                  #        # top 
-                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('1.'), top102show[1,1], paste0("(", top102show[1,10], ","), top102show[1,3],"people)"),
-                  #        hr(),
-                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('2.'), top102show[2,1], paste0("(", top102show[2,10], ","), top102show[2,3],"people)"),
-                  #        hr(),
-                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('3.'), top102show[3,1],paste0("(", top102show[3,10], ","), top102show[3,3],"people)"),
-                  #        hr(),
-                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('4.'), top102show[4,1], paste0("(", top102show[4,10], ","), top102show[4,3],"people)"),
-                  #        hr(),
-                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('5.'), top102show[5,1], paste0("(", top102show[5,10], ","), top102show[5,3],"people)"),
-                  #        hr(),
-                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('6.'), top102show[6,1], paste0("(", top102show[6,10], ","), top102show[6,3],"people)"),
-                  #        hr(),
-                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('7.'), top102show[7,1], paste0("(", top102show[7,10], ","), top102show[7,3],"people)"),
-                  #        hr(),
-                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('8.'), top102show[8,1], paste0("(", top102show[8,10], ","), top102show[8,3],"people)"),
-                  #        hr(),
-                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('9.'), top102show[9,1], paste0("(", top102show[9,10], ","), top102show[9,3],"people)"),
-                  #        hr(),
-                  #        p(style='margin-top:-10px;margin-bottom:-10px',tags$strong('10.'), top102show[10,1], paste0("(", top102show[10,10], ","), top102show[10,3],"people)"),
-                  #   )
-                  #   
-                  # })
-                  
                   }
                 
                 # for focus list selected just show a local authority
@@ -5535,7 +4079,6 @@ onclick("top_1", {
                              choices = lad_choices,
                              selected=row_wanted$`Local Authority`)
 
-          
         }
        
   )
@@ -5842,8 +4385,24 @@ onclick("top_10", {
   observe({
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
+      print('here')
+      print(input$tactical_cell)
+      print(input$lad_selected)
  
       # if user has tactical cell selected
+      if (input$tactical_cell == '-- England --' & is.null(input$lad_selected)) {
+        print("WHAT THE F IS THE PROBLEM")
+          output$secondSelection <- renderUI({
+              #lads2select <- unique(lad_uk2vuln_resilience$Name)
+            #lads2select <- c('All local authorities in region',sort(lads2select))
+            lads2select <- c('All local authorities in region')
+          selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected='All local authorities in region')
+      })
+      
+      }
+      
+      else {
+      
       #print(input$lad_selected)
       if (input$tactical_cell != '-- England --' & input$lad_selected == 'All local authorities in region') {
         # update reactive values 
@@ -5876,9 +4435,6 @@ onclick("top_10", {
           dd_areas2focus$l <- input$lad_selected
           dd_areas2focus$t <- input$tactical_cell
           dd_areas2focus$d <- lad_filtered_areas2focus
-          
-          #print('this should be showing')
-          #print(lad_filtered_areas2focus)
         
           DT::replaceData(proxy, lad_filtered_areas2focus) 
           
@@ -5895,6 +4451,7 @@ onclick("top_10", {
         
       }
       
+      }
     }
     
   })
@@ -5988,6 +4545,35 @@ onclick("top_10", {
     req(input$sidebar_id)
     if(input$sidebar_id == 'unmetneed') {
       
+      # sometimes this hasn't been initiated so causes error
+      if(is.null(input$lad_selected)) {
+        output$secondSelection <- renderUI({
+          #lads2select <- unique(lad_uk2vuln_resilience$Name)
+          #lads2select <- c('All local authorities in region',sort(lads2select))
+          lads2select <- c('All local authorities in region')
+          selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected='All local authorities in region')
+        })
+        
+        # search either whole tactical cell or all of engalnd
+        bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+        # create search of charity database 
+        output$search_needed <- renderUI({
+          # search bar
+          searchInput(inputId = "search_term", 
+                      label = "Search CharityBase for charities with a particular purpose",
+                      placeholder = 'i.e emergency response',
+                      btnSearch = icon("search"), 
+                      btnReset = icon("remove"), 
+                      value='',
+                      width = "100%")
+        })
+        
+        output$expand_search_needed <- renderUI({
+        })
+      }
+      
+      else {
+      
       # provide option for expanded search if lad selected
       if(input$lad_selected != 'All local authorities in region') {
         
@@ -6022,27 +4608,7 @@ onclick("top_10", {
         
         })
       }
-      
-      else {
-        # sometimes this hasn't been initiated so causes error
-        if(is.null(input$lad_selected)) {
-        # search either whole tactical cell or all of engalnd
-        bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
-        # create search of charity database 
-        output$search_needed <- renderUI({
-          # search bar
-          searchInput(inputId = "search_term", 
-                      label = "Search CharityBase for charities with a particular purpose",
-                      placeholder = 'i.e emergency response',
-                      btnSearch = icon("search"), 
-                      btnReset = icon("remove"), 
-                      value='',
-                      width = "100%")
-        })
         
-        output$expand_search_needed <- renderUI({
-        })
-        }
         
         else {
             # search either whole tactical cell or all of engalnd
@@ -6073,7 +4639,7 @@ onclick("top_10", {
     # - does the call take too long
     charities_found <- withTimeout({
                 findcharities(bounding_wanted, '')
-      }, timeout = 2)
+      }, timeout = 0.5)
     },
     error = function(e) {
       charities_found <- NULL
@@ -6163,7 +4729,7 @@ onclick("top_10", {
           # - does the call take too long
           charities_found <- withTimeout({
             findcharities(bounding_wanted, input$search_term)
-          }, timeout = 2)
+          }, timeout = 0.5)
         },
         error = function(e) {
           charities_found <- NULL
@@ -6191,7 +4757,7 @@ onclick("top_10", {
             # - does the call take too long
             charities_found <- withTimeout({
               findcharities(bounding_wanted, input$search_term)
-            }, timeout = 2)
+            }, timeout = 0.5)
           },
           error = function(e) {
             charities_found <- NULL
@@ -6270,7 +4836,7 @@ onclick("top_10", {
           # - does the call take too long
           charities_found <- withTimeout({
             findcharities(bounding_wanted, input$search_term)
-          }, timeout = 2)
+          }, timeout = 0.5)
         },
         error = function(e) {
           charities_found <- NULL
@@ -6293,7 +4859,7 @@ onclick("top_10", {
             # - does the call take too long
             charities_found <- withTimeout({
               findcharities(bounding_wanted, input$search_term)
-            }, timeout = 2)
+            }, timeout = 0.5)
           },
           error = function(e) {
             charities_found <- NULL
@@ -6406,7 +4972,7 @@ onclick("top_10", {
         # - does the call take too long
         charities_found <- withTimeout({
           findcharities(bounding_wanted, input$search_term)
-        }, timeout = 2)
+        }, timeout = 0.5)
       },
       error = function(e) {
         charities_found <- NULL
@@ -6447,7 +5013,7 @@ onclick("top_10", {
           # - does the call take too long
           charities_found <- withTimeout({
             findcharities(bounding_wanted, input$search_term)
-          }, timeout = 2)
+          }, timeout = 1)
         },
         error = function(e) {
           charities_found <- NULL
@@ -6469,8 +5035,6 @@ onclick("top_10", {
               tags$br(),
               'Pleas try again by searching for a cause in the search box'))
       })
-      
-     
       
     }
     
@@ -6514,405 +5078,21 @@ onclick("top_10", {
   
   
   
-  
-  
-  # 
-  # # local organisations 
-  # observe({
-  #   req(input$sidebar_id)
-  #   if(input$sidebar_id == 'unmetneed') {
-  #     #if (input$tactical_cell == '-- England --') {
-  #     #  output$region_needed <-  renderUI({
-  #     #    div(p(tags$strong("Please select a region or local authority"), tags$br(),
-  #     #         tags$strong("to view the navca members in the area")))
-  #     #    })
-  #     #}
-  #     #else {
-  #   
-  #       
-  # # all lads in tcs wanted
-  # output$local_orgs <- DT::renderDataTable({
-  #   #Sys.sleep(1.5)
-  #   DT::datatable(filtered_local_organisations(), filter=list(position='top'), escape=F,
-  #                 selection =c('single'),
-  #                 options = list(dom='tp', #should remove top search box the p includes paging
-  #                                paging = T,
-  #                                pageLength=5,
-  #                                lengthMenu = c(5, 10, 15, 20),
-  #                                scrollX=T,
-  #                                scrollY='250px',
-  #                                autoWidth = T,
-  #                                columnDefs = list(list(width = '150px', targets = c(1,2))),
-  #                                initComplete = htmlwidgets::JS(
-  #                                  "function(settings, json) {",
-  #                                  paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
-  #                                  "}")
-  #                 )) }, escape=F)
-  #     #}
-  # 
-  #   }
-  # 
-  # })
-  
-  # # ---- volunteer capacity areas to focus ----
-  #
-  # observe({
-  #   volunteers_available <- filtered_volunteers()
-  #   vulnerability <- filteredVI()
-  #   vulnerability <- vulnerability %>% select('LAD19CD', 'Name',`Vulnerability quintile`)
-  #
-  #
-  #   # - join to vulnerability
-  #   volunteers2vulnerability <- left_join(vulnerability, volunteers_available, by='LAD19CD', keep=F) %>%
-  #     st_drop_geometry() %>%
-  #     rename('Overall Vulnerability' = `Vulnerability quintile`) %>%
-  #     mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-  #               mean_score >= 2.5 ~ 'Low',
-  #               (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-  #               is.na(mean_score) ~ 'Data unavailable')) %>%
-  #     select('Name', 'Overall Vulnerability', 'Volunteer capacity', 'Score'=mean_score)
-  #
-  #   # - order
-  #   volunteers2vulnerability <- volunteers2vulnerability %>% arrange(-`Overall Vulnerability`, -Score)
-  #
-  #   output$volunteers <- DT::renderDataTable({
-  #     DT::datatable(volunteers2vulnerability,
-  #                   options = list(
-  #                  paging =FALSE
-  #                 ))
-  # })
-  #
-  # })
 
 
-
-  # ---- VCS INDICATORS -----
-
-  # --- observe requests ---
-  observe({
-
-    # --- which tab is selected ---
-    req(input$sidebar_id)
-    if (input$sidebar_id == 'unmetneed') {
-
-      requests_status <- filtered_requests()
-
-      if(is.null(input$lad_selected)) {
-        output$requests <- renderInfoBox({
-          infoBox(
-            "Requests",
-              color = "navy", fill = F, icon=icon("glyphicon-th-list", lib='glyphicon')
-             )
-            })
-          }
-
-      else {
-
-         if (input$tactical_cell == '-- England --') {
-
-            # tactical cell total
-            total_requests_this_week <- requests %>%
-            mutate('last_week_requests_no_na' = replace_na(total_requests_last_week, 0)) %>%
-            mutate(total_this_week = sum(last_week_requests_no_na)) %>%
-            select('TacticalCell','total_this_week') %>%
-            unique()
-
-            total_requests_week_previous <- requests %>%
-            mutate('previous_week_requests_no_na' = replace_na(total_requests_previous_week, 0)) %>%
-            mutate(total_previous_week = sum(previous_week_requests_no_na, na.rm=T)) %>%
-            select('TacticalCell','total_previous_week') %>%
-            unique()
-
-
-            difference <- as.numeric(total_requests_this_week$total_this_week) - as.numeric(total_requests_week_previous$total_previous_week)
-            difference <- sprintf("%+3d", difference)
-
-            to_print <- paste("Previous 7 days:", total_requests_this_week$total_this_week, "Difference to last week:",difference, sep="\n")
-
-            # because it sums for each tactical cell need to do unique
-            #print(to_print)
-
-            output$requests <- renderInfoBox({
-            infoBox(
-              "Requests for support", 
-              #HTML("<b>Requests for support</b> <button id=\"button\" type=\"button\" class=\"btn btn-primary btn-circle btn-circle-sm m-1 action-button\"><i class=\"fa fa-bar-chart\"></i></button>"),
-              #HTML("<b>Requests for support</b> <button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-circle btn-xs action-button\"><i class=\"fa fa-bar-chart\"></i></button>"),
-              #subtitle = 
-              div(p(tags$strong(unique(total_requests_this_week$total_this_week), style="font-size:24pt"), 
-                             "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
-                  p(unique(difference), "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;",
-                  HTML("<button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-xs action-button\">dashboard</button>"))),
-            
-              #"Requests", unique(to_print),
-                color = "purple", fill = F, icon=icon("fas fa-list")
-                
-              )
-              
-            })
-           }
-
-        else {
-
-          if (input$lad_selected == 'All local authorities in region') {
-
-          # tactical cell total
-          total_requests_this_week <- requests_status %>%
-            mutate('last_week_requests_no_na' = replace_na(total_requests_last_week, 0)) %>%
-            mutate(total_this_week = sum(last_week_requests_no_na)) %>%
-            select('TacticalCell','total_this_week') %>%
-            unique()
-
-          total_requests_week_previous <- requests_status %>%
-            mutate('previous_week_requests_no_na' = replace_na(total_requests_previous_week, 0)) %>%
-            mutate(total_previous_week = sum(previous_week_requests_no_na, na.rm=T)) %>%
-            select('TacticalCell','total_previous_week') %>%
-            unique()
-
-
-          difference <- as.numeric(total_requests_this_week$total_this_week) - as.numeric(total_requests_week_previous$total_previous_week)
-          difference <- sprintf("%+3d", difference)
-
-          to_print <- paste("Previous 7 days:", total_requests_this_week$total_this_week, "Difference to last week:",difference, sep="\n")
-
-          output$requests <- renderInfoBox({
-          infoBox(
-            "Requests for support", 
-            div(p(tags$strong(total_requests_this_week$total_this_week, style="font-size:24pt"), 
-                  "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
-                p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;",
-                  HTML("<button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-xs action-button\">dashboard</button>"))),
-            #div(p("Previous 7 days:", total_requests_this_week$total_this_week, style = "font-size:12pt;margin-top:5px;"),
-            #    p("Difference to last week:", difference, style = "font-size:10pt;color:#808080;margin-top:-10px;")),
-            color = "purple", fill = F, icon=icon("fas fa-list")
-                )
-          })
-
-          }
-
-        else {
-          # look up lad name
-          lad_name <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% unique()
-
-          # plot lad level
-          lad_requests <- requests_status %>% filter(LAD19CD==lad_name$LAD19CD)
-
-          # tactical cell total
-          total_requests_this_week <- lad_requests %>%
-           mutate('last_week_requests_no_na' = replace_na(total_requests_last_week, 0)) %>%
-            mutate(total_this_week = sum(last_week_requests_no_na)) %>%
-            select('TacticalCell','total_this_week') %>%
-            unique()
-
-          total_requests_week_previous <- lad_requests %>%
-            mutate('previous_week_requests_no_na' = replace_na(total_requests_previous_week, 0)) %>%
-            mutate(total_previous_week = sum(previous_week_requests_no_na, na.rm=T)) %>%
-            select('TacticalCell','total_previous_week') %>%
-            unique()
-
-          difference <- as.numeric(total_requests_this_week$total_this_week) - as.numeric(total_requests_week_previous$total_previous_week)
-          difference <- sprintf("%+3d", difference)
-
-          to_print <- paste("Previous 7 days:", total_requests_this_week$total_this_week, "Difference to last week:",difference, sep="\n")
-
-          output$requests <- renderInfoBox({
-            infoBox(
-              #"Requests", to_print,
-              "Requests for support",
-              div(p(tags$strong(total_requests_this_week$total_this_week, style="font-size:24pt"), 
-                    "requests in previous 7 days", style = "font-size:10pt;margin-top:0px;"),
-                  p(difference, "vs last week", style = "font-size:10pt;color:#808080;margin-top:-15px;margin-bottom:0px;",
-                    HTML("<button id=\"rfs_button\" type=\"button\" class=\"btn btn-primary btn-xs action-button\">dashboard</button>"))),
-              #div(p("Previous 7 days:", total_requests_this_week$total_this_week, style = "font-size:12pt;margin-top:5px;"),
-              #    p("Difference to last week:", difference, style = "font-size:10pt;color:#808080;margin-top:-10px;")),
-              color = "purple", fill = F, icon=icon("fas fa-list")
-                )
-            })
-          }
-       }
-    }
-  }
-
+observeEvent(input$internal_reports, {
+  internal_report_link()
 })
-  
-  
-#
-observeEvent(input$rfs_button, {
-    #formattedBody = paste("Hi,", "please can I have access to the VCSEP requests for support dashboard.", "Thanks'", sep='\n')
-    #mailToLink = paste0("window.location.href='mailto:izzy.everal@gmail.com?subject=Request access to VCSEP RFS dashboard&body=", formattedBody)
-    #print(mailToLink)
-    showModal(modalDialog(
-      title = "You are about to leave this page to access an internal dashboard",
-      div(
-          p("If you are a", tags$strong("member of the VCS Emergencies Partnership then please continue"), 
-          "to view the internal dashboard."),
-          tags$br(),
-          p("If you are a", tags$strong("member of the public,"), "visit our
-            website to request support or to learn more about our work.")),
-      
-      
-      footer = tagList(
-        actionButton('rfs_continue',label='Continue', onclick ="window.open('https://dashboards.vcsep.org.uk/', '_blank')"),
-        #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
-        #actionButton('rfs_access',label='Request access', onclick=mailToLink),
-        actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
-        modalButton('Close')
-      )
-        
-        #div(HTML("<button id=\"continue_button\" type=\"button\" class=\"btn btn-primary btn-sm action-button\">Continue</button>"))
-      
-      
-    ))
-  })
 
+observeEvent(input$internal_reports_from_box, {
+  internal_report_link()
+})
 
-  
+observeEvent(req(input$sidebar_id == 'internal_reports_from_sidebar'), {
+  internal_report_link()
+})
     
 
-# --- Volunteer capacity ---
-  observe({
-
-    req(input$sidebar_id)
-    if (input$sidebar_id == 'unmetneed') {
-      
-      # -- coming soon -- 
-      output$vols <- renderInfoBox({
-        infoBox(
-          "Volunteer Presence",
-          div(p('Coming Soon', style = "font-size:12pt;margin-top:5px;")),
-          color = "purple", fill = F, icon=icon('fas fa-hands-helping')
-        )
-      })
-    }
-    
-  })
-
-# 
-#       volunteer_capacity <- filtered_volunteers()
-# 
-#       if(is.null(input$lad_selected)) {
-#         output$vols <- renderInfoBox({
-#          infoBox(
-#             "Volunteer Presence",
-#             color = "navy", fill = F,
-#             )
-#           })
-#         }
-# 
-#       else {
-# 
-#         if (input$tactical_cell == '-- England --') {
-# 
-#           avg_score <- volunteers %>%
-#             mutate(avg_over_area = round(mean(mean_score, na.rm=TRUE),1)) %>% select('avg_over_area') %>%
-#             unique() %>% mutate(colour = case_when(avg_over_area <= 1.5 ~ 'green',
-#                                                  avg_over_area >= 2.5 ~ 'red',
-#                                                  (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'orange',
-#                                                  is.na(avg_over_area) ~ 'navy')) %>%
-#             mutate(to_print = case_when(is.na(avg_over_area) ~ 'No data available',
-#                                       TRUE ~ as.character(.$avg_over_area))) %>%
-#             mutate('Volunteer capacity' = case_when(avg_over_area <= 1.5 ~ 'High',
-#                                                   avg_over_area >= 2.5 ~ 'Low',
-#                                                   (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'Medium',
-#                                                   is.na(avg_over_area) ~ 'Data unavailable'))
-# 
-# 
-# 
-#           output$vols <- renderInfoBox({
-#             infoBox(
-#               "Volunteer presence", 
-#               div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
-#               color = avg_score$colour, fill = F, icon=icon('hands-helping')
-#                 )
-#               })
-#             }
-# 
-#         else {
-# 
-#         # -- Tactical cell level --
-#           if (input$lad_selected == 'All local authorities in region') {
-# 
-#             #print(volunteer_capacity)
-# 
-#             # -- calculate average of others
-#             avg_score <- volunteer_capacity %>%
-#             mutate(avg_over_area = round(mean(mean_score, na.rm=TRUE),1)) %>% select('avg_over_area') %>%
-#             unique() %>% mutate(colour = case_when(avg_over_area <= 1.5 ~ 'green',
-#                                                  avg_over_area >= 2.5 ~ 'red',
-#                                                  (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'orange',
-#                                                  is.na(avg_over_area) ~ 'navy')) %>%
-#             mutate(to_print = case_when(is.na(avg_over_area) ~ 'No data available',
-#                                       TRUE ~ as.character(.$avg_over_area))) %>%
-#             mutate('Volunteer capacity' = case_when(avg_over_area <= 1.5 ~ 'High',
-#                                                   avg_over_area >= 2.5 ~ 'Low',
-#                                                   (avg_over_area >1.5 & avg_over_area < 2.5) ~ 'Medium',
-#                                                   is.na(avg_over_area) ~ 'Data unavailable'))
-# 
-# 
-# 
-#             output$vols <- renderInfoBox({
-#             infoBox(
-#             "Volunteer presence", 
-#             div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
-#               color = avg_score$colour, fill = F, icon=icon('hands-helping')
-#                 )
-#               })
-#              }
-# 
-#           else {
-#           # --- lad level ---
-# 
-#             # look up lad name
-#             lad_name <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% unique()
-# 
-#             # plot lad level
-#             lad_volunteers <- volunteer_capacity %>% filter(LAD19CD==lad_name$LAD19CD)
-# 
-#             #print(lad_volunteers)
-# 
-#             # -- calculate average of others
-#             avg_score <- lad_volunteers %>%
-#              mutate(colour = case_when(mean_score <= 1.5 ~ 'green',
-#                                                  mean_score >= 2.5 ~ 'red',
-#                                                  (mean_score >1.5 & mean_score < 2.5) ~ 'orange',
-#                                     is.na(mean_score) ~ 'navy')) %>%
-#               mutate(to_print = case_when(is.na(mean_score) ~ 'No data available',
-#                                       TRUE ~ as.character(.$mean_score))) %>%
-#               mutate('Volunteer capacity' = case_when(mean_score <= 1.5 ~ 'High',
-#                                                   mean_score >= 2.5 ~ 'Low',
-#                                                   (mean_score >1.5 & mean_score < 2.5) ~ 'Medium',
-#                                                   is.na(mean_score) ~ 'Data unavailable'))
-# 
-# 
-#             #print(avg_score)
-# 
-#               output$vols <- renderInfoBox({
-#                 infoBox(
-#                   "Volunteer presence", 
-#                   div(p(avg_score$`Volunteer capacity`, style = "font-size:12pt;margin-top:5px;")),
-#                     color = avg_score$colour, fill = F, icon=icon('hands-helping')
-#                   )
-#                 })
-#               }
-#             }
-#         }
-#     }
-#   })
-
-
-  # --- pulse survey ---
-  observe({
-    req(input$sidebar_id)
-    if (input$sidebar_id == 'unmetneed') {
-
-      output$pulse <- renderInfoBox({
-      infoBox(
-        "Pulse", 
-        div(p('Coming Soon', style = "font-size:12pt;margin-top:5px;")),
-        color = "purple", fill = F, icon = icon("fas fa-bullseye")
-        )
-      })
-    }
-  })
 }
 
 
