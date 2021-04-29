@@ -1670,4 +1670,42 @@ internal_report_link <- function() {
 }
 
 
+rfs_highlights <- function(dataset, which_highlight) {
+  if(which_highlight == 1) {
+    no_requests <- nrow(dataset)
+    currently_active <- dataset %>% filter(request_status == 'Active') %>%
+      nrow()
 
+    return(div(p("We have responded to", tags$strong(no_requests, 
+                                          "requests for support"),
+              'during our response to the COVID-19 pandemic.',
+              tags$em("(source: requests for support data)"))))
+  }
+  else {
+    if(which_highlight == 2) {
+      # select 
+      requests_for <- dataset %>% select(starts_with("cat_")) 
+      rm_last <- requests_for %>% select(-'cat_other')
+      convert_tf <- rm_last * 1
+      total_requests_for <- convert_tf %>%
+        summarise(across(1:7, sum, na.rm=T))
+      
+      total_requests_for <- pivot_longer(total_requests_for, cols=1:7, names_to='requests_for', values_to='total',
+                                         names_prefix="cat_")
+      
+      total_requests_for <- total_requests_for %>% 
+        mutate('prop_requests'=round((total/nrow(dataset))*100,1))
+      
+      most_common_request <- total_requests_for %>% filter(prop_requests == max(prop_requests))
+      
+      return(div(
+        p("The highest proportion of requests,",
+        tags$strong(paste0(most_common_request$prop_requests, "%")),
+        paste0("(",most_common_request$total,")"),
+        "have been for", tags$strong(paste0(most_common_request$requests_for, "."))
+      )))
+        
+    }
+  }
+}
+  
