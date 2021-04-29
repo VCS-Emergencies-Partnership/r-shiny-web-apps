@@ -105,7 +105,6 @@ findcharities <- function(curr_bbox, search_term) {
 }
 
 
-
 # --- function to write html ---
 lots_of_text <- function(file_name) {
   return(includeHTML(file_name))

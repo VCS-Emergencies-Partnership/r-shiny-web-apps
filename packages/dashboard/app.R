@@ -753,7 +753,6 @@ server = function(input, output, session) {
   observeEvent(input$references, {
     newtab <- switch(input$sidebar_id, "references")
     updateTabItems(session, "sidebar_id", newtab)
-    
   })
   
   observeEvent(input$RI_tool, {
@@ -791,6 +790,11 @@ server = function(input, output, session) {
       output$refs <- renderUI({
         create_data_license_help()
       })
+      
+      output$refs <- renderUI({
+        create_data_license_help()
+      })
+    }
 
   })
   
@@ -830,7 +834,7 @@ server = function(input, output, session) {
       
       output$emergency_flooding <- renderUI({
         create_flooding_help()
-      })
+        })
       
     }
     
