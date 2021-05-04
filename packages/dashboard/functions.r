@@ -2121,4 +2121,9 @@ search_resources <- function(table, search_this) {
   })
 }
 
+
+# function for table sorting 
+clearSorting <- function(proxy) {
+  runjs(paste0("$('#' + document.getElementById('", proxy$id,"').getElementsByTagName('table')[0].id).dataTable().fnSort([]);"))
+}
   
