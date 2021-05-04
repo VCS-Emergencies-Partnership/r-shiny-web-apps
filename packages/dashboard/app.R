@@ -712,7 +712,7 @@ body <- dashboardBody(
           ),
 
   tabItem(tabName='Help',
-          column(width = 12,
+          column(width = 12, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
                    tabBox(id='information about dashboards', width=NULL,
                           tabPanel("About us",
                                    uiOutput('about_us'),
@@ -737,7 +737,7 @@ body <- dashboardBody(
                                            style = "height:600px; overflow-y: scroll;overflow-x: scroll;")
                                   ))))),
   tabItem(tabName = 'references',
-          fluidRow(#style="padding-right:100px;padding-left:100px;padding-top:20px;padding-bottom:20px",
+          fluidRow(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
                    # column 1
                    column(width = 12,
                           box(width=NULL, headerBorder=F,
