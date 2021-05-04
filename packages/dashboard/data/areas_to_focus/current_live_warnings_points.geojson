@@ -3,14 +3,6 @@
 "name": "current_live_warnings_points",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-{ "type": "Feature", "properties": { "floodAreaID": "063WAT23West" }, "geometry": { "type": "Point", "coordinates": [ -0.28954309794029, 51.475776597168448 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "062FAGKimptonGW" }, "geometry": { "type": "Point", "coordinates": [ -0.311013397480704, 51.862736172825514 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "112WATSOM1" }, "geometry": { "type": "Point", "coordinates": [ -3.59987488061468, 51.219299760874179 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "122WAC956" }, "geometry": { "type": "Point", "coordinates": [ 0.080122118964316, 53.675996811692592 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "113WACT2A" }, "geometry": { "type": "Point", "coordinates": [ -4.154659355631669, 51.077319727045314 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "122FWC003" }, "geometry": { "type": "Point", "coordinates": [ -0.164242027434467, 53.908440039545653 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "122WAC955" }, "geometry": { "type": "Point", "coordinates": [ -0.155219201961422, 53.905344089016481 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "112WATAVN1" }, "geometry": { "type": "Point", "coordinates": [ -2.656895424406651, 51.475024491217724 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "031WAT122" }, "geometry": { "type": "Point", "coordinates": [ -2.670861294367759, 51.667447648073939 ] } }
+{ "type": "Feature", "properties": { "floodAreaID": "062FAGKimptonGW" }, "geometry": { "type": "Point", "coordinates": [ -0.311013397480704, 51.862736172825514 ] } }
 ]
 }
