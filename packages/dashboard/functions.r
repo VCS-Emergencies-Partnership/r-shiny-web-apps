@@ -2042,4 +2042,83 @@ rfs_highlights <- function(dataset, which_highlight) {
     }
   }
 }
+
+
+
+plot_resource_cat <- function(table) {
+# how many resources - 
+resources_info <- table[order(table$Title),]
+
+  lapply(1:nrow(resources_info), function(a) {
+    
+    # do something with resource info
+    resource_wanted <- resources_info[a,]
+    return(
+    box(title = paste0(resource_wanted$Title), height='100px',
+        p(tags$strong("Organisation:"), resource_wanted$Organisation,
+          tags$br(),
+          tags$strong("Resource Type:"), resource_wanted$`Resource Type`,
+          tags$br(),
+          tags$strong('Description:'), resource_wanted$`Description / Usage`,
+          tags$br(),
+          tags$strong('Link:'), tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$`Link`)))
+    )
+  })
+  
+
+}
+
+
+
+search_resources <- function(table, search_this) {
+  # filter df if 
+  search_results <- table %>% 
+    filter_all(any_vars(str_detect(., pattern = search_this))) %>%
+    select('Title')
+  
+  search_results <- c(search_results$Title)
+  
+  resources_info <- table %>% 
+    mutate('highlight'=case_when(Title %in% search_results ~ 'highlight',
+                                 TRUE ~ 'no'))
+  
+  resources_info <- resources_info[order(resources_info$Title),]
+  resources_info <- resources_info[order(resources_info$highlight),]
+  
+
+  lapply(1:nrow(resources_info), function(a) {
+      
+      # do something with resource info
+      resource_wanted <- resources_info[a,]
+      if(resource_wanted$highlight == 'highlight') {
+        
+        return(box(title = paste0(resource_wanted$Title), height='100px', background = 'light-blue',
+            p(tags$strong("Organisation:"), resource_wanted$Organisation, 
+              tags$br(),
+              tags$strong("Resource Type:"), resource_wanted$`Resource Type`,
+              tags$br(),
+              tags$strong('Description:'), resource_wanted$`Description / Usage`,
+              tags$br(),
+              tags$strong('Link:'), tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$`Link`)))
+        )
+        
+      }
+      
+      else {
+        
+        return( box(title = paste0(resource_wanted$Title), height='100px', 
+            p(tags$strong("Organisation:"), resource_wanted$Organisation,
+              tags$br(),
+              tags$strong("Resource Type:"), resource_wanted$`Resource Type`,
+              tags$br(),
+              tags$strong('Description:'), resource_wanted$`Description / Usage`,
+              tags$br(),
+              tags$strong('Link:'), tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$`Link`)))
+       
+        ) 
+      }
+    
+  })
+}
+
   

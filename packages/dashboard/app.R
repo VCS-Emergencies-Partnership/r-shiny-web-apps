@@ -317,6 +317,8 @@ requests <- requests %>%
 requests_home <- read_feather("data/vcs_indicators/all_requests.feather")
 pulse <- read_feather("data/vcs_indicators/pulse_check_summary.feather")
 
+# --- resource bank ---
+resources_info <- read_csv("./data/resource_bank/resource_bank.csv")
 
 # latest insight
 vac_data <- read_feather("data/areas_to_focus/vaccination_rate.feather")
@@ -425,7 +427,7 @@ body <- dashboardBody(
                                 tags$em(tags$strong("click on the title to go to the tool"))))),
                      
                      column(width=3,
-                            box(title="Insight catalogue",width=NULL, 
+                            box(title=actionLink("e_catalogue_box","Insight catalogue"),width=NULL, 
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-book-open"),
                                 p("The Insight catalogue is a collection of useful
@@ -687,6 +689,27 @@ body <- dashboardBody(
               )
         )
     ),
+  
+  tabItem(tabName='resource_catalogue',
+          fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
+                   column(width=12,
+            panel(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
+            column(width=6, p(h2("Resource/Insight Bank"), "Useful publicly available resources")),
+            column(width=6, style='padding-top:20px', searchInput(
+              inputId = "resource_search",
+              label = "Search for resources", 
+              placeholder = "i.e covid",
+              btnSearch = icon("search"), 
+              btnReset = icon("remove"),
+              width = "100%"
+            ))))),
+            fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;",
+                     column(width=12,
+              uiOutput("dynamic_boxes")
+                     )
+            )
+            
+          ),
 
   tabItem(tabName='Help',
           column(width = 12,
@@ -748,6 +771,16 @@ server = function(input, output, session) {
     newtab <- switch(input$sidebar_id, "home")
     updateTabItems(session, "sidebar_id", newtab)
     
+  })
+  
+  observeEvent(input$e_catalogue, {
+    newtab <- switch(input$sidebar_id, "resource_catalogue")
+    updateTabItems(session, "sidebar_id", newtab)
+  })
+  
+  observeEvent(input$e_catalogue_box, {
+    newtab <- switch(input$sidebar_id, "resource_catalogue")
+    updateTabItems(session, "sidebar_id", newtab)
   })
   
   
@@ -5093,7 +5126,42 @@ observeEvent(req(input$sidebar_id == 'internal_reports_from_sidebar'), {
 })
     
 
-}
 
+# --- resource bank ---
+
+
+# plot original 
+observeEvent(req(input$sidebar_id == 'resource_catalogue') ,{
+  output$dynamic_boxes <- renderUI({
+    plot_resource_cat(resources_info)
+  })
+  
+})
+
+
+observeEvent(input$resource_search, {
+  
+  # to stop it being called in other windows - it shouldn't be but is
+  if(req(input$sidebar_id == 'resource_catalogue')) {
+    print(input$resource_search)
+    if(input$resource_search == '') {
+      
+      output$dynamic_boxes <- renderUI({
+            plot_resource_cat(resources_info)
+      })
+    }
+    
+    else {
+      output$dynamic_boxes <- renderUI({
+        search_resources(resources_info, input$resource_search)
+      })
+  
+    }
+  }
+  
+  })
+
+
+}
 
 shinyApp(ui, server)
