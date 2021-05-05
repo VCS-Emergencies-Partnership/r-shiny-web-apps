@@ -2127,3 +2127,239 @@ clearSorting <- function(proxy) {
   runjs(paste0("$('#' + document.getElementById('", proxy$id,"').getElementsByTagName('table')[0].id).dataTable().fnSort([]);"))
 }
   
+
+
+# top 10 options:
+top10_options <- function(theme) {
+  
+  if (theme == 'Covid-19') {
+    return(div(
+      selectInput(
+        inputId = "top_cases_top_change",
+        label = "", 
+        choices = c("cases per 100,000  ", "% change in cases"),
+        selected = "cases per 100,000  ",
+        #inline = TRUE, 
+        #checkbox = TRUE,
+        width="100%"
+      ),
+      hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-4px"),
+      tags$br())
+    )
+  }
+  
+  else {
+    if (theme == 'Flooding') {
+      return(
+        div(
+        selectInput(
+          inputId = "top_cases_top_change",
+          label = "", 
+          choices = c("Flood warnings/alerts","Historical flood incidents per 10,000", "% of population living in flood risk areas"),
+          selected = "Flood warnings/alerts",
+          width="100%"
+        ),
+        hr(style = "border-top: 1px solid #000000;margin-top:-15px; margin-bottom:10px;padding-bottom:10px;padding-top=-10px;margin-left:-4px"),
+        tags$br())
+      )
+      
+    }
+  }
+}
+
+
+top_10_list_title <- function(theme, rank, tc, lad) {
+  if(theme == 'Covid-19') {
+    
+    # -- change title based on what's selected --- 
+    if (rank$rank_wanted_covid == 'cases per 100,000  ') {
+      title_wanted <- "- Top 10 areas with highest number of covid cases per 100,000"
+    }
+    
+    else {
+      title_wanted <- "- Top 10 areas with highest % change in covid cases"
+    }
+    
+    # what area's been chosen
+    # whole tactical cell or england
+    if (lad == 'All local authorities in region' || is.null(lad)) {
+    
+    return(div(
+      p(tags$strong(tc), title_wanted),
+      hr(style = "border-top: 1px solid #000000;"))
+    )
+    }
+    
+    # just lad
+    else {
+      return( div(
+        p(tags$strong(lad), '- number of covid cases per 100,000, Total cases and % change in covid cases,'),
+        hr(style = "border-top: 1px solid #000000;")
+        )
+      )
+    }
+  }
+  
+  else {
+    if(theme == 'Flooding') {
+      # -- which list was wanted -- 
+      if(rank$rank_wanted_flooding == 'Historical flood incidents per 10,000') {
+        title_wanted <- "number of historical flood incidents per 10,000 people"
+      }
+      else{
+        if(rank$rank_wanted_flooding == 'Flood warnings/alerts') {
+          title_wanted <- paste("number of flood warnings and alerts as of", last_updated_time, last_updated_date)
+          
+        }
+        else {
+          if(rank$rank_wanted_flooding == '% of population living in flood risk areas') {
+            title_wanted <- paste("proportion of population living in flood risk areas")
+            
+          }
+        }
+      }
+      
+      # return title based on area
+      if (lad == 'All local authorities in region' || is.null(lad)) {
+        return(div(
+          p(tags$strong(tc), paste('Top 10 areas with highest', title_wanted)),
+          hr(style = "border-top: 1px solid #000000;"))
+        )
+      }
+      
+      else {
+        return(div(
+          p(tags$strong(lad), paste('-', title_wanted)),
+          hr(style = "border-top: 1px solid #000000;"))
+        )
+    
+      }
+      
+    }
+    
+  }
+  
+}
+
+top_10_list <- function(top10list, theme, rank, tc, lad) {
+  
+  # how many to show - just lad selected or all of area 
+  if(lad == 'All local authorities in region' || is.null(lad)) {
+    top102show <- head(top10list , 10)
+  }
+  
+  else {
+    top102show <- top10list %>% filter(`Local Authority` == lad)
+    
+  }
+
+  if(theme == 'Covid-19') {
+    
+    # to colour number red or green 
+    top102show <- top102show %>% mutate(colour = case_when(`% change in covid cases` >0 ~ 'red',
+                                                           `% change in covid cases` == 0 ~ 'orange',
+                                                           `% change in covid cases` < 0 ~ 'green')) %>%
+      mutate(format_number = case_when(`% change in covid cases` > 0 ~ paste0('+',.$`% change in covid cases`,'%'),
+                                       `% change in covid cases` == 0 ~ paste0(.$`% change in covid cases`,'%'),
+                                       `% change in covid cases` < 0 ~ paste0(.$`% change in covid cases`,'%')))
+    
+    
+    
+    return(
+      div(purrr::map(1:nrow(top102show), function(x){
+      tagList(hr(),
+              p(style='margin-top:-10px;margin-bottom:-10px', id=paste0("top_", x),
+                tags$strong(paste0(x, '.')),
+                paste0(top102show[x, 1],":"),
+                top102show[x,3],
+                "per 100k,",
+                top102show[x, 4],
+                "cases,",
+                tags$strong(top102show[x, 7],
+                            style = paste("color:", top102show[x, 6]))))
+    })
+    )
+    )
+  
+    
+  }
+  
+  else {
+    if(theme == 'Flooding') {
+     
+      
+      # what ranking was requested 
+      print(rank$rank_wanted_flooding)
+      
+      # -- which list was wanted -- 
+      if(rank$rank_wanted_flooding == 'Historical flood incidents per 10,000') {
+        #
+        #p(style='margin-top:10px;margin-bottom:10px',id='top_1',tags$strong('1.'), paste0(top102show[1,1],":"), paste0(top102show[1,6], " incidents per 10K, ", top102show[1,5], " historical floods"))
+       return(
+         div(purrr::map(1:nrow(top102show), function(x){
+          tagList(hr(),
+                  p(style='margin-top:-10px;margin-bottom:-10px', id=paste0("top_", x),
+                    tags$strong(paste0(x, '.')),
+                    paste0(top102show[x, 1],":"),
+                    top102show[x,6],
+                    "incidents per 10k,",
+                    top102show[x, 5],
+                    "historical floods"))
+        }
+        )
+        )
+       )
+        
+      }
+      else{
+        if(rank$rank_wanted_flooding == 'Flood warnings/alerts') {
+          # p(style='margin-top:10px;margin-bottom:10px',id='top_1', tags$strong('1.'), paste0(top102show[1,1], ":"), tags$strong(top102show[1,7], "severe warnings,", top102show[1,8], "warnings,", style="color:red"), tags$strong(top102show[1,9],"alerts", style='color:orange'))
+          return(
+            div(purrr::map(1:nrow(top102show), function(x){
+              tagList(hr(),
+                      p(style='margin-top:-10px;margin-bottom:-10px', id=paste0("top_", x),
+                        tags$strong(paste0(x, '.')),
+                        paste0(top102show[x, 1], ":"),
+                        tags$strong(top102show[x,7], "severe warnings",
+                                    top102show[x,8], "warnings",
+                                    style="color:red"),
+                        tags$strong(top102show[x,9], "alerts",
+                                    style="color:orange")))
+            }
+            )
+            )
+          )
+          
+        }
+        else {
+          if(rank$rank_wanted_flooding == '% of population living in flood risk areas') {
+            
+            top102show <- top102show %>%
+              mutate(format_number = case_when(`% people in flood risk areas` > 0 ~ paste0(.$`% people in flood risk areas`,'%')))
+            
+            
+            return(
+              div(purrr::map(1:nrow(top102show), function(x){
+                tagList(hr(),
+                        p(style='margin-top:-10px;margin-bottom:-10px', id=paste0("top_", x),
+                          tags$strong(paste0(x, '.')),
+                          paste0(top102show[x, 1],":"),
+                          paste0(top102show[x,10], ", ", 
+                                 format(as.numeric(top102show[x,3]), big.mark=",")," people")
+                        )
+                )
+              }
+              )
+              )
+            )
+            
+          }
+        }
+      }
+      
+    }
+    
+  }
+  
+
+}

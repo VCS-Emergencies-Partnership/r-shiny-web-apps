@@ -20,7 +20,6 @@ library('ghql') # -- ADD TO DOCKER
 
 
 readRenviron(".Renviron")
-
 source("./functions.r")
 source("./global.R")
 
@@ -230,36 +229,7 @@ body <- dashboardBody(
                                                 # top 10 options
                                                 fluidRow(width=NULL,
                                                          column(width=12, style = "height:450px; overflow-y: scroll;overflow-x: scroll;",
-                                                                fluidRow(width=NULL,
-                                                                         column(width=12,
-                                                                                uiOutput('top_10_1'))),
-                                                                fluidRow(width=NULL,
-                                                                         column(width=12,
-                                                                                uiOutput('top_10_2'))),
-                                                                fluidRow(width=NULL,
-                                                                         column(width=12,
-                                                                                uiOutput('top_10_3'))),
-                                                                fluidRow(width=NULL,
-                                                                         column(width=12, 
-                                                                                uiOutput('top_10_4'))),
-                                                                fluidRow(width=NULL,
-                                                                         column(width=12,
-                                                                                uiOutput('top_10_5'))),
-                                                                fluidRow(width=NULL,
-                                                                         column(width=12,
-                                                                                uiOutput('top_10_6'))),
-                                                                fluidRow(width=NULL,
-                                                                         column(width=12,
-                                                                                uiOutput('top_10_7'))),
-                                                                fluidRow(width=NULL,
-                                                                         column(width=12,
-                                                                                uiOutput('top_10_8'))),
-                                                                fluidRow(width=NULL,
-                                                                         column(width=12,
-                                                                                uiOutput('top_10_9'))),
-                                                                fluidRow(width=NULL,
-                                                                         column(width=12,
-                                                                                uiOutput('top_10_10')))
+                                                                uiOutput('top10list')
                                                          ))
                                                 
                                        ),
