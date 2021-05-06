@@ -2054,15 +2054,12 @@ resources_info <- table[order(table$Title),]
     # do something with resource info
     resource_wanted <- resources_info[a,]
     return(
-    box(title = paste0(resource_wanted$Title), height='100px',
-        p(tags$strong("Organisation:"), resource_wanted$Organisation,
-          tags$br(),
-          tags$strong("Resource Type:"), resource_wanted$`Resource Type`,
-          tags$br(),
-          tags$strong('Description:'), resource_wanted$`Description / Usage`,
-          tags$br(),
-          tags$strong('Link:'), tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$`Link`)))
-    )
+    box(title = tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title), height='100px',
+        fluidRow(
+          column(width=2, align="center", img(src=resource_wanted$logo_source, width=100)),
+          column(width=10,
+          p(resource_wanted$`Description / Usage`)
+    ))))
   })
   
 
@@ -2092,28 +2089,25 @@ search_resources <- function(table, search_this) {
       resource_wanted <- resources_info[a,]
       if(resource_wanted$highlight == 'highlight') {
         
-        return(box(title = paste0(resource_wanted$Title), height='100px', background = 'light-blue',
-            p(tags$strong("Organisation:"), resource_wanted$Organisation, 
-              tags$br(),
-              tags$strong("Resource Type:"), resource_wanted$`Resource Type`,
-              tags$br(),
-              tags$strong('Description:'), resource_wanted$`Description / Usage`,
-              tags$br(),
-              tags$strong('Link:'), tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$`Link`)))
-        )
+        return(box(title = tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title), height='100px', background = 'light-blue',
+                   fluidRow(
+                     column(width=2, align="center", img(src=resource_wanted$logo_source, width=100)),
+                     column(width=10,
+                            p(resource_wanted$`Description / Usage`)))
+              
+        ))
         
       }
       
       else {
         
-        return( box(title = paste0(resource_wanted$Title), height='100px', 
-            p(tags$strong("Organisation:"), resource_wanted$Organisation,
-              tags$br(),
-              tags$strong("Resource Type:"), resource_wanted$`Resource Type`,
-              tags$br(),
-              tags$strong('Description:'), resource_wanted$`Description / Usage`,
-              tags$br(),
-              tags$strong('Link:'), tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$`Link`)))
+        return( box(title = tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title), height='100px', 
+                    fluidRow(
+                      column(width=2, align="center", img(src=resource_wanted$logo_source, width=100)),
+                      column(width=10,
+                             p(resource_wanted$`Description / Usage`))))
+              #tags$br(),
+              #tags$strong('Link:'), tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$`Link`)))
        
         ) 
       }

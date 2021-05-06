@@ -276,7 +276,7 @@ requests_home <- read_feather("data/vcs_indicators/all_requests.feather")
 pulse <- read_feather("data/vcs_indicators/pulse_check_summary.feather")
 
 # --- resource bank ---
-resources_info <- read_csv("./data/resource_bank/resource_bank.csv")
+resources_info <- read_feather("./data/resource_bank/resource_bank.feather")
 
 # latest insight
 vac_data <- read_feather("data/areas_to_focus/vaccination_rate.feather")
