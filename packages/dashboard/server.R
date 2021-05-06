@@ -3742,7 +3742,7 @@ server = function(input, output, session) {
     
     # to stop it being called in other windows - it shouldn't be but is
     if(req(input$sidebar_id == 'resource_catalogue')) {
-      print(input$resource_search)
+      #print(input$resource_search)
       if(input$resource_search == '') {
         
         output$dynamic_boxes <- renderUI({
