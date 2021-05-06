@@ -1,8 +1,7 @@
 {
 "type": "FeatureCollection",
 "name": "current_live_metoffice_floodwarnings",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-{ "type": "Feature", "properties": { "TacticalCell": "South East", "LAD19CD": "E07000099", "lad19nm": "North Hertfordshire", "severity": "Flood alert", "severityLevel": 3, "floodAreaID": "062FAGKimptonGW", "description": "Groundwater flooding in Kimpton and Lilley Bottom", "message": "Groundwater levels have responded to autumn and winter rainfall and have risen to high levels at our observation borehole at Lilley Bottom.\n   \nGroundwater levels are unusually high for this time of year and have reached a level where communities in the Kimpton and Lilley Bottom area are at risk of being affected by flooding from groundwater.\n\nAlthough levels have declined during the last few weeks, we expect levels to remain high and low lying land and roads therefore remain at risk of flooding.\n  \nDue to the nature of groundwater behaviour this situation could continue for several weeks or longer. \n \nWe are continuing to monitor groundwater levels and will update this message on 5 May or as the situation changes.", "alertlevelmeaning": "flooding is possible, be prepared", "lastupdateday": "2021-04-28", "lastupdatetime": "11:26:00", "messageurl": "https:\/\/flood-warning-information.service.gov.uk\/target-area\/062FAGKimptonGW" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -0.29752, 51.85172 ], [ -0.2818, 51.8531 ], [ -0.28158, 51.85175 ], [ -0.29842, 51.85045 ], [ -0.30854, 51.85441 ], [ -0.31332, 51.85763 ], [ -0.31273, 51.86288 ], [ -0.31679, 51.86554 ], [ -0.31822, 51.86945 ], [ -0.3259, 51.87512 ], [ -0.33708, 51.87914 ], [ -0.33611, 51.88034 ], [ -0.32442, 51.87611 ], [ -0.3163, 51.87009 ], [ -0.31471, 51.86597 ], [ -0.31047, 51.86305 ], [ -0.3101, 51.85696 ], [ -0.29752, 51.85172 ] ] ] } }
+
 ]
 }

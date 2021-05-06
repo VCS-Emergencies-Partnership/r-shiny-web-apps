@@ -229,7 +229,6 @@ covid_area2focus <- covid_area2focus %>%
   
 
 
-
 # ---- Flooding ---
 # flooding stats within resilience index
 flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
@@ -243,12 +242,35 @@ flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
          `Flood incidents quintile`)
 
 
+#setwd('/home/izzy-everall/r-shiny-web-apps/packages/dashboard')
 # flood outlines metoffice warnings 
 flood_warning_polygons <- read_sf('./data/areas_to_focus/current_live_warnings_polygons.geojson')
 flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_points.geojson')
 flood_warning_meta <- read_feather('./data/areas_to_focus/current_live_warnings_metadata.feather')
 
-
+# are there any warnings 
+if (dim(flood_warning_meta)[1]==0) {
+  # ensure always have columns for all alerts
+  # if column not there
+  if(!"Total live severe Flood warning" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood warning' = 0)
+  }
+  
+  if(!"Total live Flood warning" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood warning' = 0)
+  }
+  
+  if(!"Total live Flood alert" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood alert' = 0)
+  }
+  
+  # ensure order is consistent
+  flooding_area2focus <- flooding_area2focus %>% relocate(`Total live severe Flood warning`, `Total live Flood warning`, -`Total live Flood alert`, .after=`Flood incidents quintile`) %>%
+    mutate(`Total live severe Flood warning`=replace_na(`Total live severe Flood warning`,0)) %>%
+    mutate(`Total live Flood warning`=replace_na(`Total live Flood warning`,0)) %>%
+    mutate(`Total live Flood alert`=replace_na(`Total live Flood alert`,0))
+  
+} else {
 # for areas to focus list 
 total_type_of_warning_per_authority <- flood_warning_meta %>% group_by(lad19nm, severity) %>%
   count() 
@@ -271,15 +293,15 @@ if(!"Total live Flood warning" %in% colnames(flooding_area2focus)) {
 }
 
 if(!"Total live Flood alert" %in% colnames(flooding_area2focus)) {
-  flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood alert' = 0)
+  flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood alert' = 0)
 }
+
 
 # ensure order is consistent
 flooding_area2focus <- flooding_area2focus %>% relocate(`Total live severe Flood warning`, `Total live Flood warning`, -`Total live Flood alert`, .after=`Flood incidents quintile`) %>%
   mutate(`Total live severe Flood warning`=replace_na(`Total live severe Flood warning`,0)) %>%
   mutate(`Total live Flood warning`=replace_na(`Total live Flood warning`,0)) %>%
   mutate(`Total live Flood alert`=replace_na(`Total live Flood alert`,0))
-
 
 
 # join dfs for mapping
@@ -300,6 +322,8 @@ flood_warning_meta <- flood_warning_meta %>%
                                          TacticalCell == 'Central' ~ 'Midlands & East',
                                          TRUE ~ as.character(.$TacticalCell))) %>%
   select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
+
+}
   
 
 # -- vcs indicators
@@ -1928,6 +1952,12 @@ server = function(input, output, session) {
     if (input$sidebar_id == 'unmetneed') {
     
     if (input$theme == 'Flooding') {
+      
+      if (dim(flood_warning_points)[1]==0) {
+        flood_warnings2show <- data.frame()
+      }
+      else {
+      
       if (input$tactical_cell == '-- England --') {
         
         flood_warnigns2show <- flood_warning_points %>% 
@@ -1964,6 +1994,7 @@ server = function(input, output, session) {
         }
       }
     }
+  }
   })
   
   # --- flood warning map polygons --- 
@@ -1973,6 +2004,12 @@ server = function(input, output, session) {
     if (input$sidebar_id == 'unmetneed') {
       
       if (input$theme == 'Flooding') {
+        if (dim(flood_warning_polygons)[1]==0) {
+          flood_warnings2show <- data.frame()
+        }
+        else {
+          
+        
         if (input$tactical_cell == '-- England --') {
           
           flood_warnigns2show <- flood_warning_polygons %>% 
@@ -2005,6 +2042,7 @@ server = function(input, output, session) {
               mutate('warning_col'=case_when(severityLevel==3 ~ 'orange',
                                              severityLevel == 2 ~ 'red',
                                              severityLevel == 1 ~ 'red'))
+            }
           }
         }
       }
@@ -2135,33 +2173,21 @@ server = function(input, output, session) {
   
   filtered_flood_warning_labels <- reactive({
     
+    if (dim(flood_warning_points)[1]==0) {
+      flood_warning_labels <- paste0('no flood warnings')
+    }
+    else {
+    
     flood_warning_labels <- paste0(
                     sprintf("<strong>%s</strong><br/>",  filteredFlood_warnings_points()$description),
                     filteredFlood_warnings_points()$severity, ": ", filteredFlood_warnings_points()$alertlevelmeaning, "<br/>",
                     "last updated (at time dashboard refreshed): ",  filteredFlood_warnings_points()$lastupdateday, " ", filteredFlood_warnings_points()$lastupdatetime) %>%
                    lapply(htmltools::HTML)
     
+    }
   })
   
   
-#   # for second selection
-#   filteredLA <- reactive({
-#     selected <- lad_uk2vuln_resilience %>% filter(TacticalCell == input$tactical_cell)
-#   })
-#   
-#   
-#   # second selection 
-#   observe({
-#   # ---- Adjust LAD options based on tactical cell ---
-#   output$secondSelection <- renderUI({
-#     lads2select <- unique(filteredLA()$Name)
-#     #print(lads2select)
-#     #lads2select <- order(lads2select)
-#     #print(lads2select)
-#     lads2select <- c('All local authorities in region', sort(lads2select))
-#     selectInput("lad_selected", "Local Authority", choices = lads2select, selected='All local authorities in region')
-#   })
-# })
 
 
   filterpar_tab <- reactive({
@@ -3099,10 +3125,17 @@ server = function(input, output, session) {
     else {
       if (input$theme == 'Flooding') {
         
-        #flood_incd <- filtered_areas_at_risk_flooding_incd()
-        #flood_risk <- filtered_areas_at_risk_flooding_risk()
         flood_all <- filtered_areas_at_risk_flooding_resilience()
-        plot_flood_warning_polygon <- st_as_sf(filteredFlood_warnings_polygons())
+        
+        plot_flood_warning_polygon <- tryCatch(
+          {
+           st_as_sf(filteredFlood_warnings_polygons())
+          },
+          error = function(x){
+            data.frame()
+          }
+        )
+      
         plot_flood_warning_points <- filteredFlood_warnings_points()
         
         
@@ -4170,8 +4203,12 @@ observe({
             
             # -- which list was wanted -- 
             if(store_rank_wanted$rank_wanted_flooding == 'Flood warnings/alerts') {
+              if (dim(flood_warning_points)[1] == 0) {
+                title_wanted <- paste("- No active flood warnings and alerts as of", last_updated_time, last_updated_date)
+              }
+              else {
               title_wanted <- paste("- Top 10 areas with highest number of flood warnings and alerts as of", last_updated_time, last_updated_date)
-              
+              }
               
               # the null is required because i think the way i've set up the second selection - it's called after this so when this is first run it's not currently assigned.
               if (input$lad_selected == 'All local authorities in region' || is.null(input$lad_selected)) {
@@ -4273,9 +4310,17 @@ observe({
                 
                 # plot title 
                 output$title_focus_list <- renderUI({
+                  if (dim(flood_warning_points)[1] == 0) {
+                    div(
+                      p(tags$strong(input$lad_selected), '- no active flood warnings or alerts as of', last_updated_time, last_updated_date),
+                      hr(style = "border-top: 1px solid #000000;"))
+                  }
+                  else {
                   div(
                     p(tags$strong(input$lad_selected), '- total flood warnings and alerts as of', last_updated_time, last_updated_date),
                     hr(style = "border-top: 1px solid #000000;"))
+                  
+                  }
                 })
                 
                 output$top_10_1 <- renderUI({
