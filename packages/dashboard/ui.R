@@ -17,7 +17,7 @@ library(shinycssloaders) # docker
 library(shinyWidgets) #-- ADD TO DOCKER
 library(R.utils) # -- ADD TO DOCKER 
 library('ghql') # -- ADD TO DOCKER
-
+library("bubbles")
 
 readRenviron(".Renviron")
 source("./functions.r")
@@ -366,7 +366,9 @@ body <- dashboardBody(
             fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;",
                      column(width=12,
                             uiOutput("dynamic_boxes")
-                     )
+                            #bubblesOutput('dynamic_bubbles')
+                     #)
+                )
             )
             
     ),

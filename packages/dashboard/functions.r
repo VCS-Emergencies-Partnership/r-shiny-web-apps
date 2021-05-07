@@ -2053,17 +2053,44 @@ resources_info <- table[order(table$Title),]
     
     # do something with resource info
     resource_wanted <- resources_info[a,]
+    
+    #fig <- paste0('www/', resource_wanted$logo_file_name)
+    #print(fig)
+    
     return(
     box(title = tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title), height='100px',
-        fluidRow(
-          column(width=2, align="center", img(src=resource_wanted$logo_source, width=100)),
-          column(width=10,
-          p(resource_wanted$`Description / Usage`)
-    ))))
+        
+        fluidRow(width=NULL, 
+            column(width=2, style="background-image:url(https://cdn.ons.gov.uk/assets/images/ons-logo/v2/ons-logo.svg);background-size: cover;"),
+      
+        column(width=10,
+          p(resource_wanted$`Description / Usage`)))
+      )
+    )
   })
   
 
 }
+
+# test_bubble_resource <- function(table) {
+#   resources_info <- table[order(table$Title),]
+#   
+#   lapply(1:nrow(resources_info), function(a) {
+#     
+#   resource_wanted <- resources_info[a,]
+#   
+#   testing <- paste0('bubble_', a)
+#   print(testing)
+# 
+#    return(
+#      bubbles(value=nrow(resource_wanted), 
+#              color='#f0f0f0', key=testing, 
+#              label=resource_wanted$Title)
+#       )
+#   
+#       }
+#   )
+# }
 
 
 
