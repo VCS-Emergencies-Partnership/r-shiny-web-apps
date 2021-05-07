@@ -3731,13 +3731,19 @@ server = function(input, output, session) {
   
   # plot original 
   observeEvent(req(input$sidebar_id == 'resource_catalogue') ,{
+ 
+    #output$dynamic_bubbles <- renderBubbles({
+    #  test_bubble_resource(resources_info)
+      
+    #})
+    
     output$dynamic_boxes <- renderUI({
       plot_resource_cat(resources_info)
     })
     
   })
   
-  
+ 
   observeEvent(input$resource_search, {
     
     # to stop it being called in other windows - it shouldn't be but is
