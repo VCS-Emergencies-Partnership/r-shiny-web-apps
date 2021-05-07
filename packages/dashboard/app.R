@@ -248,6 +248,7 @@ flood_warning_polygons <- read_sf('./data/areas_to_focus/current_live_warnings_p
 flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_points.geojson')
 flood_warning_meta <- read_feather('./data/areas_to_focus/current_live_warnings_metadata.feather')
 
+
 # are there any warnings 
 if (dim(flood_warning_meta)[1]==0) {
   # ensure always have columns for all alerts
@@ -4906,6 +4907,22 @@ onclick("top_10", {
   observe({
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
+      print('here')
+      print(input$tactical_cell)
+      print(input$lad_selected)
+      
+      # if user has tactical cell selected
+      if (input$tactical_cell == '-- England --' & is.null(input$lad_selected)) {
+        print("WHAT THE F IS THE PROBLEM")
+        output$secondSelection <- renderUI({
+          #lads2select <- unique(lad_uk2vuln_resilience$Name)
+          #lads2select <- c('All local authorities in region',sort(lads2select))
+          lads2select <- c('All local authorities in region')
+          selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+        })
+        
+      }
+      else {
  
       # if user has tactical cell selected
       #print(input$lad_selected)
@@ -4957,8 +4974,9 @@ onclick("top_10", {
           DT::replaceData(proxy, filtered_areas2focus())
         }
         
-      }
+       }
       
+      }
     }
     
   })
@@ -5090,6 +5108,13 @@ onclick("top_10", {
       else {
         # sometimes this hasn't been initiated so causes error
         if(is.null(input$lad_selected)) {
+          print("Promblem here")
+          output$secondSelection <- renderUI({
+            #lads2select <- unique(lad_uk2vuln_resilience$Name)
+            #lads2select <- c('All local authorities in region',sort(lads2select))
+            lads2select <- c('All local authorities in region')
+            selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+          })
         # search either whole tactical cell or all of engalnd
         bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
         # create search of charity database 
