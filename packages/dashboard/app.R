@@ -242,7 +242,7 @@ flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
          `Flood incidents quintile`)
 
 
-#setwd('/home/izzy-everall/r-shiny-web-apps/packages/dashboard')
+setwd('/home/izzy-everall/r-shiny-web-apps/packages/dashboard')
 # flood outlines metoffice warnings 
 flood_warning_polygons <- read_sf('./data/areas_to_focus/current_live_warnings_polygons.geojson')
 flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_points.geojson')
@@ -332,6 +332,7 @@ requests <- read_feather('data/vcs_indicators/requests_this_week_and_last.feathe
 requests <- requests %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
                                          TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TacticalCell == 'Midlands and East' ~ 'Midlands & East',
                                          TRUE ~ as.character(.$TacticalCell))) %>%
   select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
 
@@ -2564,6 +2565,7 @@ server = function(input, output, session) {
 
   # --- Requests ----
   filtered_requests <- reactive({
+    
     requests_tc <- requests %>% filter(TacticalCell==input$tactical_cell)
 
   })
@@ -5685,6 +5687,7 @@ onclick("top_10", {
     if (input$sidebar_id == 'unmetneed') {
 
       requests_status <- filtered_requests()
+      
 
       if(is.null(input$lad_selected)) {
         output$requests <- renderInfoBox({
@@ -5779,6 +5782,7 @@ onclick("top_10", {
           }
 
         else {
+          
           # look up lad name
           lad_name <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% unique()
 
@@ -5803,6 +5807,7 @@ onclick("top_10", {
 
           to_print <- paste("Previous 7 days:", total_requests_this_week$total_this_week, "Difference to last week:",difference, sep="\n")
 
+          
           output$requests <- renderInfoBox({
             infoBox(
               #"Requests", to_print,
