@@ -1,7 +1,8 @@
 {
 "type": "FeatureCollection",
 "name": "current_live_warnings_points",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-
+{ "type": "Feature", "properties": { "floodAreaID": "033WAF305" }, "geometry": { "type": "Point", "coordinates": [ -1.845908073298085, 52.644107442196329 ] } }
 ]
 }
