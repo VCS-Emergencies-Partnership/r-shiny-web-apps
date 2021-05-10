@@ -242,7 +242,7 @@ flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
          `Flood incidents quintile`)
 
 
-setwd('/home/izzy-everall/r-shiny-web-apps/packages/dashboard')
+#setwd('/home/izzy-everall/r-shiny-web-apps/packages/dashboard')
 # flood outlines metoffice warnings 
 flood_warning_polygons <- read_sf('./data/areas_to_focus/current_live_warnings_polygons.geojson')
 flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_points.geojson')
