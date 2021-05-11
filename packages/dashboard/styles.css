@@ -106,7 +106,20 @@ h1, h2, h3, h4 { font-weight: 400; }
     }
  
 
+.box-tools.pull-right {
+  position: absolute;
+  right: 5px;
+  top: 8px;
+}
 
+.learner-title {
+  margin-top:5px
+}
 
+.badge.badge-pill.badge-primary {
+  background-color:#3182bd;
+}
 
-
+.badge.badge-pill.badge-secondary {
+   background-color:#f03b20;
+}
