@@ -121,7 +121,8 @@ body <- dashboardBody(
                                 icon = icon("fas fa-book-open"),
                                 p("The Insight catalogue is a collection of useful
                                   publicly available insight resources that could be of use to
-                                  the VCS community.", tags$br(),
+                                  the VCS community. The VCS EP does not take responsiblity for
+                                  the data/insight represented in these resources.", tags$br(),
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
