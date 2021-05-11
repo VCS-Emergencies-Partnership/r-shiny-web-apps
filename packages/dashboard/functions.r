@@ -2043,6 +2043,40 @@ rfs_highlights <- function(dataset, which_highlight) {
   }
 }
 
+# lookup logo
+organisations <- c("British Red Cross", "Kings college",
+                   "Greater London Authority", "Childrens Commission",
+                   "Office of National Statistics (ONS)",
+                   "Nottingham Trent University (NTU)", 
+                   "Public Health England", 
+                   "Wellcome Sanger Institute",
+                   "London Data Store")
+
+logos <- c("British Red Cross.jpg",
+           "Kings College.png",
+           "Greater London Authority.png",
+           "Childrens commissioner.jpg",
+           "Office of national statistics.jpg",
+           "Nottingham Trent University.png",
+           "Public Health England.png",
+           "Wellcome Sanger Institute.png",
+           "")
+
+x_name <- "Organisations"
+y_name <- "logos"
+
+orgs2logos <- data.frame(organisations,logos)
+names(orgs2logos) <- c(x_name,y_name)
+
+theme <- c("Covid", "Deprivation")
+class_wanted <- c("<span class=\"badge badge-pill badge-primary\">Covid</span>",
+                  "<span class=\"badge badge-pill badge-secondary\">Deprivation</span>")
+
+theme_name <- 'Themes'
+theme_badge <- 'Badge'
+
+theme2badge <- data.frame(theme, class_wanted)
+names(theme2badge) <- c(theme_name, theme_badge)
 
 
 plot_resource_cat <- function(table) {
@@ -2053,17 +2087,33 @@ resources_info <- table[order(table$Title),]
     
     # do something with resource info
     resource_wanted <- resources_info[a,]
+    logo_wanted <- orgs2logos %>% filter(Organisations == resource_wanted$Organisation)
+    #print(logo_wanted)
     
-    #fig <- paste0('www/', resource_wanted$logo_file_name)
-    #print(fig)
+    # split out themes
+    themes <- str_split(resource_wanted$Theme, ',')
+    badges2plot <- c()
+    for (i in themes) {
+      #print(i)
+      theme_recorded <- theme2badge %>% filter(Themes == i)
+      badges2plot <- c(badges2plot, theme_recorded$Badge)
+      #badges2plot <- theme_recorded$Badge
+    }
+   
+    badges <- paste(badges2plot, collapse="")
     
     return(
-    box(title = tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title), height='100px',
-        
-        fluidRow(width=NULL, 
-            column(width=2, style="background-image:url(https://cdn.ons.gov.uk/assets/images/ons-logo/v2/ons-logo.svg);background-size: cover;"),
+    box(title = div(
+      tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title, class='.learner-title'), 
+      div(class = "box-tools pull-right",
+          HTML(badges))),
+      height='200px',
+        fluidRow(width=NULL,
+            #column(width=2, align='center',
+            #       #style="padding-top:-20px;margin-top:-20px;",
+            #       img(src=logo_wanted$logos, width=100)),
       
-        column(width=10,
+        column(width=12,
           p(resource_wanted$`Description / Usage`)))
       )
     )
