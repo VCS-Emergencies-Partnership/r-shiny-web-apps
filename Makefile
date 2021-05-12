@@ -9,11 +9,10 @@ build:
 down:
 	docker-compose down
 
-# See https://github.com/rocker-org/shiny/issues/79
 run:
 	docker-compose run \
 		--service-ports \
-		--rm ${PACKAGE} /usr/bin/shiny-server \
+		${PACKAGE} \
 		${CMD}
 
 serve:
