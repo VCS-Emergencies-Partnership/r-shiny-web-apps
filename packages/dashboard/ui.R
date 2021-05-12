@@ -79,8 +79,9 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   useShinyjs(),
-  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-  tags$head(includeCSS("styles.css"), includeHTML("cookie_consent_v2.html"),
+  tags$style(type = "text/css", "html, body {width:100%;height:100%}",),
+  tags$head(
+    includeCSS("styles.css"), includeHTML("cookie_consent_v2.html"),
             tags$link(rel="icon", sizes="32X32", href="img/favicon-32x32.png"),
             tags$link(rel="icon",  sizes="16X16", href="img/favicon-16x16.png"),
             tags$link(rel="apple-touch-icon", sizes="180x180", href="img/img/apple-touch-icon.png"),
@@ -88,6 +89,7 @@ body <- dashboardBody(
   tabItems(
     # --- Home page ---
     tabItem(tabName="home", selected=T,
+            
             # - row 1 -
             fluidRow(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
                      panel(
@@ -121,8 +123,7 @@ body <- dashboardBody(
                                 icon = icon("fas fa-book-open"),
                                 p("The Insight catalogue is a collection of useful
                                   publicly available insight resources that could be of use to
-                                  the VCS community. The VCS EP does not take responsiblity for
-                                  the data/insight represented in these resources.", tags$br(),
+                                  the VCS community.", tags$br(),
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
@@ -174,6 +175,7 @@ body <- dashboardBody(
     
     # -- areas in need --
     tabItem(tabName = "unmetneed",
+            
             # - row 1 -
             fluidRow(style="padding-right:20px; padding-left:20px",
                      column(width=12,
@@ -354,11 +356,17 @@ body <- dashboardBody(
     tabItem(tabName='resource_catalogue',
             fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
                      column(width=12,
-                            panel(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
-                                  column(width=6, p(h2("Resource/Insight Bank"), "Useful publicly available resources")),
-                                  column(width=6, style='padding-top:20px', searchInput(
+                            panel(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
+                                  column(width=6, p(h2("Insight catalogue"), "This is a bank of useful publicly available 
+                                            resources that could be useful to the VCS.", tags$br(), 
+                                                    tags$a(href="https://vcsep.org.uk/", target="_blank", "Contact us"), 
+                                                    "if you know of any further resources that may be of use.",
+                                            tags$br(), 
+                                            "The VCS EP does not have responsibility 
+                                            for these resources.")),
+                                  column(width=6, style='padding-top:30px', searchInput(
                                     inputId = "resource_search",
-                                    label = "Search for resources", 
+                                    label = "Search for resources with a particular theme:", 
                                     placeholder = "i.e covid",
                                     btnSearch = icon("search"), 
                                     btnReset = icon("remove"),

@@ -2043,6 +2043,7 @@ rfs_highlights <- function(dataset, which_highlight) {
   }
 }
 
+
 # lookup logo
 organisations <- c("British Red Cross", "Kings college",
                    "Greater London Authority", "Childrens Commission",
@@ -2068,9 +2069,16 @@ y_name <- "logos"
 orgs2logos <- data.frame(organisations,logos)
 names(orgs2logos) <- c(x_name,y_name)
 
-theme <- c("Covid", "Deprivation")
+
+theme <- c("Covid", "Deprivation", "Children and Young People", " Voluntary Sector",
+           "NHS"," Winter Pressures")
 class_wanted <- c("<span class=\"badge badge-pill badge-primary\">Covid</span>",
-                  "<span class=\"badge badge-pill badge-secondary\">Deprivation</span>")
+                  "<span class=\"badge badge-pill badge-secondary\">Deprivation</span>",
+                  "<span class=\"badge badge-pill badge-success\">Children and Young People</span>",
+                  "<span class=\"badge badge-pill badge-danger\">Voluntary Sector</span>",
+                  #"<span class=\"badge badge-pill badge-warning\">NHS</span>",
+                  "",
+                  "<span class=\"badge badge-pill badge-info\">Winter Pressures</span>")
 
 theme_name <- 'Themes'
 theme_badge <- 'Badge'
@@ -2080,114 +2088,98 @@ names(theme2badge) <- c(theme_name, theme_badge)
 
 
 plot_resource_cat <- function(table) {
-# how many resources - 
-resources_info <- table[order(table$Title),]
-
+  # how many resources - 
+  resources_info <- table[order(table$Title),]
+  
   lapply(1:nrow(resources_info), function(a) {
     
     # do something with resource info
     resource_wanted <- resources_info[a,]
-    logo_wanted <- orgs2logos %>% filter(Organisations == resource_wanted$Organisation)
-    #print(logo_wanted)
+    
     
     # split out themes
     themes <- str_split(resource_wanted$Theme, ',')
     badges2plot <- c()
+    
     for (i in themes) {
-      #print(i)
+      
       theme_recorded <- theme2badge %>% filter(Themes == i)
       badges2plot <- c(badges2plot, theme_recorded$Badge)
       #badges2plot <- theme_recorded$Badge
+      
     }
-   
+    
     badges <- paste(badges2plot, collapse="")
     
     return(
-    box(title = div(
-      tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title, class='.learner-title'), 
-      div(class = "box-tools pull-right",
-          HTML(badges))),
-      height='200px',
+      box( title = div(
+        tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title, class='.learner-title'), 
+        div(class = "box-tools pull-right",
+            HTML(badges))),
         fluidRow(width=NULL,
-            #column(width=2, align='center',
-            #       #style="padding-top:-20px;margin-top:-20px;",
-            #       img(src=logo_wanted$logos, width=100)),
-      
-        column(width=12,
-          p(resource_wanted$`Description / Usage`)))
+                 #column(width=2, align='center',
+                 #       #style="padding-top:-20px;margin-top:-20px;",
+                 #       img(src=logo_wanted$logos, width=100)),
+                 
+                 column(width=12,
+                        p(resource_wanted$`Description / Usage`)))
       )
     )
   })
   
-
+  
 }
 
-# test_bubble_resource <- function(table) {
-#   resources_info <- table[order(table$Title),]
-#   
-#   lapply(1:nrow(resources_info), function(a) {
-#     
-#   resource_wanted <- resources_info[a,]
-#   
-#   testing <- paste0('bubble_', a)
-#   print(testing)
-# 
-#    return(
-#      bubbles(value=nrow(resource_wanted), 
-#              color='#f0f0f0', key=testing, 
-#              label=resource_wanted$Title)
-#       )
-#   
-#       }
-#   )
-# }
+
+
+
 
 
 
 search_resources <- function(table, search_this) {
   # filter df if 
   search_results <- table %>% 
-    filter_all(any_vars(str_detect(., pattern = search_this))) %>%
-    select('Title')
+    filter_all(any_vars(str_detect(., pattern = search_this))) #%>%
+  #select('Title')
   
-  search_results <- c(search_results$Title)
   
-  resources_info <- table %>% 
-    mutate('highlight'=case_when(Title %in% search_results ~ 'highlight',
-                                 TRUE ~ 'no'))
+  resources_info <- search_results[order(search_results$Title),]
   
-  resources_info <- resources_info[order(resources_info$Title),]
-  resources_info <- resources_info[order(resources_info$highlight),]
   
-
   lapply(1:nrow(resources_info), function(a) {
-      
-      # do something with resource info
-      resource_wanted <- resources_info[a,]
-      if(resource_wanted$highlight == 'highlight') {
-        
-        return(box(title = tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title), height='100px', background = 'light-blue',
-                   fluidRow(
-                     column(width=2, align="center", img(src=resource_wanted$logo_source, width=100)),
-                     column(width=10,
-                            p(resource_wanted$`Description / Usage`)))
-              
-        ))
-        
-      }
-      
-      else {
-        
-        return( box(title = tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title), height='100px', 
-                    fluidRow(
-                      column(width=2, align="center", img(src=resource_wanted$logo_source, width=100)),
-                      column(width=10,
-                             p(resource_wanted$`Description / Usage`))))
-              #tags$br(),
-              #tags$strong('Link:'), tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$`Link`)))
-       
-        ) 
-      }
+    
+    # do something with resource info
+    resource_wanted <- resources_info[a,]
+    
+    # split out themes
+    themes <- str_split(resource_wanted$Theme, ',')
+    badges2plot <- c()
+    
+    for (i in themes) {
+      print(i)
+      theme_recorded <- theme2badge %>% filter(Themes == i)
+      badges2plot <- c(badges2plot, theme_recorded$Badge)
+      #badges2plot <- theme_recorded$Badge
+    }
+    
+    badges <- paste(badges2plot, collapse="")
+    
+    return(
+      box(title = div(
+        tags$a(href=resource_wanted$`Link`, target="_blank", resource_wanted$Title, class='.learner-title'), 
+        div(class = "box-tools pull-right",
+            HTML(badges))),
+        height='200px',
+        fluidRow(width=NULL,
+                 #column(width=2, align='center',
+                 #       #style="padding-top:-20px;margin-top:-20px;",
+                 #       img(src=logo_wanted$logos, width=100)),
+                 
+                 column(width=12,
+                        p(resource_wanted$`Description / Usage`)))
+      )
+    )
+    
     
   })
 }
