@@ -38,6 +38,3 @@ COPY cookie_consent_v2.html *.R .Renviron* google-analytics.html shiny-server.sh
 COPY data ${SRV_DIR}/data
 # Copy styling and images thr
 COPY www ${SRV_DIR}/www
-
-# Don't run as root for extra security
-USER shiny
