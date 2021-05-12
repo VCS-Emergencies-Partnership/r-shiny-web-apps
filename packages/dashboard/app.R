@@ -248,6 +248,7 @@ flood_warning_polygons <- read_sf('./data/areas_to_focus/current_live_warnings_p
 flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_points.geojson')
 flood_warning_meta <- read_feather('./data/areas_to_focus/current_live_warnings_metadata.feather')
 
+
 # are there any warnings 
 if (dim(flood_warning_meta)[1]==0) {
   # ensure always have columns for all alerts
@@ -331,6 +332,7 @@ requests <- read_feather('data/vcs_indicators/requests_this_week_and_last.feathe
 requests <- requests %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
                                          TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TacticalCell == 'Midlands and East' ~ 'Midlands & East',
                                          TRUE ~ as.character(.$TacticalCell))) %>%
   select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
 
@@ -2563,6 +2565,7 @@ server = function(input, output, session) {
 
   # --- Requests ----
   filtered_requests <- reactive({
+    
     requests_tc <- requests %>% filter(TacticalCell==input$tactical_cell)
 
   })
@@ -4906,6 +4909,22 @@ onclick("top_10", {
   observe({
     req(input$sidebar_id)
     if (input$sidebar_id == 'unmetneed') {
+      print('here')
+      print(input$tactical_cell)
+      print(input$lad_selected)
+      
+      # if user has tactical cell selected
+      if (input$tactical_cell == '-- England --' & is.null(input$lad_selected)) {
+        print("WHAT THE F IS THE PROBLEM")
+        output$secondSelection <- renderUI({
+          #lads2select <- unique(lad_uk2vuln_resilience$Name)
+          #lads2select <- c('All local authorities in region',sort(lads2select))
+          lads2select <- c('All local authorities in region')
+          selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+        })
+        
+      }
+      else {
  
       # if user has tactical cell selected
       #print(input$lad_selected)
@@ -4957,8 +4976,9 @@ onclick("top_10", {
           DT::replaceData(proxy, filtered_areas2focus())
         }
         
-      }
+       }
       
+      }
     }
     
   })
@@ -5090,6 +5110,13 @@ onclick("top_10", {
       else {
         # sometimes this hasn't been initiated so causes error
         if(is.null(input$lad_selected)) {
+          print("Promblem here")
+          output$secondSelection <- renderUI({
+            #lads2select <- unique(lad_uk2vuln_resilience$Name)
+            #lads2select <- c('All local authorities in region',sort(lads2select))
+            lads2select <- c('All local authorities in region')
+            selectInput("lad_selected", "Local authority district", choices = lads2select, selected='All local authorities in region')
+          })
         # search either whole tactical cell or all of engalnd
         bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
         # create search of charity database 
@@ -5660,6 +5687,7 @@ onclick("top_10", {
     if (input$sidebar_id == 'unmetneed') {
 
       requests_status <- filtered_requests()
+      
 
       if(is.null(input$lad_selected)) {
         output$requests <- renderInfoBox({
@@ -5754,6 +5782,7 @@ onclick("top_10", {
           }
 
         else {
+          
           # look up lad name
           lad_name <- lad_uk2areas2vulnerability %>% filter(Name == input$lad_selected) %>% select('LAD19CD') %>% unique()
 
@@ -5778,6 +5807,7 @@ onclick("top_10", {
 
           to_print <- paste("Previous 7 days:", total_requests_this_week$total_this_week, "Difference to last week:",difference, sep="\n")
 
+          
           output$requests <- renderInfoBox({
             infoBox(
               #"Requests", to_print,
