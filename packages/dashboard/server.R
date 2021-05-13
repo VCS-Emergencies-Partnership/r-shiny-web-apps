@@ -2410,8 +2410,6 @@ server = function(input, output, session) {
           select('eng_people_recieving_section_95_support',
                  'prop_eng_receiving_section_95_support',
                  'england_proportion_bame',
-                 'eng_case_per_100000',
-                 'total_las_in_eng_with_data',
                  'eng_total_fuel_poor_households',
                  'eng_prop_households_fuel_poor',
                  'eng_rate_per_1000',

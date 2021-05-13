@@ -17,10 +17,9 @@ library(shinycssloaders) # docker
 library(shinyWidgets) #-- ADD TO DOCKER
 library(R.utils) # -- ADD TO DOCKER 
 library('ghql') # -- ADD TO DOCKER
-library("bubbles")
 
 readRenviron(".Renviron")
-source("./functions.r")
+source("./functions.R")
 source("./global.R")
 
 

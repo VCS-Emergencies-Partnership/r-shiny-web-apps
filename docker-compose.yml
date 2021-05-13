@@ -9,8 +9,6 @@ services:
       context: ./packages/dashboard
     ports:
       - 3000:3838
-    volumes:
-      - ./packages/dashboard:/srv/shiny-server
 
   hello-world:
     build:

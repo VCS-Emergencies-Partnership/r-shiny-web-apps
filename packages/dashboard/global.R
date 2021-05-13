@@ -146,7 +146,7 @@ par_table_tc_avg <- par_table %>%
     `tc_People receiving Section 95 support`,
     `tc_prop_people_recieving_section_95_support`,
     `tc_proportion`,
-    `tc_cases_per_10000_for_current_week`,
+    #`tc_cases_per_10000_for_current_week`,
     `tc_Number of households in fuel poverty1`,
     'tc_prop_households_fuel_poor',
     `tc_Homelessness (rate per 1000)`,
@@ -262,13 +262,13 @@ flood_warning_meta <- flood_warning_meta %>%
   select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
 
 
-# -- vcs indicators
-requests <- read_feather('data/vcs_indicators/requests_this_week_and_last.feather')
-requests <- requests %>%
-  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
-                                         TacticalCell == 'Central' ~ 'Midlands & East',
-                                         TRUE ~ as.character(.$TacticalCell))) %>%
-  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
+# # -- vcs indicators
+# requests <- read_feather('data/vcs_indicators/requests_this_week_and_last.feather')
+# requests <- requests %>%
+#   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+#                                          TacticalCell == 'Central' ~ 'Midlands & East',
+#                                          TRUE ~ as.character(.$TacticalCell))) %>%
+#   select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
 
 
 # -- for home page maybe replacing initial requests --
