@@ -426,7 +426,7 @@ body <- dashboardBody(
 ui <- function(request) {
   dashboardPage(
     #sidebar_fullCollapse = TRUE,
-    skin='purple',
+    skin='yellow',
     header,
     sidebar,
     body,
