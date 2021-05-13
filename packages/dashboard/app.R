@@ -352,7 +352,7 @@ last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%
 
 # ---  dashboard --- #
 # --- header --- #
-header <- dashboardHeader(title = "VCSEP Insights", titleWidth = "300px")#,
+header <- dashboardHeader(title = "Development branch", titleWidth = "300px")#,
                               #dropdownMenu(
                               #  type = "notifications",
                               #  icon = icon("question-circle"),
