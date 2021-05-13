@@ -22,7 +22,35 @@ flood_warning_content <- content(flood_warning, type = 'text', encoding = "UTF-8
 flood_warning_data <- fromJSON(flood_warning_content)
 flood_warning_df <- as_tibble(flood_warning_data$items, .name_repair='minimal') 
 flood_warning_df <- do.call(data.frame, flood_warning_df)
-# 
+
+if (dim(flood_warning_df)[1]==0) {
+  
+  flood_warning_polygons <- data.frame(matrix(ncol = 1, nrow = 0))
+  flood_warning_points <- data.frame(matrix(ncol= 1, nrow=0))
+  
+  x <- c("geometry")
+  colnames(flood_warning_polygons) <- x
+  colnames(flood_warning_points) <- x
+  
+  flood_warning_meta <- data.frame(matrix(ncol = 13, nrow = 0))
+  meta_columns <- c("polygon", "severity", "servityLevel",
+                    "floodArea.riverOrSea", "floodAreaID",
+                    "description", "message",
+                    "timeMessageChanged", "timeRaised",
+                    "timeSeverityChanged", "alertlevelmeaning",
+                    "lastupdateday","messageurl")
+  
+  colnames(flood_warning_meta) <- meta_columns
+  
+  #write_sf(flood_warning_information, './flooding_metoffice_data/current_live_metoffice_floodwarnings.geojson')
+  
+  write_sf(flood_warning_polygons, './flooding_metoffice_data/current_live_warnings_polygons.geojson')
+  write_feather(flood_warning_meta, './flooding_metoffice_data/current_live_warnings_metadata.feather')
+  write_sf(flood_warning_points, './flooding_metoffice_data/current_live_warnings_points.geojson')
+  
+  
+} else {
+
 # only intested in severity level level 4 means reduced
 flood_warnings_of_interest <- flood_warning_df %>% filter(severityLevel <= 3)
 #flood_warnings_of_interest <- flood_warning_df
@@ -95,6 +123,7 @@ for (i in polygons_of_interest) {
   #add polygon to join back to final df
   output_flood_data = rbind(output_flood_data, flood_reduced)
 }
+
 # 
 # #select data from flood warning df to join to flood polygon df
 flood_warning_information <- flood_warnings_of_interest %>% 
@@ -108,14 +137,56 @@ flood_warning_information <- flood_warnings_of_interest %>%
 format_dates <- flood_warning_information %>% select('polygon', 'timeMessageChanged') %>%
   separate(timeMessageChanged, c("lastupdateday", "lastupdatetime"), sep='T')
 
-flood_warning_information <- left_join(flood_warning_information, format_dates, by='polygon', keep=F)
 
-# add url for message 
-flood_warning_information <- flood_warning_information %>% 
+
+ # if no flood warnings 
+if (is.null(output_flood_data)) {
+  
+  flood_warning_information <- left_join(flood_warning_information, format_dates)
+  
+  flood_warning_information <- flood_warning_information %>% 
+    mutate('messageurl'=paste('https://flood-warning-information.service.gov.uk/target-area/',floodAreaID, sep=''))
+  # 
+  # #join the data
+  #final_flood_warning_info_of_interest <- left_join(output_flood_data, flood_warning_information) %>% unique() %>%
+  #  select(-'QDIAL', -'FWS_TACODE', -'AREA', -'TA_NAME',-'DESCRIP',-'LA_NAME',-'RIVER_SEA',-'polygon',-'floodArea.riverOrSea',-'timeMessageChanged',-'timeRaised',-'timeSeverityChanged')
+  
+  # write to file 
+  write_sf(flood_warning_information, './flooding_metoffice_data/current_live_metoffice_floodwarnings.geojson')
+  
+  # try three smaller output files:
+  # 1). # flood area id and polygon
+  flood_areaid2polygon <- flood_warning_information %>%
+    select('floodAreaID') %>%
+    unique()
+  
+  # write to file
+  write_sf(flood_areaid2polygon, './flooding_metoffice_data/current_live_warnings_polygons.geojson')
+  
+  # 2). .feather with metadata - but no warnings
+  flood_areaid2lad2metadata <- flood_warning_information
+  
+  write_feather(flood_areaid2lad2metadata, './flooding_metoffice_data/current_live_warnings_metadata.feather')
+  
+  # 3) # add centroids to data
+  # transform to utm because st_centroid doesn't work with lng lat - or won't be accurate specifically i think
+
+  
+  centroids <- flood_warning_information
+
+  write_sf(centroids, './flooding_metoffice_data/current_live_warnings_points.geojson')
+  
+  
+  } else 
+  if (!is.null(output_flood_data)) {
+  flood_warning_information <- left_join(flood_warning_information, format_dates, by='polygon', keep=F)
+
+  # add url for message 
+  flood_warning_information <- flood_warning_information %>% 
   mutate('messageurl'=paste('https://flood-warning-information.service.gov.uk/target-area/',floodAreaID, sep=''))
 # 
-# #join the data
-final_flood_warning_info_of_interest <- left_join(output_flood_data, flood_warning_information, by='polygon', keep=F) %>% unique() %>%
+  # #join the data
+  final_flood_warning_info_of_interest <- left_join(output_flood_data, flood_warning_information, by='polygon', keep=F) %>% unique() %>%
   select(-'QDIAL', -'FWS_TACODE', -'AREA', -'TA_NAME',-'DESCRIP',-'LA_NAME',-'RIVER_SEA',-'polygon',-'floodArea.riverOrSea',-'timeMessageChanged',-'timeRaised',-'timeSeverityChanged')
 
 
@@ -149,17 +220,19 @@ centroids <- st_centroid(final_flood_warnings_centroids) %>%
 
 write_sf(centroids, './flooding_metoffice_data/current_live_warnings_points.geojson')
 
+  
+}
 
-
+}
 
 # 
-# convert long and lat to dataframe columns 
- centroids <- centroids %>%
-   mutate(long = unlist(map(centroids$geometry,1)),
-          lat = unlist(map(centroids$geometry,2))) %>%
-   st_drop_geometry()
- 
- centroids_df <- as.data.frame(centroids)
+# # convert long and lat to dataframe columns 
+#  centroids <- centroids %>%
+#    mutate(long = unlist(map(centroids$geometry,1)),
+#           lat = unlist(map(centroids$geometry,2))) %>%
+#    st_drop_geometry()
+#  
+#  centroids_df <- as.data.frame(centroids)
 
 
 

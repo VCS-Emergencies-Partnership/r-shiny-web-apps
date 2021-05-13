@@ -3,7 +3,8 @@ library(tidyverse)
 library(readxl)
 library(httr)
 library("feather")
-#setwd('/home/izzy-everall/')
+
+
 # --- get look up table 
 area_lookup <- read_csv("https://github.com/britishredcrosssociety/covid-19-vulnerability/raw/master/data/lookup%20mosa11%20to%20lad17%20to%20lad19%20to%20tactical%20cell.csv")
 area_lookup_tc2lad <- area_lookup %>% select('LAD19CD', 'TacticalCell')
@@ -11,7 +12,6 @@ area_lookup_tc2lad <- area_lookup %>% select('LAD19CD', 'TacticalCell')
 # read in data 
 bame <- read_csv('/data/data-lake/curated/annual-population-survey-ethnicity-data/bame-ethnicity-lad19.csv')
 asylum <- read_csv('/data/data-lake/curated/asylum-section-95-support/asylum-lad19.csv')
-#covid <- read_csv('/data/data-lake/curated/coronavirus-cases-eng/covid-rates-la.csv')
 digital_exclusion_tc <- read_csv('/data/data-lake/curated/digital-exclusion/digital-exclusion-tc.csv')
 digital_exclusion_lad <- read_csv('/data/data-lake/curated/digital-exclusion/digital-exclusion-lad19.csv')
 fuelp <- read_csv('/data/data-lake/curated/fuel-poverty-eng/fuel-poverty-lad19.csv')
@@ -54,8 +54,6 @@ eng_pop <- unique(pop_eng_lad_tc$eng_pop)
 # 2019 estimates population size 
 
 
-
-
 # bame data 
 # -- BAME population in LAD 
 # --> already calculated % of lad population which is bame 
@@ -82,7 +80,7 @@ bame_lad_values2tc_total_final = bame_lad_values2tc_total %>% mutate(total_bame_
 # join to LAD data 
 bame_data <- left_join(bame_data, bame_lad_values2tc_total_final, by='TacticalCell', keep=F)
 # write bame indicator to people at risk file
-write_csv(bame_data, './people_at_risk_table/BAME-indicator.csv')
+#write_csv(bame_data, './people_at_risk_table/BAME-indicator.csv')
 
 # --- asylum data ---
 # --- calculate proportion receiving support ---
@@ -125,86 +123,8 @@ asylum_data <- asylum_data %>%
   mutate('prop_eng_receiving_section_95_support'=round((`eng_people_recieving_section_95_support`/eng_pop)*100,2)) %>%
   mutate('eng_receiving_section_95_support_cases_per_1000'=round((`eng_people_recieving_section_95_support`/eng_pop)*1000,2))
 
-write_csv(asylum_data, './people_at_risk_table/asylum-indicator.csv')
+#write_csv(asylum_data, './people_at_risk_table/asylum-indicator.csv')
 
-# --- Covid Cases ---
-# # want to show latest rate per 100,000 and change in number of cases select just last two weeks
-# covid_data <- covid %>% select(LAD19CD, tail(names(.),2))
-# # to convert rates per 100,000 into actual number of cases 
-# covid_data <- left_join(area_lookup_tc2lad, covid_data, by='LAD19CD', keep=F) %>% unique()
-# covid_data <- left_join(pop_eng_lad_tc, covid_data, by=c('LAD19CD','TacticalCell'), keep=F) %>%
-#   unique() %>%
-#   # remove wales/scotland/NI for now
-#   filter(TacticalCell != "Northern Ireland and the Isle of Man",
-#          TacticalCell != "Scotland",
-#          TacticalCell != "Wales")
-# 
-# # to convert to cases per 100,000
-# #total/population*100,000
-# 
-# # the opposite would be
-# #cases/100,000 * population
-# covid_data <- covid_data %>% mutate(prev_week_total_cases = round((.[[6]]/100000)*lad_pop,1)) %>%
-#   mutate(current_week_total_cases = round((.[[7]]/100000)*lad_pop,1)) %>%
-#   mutate(change_in_number_of_cases = round(current_week_total_cases - prev_week_total_cases,0))
-# 
-# # if we wanted cases per 100,000 in tactical cell 
-# # you would need to sum by group total cases per tactical cell
-# # divide by population size and times by 100,000 
-# # should we make this however the population where data was available?
-# covid_data_tc_stats <- covid_data %>% 
-#   filter(!is.na(current_week_total_cases)) %>%
-#   group_by(TacticalCell,tc_pop) %>%
-#   # should I use population of lads with data available in that tactical cell or actual tc population
-#   #summarise_at(vars('prev_week_total_cases', 'current_week_total_cases', lad_pop), list(sum), na.rm=T) %>%
-#   summarise_at(vars('prev_week_total_cases', 'current_week_total_cases'), list(sum), na.rm=T) %>%
-#   # rename these
-#   rename(tc_prev_week_total_cases = 'prev_week_total_cases', tc_current_week_total_cases='current_week_total_cases') %>%
-#   # determine cases per 100,000
-#   mutate(tc_cases_per_10000_for_current_week = round((tc_current_week_total_cases/tc_pop)*100000,1)) %>%
-#   # change in number of cases 
-#   mutate(tc_change_in_number_of_cases = round(tc_current_week_total_cases-tc_prev_week_total_cases,0))
-#   
-# covid_data <- left_join(covid_data, covid_data_tc_stats, by=c('TacticalCell', 'tc_pop'), keep=F) %>% unique()
-# 
-# # how many LADs was the tc analysis based on
-# covid_data_how_many_las <- covid_data %>% group_by(TacticalCell) %>%
-#   # how many local authorities per tc
-#   tally() %>% 
-#   rename('total_las_in_tc'=n) 
-#   
-# covid_data_how_many_with_data <- covid_data %>% filter(!is.na(current_week_total_cases)) %>%
-#   group_by(TacticalCell) %>%
-#   # how many local authorities per tc with data
-#   tally() %>% 
-#   rename('total_las_in_tc_with_data'=n)
-# 
-# covid_data <- left_join(covid_data, covid_data_how_many_las, by='TacticalCell', keep=F) %>%
-#   unique() %>%
-#   left_join(., covid_data_how_many_with_data, by='TacticalCell', keep=F)
-# 
-# 
-# # cases per 100,000 in England do i use the population of england or 
-# # sum of those with data - currently i've summed the regions that have reported. 
-# covid_data <- covid_data %>% 
-#   mutate(eng_current_week_total_cases = sum(current_week_total_cases, na.rm=T)) %>%
-#   mutate(eng_prev_week_total_cases = sum(prev_week_total_cases, na.rm=T)) %>%
-#   mutate(eng_change_in_number_of_cases = round(eng_current_week_total_cases - eng_prev_week_total_cases, 0))
-#   
-# # using population of areas that have provided data - not any more using total eng population
-# covid_data <- covid_data %>% 
-#   filter(!is.na(current_week_total_cases)) %>%
-#   #mutate(eng_pop_with_data = sum(lad_pop)) %>%
-#   mutate(eng_case_per_100000 = round((eng_current_week_total_cases/eng_pop)*100000, 1))
-# 
-# covid_data_eng_las <- covid_data %>% 
-#   select('TacticalCell', total_las_in_tc_with_data) %>%
-#   unique() %>%
-#   summarise_at(vars('total_las_in_tc_with_data'), list(sum), na.rm=T) %>%
-#   rename('total_las_in_eng_with_data'='total_las_in_tc_with_data')
-# 
-# covid_data <- covid_data %>% mutate(total_las_in_eng_with_data = covid_data_eng_las$total_las_in_eng_with_data) 
-# write_csv(covid_data, './people_at_risk_table/covid-indicator.csv')
 
 # --- Digital exclusion ---
 # just going to combine the two file
@@ -226,7 +146,7 @@ digital_exclusion_data <- digital_exclusion_tc %>% rename(`tc_Proportion of neig
   left_join(digital_exclusion_data, ., by='TacticalCell', keep=F)
 
 
-write_csv(digital_exclusion_data, './people_at_risk_table/digital-exclusion-indicator.csv')
+#write_csv(digital_exclusion_data, './people_at_risk_table/digital-exclusion-indicator.csv')
 
 # --- shielding --- 
 # join lad population
@@ -255,7 +175,7 @@ shielding_data <- shielding_data %>%
   # proportion of englands population 
   mutate('proportion_total_shielding_Eng'= round((total_shielding_eng/eng_pop)*100,1))
 
-write_csv(shielding_data, './people_at_risk_table/shielding-indicator.csv')
+#write_csv(shielding_data, './people_at_risk_table/shielding-indicator.csv')
 
 # --- Homelessness ---
 homelessness_data <- left_join(area_lookup_tc2lad, homelessness, by="LAD19CD", keep=F) %>%
@@ -297,7 +217,7 @@ homelessness_data <- left_join(homelessness_data, homelessness_data_tc, by=c('Ta
 homelessness_data <- homelessness_data %>%
   mutate('eng_rate_per_1000'= mean(`Homelessness (rate per 1000)`, na.rm=T))
 
-write_csv(homelessness_data, './people_at_risk_table/homelessness-indicator.csv')
+#write_csv(homelessness_data, './people_at_risk_table/homelessness-indicator.csv')
 
 # ---- universal credit ---
 # for both local authority, tactical cell and england
@@ -330,7 +250,7 @@ ucred_data <- ucred_data %>%
   mutate('prop_eng_pop_unemployed_on_ucred'=round((eng_total_unemployed_on_ucred/eng_pop)*100,1))
 
 
-write_csv(ucred_data, './people_at_risk_table/ucred-indicator.csv')
+#write_csv(ucred_data, './people_at_risk_table/ucred-indicator.csv')
 
 # --- fuel poverty ---
 # join tactical cells (this is households so don't need population)
@@ -355,7 +275,7 @@ fuelp_data_tc_eng <- fuelp_data %>%
 
 fuelp_data <- left_join(fuelp_data, fuelp_data_tc_eng, by='TacticalCell', keep=F)
 
-write_csv(fuelp_data, './people_at_risk_table/fuel-poverty-indicator.csv')
+#write_csv(fuelp_data, './people_at_risk_table/fuel-poverty-indicator.csv')
 
 
 # ---- do we want to join them all together ----
@@ -375,8 +295,8 @@ all_data <- left_join(digital_exclusion_data, asylum_data, by=c("LAD19CD","Tacti
   left_join(., shielding_data,  by=c("LAD19CD","TacticalCell",'lad_pop','tc_pop','eng_pop'), keep=F)
 
 # --- save all data as a .feather file ---
-write_csv(all_data, './people_at_risk_table/people-at-risk.csv')
-write_feather(all_data, './people_at_risk_table/people-at-risk.feather')
+#write_csv(all_data, './people_at_risk_table/people-at-risk.csv')
+write_feather(all_data, './r-shiny-web-apps/packages/dashboard/data/people_at_risk/people_at_risk_table/people-at-risk.feather')
 # --- and to app file -- 
 #write_feather(all_data, './r-shiny-web-apps/packages/dashboard/data/people_at_risk/people-at-risk.feather')
 #write_feather(all_data, './r-shiny-web-apps/packages/dashboard/data/people_at_risk/people-at-risk.csv')
