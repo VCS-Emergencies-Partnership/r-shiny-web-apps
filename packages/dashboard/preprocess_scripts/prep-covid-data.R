@@ -46,14 +46,63 @@ if (!file.exists(covid_file)) {
   # align with tactical cells 
   latest_covid_data2tactical_cell <- left_join(area_lookup_tc2lad, latest_covid_data, by='LAD19CD') %>%
   filter(TacticalCell != 'Scotland' & TacticalCell != 'Wales' & TacticalCell != 'Northern Ireland and the Isle of Man')
-
+  
+  # CHECK are HACKNEY AND LONDON AND CORNWALL AND ISLEs OF SCILLY COMBINED
+  combined_authorities <- c('Hackney and City of London','Cornwall and Isles of Scilly')
+  #combined_authorities <- c('test')
+  test_combined_auth_present <- latest_covid_data2tactical_cell %>% filter(areaName %in% combined_authorities)
+  
+  if (dim(test_combined_auth_present)[1]==0) {
+    # do not need to correct for combined authorities
+    print('No need to correct for combined auhtorities')
+    #glimpse(latest_covid_data2tactical_cell)
+    #write_feather(latest_covid_data2tactical_cell, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather')
+    
+  } else {
+  # correct for combined authorities
+  #print("correct for combined authorities")
+  # Correct Hackney and city of london combined
+  duplicate_hackney <- latest_covid_data2tactical_cell %>% 
+                        filter(areaName == 'Hackney and City of London') %>%
+    mutate("clean_areaNames"="Hackney") %>%
+    mutate("clean_LAD19CD"="E09000012") 
+  
+  duplicate_city <- latest_covid_data2tactical_cell %>% 
+    filter(areaName == 'Hackney and City of London') %>%
+    mutate("clean_areaNames"="City of London") %>%
+    mutate("clean_LAD19CD"="E09000001") 
+  
+  #Correct Cornwall and Isle of Scilly
+  duplicate_cornwall <- latest_covid_data2tactical_cell %>% 
+    filter(areaName == 'Cornwall and Isles of Scilly') %>%
+    mutate("clean_areaNames"="Cornwall") %>%
+    mutate("clean_LAD19CD"="E06000052") 
+  
+  duplicate_isle_scilly <- latest_covid_data2tactical_cell %>% 
+    filter(areaName == 'Cornwall and Isles of Scilly') %>%
+    mutate("clean_areaNames"="Isles of Scilly") %>%
+    mutate("clean_LAD19CD"="E06000053") 
+  
+  # remove combined authorities
+  latest_covid_data2tactical_cell <- latest_covid_data2tactical_cell %>%
+    mutate("clean_LAD19CD"=LAD19CD) %>%
+    mutate("clean_areaNames"=areaName) %>%
+    filter(!areaName %in% combined_authorities)
+  
+  
+  # latest covid data
+  latest_covid_data2tactical_cell <- rbind(latest_covid_data2tactical_cell, duplicate_hackney, duplicate_city, duplicate_cornwall, duplicate_isle_scilly)
+  latest_covid_data2tactical_cell <- latest_covid_data2tactical_cell %>%
+    select(-LAD19CD) %>% rename(LAD19CD='clean_LAD19CD')
+  
   #glimpse(latest_covid_data2tactical_cell)
-# --- local file ---
-write_feather(latest_covid_data2tactical_cell, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather')
 
+  # --- local file ---
+  write_feather(latest_covid_data2tactical_cell, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather')
+
+     }
   }
 }
-
 
 
 
