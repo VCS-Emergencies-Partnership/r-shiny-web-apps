@@ -7,7 +7,21 @@ get_pulse <- list.dirs('/data/data-lake/raw/pulse_check_raw/')
 file_name <- paste(tail(get_pulse, n=1), 'pulse_check_raw.csv', sep='/')
 
 pulse_needed <- read_csv(file_name)
-glimpse(pulse_needed)
+
+#pulse_needed <- pulse_needed %>% rename(test =`What is your Multi-Agency Cell area?`)
+#glimpse(pulse_needed)
+# ARE THE COLUMNS I NEED IN THERE --> 
+cols_needed <- c('`_index`','`What is your Multi-Agency Cell area?`', '`In which county/unitary authority does your organisation operate?`')
+columns_present <- colnames(pulse_needed)
+#print(columns_present)
+
+if (!(cols_needed %in% columns_present) ||
+    !grepl("which of the following sectors are the top three priority concerns in your area in the next 14 days?/", columns_present)) {
+  print("broken")
+} else {
+  
+
+
 # filter by column number to get concerns in next 14 days other relating to this is col 404 - not needed as this is counted but column on what was required is provided which is other:
 pulse_needed <- pulse_needed %>% select(438,6,7, contains("following sectors are the top three priority concerns in your area in the next 14 days?/"))
 
@@ -43,32 +57,7 @@ concerns_by_type <- concerns_by_type %>% filter(!clean_groups %in% not_wanted) %
 glimpse(concerns_by_type)
 
 # -- write to file ---
-write_feather(concerns_by_type, '/home/izzy-everall/vcs-indicators/pulse_check_summary.feather')
+#write_feather(concerns_by_type, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/pulse_check_summary.feather')
 
 
-
-
-# # group by and sum number responded with particular concerns
-# tc_proporiton_need <- pulse_needed %>%
-#   group_by(`What is your Multi-Agency Cell area?`) %>%
-#   count(`Thinking about the last fourteen days, do you have any concerns about the level of unmet needs in your area?`)
-#   
-# # sum total responses for each area 
-# tc_proporiton_need_totals <- tc_proporiton_need %>%
-#   group_by(`What is your Multi-Agency Cell area?`) %>%
-#   summarise(area_total=sum(n))
-# 
-# # pivot so one row per mac
-# tc_proporiton_need <- pivot_wider(tc_proporiton_need, names_from=`Thinking about the last fourteen days, do you have any concerns about the level of unmet needs in your area?`, values_from=`n`)
-# 
-# # join totals
-# tc_group_total_and_area_total <- left_join(tc_proporiton_need, tc_proporiton_need_totals)
-# # proportion of major concerns per area
-# tc_prop_major_concern <- tc_group_total_and_area_total %>% mutate(prop_major_concern=round((`Major concerns`/`area_total`)*100,1))
-# 
-# eng_prop_major_concern <- round((sum(tc_prop_major_concern$`Major concerns`, na.rm=T)/sum(tc_prop_major_concern$area_total, na.rm=T))*100, 1)
-# 
-# tc_prop_major_concern <- tc_prop_major_concern %>% mutate('eng_prop_major_concer'=eng_prop_major_concenr)
-
-# summary statistics for multi agency cells:
-write_feather(tc_prop_major_concern, '/home/izzy-everall/vcs-indicators/pulse_check.feather')
+}

@@ -95,7 +95,7 @@ all_requests <- requests_geocoded %>% mutate('request_status'=case_when(!grepl("
 #glimpse(all_requests)
 
 # write feather 
-write_feather(all_requests, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/vcs_indicatorss/all_requests.feather')
+write_feather(all_requests, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/all_requests.feather')
 
   }
 }
