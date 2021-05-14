@@ -218,7 +218,8 @@ covid_area2focus <- covid_area2focus[, !(names(covid_area2focus) %in% remove)]
 # rename with suffix for time being. 
 covid_area2focus <- covid_area2focus %>%
   rename('covid cases per 100,000'=newCasesBySpecimenDateRollingRate) %>%
-  rename('Name' = areaName) %>%
+  rename('Name' = clean_areaNames) %>%
+  rename('to_show'= areaName) %>%
   rename('Total cases' = newCasesBySpecimenDateRollingSum) %>%
   rename('% change in covid cases' = newCasesBySpecimenDateChangePercentage) %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
@@ -352,7 +353,7 @@ last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%
 
 # ---  dashboard --- #
 # --- header --- #
-header <- dashboardHeader(title = "Development branch", titleWidth = "300px")#,
+header <- dashboardHeader(title = "VCSEP Insight", titleWidth = "300px")#,
                               #dropdownMenu(
                               #  type = "notifications",
                               #  icon = icon("question-circle"),
@@ -2302,7 +2303,7 @@ server = function(input, output, session) {
         if (input$tactical_cell == '-- England --') {
       
         covid_lads_in_tc <- covid_area2focus %>% arrange(-`covid cases per 100,000`) %>%
-          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+          select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
       
       covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
         select(-'LAD19CD') #%>% 
@@ -2313,7 +2314,7 @@ server = function(input, output, session) {
         
         covid_lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
           arrange(-`covid cases per 100,000`) %>%
-          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+          select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
         
         covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
           select(-'LAD19CD') #%>% 
@@ -2323,7 +2324,7 @@ server = function(input, output, session) {
       else {
         covid_lads_in_tc <- covid_area2focus %>% filter(Name == input$lad_selected) %>%
           arrange(-`covid cases per 100,000`) %>%
-          select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+          select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
         
         covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
           select(-'LAD19CD') #%>% 
@@ -2339,7 +2340,7 @@ server = function(input, output, session) {
         if (input$tactical_cell == '-- England --') {
           
           covid_lads_in_tc <- covid_area2focus %>% arrange(-`% change in covid cases`) %>%
-            select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+            select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
           
           covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
             select(-'LAD19CD') # %>% 
@@ -2350,7 +2351,7 @@ server = function(input, output, session) {
             
             covid_lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
               arrange(-`% change in covid cases`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`,`% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`,`% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
               select(-'LAD19CD') #%>% 
@@ -2360,7 +2361,7 @@ server = function(input, output, session) {
           else {
             covid_lads_in_tc <- covid_area2focus %>% filter(Name == input$lad_selected) %>%
               arrange(-`% change in covid cases`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
               select(-'LAD19CD') #%>% 
@@ -3952,7 +3953,7 @@ observe({
     
     else {
       top102show <- head(top10, 1)
-      
+     
       # plot title 
       output$title_focus_list <- renderUI({
         div(
