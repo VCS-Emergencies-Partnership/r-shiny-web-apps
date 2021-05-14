@@ -10,6 +10,14 @@
 { "type": "Feature", "properties": { "floodAreaID": "113WABTW08" }, "geometry": { "type": "Point", "coordinates": [ -3.253944830900711, 50.756140181491922 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "113WAFTW07" }, "geometry": { "type": "Point", "coordinates": [ -3.390084121589584, 50.816567261390936 ] } },
 { "type": "Feature", "properties": { "floodAreaID": "112WAFTSSR" }, "geometry": { "type": "Point", "coordinates": [ -2.862535458230984, 50.969891045565916 ] } },
-{ "type": "Feature", "properties": { "floodAreaID": "112WAFRTC" }, "geometry": { "type": "Point", "coordinates": [ -3.145943432188129, 51.016724752261979 ] } }
+{ "type": "Feature", "properties": { "floodAreaID": "112WAFRTC" }, "geometry": { "type": "Point", "coordinates": [ -3.145943432188129, 51.016724752261979 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "112FWFDON10A" }, "geometry": { "type": "Point", "coordinates": [ -3.302737891917968, 51.157117536869542 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "031WAF215" }, "geometry": { "type": "Point", "coordinates": [ -2.45825259549675, 51.767157377339274 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "113WABTW10" }, "geometry": { "type": "Point", "coordinates": [ -3.509339676535816, 50.745396983167495 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "113WAFTW05" }, "geometry": { "type": "Point", "coordinates": [ -3.717733939054154, 51.063779480690869 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "033WAF205" }, "geometry": { "type": "Point", "coordinates": [ -1.847720280093593, 52.229690247246175 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "033WAF207" }, "geometry": { "type": "Point", "coordinates": [ -1.670526505266521, 52.088009430203513 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "052WAFTOVE" }, "geometry": { "type": "Point", "coordinates": [ -0.928400165941944, 52.116262218762422 ] } },
+{ "type": "Feature", "properties": { "floodAreaID": "052WAFUPOUSE" }, "geometry": { "type": "Point", "coordinates": [ -0.875793775112946, 52.0272122216616 ] } }
 ]
 }
