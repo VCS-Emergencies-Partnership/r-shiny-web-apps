@@ -23,10 +23,14 @@ date <- format(as.Date(date_time[[1]][1]), '%d-%m-%Y')
 
 # --- now retrieving from raw section --- 
 get_requests <- list.dirs('/data/data-lake/raw/vcsep-requests-for-support/')
-
 file_name <- paste(tail(get_requests, n=1), 'vcsep-requests-for-support.csv', sep='/')
 
-requests <- read_csv(file_name)
+if (!file.exists(file_name)) {
+  # break send warning 
+  print("problem - file doesn't exist")
+} else {
+  
+  requests <- read_csv(file_name)
 
 # --- CHECK IS THIS IS TODAYS DATA EXTRACT ---
 date_of_last_update <- str_split(tail(get_requests, n=1), '/')
@@ -35,15 +39,19 @@ date_format <- str_split(date_of_last_update, '-')
 date_of_last_update <- paste0(date_format[[1]][3],"-",date_format[[1]][2], '-', date_format[[1]][1])
 
 if (date != date_of_last_update) {
-  print("NOT TODAYS DATA")
+  print("problem - NOT TODAYS DATA")
   
   } else {
 
   # do the columns i need exist
   columns_in_raw_data <- colnames(requests)
   cols_needed <- c("status","request_date",'multi_agency_cell','postcode')
-  if (!(cols_needed %in% columns_in_raw_data)) {
-    print("broken")
+  are_cols_present <- (cols_needed %in% columns_in_raw_data)
+  
+  # are_cols_present not all T means missing names
+  if (all(are_cols_present)==F) {
+    print("broken - columns changed")
+    
   } else {
     
 # -- filtering for current live requests -- 
@@ -97,5 +105,6 @@ all_requests <- requests_geocoded %>% mutate('request_status'=case_when(!grepl("
 # write feather 
 write_feather(all_requests, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/all_requests.feather')
 
+   }
   }
 }
