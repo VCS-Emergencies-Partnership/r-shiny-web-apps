@@ -103,9 +103,9 @@ body <- dashboardBody(
                                       style="align:center;margin-left:-40px;"))))),
             #style="position:fixed; padding-right:20px; padding-left:20px;padding-top:0px;padding-bottom:50px"))),
             # row two
-            fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:20px",  
+            fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:0px",  
                      
-                     column(width=3,
+                     column(width=4,
                             box(title=actionLink("RI_tool_box","Risk Indicator Tool"), width=NULL,
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-map-signs"),
@@ -116,7 +116,7 @@ body <- dashboardBody(
                                   tags$br(),
                                   tags$em(tags$strong("click on the title to go to the tool"))))),
                      
-                     column(width=3,
+                     column(width=4,
                             box(title=actionLink("e_catalogue_box","Insight catalogue"),width=NULL, 
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-book-open"),
@@ -126,7 +126,17 @@ body <- dashboardBody(
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
-                     column(width=3, 
+                     column(width=4,
+                            box(title=actionLink("vcs_reports","VCS reports"),width=NULL, 
+                                collapsible = T, collapsed=T,
+                                icon = icon("fas fa-file"),
+                                p("A collection of insight reports from the
+                                  VCS parntership", tags$br(),
+                                  tags$br(),
+                                  tags$strong(tags$em("click on the title to go to the reports")))))),
+                     fluidRow(width=NULL, style="padding-right:100px; padding-left:100px; padding-bottom:20px; padding-top:0px",
+                              
+                        column(width=6, style="padding-left:80px;",
                             box(title=actionLink("internal_reports_from_box", "Partnership insight"),
                                 width=NULL,
                                 collapsible = T, 
@@ -140,7 +150,7 @@ body <- dashboardBody(
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
-                     column(width=3,
+                     column(width=6, style="padding-right:80px;",
                             box(title=actionLink("community_assets", "Community assets map", 
                                                  onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')")
                                 ,width=NULL,
