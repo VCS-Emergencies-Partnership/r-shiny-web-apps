@@ -2,112 +2,177 @@ library(tidyverse)
 library(readxl)
 library(httr)
 library("feather")
+library(purrr)
 
+# CHECK Population data still exists 
+pop_data <- '/data/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx'
+
+if (!file.exists(pop_data)) {
+  print("Population data missing")
+} else {
+  
 pop_eng_2019 <- read_excel('/data/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx', sheet = "Mid-2019 Persons", skip = 4)
 # in vac data - this population data is referenced - https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates
 
 ages <- pop_eng_2019 %>% select(8:ncol(.))
-under_45 <- ages %>% select(19:45) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
-  mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
-  select(total_pop_age_range) %>%
-  mutate('age_range'='under 45') %>%
-  head(n=1)
-age_45_49 <- ages %>% select(46:50)  %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
-  mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
-  select(total_pop_age_range) %>%
-  mutate('age_range'='45-49')  %>%
-  head(n=1)
-age_50_54 <- ages %>% select(51:55) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
-  mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
-  select(total_pop_age_range) %>%
-  mutate('age_range'='50-54')  %>%
-  head(n=1)
-age_55_59 <- ages %>% select(56:60) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
-  mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
-  select(total_pop_age_range) %>%
-  mutate('age_range'='55-59')  %>%
-  head(n=1)
-age_60_64 <- ages %>% select(61:65) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
-  mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
-  select(total_pop_age_range) %>%
-  mutate('age_range'='60-64')  %>%
-  head(n=1)
-age_65_69 <- ages %>% select(66:70) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
-  mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
-  select(total_pop_age_range) %>%
-  mutate('age_range'='65-69')  %>%
-  head(n=1)
-age_70_74 <- ages %>% select(71:75) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
-  mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
-  select(total_pop_age_range) %>%
-  mutate('age_range'='70-74')  %>%
-  head(n=1)
-age_75_79 <- ages %>% select(75:79) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
-  mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
-  select(total_pop_age_range) %>%
-  mutate('age_range'='75-79')  %>%
-  head(n=1)
-age_80_over <- ages %>% select(81:ncol(.)) %>% mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
-  mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
-  select(total_pop_age_range) %>%
-  mutate('age_range'='80+')  %>%
-  head(n=1)
+
+# function to sum populations by age rage 
+population_by_age <- function(bracket, age_start, age_end) {
+  
+  # cols to select 
+  if(age_end == 'over') {
+    #because age zero is in and R is 1 indexed, the index of the column containing the right age is age plus 1
+    age_start <- as.integer(age_start) + 1
+    
+    age_range_calc <- ages %>% select(age_start:ncol(.)) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
+      mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
+      select(total_pop_age_range) %>%
+      mutate('age_range'=bracket) %>%
+      head(n=1) 
+    
+      
+  }
+  
+  else {
+    #because age zero is in and R is 1 indexed, the index of the column containing the right age is age plus 1
+    age_start <- as.integer(age_start) + 1
+    age_end <- as.integer(age_end) + 1
+    
+    age_range_calc <- ages %>% select(age_start:age_end) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
+      mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
+      select(total_pop_age_range) %>%
+      mutate('age_range'=bracket) %>%
+      head(n=1)
+    
+  }
+  
+  return(age_range_calc)
+  
+}
 
 
-populations_by_age <- rbind(under_45,
-                            age_45_49,
-                            age_50_54,
-                            age_55_59,
-                            age_60_64,
-                            age_65_69,
-                            age_70_74,
-                            age_75_79,
-                            age_80_over)
 
 # --- vaccination data ---
 # --- now retrieving from raw section --- 
-get_requests <- list.dirs('/data/data-lake/raw/nhs-weekly-vaccination-data/')
+  if(!dir.exists('/data/data-lake/raw/nhs-weekly-vaccination-data/')) {
+    print("Vaccination data has moved")
+  } else {
+    
+  
+  get_requests <- list.dirs('/data/data-lake/raw/nhs-weekly-vaccination-data/')
 
-file_name <- paste(tail(get_requests, n=1), 'nhs_weekly_vaccination_data.xlsx', sep='/')
+  file_name <- paste(tail(get_requests, n=1), 'nhs_weekly_vaccination_data.xlsx', sep='/')
 
-vac_data <- read_excel(file_name,
-                       sheet = "Gender, Age & Region", skip = 13)
+  if(!file.exists(file_name)) {
+    print("Vaccination file name has changed")
+    
+  } else {
+  
+  
+  vaccination_data_raw <- read_excel(file_name,
+                                   sheet = "LTLA", skip = 12)
+  
+  # for homepage remove first geog data
+   vaccination_data_summary <- head(vaccination_data_raw , 1)
+  
 
-get_age_total <- head(vac_data, 1)
+  # remove first 6 cols which are geog data
+   vaccination_data_summary  <- vaccination_data_summary  %>% select(7:ncol(.))
+  
+   if (startsWith(colnames(vaccination_data_summary)[1], '.')==T) {
+     print("wrong columns")
+   } else {
+   
 
-# not repeatable
-first_dose_vaccines <- get_age_total %>% select(3:20)
-second_dose_vaccines <- get_age_total %>% select(22:39)
+    # remove all columns that are just NA
+   vaccination_data_summary  <- vaccination_data_summary %>%  select(where(
+                    ~!all(is.na(.x))))
+    
+    
+    # what age groups are we working with
+    age_brackets <- strsplit(colnames(vaccination_data_summary), "[.]")
+    age_brackets <- map(age_brackets, 1) %>% as_vector() %>% unique()
+    age_brackets <- age_brackets[age_brackets != ""]
+    age_brackets
+    
+    age_bracket_populations <- data.frame(matrix(ncol=2, nrow=0))
+    colnames(age_bracket_populations) <- c('total_pop_age_range','age_range')
+    
+    # calculate population
+    for (x in age_brackets) {
+      
+      if (startsWith(x, "Under")==T) {
+        top_age <- str_split(x, ' ')
+        # because it is under this age needs to be -1
+        top_age <- as.integer(top_age[[1]][2]) - 1
+        top_age <- as.character(top_age)
+        bottom_age <- "18"
+      }
+      else {
+        if (endsWith(x,"+")) {
+          bottom_age <- str_split(x, "[+]")
+          bottom_age <- bottom_age[[1]][1]
+          #print(bottom_age)
+          
+          top_age <- 'over'
+        } 
+        else {
+          age_range <- str_split(x, "-")
+          bottom_age <- age_range[[1]][1]
+          top_age <- age_range[[1]][2]
+        }
+      }
+      
+      # call function
+      population_of_age_bracket <- population_by_age(x, bottom_age, top_age)
+      age_bracket_populations <- rbind(age_bracket_populations, population_of_age_bracket)
+    }
+   
+    
+    # size of dataframe should be length of colnames*2 + 1 (as theres a total column)
+    size_of_df_expected <- as.integer(length(age_brackets) + length(age_brackets)) + 1
+    if (dim(vaccination_data_summary)[2]!=size_of_df_expected) {
+      print("something wrong with even split between age ranges in first and second dose")
+    } else {
+      
+    
+    # this works because first and second dose will (should) have the same number of age bracket columns
+    first_dose_index_end <- length(age_brackets)
+    second_dose_index_start <- as.integer(length(age_brackets)) + 1
+    second_dose_index_end <- as.integer(length(age_brackets) + length(age_brackets))
+    
+    first_doses <- vaccination_data_summary %>% select(1:as.integer(first_dose_index_end))
+    second_doses <- vaccination_data_summary %>% select(all_of(second_dose_index_start):all_of(as.integer(second_dose_index_end)))
+    
+    # replace colnames with clean colnames 
+    colnames(first_doses) <- age_brackets
+    colnames(second_doses) <- age_brackets
+    
+    # add which doses are which
+    first_doses <- first_doses %>% mutate('dose'='First dose')
+    second_doses <- second_doses %>% mutate('dose'='Second dose')
+    
+    #combine doses 
+    both_doses <- rbind(first_doses, second_doses)
+    
+    # transpose longer - number of age brackets needs to be dynamic
+    both_doses_tr <- pivot_longer(both_doses, cols=1:as.integer(length(age_brackets)), names_to='age_range', values_to='number_of_doses')
+    
+    # join data sets
+    doses_by_population <- left_join(both_doses_tr, age_bracket_populations, by='age_range')
+    
+    final_doses_by_population <- doses_by_population %>%
+      mutate(prop_of_population = round((number_of_doses/total_pop_age_range)*100,1))
+    
+  
+    #glimpse(final_doses_by_population)
+    write_feather(final_doses_by_population, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/vaccination_rate.feather')
+    
+    
+        }
+      }
+   }
+  }
+}
 
-# sum the pairs of vaccinations
-#https://stackoverflow.com/questions/35083166/sum-column-every-n-column-in-a-data-frame-r
-first_dose <- (first_dose_vaccines[1:(ncol(first_dose_vaccines)-1)] + first_dose_vaccines[2:ncol(first_dose_vaccines)])[c(T,F)]
-second_dose <- (second_dose_vaccines[1:(ncol(second_dose_vaccines)-1)] + second_dose_vaccines[2:ncol(second_dose_vaccines)])[c(T,F)]
-
-# combine both doses 
-first_dose <- first_dose %>% mutate('dose'='First dose')
-second_dose <- second_dose %>% mutate('dose'='Second dose')
-
-# add headers
-col_headers<- c("under 45", "45-49", "50-54", '55-59',"60-64",'65-69','70-74','75-79','80+', 'dose')
-
-colnames(first_dose) <- col_headers
-colnames(second_dose) <- col_headers
-
-both_doses <- rbind(first_dose, second_dose)
-
-# transpose longer
-both_doses_tr <- pivot_longer(both_doses, cols=1:9, names_to='age_range', values_to='number_of_doses')
-
-# join data sets
-doses_by_population <- left_join(both_doses_tr, populations_by_age, by='age_range')
-
-final_doses_by_population <- doses_by_population %>%
-  mutate(prop_of_population = round((number_of_doses/total_pop_age_range)*100,1))
-
-#glimpse(final_doses_by_population)
-write_feather(final_doses_by_population, '/home/izzy-everall/areas2focus_data/vaccination_rate.feather')
-
-
-
-
+  
