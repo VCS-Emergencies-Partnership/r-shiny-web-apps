@@ -99,12 +99,6 @@ flood_overlap <- function (x) {
 # #create output dataframe
 output_flood_data = NULL
 
-#test <- polygons_of_interest[[24]]
-#test_url <- URLencode(test)
-#test_poly <- st_read(test_url)
-#test_simplify <- ms_simplify(test_poly, keep=0.01, keep_shapes=T)
-
-
 # #for each polygon
 for (i in polygons_of_interest) {
   #retrieve msoas it overlaps with - only returns msoas where flood is predicted at msoa as vulnerability decile of >=9
@@ -190,10 +184,6 @@ if (is.null(output_flood_data)) {
   select(-'QDIAL', -'FWS_TACODE', -'AREA', -'TA_NAME',-'DESCRIP',-'LA_NAME',-'RIVER_SEA',-'polygon',-'floodArea.riverOrSea',-'timeMessageChanged',-'timeRaised',-'timeSeverityChanged')
 
 
-
-# write to file 
-write_sf(final_flood_warning_info_of_interest, './flooding_metoffice_data/current_live_metoffice_floodwarnings.geojson')
-
 # try three smaller output files:
 # 1). # flood area id and polygon
 flood_areaid2polygon <- final_flood_warning_info_of_interest %>%
@@ -224,17 +214,6 @@ write_sf(centroids, './flooding_metoffice_data/current_live_warnings_points.geoj
 }
 
 }
-
-# 
-# # convert long and lat to dataframe columns 
-#  centroids <- centroids %>%
-#    mutate(long = unlist(map(centroids$geometry,1)),
-#           lat = unlist(map(centroids$geometry,2))) %>%
-#    st_drop_geometry()
-#  
-#  centroids_df <- as.data.frame(centroids)
-
-
 
 
 
