@@ -36,6 +36,7 @@ if (!file.exists(covid_file)) {
   latest_covid_data <- retrieve_covid_data %>% rename(LAD19CD=areaCode) %>% 
   # todays seven day rolling average
   filter(as.Date(date) == as.Date(latest_specimen_date) & str_detect(LAD19CD, "^E"))
+  
 
 
   # ---- read in area lookups ---
@@ -93,7 +94,9 @@ if (!file.exists(covid_file)) {
   # latest covid data
   latest_covid_data2tactical_cell <- rbind(latest_covid_data2tactical_cell, duplicate_hackney, duplicate_city, duplicate_cornwall, duplicate_isle_scilly)
   latest_covid_data2tactical_cell <- latest_covid_data2tactical_cell %>%
-    select(-LAD19CD) %>% rename(LAD19CD='clean_LAD19CD')
+    select(-LAD19CD) %>% rename(LAD19CD='clean_LAD19CD') %>%
+    # remove NAs that have been introduced by cleaning stuff up.
+    filter(!is.na(areaName))
   
   #glimpse(latest_covid_data2tactical_cell)
 
