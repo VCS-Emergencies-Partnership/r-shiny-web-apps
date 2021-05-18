@@ -35,6 +35,8 @@ header <- dashboardHeader(title = "", titleWidth = "300px",
                                   tags$li(class="dropdown",
                                           actionLink("e_catalogue", "Insight catalouge", icon=icon("fas fa-book-open"))),
                                   tags$li(class="dropdown",
+                                          actionLink("vcs_reports", "VCS reports", icon=icon("fas fa-file"))),
+                                  tags$li(class="dropdown",
                                           actionLink("internal_reports", "Partnership insight", icon=icon("fas fa-lock"))),
                                   tags$li(class="dropdown",
                                           actionLink("community_assets", "Community assets map", icon=icon("fas fa-map-marked"), 
@@ -63,6 +65,7 @@ sidebar <- dashboardSidebar(
               # -- trying conditional panel ---
               
               menuItem(HTML("Insight catalouge"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
+              menuItem(HTML("VCS reports"), tabName="vcs_report_sidebar", icon=icon("fas fa-file")),
               menuItem(HTML("Partnership insight"), tabName="internal_reports_from_sidebar", icon=icon("fas fa-lock")),
               menuItem(HTML("Community assets web map"), tabName="community_assets", icon=icon("fas fa-map-marked")),
               
