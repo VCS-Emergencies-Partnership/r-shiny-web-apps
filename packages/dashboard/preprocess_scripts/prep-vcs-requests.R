@@ -27,7 +27,8 @@ file_name <- paste(tail(get_requests, n=1), 'vcsep-requests-for-support.csv', se
 
 if (!file.exists(file_name)) {
   # break send warning 
-  print("problem - file doesn't exist")
+  message <- paste0('Promblem:', file_name, "or path doesn't exist")
+  stop(message)
 } else {
   
   requests <- read_csv(file_name)
@@ -39,7 +40,7 @@ date_format <- str_split(date_of_last_update, '-')
 date_of_last_update <- paste0(date_format[[1]][3],"-",date_format[[1]][2], '-', date_format[[1]][1])
 
 if (date != date_of_last_update) {
-  print("problem - NOT TODAYS DATA")
+  stop("problem - NOT TODAYS DATA")
   
   } else {
 
@@ -103,7 +104,7 @@ all_requests <- requests_geocoded %>% mutate('request_status'=case_when(!grepl("
 #glimpse(all_requests)
 
 # write feather 
-write_feather(all_requests, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/all_requests.feather')
+write_feather(all_requests, '~/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/all_requests.feather')
 
    }
   }
