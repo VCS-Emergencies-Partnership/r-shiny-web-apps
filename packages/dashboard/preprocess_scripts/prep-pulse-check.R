@@ -8,7 +8,8 @@ file_name <- paste(tail(get_pulse, n=1), 'pulse_check_raw.csv', sep='/')
 # Does file exist 
 if (!file.exists(file_name)) {
   # break send warning 
-  print("problem")
+  message <- paste0("Problem:", file_name, 'or directory', get_pulse, "don't exist")
+  stop(message)
 } else {
  # READ FILE
   pulse_needed <- read_csv(file_name)
@@ -25,7 +26,7 @@ if (!file.exists(file_name)) {
   # of if theres no columns containing the following sectors comment the question has changed
   if (all(area_names_still_present)==F ||
      dim(question_still_present_cols)[2] == 0) {
-     print("broken")
+     stop("Couldn't find required columns in pulse check survey")
   
   } else {
 
@@ -60,8 +61,8 @@ if (!file.exists(file_name)) {
                                                              TRUE ~ as.character(.$clean_groups)))
 
 
-# -- write to file ---
-write_feather(concerns_by_type, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/pulse_check_summary.feather')
+  # -- write to file ---
+  write_feather(concerns_by_type, '~/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/pulse_check_summary.feather')
 
 
  }

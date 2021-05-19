@@ -140,13 +140,6 @@ if (is.null(output_flood_data)) {
   
   flood_warning_information <- flood_warning_information %>% 
     mutate('messageurl'=paste('https://flood-warning-information.service.gov.uk/target-area/',floodAreaID, sep=''))
-  # 
-  # #join the data
-  #final_flood_warning_info_of_interest <- left_join(output_flood_data, flood_warning_information) %>% unique() %>%
-  #  select(-'QDIAL', -'FWS_TACODE', -'AREA', -'TA_NAME',-'DESCRIP',-'LA_NAME',-'RIVER_SEA',-'polygon',-'floodArea.riverOrSea',-'timeMessageChanged',-'timeRaised',-'timeSeverityChanged')
-  
-  # write to file 
-  write_sf(flood_warning_information, './flooding_metoffice_data/current_live_metoffice_floodwarnings.geojson')
   
   # try three smaller output files:
   # 1). # flood area id and polygon
@@ -155,19 +148,15 @@ if (is.null(output_flood_data)) {
     unique()
   
   # write to file
-  write_sf(flood_areaid2polygon, './flooding_metoffice_data/current_live_warnings_polygons.geojson')
+  write_sf(flood_areaid2polygon, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_polygons.geojson')
   
   # 2). .feather with metadata - but no warnings
   flood_areaid2lad2metadata <- flood_warning_information
-  
-  write_feather(flood_areaid2lad2metadata, './flooding_metoffice_data/current_live_warnings_metadata.feather')
+  write_feather(flood_areaid2lad2metadata, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_metadata.feather')
   
   # 3) # add centroids to data
   # transform to utm because st_centroid doesn't work with lng lat - or won't be accurate specifically i think
-
-  
   centroids <- flood_warning_information
-
   write_sf(centroids, './flooding_metoffice_data/current_live_warnings_points.geojson')
   
   
@@ -191,13 +180,13 @@ flood_areaid2polygon <- final_flood_warning_info_of_interest %>%
   unique()
 
 # write to file
-write_sf(flood_areaid2polygon, './flooding_metoffice_data/current_live_warnings_polygons.geojson')
+write_sf(flood_areaid2polygon, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_polygons.geojson')
 
 # 2). .feather with metadata
 flood_areaid2lad2metadata <- final_flood_warning_info_of_interest %>%
   st_drop_geometry()
 
-write_feather(flood_areaid2lad2metadata, './flooding_metoffice_data/current_live_warnings_metadata.feather')
+write_feather(flood_areaid2lad2metadata, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_metadata.feather')
 
 # 3) # add centroids to data
 # transform to utm because st_centroid doesn't work with lng lat - or won't be accurate specifically i think
@@ -208,7 +197,7 @@ centroids <- st_centroid(final_flood_warnings_centroids) %>%
    # select lad19CD and geometry 
    st_transform(4326)
 
-write_sf(centroids, './flooding_metoffice_data/current_live_warnings_points.geojson')
+write_sf(centroids, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_points.geojson')
 
   
 }

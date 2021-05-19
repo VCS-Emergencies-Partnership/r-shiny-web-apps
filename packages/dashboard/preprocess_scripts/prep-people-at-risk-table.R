@@ -41,8 +41,8 @@ eng_pop <- unique(pop_eng_lad_tc$eng_pop)
 does_file_exist <- function(input_file) {
   
   if (!file.exists(input_file)){
-    
-    print("missing input file")
+    message <- paste0('could not find file', input_file)
+    stop(message)
     #break script
     
   } else {
@@ -68,7 +68,8 @@ correct_columns <- function(columns_expected, data_read) {
   # are all the columns i use with easy names there?
   cols_still_present <- (columns_expected %in% colnames(data_read))
   if (all(cols_still_present)==F) {
-    print("Problem - column names changed")
+    col_message <- paste0('Columns not found')
+    stop(col_message)
     #break
   }
   
@@ -342,11 +343,11 @@ any_columns_of_just_NA <- all_data %>% select(
   )
 
 if (dim(any_columns_of_just_NA)[2]!=dim(all_data)[2]) {
-  print("Something weirds happened - column with just NA")
+  stop("Something wrong - a column with just NAs is present")
 } else {
   #glimpse(all_data)
   # --- save all data as a .feather file ---
-  write_feather(all_data, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/people_at_risk/people_at_risk_table/people-at-risk.feather')
+  write_feather(all_data, '~/r-shiny-web-apps/packages/dashboard/data/people_at_risk/people_at_risk_table/people-at-risk.feather')
   
 }
 

@@ -7,8 +7,8 @@ covid_file <- paste0(tail(covid_dirs, n=1), '/coronavirus_cases.csv')
 
 # Does the file exist 
 if (!file.exists(covid_file)) {
-  
-  print("Problem - file doesn't exist")
+  message <- paste('Problem:',covid_file, "doesn't exist")
+  stop(message)
   
 } else {
   
@@ -24,7 +24,7 @@ if (!file.exists(covid_file)) {
   
   if (all(cols_still_present)==F) {
     
-    print("Problem - column names changed")
+    stop("Problem - column names changed")
     
   } else {
   
@@ -55,9 +55,9 @@ if (!file.exists(covid_file)) {
   
   if (dim(test_combined_auth_present)[1]==0) {
     # do not need to correct for combined authorities
-    print('No need to correct for combined auhtorities')
+    #print('No need to correct for combined auhtorities')
     #glimpse(latest_covid_data2tactical_cell)
-    #write_feather(latest_covid_data2tactical_cell, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather')
+    write_feather(latest_covid_data2tactical_cell, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather')
     
   } else {
   # correct for combined authorities
@@ -101,7 +101,7 @@ if (!file.exists(covid_file)) {
   #glimpse(latest_covid_data2tactical_cell)
 
   # --- local file ---
-  write_feather(latest_covid_data2tactical_cell, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather')
+  write_feather(latest_covid_data2tactical_cell, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather')
 
      }
   }

@@ -8,7 +8,7 @@ library(purrr)
 pop_data <- '/data/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx'
 
 if (!file.exists(pop_data)) {
-  print("Population data missing")
+  stop("Population data missing")
 } else {
   
 pop_eng_2019 <- read_excel('/data/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx', sheet = "Mid-2019 Persons", skip = 4)
@@ -55,7 +55,7 @@ population_by_age <- function(bracket, age_start, age_end) {
 # --- vaccination data ---
 # --- now retrieving from raw section --- 
   if(!dir.exists('/data/data-lake/raw/nhs-weekly-vaccination-data/')) {
-    print("Vaccination data has moved")
+    stop("Vaccination data has moved")
   } else {
     
   
@@ -64,7 +64,8 @@ population_by_age <- function(bracket, age_start, age_end) {
   file_name <- paste(tail(get_requests, n=1), 'nhs_weekly_vaccination_data.xlsx', sep='/')
 
   if(!file.exists(file_name)) {
-    print("Vaccination file name has changed")
+    
+    stop("Vaccination file name has changed")
     
   } else {
   
@@ -80,7 +81,7 @@ population_by_age <- function(bracket, age_start, age_end) {
    vaccination_data_summary  <- vaccination_data_summary  %>% select(7:ncol(.))
   
    if (startsWith(colnames(vaccination_data_summary)[1], '.')==T) {
-     print("wrong columns")
+     stop("Vaccination columns changed")
    } else {
    
 
@@ -132,10 +133,11 @@ population_by_age <- function(bracket, age_start, age_end) {
     # size of dataframe should be length of colnames*2 + 1 (as theres a total column)
     size_of_df_expected <- as.integer(length(age_brackets) + length(age_brackets)) + 1
     if (dim(vaccination_data_summary)[2]!=size_of_df_expected) {
-      print("something wrong with even split between age ranges in first and second dose")
+      
+      stop("something wrong with even split between age ranges in first and second dose")
+      
     } else {
       
-    
     # this works because first and second dose will (should) have the same number of age bracket columns
     first_dose_index_end <- length(age_brackets)
     second_dose_index_start <- as.integer(length(age_brackets)) + 1
@@ -164,9 +166,8 @@ population_by_age <- function(bracket, age_start, age_end) {
     final_doses_by_population <- doses_by_population %>%
       mutate(prop_of_population = round((number_of_doses/total_pop_age_range)*100,1))
     
-  
     #glimpse(final_doses_by_population)
-    write_feather(final_doses_by_population, '/home/izzy-everall/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/vaccination_rate.feather')
+    write_feather(final_doses_by_population, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/vaccination_rate.feather')
     
     
         }
