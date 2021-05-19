@@ -25,29 +25,30 @@ source("./global.R")
 
 # ---  dashboard --- #
 # --- header --- #
-header <- dashboardHeader(title = "", titleWidth = "300px",
-                          tags$li(class = "dropdown", 
-                                  tags$li(class="dropdown",
-                                          actionLink("home", "Home", icon=icon("home"))),
-                                  tags$li(class="dropdown",
-                                          actionLink("RI_tool","Risk Indicator Tool", icon=icon("fas fa-map-signs"))
-                                  ),
-                                  tags$li(class="dropdown",
-                                          actionLink("e_catalogue", "Insight catalogue", icon=icon("fas fa-book-open"))),
-                                  tags$li(class="dropdown",
-                                          actionLink("vcs_reports_header", "VCS reports", icon=icon("fas fa-file"))),
-                                                     
-                                  tags$li(class="dropdown",
-                                          actionLink("internal_reports", "Partnership insight", icon=icon("fas fa-lock"))),
-                                  tags$li(class="dropdown",
-                                          actionLink("community_assets_header", "Community assets map", icon=icon("fas fa-map-marked"))),
-                                  tags$li(class="dropdown",
-                                          actionLink("help", "Help", icon=icon("far fa-question-circle"))),
-                                  tags$li(class="dropdown",
-                                          actionLink("references", "References", icon=icon('fas fa-feather-alt')))
-                          ))
+# header <- dashboardHeader(title = "", titleWidth = "300px",
+#                           
+#                           tags$li(class = "dropdown", 
+#                                   tags$li(class="dropdown",
+#                                           actionLink("home", "Home", icon=icon("home"))),
+#                                   tags$li(class="dropdown",
+#                                           actionLink("RI_tool","Risk Indicator Tool", icon=icon("fas fa-map-signs"))
+#                                   ),
+#                                   tags$li(class="dropdown",
+#                                           actionLink("e_catalogue", "Public resources", icon=icon("fas fa-book-open"))),
+#                                   tags$li(class="dropdown",
+#                                           actionLink("vcs_reports_header", "Partner reports", icon=icon("fas fa-file"))),
+#                                                      
+#                                   tags$li(class="dropdown",
+#                                           actionLink("internal_reports", "Internal dashboards", icon=icon("fas fa-lock"))),
+#                                   tags$li(class="dropdown",
+#                                           actionLink("community_assets_header", "Community assets map", icon=icon("fas fa-map-marked"))),
+#                                   tags$li(class="dropdown",
+#                                           actionLink("help", "Help", icon=icon("far fa-question-circle"))),
+#                                   tags$li(class="dropdown",
+#                                           actionLink("references", "References", icon=icon('fas fa-feather-alt')))
+#                           ))
 
-
+header <- dashboardHeader(title = "", titleWidth = "300px")
 
 # --- side bar --- #
 sidebar <- dashboardSidebar(
@@ -64,11 +65,11 @@ sidebar <- dashboardSidebar(
               
               # -- trying conditional panel ---
               
-              menuItem(HTML("Insight catalogue"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
-              menuItem(HTML("VCS reports"), tabName="vcs_report_sidebar", icon=icon("fas fa-file")),
-              menuItem(HTML("Partnership insight"), tabName="internal_reports_from_sidebar", icon=icon("fas fa-lock")),
+              menuItem(HTML("Public resources"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
+              menuItem(HTML("Partner reports"), tabName="vcs_report_sidebar", icon=icon("fas fa-file")),
+              menuItem(HTML("Internal dashboards"), tabName="internal_reports_from_sidebar", icon=icon("fas fa-lock")),
               menuItem(HTML("Community assets web map"), tabName="community_assets_sidebar", icon=icon("fas fa-map-marked")),
-              
+              menuItem(HTML("Latest News"), tabName="latest_news_sidebar", icon=icon("fas fa-newspaper")),
               menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
               menuItem("References", tabName='references', icon=icon('fas fa-feather-alt'))
               
@@ -120,17 +121,17 @@ body <- dashboardBody(
                                   tags$em(tags$strong("click on the title to go to the tool"))))),
                      
                      column(width=4,
-                            box(title=actionLink("e_catalogue_box","Insight catalogue"),width=NULL, 
+                            box(title=actionLink("e_catalogue_box","Public resources"),width=NULL, 
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-book-open"),
-                                p("The Insight catalogue is a collection of useful
+                                p("A collection of useful
                                   publicly available insight resources that could be of use to
                                   the VCS community.", tags$br(),
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
                      column(width=4,
-                            box(title=actionLink("vcs_reports_box","VCS reports"),
+                            box(title=actionLink("vcs_reports_box","Partner reports"),
                                 width=NULL, 
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-file"),
@@ -141,7 +142,7 @@ body <- dashboardBody(
                      fluidRow(width=NULL, style="padding-right:20px; padding-left:20px; padding-bottom:20px; padding-top:0px",
                               
                         column(width=4,
-                            box(title=actionLink("internal_reports_from_box", "Partnership insight"),
+                            box(title=actionLink("internal_reports_from_box", "Internal dashboards"),
                                 width=NULL,
                                 collapsible = T, 
                                 collapsed=T,
@@ -167,7 +168,7 @@ body <- dashboardBody(
                             box(title=actionLink("latest_news_box", "Latest news"),
                                 width=NULL,
                                 collapsible = T, collapsed=T,
-                                icon=icon("fas fa-map-marked"),
+                                icon=icon("fas fa-newspaper"),
                                 p("Latest News from the partnership.", tags$br(),
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to find out more")))))
@@ -378,8 +379,8 @@ body <- dashboardBody(
             fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
                      column(width=12,
                             panel(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
-                                  column(width=6, p(h2("Insight catalogue"), "This is a bank of useful publicly available 
-                                            resources that could be useful to the VCS.", tags$br(), 
+                                  column(width=6, p(h2("Public resources"), "This is a collection of useful publicly available 
+                                            resources that could be useful to the Voluntary Community Sector.", 
                                                     tags$a(href="https://vcsep.org.uk/", target="_blank", "Contact us"), 
                                                     "if you know of any further resources that may be of use.",
                                             tags$br(), 

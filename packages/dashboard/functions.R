@@ -2006,7 +2006,7 @@ internal_report_link <- function() {
 
 reports_from_the_sector_link <- function() {
   return(showModal(modalDialog(
-    title = "You are about to leave this page to access Reports from the Sector",
+    title = "You are about to leave this page to access Partner Reports",
     div(
       p("Press", tags$strong("continue"), "to proceed to the reports."),
       tags$br(),
@@ -2178,15 +2178,20 @@ plot_resource_cat <- function(table) {
 
 
 search_resources <- function(table, search_this) {
+  
   # filter df if 
   search_results <- table %>% 
-    filter_all(any_vars(str_detect(., pattern = search_this))) #%>%
+    filter_all(any_vars(grepl(search_this, ., ignore.case=T))) #%>%
   #select('Title')
   
   # were there any results:
-  glimpse(search_results)
+  #glimpse(search_results)
   if(dim(search_results)[1]==0){
-    print('blah')
+    return(
+      p(h2(tags$strong("No resources contained the search term ", tags$em(search_this))),
+        
+        h4("Please try another search term - or press X to see all the public resources listed"))
+    )
   } else {
   
   resources_info <- search_results[order(search_results$Title),]
