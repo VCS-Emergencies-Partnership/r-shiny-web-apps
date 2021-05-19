@@ -403,15 +403,15 @@ body <- dashboardBody(
             )
             
     ),
-    tabItem(tabName="latest_news_tab", style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
-            fluidRow(width=NULL,
+    tabItem(tabName="latest_news_tab", 
+            fluidRow(width=NULL,style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
                      panel(h2("Latest news from the Emergencies Partnership")),
-                     fluidRow(width=NULL,
-                              column(width=4,style="padding-right:30px; padding-left:30px;", tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
-                                    box(width=NULL,
+                     fluidRow(width=NULL,style="padding-right:30px; padding-left:30px;",
+                              column(width=4, tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
+                                    box(width=NULL, height='750px',
                                         headerBorder=F,
                                         a(class="twitter-timeline", href="https://twitter.com/vcsep"),
-                                        style = "height:698px; overflow-y: scroll;overflow-x: scroll;margin-top:-40px;padding-top:-40px")),
+                                        style = "height:80vh; overflow-y: scroll;overflow-x: scroll;margin-top:-40px;padding-top:-40px")),
                               column(width=4, 
                                      box(title="Coming up", width=NULL,
                                          div(
