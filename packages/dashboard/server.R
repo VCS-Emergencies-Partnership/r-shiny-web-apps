@@ -20,11 +20,11 @@ server = function(input, output, session) {
     
   })
   
-  # observeEvent(input$RI_tool, {
-  #   newtab <- switch(input$sidebar_id, "unmetneed")
-  #   updateTabItems(session, "sidebar_id", newtab)
-  #   
-  # })
+   observeEvent(input$latest_news_box, {
+     newtab <- switch(input$sidebar_id, "latest_news_tab")
+     updateTabItems(session, "sidebar_id", newtab)
+     
+   })
   
   observeEvent(input$RI_tool_box, {
     newtab <- switch(input$sidebar_id, "unmetneed")
