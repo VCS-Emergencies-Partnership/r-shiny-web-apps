@@ -33,14 +33,14 @@ header <- dashboardHeader(title = "", titleWidth = "300px",
                                           actionLink("RI_tool","Risk Indicator Tool", icon=icon("fas fa-map-signs"))
                                   ),
                                   tags$li(class="dropdown",
-                                          actionLink("e_catalogue", "Insight catalouge", icon=icon("fas fa-book-open"))),
+                                          actionLink("e_catalogue", "Insight catalogue", icon=icon("fas fa-book-open"))),
                                   tags$li(class="dropdown",
-                                          actionLink("vcs_reports", "VCS reports", icon=icon("fas fa-file"))),
+                                          actionLink("vcs_reports_header", "VCS reports", icon=icon("fas fa-file"))),
+                                                     
                                   tags$li(class="dropdown",
                                           actionLink("internal_reports", "Partnership insight", icon=icon("fas fa-lock"))),
                                   tags$li(class="dropdown",
-                                          actionLink("community_assets", "Community assets map", icon=icon("fas fa-map-marked"), 
-                                                     onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')")),
+                                          actionLink("community_assets_header", "Community assets map", icon=icon("fas fa-map-marked"))),
                                   tags$li(class="dropdown",
                                           actionLink("help", "Help", icon=icon("far fa-question-circle"))),
                                   tags$li(class="dropdown",
@@ -64,10 +64,10 @@ sidebar <- dashboardSidebar(
               
               # -- trying conditional panel ---
               
-              menuItem(HTML("Insight catalouge"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
+              menuItem(HTML("Insight catalogue"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
               menuItem(HTML("VCS reports"), tabName="vcs_report_sidebar", icon=icon("fas fa-file")),
               menuItem(HTML("Partnership insight"), tabName="internal_reports_from_sidebar", icon=icon("fas fa-lock")),
-              menuItem(HTML("Community assets web map"), tabName="community_assets", icon=icon("fas fa-map-marked")),
+              menuItem(HTML("Community assets web map"), tabName="community_assets_sidebar", icon=icon("fas fa-map-marked")),
               
               menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
               menuItem("References", tabName='references', icon=icon('fas fa-feather-alt'))
@@ -130,16 +130,17 @@ body <- dashboardBody(
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
                      column(width=4,
-                            box(title=actionLink("vcs_reports","VCS reports"),width=NULL, 
+                            box(title=actionLink("vcs_reports_box","VCS reports"),
+                                width=NULL, 
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-file"),
-                                p("A collection of insight reports from the
-                                  VCS parntership", tags$br(),
+                                p("Insightful and thought-provoking reports that we and
+                                  our parnters have written for the voluntary and community sector.", tags$br(),
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the reports")))))),
-                     fluidRow(width=NULL, style="padding-right:100px; padding-left:100px; padding-bottom:20px; padding-top:0px",
+                     fluidRow(width=NULL, style="padding-right:20px; padding-left:20px; padding-bottom:20px; padding-top:0px",
                               
-                        column(width=6, style="padding-left:80px;",
+                        column(width=4,
                             box(title=actionLink("internal_reports_from_box", "Partnership insight"),
                                 width=NULL,
                                 collapsible = T, 
@@ -153,16 +154,24 @@ body <- dashboardBody(
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
-                     column(width=6, style="padding-right:80px;",
-                            box(title=actionLink("community_assets", "Community assets map", 
-                                                 onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')")
-                                ,width=NULL,
+                     column(width=4,
+                            box(title=actionLink("community_assets_box", "Community assets map"),
+                                width=NULL,
                                 collapsible = T, collapsed=T,
                                 icon=icon("fas fa-map-marked"),
                                 p("Community assets map allows you to explore and understand 
                                     assets in your area.", tags$br(),
                                   tags$br(),
-                                  tags$strong(tags$em("click on the title to go to the tool")))))),
+                                  tags$strong(tags$em("click on the title to go to the tool"))))),
+                     column(width=4,
+                            box(title=actionLink("latest_news_box", "Latest news"),
+                                width=NULL,
+                                collapsible = T, collapsed=T,
+                                icon=icon("fas fa-map-marked"),
+                                p("Latest News from the partnership.", tags$br(),
+                                  tags$br(),
+                                  tags$strong(tags$em("click on the title to find out more")))))
+                     ),
             
             # row three 
             fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",

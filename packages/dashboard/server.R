@@ -3709,7 +3709,8 @@ server = function(input, output, session) {
   
   
   
-  
+  # going to external sites
+  # Dashboards
   observeEvent(input$internal_reports, {
     internal_report_link()
   })
@@ -3723,6 +3724,33 @@ server = function(input, output, session) {
   })
   
   
+  
+  # Reports from the sector
+  observeEvent(input$vcs_reports_box, {
+    reports_from_the_sector_link()
+  })
+  
+  observeEvent(req(input$sidebar_id == 'vcs_report_sidebar'), {
+    reports_from_the_sector_link()
+    })
+  
+  observeEvent(input$vcs_reports_header, {
+    reports_from_the_sector_link()
+  })
+  
+  # community assets map
+  observeEvent(input$community_assets_header,{
+    webmap_link()
+    
+  })
+  
+  observeEvent(req(input$sidebar_id == 'community_assets_sidebar'),{
+    webmap_link()
+  })
+  
+  observeEvent(input$community_assets_box,{
+    webmap_link()
+  })
   
   # --- resource bank ---
   
