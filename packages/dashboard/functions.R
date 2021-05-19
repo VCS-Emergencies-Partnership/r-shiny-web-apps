@@ -2004,6 +2004,50 @@ internal_report_link <- function() {
 }
 
 
+reports_from_the_sector_link <- function() {
+  return(showModal(modalDialog(
+    title = "You are about to leave this page to access Reports from the Sector",
+    div(
+      p("Press", tags$strong("continue"), "to proceed to the reports."),
+      tags$br(),
+      p("Visit our website to learn more about our work.")),
+    
+    footer = tagList(
+      actionButton('rfs_continue',label='Continue', onclick ="window.open('https://vcsep.org.uk/reports-from-the-sector', '_blank')"),
+      #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
+      #actionButton('rfs_access',label='Request access', onclick=mailToLink),
+      actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
+      modalButton('Close')
+    )
+  )
+  )
+  )
+}
+
+
+
+webmap_link <- function() {
+  return(showModal(modalDialog(
+    title = "You are about to leave this page to access the VCS Community Assets webmap",
+    div(
+      p("Press", tags$strong("continue"), "to proceed to the map."),
+      tags$br(),
+      p("Visit our website to learn more about our work.")),
+    
+    footer = tagList(
+      actionButton('rfs_continue',label='Continue', onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')"),
+      #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
+      #actionButton('rfs_access',label='Request access', onclick=mailToLink),
+      actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
+      modalButton('Close')
+    )
+  )
+  )
+  )
+}
+
+
+
 rfs_highlights <- function(dataset, which_highlight) {
   if(which_highlight == 1) {
     no_requests <- nrow(dataset)
@@ -2133,15 +2177,17 @@ plot_resource_cat <- function(table) {
 
 
 
-
-
-
 search_resources <- function(table, search_this) {
   # filter df if 
   search_results <- table %>% 
     filter_all(any_vars(str_detect(., pattern = search_this))) #%>%
   #select('Title')
   
+  # were there any results:
+  glimpse(search_results)
+  if(dim(search_results)[1]==0){
+    print('blah')
+  } else {
   
   resources_info <- search_results[order(search_results$Title),]
   
@@ -2179,9 +2225,8 @@ search_resources <- function(table, search_this) {
                         p(resource_wanted$`Description / Usage`)))
       )
     )
-    
-    
   })
+  }
 }
 
 
