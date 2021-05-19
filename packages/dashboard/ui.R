@@ -69,7 +69,7 @@ sidebar <- dashboardSidebar(
               menuItem(HTML("Partner reports"), tabName="vcs_report_sidebar", icon=icon("fas fa-file")),
               menuItem(HTML("Internal dashboards"), tabName="internal_reports_from_sidebar", icon=icon("fas fa-lock")),
               menuItem(HTML("Community assets web map"), tabName="community_assets_sidebar", icon=icon("fas fa-map-marked")),
-              menuItem(HTML("Latest News"), tabName="latest_news_sidebar", icon=icon("fas fa-newspaper")),
+              menuItem(HTML("Latest News"), tabName="latest_news_tab", icon=icon("fas fa-newspaper")),
               menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
               menuItem("References", tabName='references', icon=icon('fas fa-feather-alt'))
               
@@ -403,6 +403,27 @@ body <- dashboardBody(
             )
             
     ),
+    tabItem(tabName="latest_news_tab", style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
+            fluidRow(width=NULL,
+                     panel(h2("Latest news from the Emergencies Partnership")),
+                     fluidRow(width=NULL,
+                              column(width=4,style="padding-right:30px; padding-left:30px;", tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
+                                    box(width=NULL,
+                                        headerBorder=F,
+                                        a(class="twitter-timeline", href="https://twitter.com/vcsep"),
+                                        style = "height:698px; overflow-y: scroll;overflow-x: scroll;margin-top:-40px;padding-top:-40px")),
+                              column(width=4, 
+                                     box(title="Coming up", width=NULL,
+                                         div(
+                                           tags$li(p(tags$strong("CKAN")))
+                                         ))),
+                              column(width=4, 
+                                     box(title="In the press", width=NULL,
+                                         div(tags$li(tags$a(href="https://www.computerweekly.com/news/252500063/How-the-British-Red-Cross-harnessed-digital-mapping-honed-abroad-for-the-domestic-Covid-19-crisis", target="_blank", "Computer Weekly")),
+                                             tags$li(tags$a(href="https://emergencyservicestimes.com/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid/", target="_blank", "Emergency Services Times")),
+                                             tags$li(tags$a(href="https://www.geoconnexion.com/news/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19", target="_blank", "Geoconnexion")),
+                                             tags$li(tags$a(href="https://www.charitytimes.com/ct/Digital-mapping-transforming-UK-charities-response-to-emergencies.php", target="_blank", "Charity Times (behind paywall)"))
+                                             )))))),
     
     tabItem(tabName='Help',
             column(width = 12, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
