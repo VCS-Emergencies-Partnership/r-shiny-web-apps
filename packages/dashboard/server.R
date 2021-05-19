@@ -7,11 +7,6 @@ server = function(input, output, session) {
     
   })
   
-  observeEvent(input$e_catalogue, {
-    newtab <- switch(input$sidebar_id, "resource_catalogue")
-    updateTabItems(session, "sidebar_id", newtab)
-  })
-  
   observeEvent(input$e_catalogue_box, {
     newtab <- switch(input$sidebar_id, "resource_catalogue")
     updateTabItems(session, "sidebar_id", newtab)
@@ -25,11 +20,11 @@ server = function(input, output, session) {
     
   })
   
-  observeEvent(input$RI_tool, {
-    newtab <- switch(input$sidebar_id, "unmetneed")
-    updateTabItems(session, "sidebar_id", newtab)
-    
-  })
+  # observeEvent(input$RI_tool, {
+  #   newtab <- switch(input$sidebar_id, "unmetneed")
+  #   updateTabItems(session, "sidebar_id", newtab)
+  #   
+  # })
   
   observeEvent(input$RI_tool_box, {
     newtab <- switch(input$sidebar_id, "unmetneed")
@@ -3711,10 +3706,6 @@ server = function(input, output, session) {
   
   # going to external sites
   # Dashboards
-  observeEvent(input$internal_reports, {
-    internal_report_link()
-  })
-  
   observeEvent(input$internal_reports_from_box, {
     internal_report_link()
   })
@@ -3734,15 +3725,7 @@ server = function(input, output, session) {
     reports_from_the_sector_link()
     })
   
-  observeEvent(input$vcs_reports_header, {
-    reports_from_the_sector_link()
-  })
   
-  # community assets map
-  observeEvent(input$community_assets_header,{
-    webmap_link()
-    
-  })
   
   observeEvent(req(input$sidebar_id == 'community_assets_sidebar'),{
     webmap_link()
@@ -3787,6 +3770,7 @@ server = function(input, output, session) {
     
   })
   
+
   
 }
 
