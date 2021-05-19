@@ -347,7 +347,7 @@ if (dim(any_columns_of_just_NA)[2]!=dim(all_data)[2]) {
 } else {
   #glimpse(all_data)
   # --- save all data as a .feather file ---
-  write_feather(all_data, '~/r-shiny-web-apps/packages/dashboard/data/people_at_risk/people_at_risk_table/people-at-risk.feather')
+  write_feather(all_data, '~/r-shiny-web-apps/packages/dashboard/data/people_at_risk/people-at-risk.feather')
   
 }
 
