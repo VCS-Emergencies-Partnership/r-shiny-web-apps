@@ -411,19 +411,20 @@ body <- dashboardBody(
                                     box(width=NULL, height='750px',
                                         headerBorder=F,
                                         a(class="twitter-timeline", href="https://twitter.com/vcsep"),
-                                        style = "height:80vh; overflow-y: scroll;overflow-x: scroll;margin-top:-40px;padding-top:-40px")),
-                              column(width=4, 
-                                     box(title="Coming up", width=NULL,
-                                         div(
-                                           tags$li(p(tags$strong("CKAN")))
-                                         ))),
+                                        style = "height:100vh; overflow-y: scroll;overflow-x: scroll;margin-top:-40px;padding-top:-40px")),
+                              
                               column(width=4, 
                                      box(title="In the press", width=NULL,
                                          div(tags$li(tags$a(href="https://www.computerweekly.com/news/252500063/How-the-British-Red-Cross-harnessed-digital-mapping-honed-abroad-for-the-domestic-Covid-19-crisis", target="_blank", "Computer Weekly")),
                                              tags$li(tags$a(href="https://emergencyservicestimes.com/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid/", target="_blank", "Emergency Services Times")),
                                              tags$li(tags$a(href="https://www.geoconnexion.com/news/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19", target="_blank", "Geoconnexion")),
                                              tags$li(tags$a(href="https://www.charitytimes.com/ct/Digital-mapping-transforming-UK-charities-response-to-emergencies.php", target="_blank", "Charity Times (behind paywall)"))
-                                             )))))),
+                                             ))),
+                              column(width=4, 
+                                     box(title="Coming up", width=NULL,
+                                         div(
+                                           tags$li(tags$strong("CKAN"))
+                                         )))))),
     
     tabItem(tabName='Help',
             column(width = 12, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
