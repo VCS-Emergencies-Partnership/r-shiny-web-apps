@@ -405,7 +405,8 @@ body <- dashboardBody(
     ),
     tabItem(tabName="latest_news_tab", 
             fluidRow(width=NULL,style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
-                     panel(h2("Latest news from the Emergencies Partnership")),
+                     column(width=12,
+                            panel(h2("Latest news from the Emergencies Partnership")))),
                      fluidRow(width=NULL,style="padding-right:30px; padding-left:30px;",
                               column(width=4, tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
                                     box(width=NULL, height='750px',
@@ -424,7 +425,7 @@ body <- dashboardBody(
                                      box(title="Coming up", width=NULL,
                                          div(
                                            tags$li(tags$strong("CKAN"))
-                                         )))))),
+                                         ))))),
     
     tabItem(tabName='Help',
             column(width = 12, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
@@ -432,7 +433,7 @@ body <- dashboardBody(
                           tabPanel("About us",
                                    uiOutput('about_us'),
                                    style = "height:600px; overflow-y: scroll;overflow-x: scroll;"),
-                          tabPanel("Areas at risk in an emergency dashboard",
+                          tabPanel("Risk Indicator Tool",
                                    tabBox(id='help_areas_at_risk', width=NULL,
                                           tabPanel("About",
                                                    uiOutput('about_needs'),

@@ -121,7 +121,7 @@ create_about_us <- function(time, date) {
       tags$a(href="https://vcsep.org.uk/",target="_blank",'in touch'),
       "if you have any questions."),
     tags$br(),
-    h4(tags$strong("Welcome to the Voluntary and Community Emergency Partnership Risk Indicator Tool Kit")),
+    h4(tags$strong("Welcome to the Voluntary and Community Emergencies Partnership Toolkit")),
     p("We created this toolkit to recongise the role data and insight have in helping organisations 
       plan and prepare for emergencies with the ultimate aim of reducing the impact of an emergency.
       It doesn’t have answer the problems we face in emergency response, but it can help spark 
@@ -154,7 +154,7 @@ create_about_areas_at_risk <- function(time, date) {
 
   return( div(
         #tags$br(),
-    h4(tags$strong("Brief introduction to the risk indicator tool")),
+    h4(tags$strong("Brief introduction to the Risk Indicator Tool")),
     h5(tags$strong("Identify, focus and tailor")),
     p("Do you want to better inform the focusing and tailoring of resources to prepare for, 
       respond to, and help communities recover from an emergency? The tool helps those who 
