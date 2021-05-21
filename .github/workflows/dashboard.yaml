@@ -30,11 +30,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Login to Docker registry
-        run: docker login
-          ${{ secrets.CONTAINER_REGISTRY_SERVER }}
-          --username=${{ secrets.CONTAINER_REGISTRY_USERNAME }}
-          --password=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+      - uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.CONTAINER_REGISTRY_SERVER }}
+          username: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
       - name: Infuse with secrets
         run: |
@@ -54,6 +54,11 @@ jobs:
 
       - name: Tag name
         run: echo ${{ steps.tag.outputs.docker_tag }}
+
+      - name: Try pull existing image with same tag (for caching purposes)
+        run: docker pull
+           ${{ secrets.CONTAINER_REGISTRY_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.docker_tag }}
+        continue-on-error: true
 
       - name: Build Docker image
         run: docker build -t
