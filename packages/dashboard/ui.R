@@ -180,18 +180,20 @@ body <- dashboardBody(
                      column(width=4,
                             box(title="Where we're working", width=NULL, #height='80vh',
                                 style='overflow-y: scroll;',
-                                uiOutput("home_map_headlines", height='40vh'),
-                                leafletOutput('home_map', height = "60vh"))),
+                                uiOutput("home_map_headlines", height='20vh'),
+                                leafletOutput('home_map', height = "70vh"),
+                                uiOutput("source_home_map", height='10vh'))),
                      column(width=4,
                             box(title="What our network is telling us", width=NULL,
-                                uiOutput("latest_concerns_headline", height='40vh', width=NULL),
-                                
-                                echarts4rOutput('concerns', height="60vh"))),
+                                uiOutput("latest_concerns_headline", height='20vh', width=NULL),
+                                echarts4rOutput('concerns', height="70vh"),
+                                uiOutput("source_concerns", height="10vh"))),
                      
                      column(width = 4,
                             box(title="Latest insight", width=NULL,
-                                uiOutput("latest_insight_headline", height='40vh'),
-                                echarts4rOutput("latest_insight", height="60vh"))
+                                uiOutput("latest_insight_headline", height='20vh'),
+                                echarts4rOutput("latest_insight", height="70vh"),
+                                uiOutput("source_insight_headline", height='10vh'))
                      )
             )
     ),

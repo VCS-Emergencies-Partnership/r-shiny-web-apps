@@ -2057,8 +2057,8 @@ rfs_highlights <- function(dataset, which_highlight) {
 
     return(div(p("We have responded to", tags$strong(no_requests, 
                                           "requests for support"),
-              'during our response to the COVID-19 pandemic.',
-              tags$em("(source: requests for support data)"))))
+              'during our response to the COVID-19 pandemic.'
+              )))
   }
   else {
     if(which_highlight == 2) {
