@@ -2013,6 +2013,7 @@ reports_from_the_sector_link <- function() {
       p("Visit our website to learn more about our work.")),
     
     footer = tagList(
+
       actionButton('partner_reports_continue',label='Continue', onclick ="window.open('https://vcsep.org.uk/reports-from-the-sector', '_blank')"),
       #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
       #actionButton('rfs_access',label='Request access', onclick=mailToLink),
