@@ -180,6 +180,13 @@ server = function(input, output, session) {
     
   })
   
+  output$source_home_map <- renderUI({
+    div(p(tags$em(paste0("Source: Requests for support service; See partnership insight")
+        )
+      )
+    )
+  })
+  
   output$latest_concerns_headline <- renderUI({
     max_in_need <- pulse %>% arrange(-desc(proportion_respondents))
     max_in_need <- tail(max_in_need, 1)
@@ -188,9 +195,15 @@ server = function(input, output, session) {
       p(style="font-size:14px;",
         tags$strong(paste0(max_in_need$proportion_respondents,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
                   reported", tags$strong(max_in_need$clean_names), "as a concern
-                  in the next 14 days.",
-        tags$em(paste0("(source latest pulse check survey)"))))
+                  in the next 14 days."))
     
+  })
+  
+  output$source_concerns <- renderUI({
+    div(p(tags$em(paste0("Source: latest Pulse Check Survey; see internal dashboards")
+                  )
+          )
+    )
   })
   
   # pulse major concerns
@@ -203,12 +216,13 @@ server = function(input, output, session) {
       e_bar(proportion_respondents, bar_width=1, showBackground=T) %>%
       e_hide_grid_lines() %>%
       e_flip_coords() %>%
-      e_grid(containLabel = TRUE, left=30, right=30, top=20, bottom=5, height='90%') %>%
+      e_grid(containLabel = TRUE, left=20, right=30, top=20, bottom=5, height='90%') %>%
       e_x_axis(name='% respondents', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
       e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
       e_y_axis(show=T) %>%
       e_axis_labels(x="% respondents") %>%
-      e_legend(FALSE)
+      e_legend(FALSE) %>%
+      e_tooltip()
     
   })
   
@@ -228,9 +242,8 @@ server = function(input, output, session) {
     div(
       p(tags$strong(paste0(vac_second_dose_highest$prop_of_population, "%")),
         "of those aged", tags$strong(vac_second_dose_highest$age_range),
-        "have received both doses of vaccine against COVID-19", 
-        tags$em(paste0("(vaccine uptake dashboard)"))
-      ))
+        "have received both doses of vaccine against COVID-19")
+      )
     
   })
   
@@ -247,10 +260,18 @@ server = function(input, output, session) {
       #e_title("% population vaccinated", fontsize=12) %>%
       e_flip_coords() %>%
       e_grid(containLabel = TRUE, left=30, right=30, top=20, bottom=5, height='90%') %>%
-      e_x_axis(name='% populoation', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+      e_x_axis(name='% population', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
       e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
       e_y_axis(show=T) %>%
-      e_legend(show=F)
+      e_legend(show=F) %>%
+      e_tooltip()
+    
+  })
+  
+  output$source_insight_headline <- renderUI({
+    
+    div(p(tags$em("See vaccine uptake dashboard in internal dashboards. 
+                  Source: NHS vaccination data")))
     
   })
   
