@@ -70,8 +70,25 @@ population_by_age <- function(bracket, age_start, age_end) {
   } else {
   
   
+
+  
+  # get latest update period
+  vaccination_metadata <- read_excel(file_name,
+                                        sheet = "LTLA", skip = 2)
+  
+  vaccination_metadata <- vaccination_metadata %>%
+    select(1:2)
+  
+  colnames(vaccination_metadata) <- c("Info", "Value")
+  
+  vaccination_source <- vaccination_metadata[2,]
+  vaccination_time_period <- vaccination_metadata[1,]
+  vaccination_publish_date <- vaccination_metadata[4,]
+  
+  
+  # read in table of data
   vaccination_data_raw <- read_excel(file_name,
-                                   sheet = "LTLA", skip = 12)
+                                     sheet = "LTLA", skip = 12)
   
   # for homepage remove first geog data
    vaccination_data_summary <- head(vaccination_data_raw , 1)
@@ -107,7 +124,7 @@ population_by_age <- function(bracket, age_start, age_end) {
         # because it is under this age needs to be -1
         top_age <- as.integer(top_age[[1]][2]) - 1
         top_age <- as.character(top_age)
-        bottom_age <- "18"
+        bottom_age <- "0"
       }
       else {
         if (endsWith(x,"+")) {
@@ -164,8 +181,11 @@ population_by_age <- function(bracket, age_start, age_end) {
     doses_by_population <- left_join(both_doses_tr, age_bracket_populations, by='age_range')
     
     final_doses_by_population <- doses_by_population %>%
-      mutate(prop_of_population = round((number_of_doses/total_pop_age_range)*100,1))
-    
+      mutate(prop_of_population = round((number_of_doses/total_pop_age_range)*100,1)) %>%
+      mutate(source = vaccination_source$Value) %>%
+      mutate(published = vaccination_publish_date$Value) %>%
+      mutate(time_span = vaccination_time_period$Value)
+    #write_feather(final_doses_by_population, '~/vaccination_rate.feather')
     #glimpse(final_doses_by_population)
     write_feather(final_doses_by_population, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/vaccination_rate.feather')
     
