@@ -101,7 +101,7 @@ body <- dashboardBody(
                        # column 1
                        column(width = 9,
                               h1("Welcome to the Emergencies Partnership Toolkit"),
-                              h4("Sharing insight and resources amongst the VCS to help before, during and after an emergency."),
+                              h4("Sharing insight and resources amongst the Voluntary and Community Sector to help before, during and after an emergency.", style='margin-right:150px'),
                        ),
                        column(width = 3,
                               div(img(src = "vcsep_logo_line.jpg", width = 250, 
