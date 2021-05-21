@@ -1,15 +1,22 @@
 <!Doctype HTML>
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-W79WXXP70S"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GBVQ47CXQQ"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-W79WXXP70S');
+  gtag('config', 'G-GBVQ47CXQQ');
   //G-JJ32M7WFST my link
   //G-W79WXXP70S vcsep link
+  // new link G-GBVQ47CXQQ
+  //
   
-  // which pages are visited:
+  // which pages are visited from sidebar:
+  // latest_news_tab
+  // resource_catalogue
+  // vcs_report_sidebar
+  //internal_reports_from_sidebar
+
   $(document).on('shiny:inputchanged', function(event) {
     if(event.value == 'unmetneed') {
     gtag('event', 'which_page_visited', {
@@ -17,8 +24,8 @@
       'event_label': event.name,
       'value': event.value
     }); 
-      //console.log(event.name)
-      //console.log(event.value)
+      console.log(event.name)
+      console.log(event.value)
     }
     
     else {
@@ -28,8 +35,8 @@
       'event_label': event.name,
       'value': event.value
     }); 
-      //console.log(event.name)
-      //console.log(event.value)
+      console.log(event.name)
+      console.log(event.value)
         
         }
         
@@ -40,8 +47,8 @@
       'event_label': event.name,
       'value': event.value
     }); 
-      //console.log(event.name)
-      //console.log(event.value)
+      console.log(event.name)
+      console.log(event.value)
         
           }
           else {
@@ -51,173 +58,154 @@
               'event_label': event.name,
               'value': event.value
             }); 
-              //console.log(event.name)
-              //console.log(event.value)
+              console.log(event.name)
+              console.log(event.value)
             
           }
           
-        }
-      }
-    }
-  });
-  
-    //sidebar drop down list interaction 
-    $(document).on('shiny:inputchanged', function(event) {
-    
-    if(event.name == 'theme') {
-      gtag('event', 'theme_change', {
-      'event_category': 'which_theme_selected',
-      'event_label': event.name,
-      'value': event.value
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
-    }
-    
-    else {
-       if(event.name == 'tactical_cell') {
-      gtag('event', 'place_change', {
-      'event_category': 'tactical_cell',
-      'event_label': event.name,
-      'value': event.value
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
-    }
-     else {
-       if (event.name == 'lad_selected') {
-      gtag('event', 'place_change', {
-      'event_category': 'local_authority',
-      'event_label': event.name,
-      'value': event.value
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
-      }
-    }
-  }
-});
-
-
-    // Select inputs changed areas to focus
-    $(document).on('shiny:inputchanged', function(event) {
-    
-    if(event.name == 'top_cases_top_change') {
-      gtag('event', 'areas_to_focus', {
-      'event_category': 'which_option_selected',
-      'event_label': event.name,
-      'value': event.value
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
-    }
-    
-});
-
-
-    // which tabs on unmet need page selected
-    //sidebar drop down list interaction 
-    $(document).on('shiny:inputchanged', function(event) {
-    
-    if(event.value == 'Areas to focus') {
-      gtag('event', 'unmet_need_sub_tabs_visited', {
-      'event_category': 'which_subtab_selected',
-      'event_label': event.name,
-      'value': event.value
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
-    }
-    
-    else {
-       if(event.value == 'Area demographics') {
-      gtag('event', 'unmet_need_sub_tabs_visited', {
-      'event_category': 'which_subtab_selected',
-      'event_label': event.name,
-      'value': event.value
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
-    }
-     else {
-       if (event.value == 'Areas at risk') {
-      gtag('event', 'unmet_need_sub_tabs_visited', {
-      'event_category': 'which_subtab_selected',
-      'event_label': event.name,
-      'value': event.value
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
-      }
-      
-      else {
-         if (event.value == 'Find local resources') {
-      gtag('event', 'unmet_need_sub_tabs_visited', {
-      'event_category': 'which_subtab_selected',
-      'event_label': event.name,
-      'value': event.value
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
-      }
-      else {
-         if (event.value == 'Areas to focus table') {
-      gtag('event', 'unmet_need_sub_tabs_visited', {
-      'event_category': 'which_subtab_selected',
-      'event_label': event.name,
-      'value': event.value
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
+          else {
+            if(event.value == 'latest_news_tab') {
+              gtag('event', 'which_page_visited', {
+              'event_category': 'which_page_visited',
+              'event_label': event.name,
+              'value': event.value
+            }); 
+              console.log(event.name)
+              console.log(event.value)
+            
+          } 
+          else {
+            if(event.value == 'resource_catalogue') {
+              gtag('event', 'which_page_visited', {
+              'event_category': 'which_page_visited',
+              'event_label': event.name,
+              'value': event.value
+            }); 
+              console.log(event.name)
+              console.log(event.value)
+            
+          }
+          
+          else {
+            if(event.value == 'vcs_report_sidebar') {
+              gtag('event', 'which_page_visited', {
+              'event_category': 'which_page_visited',
+              'event_label': event.name,
+              'value': event.value
+            }); 
+              console.log(event.name)
+              console.log(event.value)
+            
+          }
+          
+          else {
+            if(event.value == 'internal_reports_from_sidebar') {
+              gtag('event', 'which_page_visited', {
+              'event_category': 'which_page_visited',
+              'event_label': event.name,
+              'value': event.value
+            }); 
+              console.log(event.name)
+              console.log(event.value)
+            
+          } else {
+             if(event.value == 'community_assets_sidebar') {
+              gtag('event', 'which_page_visited', {
+              'event_category': 'which_page_visited',
+              'event_label': event.name,
+              'value': event.value
+            }); 
+              console.log(event.name)
+              console.log(event.value)
+            
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
-    }
-  }
+      
 });
 
-// are people searching charity base
-    $(document).on('shiny:inputchanged', function(event) {
-    
-    if(event.name == 'search_term_search') {
-      gtag('event', 'charitybase_search', {
-      'event_category': 'charity_base_search_used',
-      'event_label': event.name,
-      'value': 'search_carried_out'
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
-    }
 
+// event click on links to external sites
+//community_assets_box
+//internal_reports_from_box
+//vcs_reports_box
+// click on vcs reports box
+$(document).on('click', 'a#vcs_reports_box.action-button.shiny-bound-input', function(e) {
+    console.log("box click partner insight reports")
+    console.log(e)
+    gtag('event', 'clicked_box_to_external', {
+      'event_category': 'clicked_box_to_external',
+      'event_label': 'partner_reports_selected',
+      'value': $(e.currentTarget).val()
     });
-    
-    // are people using expansion
-  // are people searching charity base
-    $(document).on('shiny:inputchanged', function(event) {
-    if(event.name == 'expand_search') {
-      gtag('event', 'charitybase_search', {
-      'event_category': 'charity_base_area_expansion',
-      'event_label': event.name,
-      'value': event.value
-    }); 
-      //console.log(event.name)
-      //console.log(event.value)
-    }
+    //console.log($(e.currentTarget).val())
+      
 });
 
- // map interaction
-  //$(':button').on('shiny:click', function(event) {
-  //  console.log(event.name)
-  //  console.log(event.value)
-  //  if(event.name == 'my_easy_button') {
-  //    gtag('event', 'map_interaction', {
-  //    'event_category': 'show_focus_areas',
-  //    'event_label': event.name,
-  //    'value': event.value
-  //  }); 
-  //    console.log(event.name)
-  //    console.log(event.value)
-  //  }
-//});
+$(document).on('click', 'a#internal_reports_from_box.action-button.shiny-bound-input', function(e) {
+    console.log("box click dashboards")
+    console.log(e)
+    gtag('event', 'clicked_box_to_external', {
+      'event_category': 'clicked_box_to_external',
+      'event_label': 'internal_dashboards_selected',
+      'value': $(e.currentTarget).val()
+    });
+    //console.log($(e.currentTarget).val())
+      
+});
+
+$(document).on('click', 'a#community_assets_box.action-button.shiny-bound-input', function(e) {
+    console.log("box click community")
+    console.log(e)
+    gtag('event', 'clicked_box_to_external', {
+      'event_category': 'clicked_box_to_external',
+      'event_label': 'community_assets_selected',
+      'value': $(e.currentTarget).val()
+    });
+    //console.log($(e.currentTarget).val())
+      
+});
+
+// did they click through 
+//class="btn.btn-default.action-button.shiny-bound-input"
+$(document).on('click', 'button#partner_reports_continue.btn.btn-default.action-button.shiny-bound-input', function(e) {
+    console.log("click through partners")
+    console.log(e)
+    gtag('event', 'which_page_visited', {
+      'event_category': 'which_page_visited',
+      'event_label': 'vcs_reports_clicked_through',
+      'value': $(e.currentTarget).val()
+    });
+});
+
+$(document).on('click', 'button#webmap_continue.btn.btn-default.action-button.shiny-bound-input', function(e) {
+    console.log("click through webmap")
+    console.log(e)
+    gtag('event', 'which_page_visited', {
+      'event_category': 'which_page_visited',
+      'event_label': 'webmap_clicked_through',
+      'value': $(e.currentTarget).val()
+    });
+});
+
+$(document).on('click', 'button#internal_ds_continue.btn.btn-default.action-button.shiny-bound-input', function(e) {
+    console.log("click through internal dash")
+    console.log(e)
+    gtag('event', 'which_page_visited', {
+      'event_category': 'which_page_visited',
+      'event_label': 'internal_ds_clicked_through',
+      'value': $(e.currentTarget).val()
+    });
+});
+
+
+  
+  
 
 </script>

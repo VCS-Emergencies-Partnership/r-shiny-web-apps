@@ -1992,7 +1992,7 @@ internal_report_link <- function() {
     
     
     footer = tagList(
-      actionButton('rfs_continue',label='Continue', onclick ="window.open('https://dashboards.vcsep.org.uk/', '_blank')"),
+      actionButton('internal_ds_continue',label='Continue', onclick ="window.open('https://dashboards.vcsep.org.uk/', '_blank')"),
       #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
       #actionButton('rfs_access',label='Request access', onclick=mailToLink),
       actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
@@ -2013,7 +2013,8 @@ reports_from_the_sector_link <- function() {
       p("Visit our website to learn more about our work.")),
     
     footer = tagList(
-      actionButton('rfs_continue',label='Continue', onclick ="window.open('https://vcsep.org.uk/reports-from-the-sector', '_blank')"),
+
+      actionButton('partner_reports_continue',label='Continue', onclick ="window.open('https://vcsep.org.uk/reports-from-the-sector', '_blank')"),
       #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
       #actionButton('rfs_access',label='Request access', onclick=mailToLink),
       actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
@@ -2035,7 +2036,7 @@ webmap_link <- function() {
       p("Visit our website to learn more about our work.")),
     
     footer = tagList(
-      actionButton('rfs_continue',label='Continue', onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')"),
+      actionButton('webmap_continue',label='Continue', onclick ="window.open('https://britishredcross.maps.arcgis.com/apps/webappviewer/index.html?id=b2fec0e028554a5aac99d3519c81ab44', '_blank')"),
       #actionButton('rfs_access',label='Request access', onclick="window.location.href='mailto:itsupport@vcsep.org.uk?subject=Request access to VCSEP RFS dashboard'"),
       #actionButton('rfs_access',label='Request access', onclick=mailToLink),
       actionButton('VCS website', label='Visit website', onclick ="window.open('https://vcsep.org.uk/', '_blank')"),
