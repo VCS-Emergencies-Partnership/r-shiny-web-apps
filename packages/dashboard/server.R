@@ -155,6 +155,16 @@ server = function(input, output, session) {
     requests_home_no_na <- requests_home %>%
       filter(!is.na(admin_district_code))
     
+    labels <- paste0(
+      "<strong>Status: </strong>",  requests_home_no_na$request_status, "</br>",
+      "<strong>Date of request: </strong>",  requests_home_no_na$formatted_date, "</br>",
+      "<strong>Request for: </strong>",  "coming soon", "</br>",
+      "<strong>Lead broker organisation: </strong>", requests_home_no_na$lead_broker_organisation
+    ) %>%
+      lapply(htmltools::HTML)
+    
+    #glimpse(requests_home_no_na)
+    
     leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
       setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # maybe could Fenny drayton to make map sclighly closer initially --> centre map on lat = 54.00366, lng = -2.547855 Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
       addProviderTiles(providers$CartoDB.Positron) %>%
@@ -175,7 +185,8 @@ server = function(input, output, session) {
                        radius=4,
                        color='blue',
                        fillOpacity=0.6,
-                       stroke=F)
+                       stroke=F,
+                       label=labels)
     #clusterOptions = markerClusterOptions())
     
   })
@@ -237,7 +248,7 @@ server = function(input, output, session) {
       arrange(-desc(prop_of_population)) %>%
       tail(n=1)
     
-    #print(vac_second_dose_highest)
+    #glimpse(vac_second_dose_highest)
     
     div(
       p(tags$strong(paste0(vac_second_dose_highest$prop_of_population, "%")),
@@ -269,9 +280,15 @@ server = function(input, output, session) {
   })
   
   output$source_insight_headline <- renderUI({
+    vac_meta <- vac_data %>%
+      tail(n=1)
+
     
-    div(p(tags$em("See vaccine uptake dashboard in internal dashboards. 
-                  Source: NHS vaccination data")))
+    div(p(tags$em("See vaccine uptake dashboard in internal dashboards."),
+    tags$br(),
+    tags$em("Source:",vac_meta$source, "Time-period:", vac_meta$time_span,
+            "published:", vac_meta$published,
+            style="font-size:10px")))
     
   })
   

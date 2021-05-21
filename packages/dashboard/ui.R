@@ -150,9 +150,9 @@ body <- dashboardBody(
                                 icon = icon("fas fa-lock"),
                                 p("These are internal reports and insight for VCS EP members.
                           Current reports include:",
-                                  tags$li("The Request for support dashboard"),
-                                  tags$li("The pulse survey dashboard"),
-                                  tags$li("Vaccine uptake dashobard"),
+                                  tags$li("The request for support dashboard"),
+                                  tags$li("The pulse check survey dashboard"),
+                                  tags$li("Vaccine uptake dashboard"),
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
