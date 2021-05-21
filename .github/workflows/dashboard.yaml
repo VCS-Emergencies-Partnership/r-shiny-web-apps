@@ -26,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     if: "! contains(toJSON(github.event.commits.*.message), '[ci skip]')"
     steps:
+
       - uses: actions/checkout@v2
         with:
           persist-credentials: false
@@ -51,6 +52,11 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+        with:
+          driver: docker-container
+          driver-opts: |
+            image=moby/buildkit:master
+            network=host
 
       - name: Cache Docker layers
         uses: actions/cache@v2
