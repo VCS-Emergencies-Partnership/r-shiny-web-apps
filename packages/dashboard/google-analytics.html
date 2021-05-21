@@ -1,13 +1,15 @@
 <!Doctype HTML>
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-JJ32M7WFS"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GBVQ47CXQQ"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-JJ32M7WFS');
+  gtag('config', 'G-GBVQ47CXQQ');
   //G-JJ32M7WFST my link
   //G-W79WXXP70S vcsep link
+  // new link G-GBVQ47CXQQ
+  //
   
   // which pages are visited from sidebar:
   // latest_news_tab
@@ -127,51 +129,82 @@
       }
       
 });
-  
-  
-  $(document).on('click', 'button', function() {
-  ga('send', 'event', 'button', 'update plot');
+
+
+// event click on links to external sites
+//community_assets_box
+//internal_reports_from_box
+//vcs_reports_box
+// click on vcs reports box
+$(document).on('click', 'a#vcs_reports_box.action-button.shiny-bound-input', function(e) {
+    console.log("box click partner insight reports")
+    console.log(e)
+    gtag('event', 'clicked_box_to_external', {
+      'event_category': 'clicked_box_to_external',
+      'event_label': 'partner_reports_selected',
+      'value': $(e.currentTarget).val()
+    });
+    //console.log($(e.currentTarget).val())
+      
 });
-  
-  
-  $(document).on('shin:click', function(e) {
-          //community_assets_box
-        //internal_reports_from_box
-        //vcs_reports_box
-        if(e.value == 'rfs_continue') {
-              gtag('event', 'which_page_visited_box', {
-              'event_category': 'which_page_visited_box',
-              'event_label': e.name,
-              'value': e.value
-            }); 
-              console.log(e.name)
-              console.log(e.value)
-            
-            } 
-//            else {
-//              if(event.value == 'internal_reports_from_box') {
-//              gtag('event', 'which_page_visited_box', {
-//              'event_category': 'which_page_visited_box',
-//              'event_label': event.name,
-//              'value': event.value
-//            }); 
-//              console.log(event.name)
-//              console.log(event.value)
-//            
-//            } else {
-//                if(event.value == 'vcs_reports_box') {
-//              gtag('event', 'which_page_visited_box', {
-//              'event_category': 'which_page_visited',
-//              'event_label': event.name,
-//              'value': event.value
-//            }); 
-//              console.log(event.name)
-//              console.log(event.value)
-//            
-//                            }
-//                        }
-//                    }
-        });
+
+$(document).on('click', 'a#internal_reports_from_box.action-button.shiny-bound-input', function(e) {
+    console.log("box click dashboards")
+    console.log(e)
+    gtag('event', 'clicked_box_to_external', {
+      'event_category': 'clicked_box_to_external',
+      'event_label': 'internal_dashboards_selected',
+      'value': $(e.currentTarget).val()
+    });
+    //console.log($(e.currentTarget).val())
+      
+});
+
+$(document).on('click', 'a#community_assets_box.action-button.shiny-bound-input', function(e) {
+    console.log("box click community")
+    console.log(e)
+    gtag('event', 'clicked_box_to_external', {
+      'event_category': 'clicked_box_to_external',
+      'event_label': 'community_assets_selected',
+      'value': $(e.currentTarget).val()
+    });
+    //console.log($(e.currentTarget).val())
+      
+});
+
+// did they click through 
+//class="btn.btn-default.action-button.shiny-bound-input"
+$(document).on('click', 'button#partner_reports_continue.btn.btn-default.action-button.shiny-bound-input', function(e) {
+    console.log("click through partners")
+    console.log(e)
+    gtag('event', 'which_page_visited', {
+      'event_category': 'which_page_visited',
+      'event_label': 'vcs_reports_clicked_through',
+      'value': $(e.currentTarget).val()
+    });
+});
+
+$(document).on('click', 'button#webmap_continue.btn.btn-default.action-button.shiny-bound-input', function(e) {
+    console.log("click through webmap")
+    console.log(e)
+    gtag('event', 'which_page_visited', {
+      'event_category': 'which_page_visited',
+      'event_label': 'webmap_clicked_through',
+      'value': $(e.currentTarget).val()
+    });
+});
+
+$(document).on('click', 'button#internal_ds_continue.btn.btn-default.action-button.shiny-bound-input', function(e) {
+    console.log("click through internal dash")
+    console.log(e)
+    gtag('event', 'which_page_visited', {
+      'event_category': 'which_page_visited',
+      'event_label': 'internal_ds_clicked_through',
+      'value': $(e.currentTarget).val()
+    });
+});
+
+
   
   
 
