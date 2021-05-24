@@ -192,7 +192,7 @@ server = function(input, output, session) {
   })
   
   output$source_home_map <- renderUI({
-    div(p(tags$em(paste0("Source: Requests for support service; See partnership insight")
+    div(p(tags$em(paste0("Source: Requests for support service; See internal dashboards")
         )
       )
     )
