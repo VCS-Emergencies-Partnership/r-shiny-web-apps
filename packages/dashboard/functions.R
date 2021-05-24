@@ -2117,13 +2117,13 @@ names(orgs2logos) <- c(x_name,y_name)
 
 
 theme <- c("Covid", "Deprivation", "Children and Young People", " Voluntary Sector",
-           "NHS"," Winter Pressures")
+           "General"," Winter Pressures")
 class_wanted <- c("<span class=\"badge badge-pill badge-primary\">Covid</span>",
                   "<span class=\"badge badge-pill badge-secondary\">Deprivation</span>",
                   "<span class=\"badge badge-pill badge-success\">Children and Young People</span>",
                   "<span class=\"badge badge-pill badge-danger\">Voluntary Sector</span>",
                   #"<span class=\"badge badge-pill badge-warning\">NHS</span>",
-                  "",
+                  "<span class=\"badge badge-pill badge-warning\">General</span>",
                   "<span class=\"badge badge-pill badge-info\">Winter Pressures</span>")
 
 theme_name <- 'Themes'
@@ -2152,6 +2152,7 @@ plot_resource_cat <- function(table) {
       theme_recorded <- theme2badge %>% filter(Themes == i)
       badges2plot <- c(badges2plot, theme_recorded$Badge)
       #badges2plot <- theme_recorded$Badge
+      #glimpse(theme_recorded)
       
     }
     
