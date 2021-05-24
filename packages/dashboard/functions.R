@@ -2311,7 +2311,9 @@ top_10_list_title <- function(theme, rank, tc, lad, date_of_data) {
     # just lad
     else {
       return( div(
-        p(tags$strong(lad), '- number of covid cases per 100,000, Total cases and % change in covid cases,'),
+        p(tags$strong(lad), '- number of covid cases per 100,000, Total cases and % change in covid cases.',
+          tags$em(style="font-size:10px", "7 day rolling avg by specimen date ending on",
+                  date_of_data)),
         hr(style = "border-top: 1px solid #000000;")
         )
       )
