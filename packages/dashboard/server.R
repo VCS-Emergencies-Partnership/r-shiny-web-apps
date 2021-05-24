@@ -199,12 +199,15 @@ server = function(input, output, session) {
   })
   
   output$latest_concerns_headline <- renderUI({
+   
     max_in_need <- pulse %>% arrange(-desc(proportion_respondents))
-    max_in_need <- tail(max_in_need, 1)
+    max_in_need <- tail(max_in_need, 1) %>%
+      rename(`Proportion of respondents` = proportion_respondents)
+    
     
     div(
       p(style="font-size:14px;",
-        tags$strong(paste0(max_in_need$proportion_respondents,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
+        tags$strong(paste0(max_in_need$`Proportion of respondents`,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
                   reported", tags$strong(max_in_need$clean_names), "as a concern
                   in the next 14 days."))
     
@@ -220,11 +223,13 @@ server = function(input, output, session) {
   # pulse major concerns
   output$concerns <- renderEcharts4r({
     
-    pulse <- pulse %>% arrange(-desc(proportion_respondents))
+    pulse <- pulse %>%
+      rename(`Proportion of respondents` = proportion_respondents) %>%
+      arrange(-desc(`Proportion of respondents`))
     
     concerns_pulse <- pulse %>%
       e_charts(x = clean_names) %>%
-      e_bar(proportion_respondents, bar_width=1, showBackground=T) %>%
+      e_bar(`Proportion of respondents`, bar_width=1, showBackground=T) %>%
       e_hide_grid_lines() %>%
       e_flip_coords() %>%
       e_grid(containLabel = TRUE, left=20, right=30, top=20, bottom=5, height='90%') %>%
@@ -2686,7 +2691,8 @@ server = function(input, output, session) {
     top_10_list_title(theme=input$theme, 
                       rank=store_rank_wanted, 
                       tc=input$tactical_cell, 
-                      lad=input$lad_selected)
+                      lad=input$lad_selected,
+                      date_of_data=covid_data_date)
     })
   
     # plot list
@@ -3806,6 +3812,13 @@ server = function(input, output, session) {
       }
     }
     
+  })
+  
+  #latest news press releases
+  observeEvent(req(input$sidebar_id == 'latest_news_tab'), {
+    output$press_highlights <- renderUI({
+      in_the_press()
+    })
   })
   
 
