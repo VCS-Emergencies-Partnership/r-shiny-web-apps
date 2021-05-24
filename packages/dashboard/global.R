@@ -178,7 +178,8 @@ covid_area2focus <- covid_area2focus[, !(names(covid_area2focus) %in% remove)]
 # rename with suffix for time being. 
 covid_area2focus <- covid_area2focus %>%
   rename('covid cases per 100,000'=newCasesBySpecimenDateRollingRate) %>%
-  rename('Name' = areaName) %>%
+  rename('Name' = clean_areaNames) %>%
+  rename('to_show'= areaName) %>%
   rename('Total cases' = newCasesBySpecimenDateRollingSum) %>%
   rename('% change in covid cases' = newCasesBySpecimenDateChangePercentage) %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',

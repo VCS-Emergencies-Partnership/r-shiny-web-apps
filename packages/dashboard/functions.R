@@ -2362,14 +2362,14 @@ else {
 }
 
 top_10_list <- function(top10list, theme, rank, tc, lad) {
-  
+  glimpse(top10list)
   # how many to show - just lad selected or all of area 
   if(lad == 'All local authorities in region' || is.null(lad)) {
     top102show <- head(top10list , 10)
   }
   
   else {
-    top102show <- top10list %>% filter(`Local Authority` == lad)
+    top102show <- top10list #%>% filter(`Local Authority` == lad)
     
   }
 

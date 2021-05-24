@@ -1246,7 +1246,7 @@ server = function(input, output, session) {
         if (input$tactical_cell == '-- England --') {
           
           covid_lads_in_tc <- covid_area2focus %>% arrange(-`covid cases per 100,000`) %>%
-            select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+            select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
           
           covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
             select(-'LAD19CD') #%>% 
@@ -1257,7 +1257,7 @@ server = function(input, output, session) {
             
             covid_lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
               arrange(-`covid cases per 100,000`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
               select(-'LAD19CD') #%>% 
@@ -1267,7 +1267,7 @@ server = function(input, output, session) {
           else {
             covid_lads_in_tc <- covid_area2focus %>% filter(Name == input$lad_selected) %>%
               arrange(-`covid cases per 100,000`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
               select(-'LAD19CD') #%>% 
@@ -1283,7 +1283,7 @@ server = function(input, output, session) {
         if (input$tactical_cell == '-- England --') {
           
           covid_lads_in_tc <- covid_area2focus %>% arrange(-`% change in covid cases`) %>%
-            select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+            select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
           
           covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
             select(-'LAD19CD') # %>% 
@@ -1294,7 +1294,7 @@ server = function(input, output, session) {
             
             covid_lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
               arrange(-`% change in covid cases`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`,`% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`,`% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
               select(-'LAD19CD') #%>% 
@@ -1304,7 +1304,7 @@ server = function(input, output, session) {
           else {
             covid_lads_in_tc <- covid_area2focus %>% filter(Name == input$lad_selected) %>%
               arrange(-`% change in covid cases`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
               select(-'LAD19CD') #%>% 
@@ -2703,6 +2703,7 @@ server = function(input, output, session) {
   
     # plot list
     output$top10list <- renderUI({
+      glimpse(filtered_areas2focus_list())
       # function to plot list
       top_10_list(top10list=filtered_areas2focus_list(),
       theme=input$theme, 
