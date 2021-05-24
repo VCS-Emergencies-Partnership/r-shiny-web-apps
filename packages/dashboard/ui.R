@@ -48,7 +48,12 @@ source("./global.R")
 #                                           actionLink("references", "References", icon=icon('fas fa-feather-alt')))
 #                           ))
 
-header <- dashboardHeader(title = "", titleWidth = "300px")
+header <- dashboardHeader(title = "", titleWidth = "300px",
+                          tags$li(class="dropdown",
+                                  tags$li(class="dropdown",
+                                  p(style='padding-top:15px; padding-right:15px;color:white;font-size=12px', "Last updated at", last_updated_time_header, "on", last_updated_date), 
+                                  #icon=icon("fas fa-clock")
+                                  )))
 
 # --- side bar --- #
 sidebar <- dashboardSidebar(
@@ -181,18 +186,18 @@ body <- dashboardBody(
                             box(title="Where we're working", width=NULL, #height='80vh',
                                 style='overflow-y: scroll;',
                                 uiOutput("home_map_headlines", height='20vh'),
-                                leafletOutput('home_map', height = "70vh"),
+                                withSpinner(leafletOutput('home_map', height = "70vh")),
                                 uiOutput("source_home_map", height='10vh'))),
                      column(width=4,
                             box(title="What our network is telling us", width=NULL,
                                 uiOutput("latest_concerns_headline", height='20vh', width=NULL),
-                                echarts4rOutput('concerns', height="70vh"),
+                                withSpinner(echarts4rOutput('concerns', height="70vh")),
                                 uiOutput("source_concerns", height="10vh"))),
                      
                      column(width = 4,
                             box(title="Latest insight", width=NULL,
                                 uiOutput("latest_insight_headline", height='20vh'),
-                                echarts4rOutput("latest_insight", height="70vh"),
+                                withSpinner(echarts4rOutput("latest_insight", height="70vh")),
                                 uiOutput("source_insight_headline", height='10vh'))
                      )
             )
