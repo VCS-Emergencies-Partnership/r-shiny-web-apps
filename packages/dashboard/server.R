@@ -192,8 +192,11 @@ server = function(input, output, session) {
   })
   
   output$source_home_map <- renderUI({
-    div(p(tags$em(paste0("Source: Requests for support service; See internal dashboards")
-        )
+    div(p(tags$br(),
+      tags$em(paste0("Source: Request for support service; see internal dashboards")
+              
+        ),
+      tags$br()
       )
     )
   })
@@ -214,8 +217,10 @@ server = function(input, output, session) {
   })
   
   output$source_concerns <- renderUI({
-    div(p(tags$em(paste0("Source: latest Pulse Check Survey; see internal dashboards")
-                  )
+    div(p(tags$br(),
+      tags$em(paste0("Source: Latest pulse check survey; see internal dashboards")
+                  ),
+      tags$br()
           )
     )
   })
@@ -258,7 +263,7 @@ server = function(input, output, session) {
     div(
       p(tags$strong(paste0(vac_second_dose_highest$prop_of_population, "%")),
         "of those aged", tags$strong(vac_second_dose_highest$age_range),
-        "have received both doses of vaccine against COVID-19")
+        "have received both", tags$strong('dose 1', style='color:#ee6666'), "and", tags$strong("dose 2", style='color:#36454f'), "of vaccine against COVID-19")
       )
     
   })
@@ -291,7 +296,8 @@ server = function(input, output, session) {
     
     div(p(tags$em("See vaccine uptake dashboard in internal dashboards."),
     tags$br(),
-    tags$em("Source:",vac_meta$source, "Time-period:", vac_meta$time_span,
+    tags$em("Source:",vac_meta$source, style="font-size:10px"),
+    tags$br(), tags$em("Time-period:", vac_meta$time_span,
             "published:", vac_meta$published,
             style="font-size:10px")))
     
