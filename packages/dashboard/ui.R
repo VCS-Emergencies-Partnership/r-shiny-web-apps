@@ -116,7 +116,7 @@ body <- dashboardBody(
             fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:0px",  
                      
                      column(width=4,
-                            box(title=actionLink("RI_tool_box","Risk Indicator Tool"), width=NULL,
+                            box(title=actionLink("RI_tool_box","Risk indicator tool"), width=NULL,
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-map-signs"),
                                 p("The Risk indicator tool shows you key statistics about an
@@ -184,7 +184,7 @@ body <- dashboardBody(
             fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",
                      column(width=4,
                             box(title="Where we're working", width=NULL, #height='80vh',
-                                style='overflow-y: scroll;',
+                                style='overflow-y: scroll;', 
                                 uiOutput("home_map_headlines", height='20vh'),
                                 withSpinner(leafletOutput('home_map', height = "70vh")),
                                 uiOutput("source_home_map", height='10vh'))),
