@@ -90,13 +90,13 @@ h1, h2, h3, h4 { font-weight: 400; }
         }
         
 
-.navbar-custom-menu {
-    float: left!important;
-} 
+/*.navbar-custom-menu {
+/*    float: left!important;
+/*} 
 
-.navbar-static-top {
-  overflow: auto;
-}
+/*.navbar-static-top {
+/*  overflow: auto;
+/*}
 
 .my_style_1{ 
     /* background-image: url('https://cdn.ons.gov.uk/assets/images/ons-logo/v2/ons-logo.svg'); */
