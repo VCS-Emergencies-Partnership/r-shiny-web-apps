@@ -2284,24 +2284,26 @@ top10_options <- function(theme) {
 }
 
 
-top_10_list_title <- function(theme, rank, tc, lad) {
+top_10_list_title <- function(theme, rank, tc, lad, date_of_data) {
   if(theme == 'Covid-19') {
     
     # -- change title based on what's selected --- 
     if (rank$rank_wanted_covid == 'cases per 100,000  ') {
-      title_wanted <- "- Top 10 areas with highest number of covid cases per 100,000"
+      title_wanted <- paste0("- Top 10 areas with highest number of covid cases per 100,000.")
     }
     
     else {
-      title_wanted <- "- Top 10 areas with highest % change in covid cases"
+      title_wanted <- paste0("- Top 10 areas with highest % change in covid cases.")
     }
+    
     
     # what area's been chosen
     # whole tactical cell or england
     if (lad == 'All local authorities in region' || is.null(lad)) {
     
     return(div(
-      p(tags$strong(tc), title_wanted),
+      p(tags$strong(tc), title_wanted, tags$em(style="font-size:10px", "7 day rolling avg by specimen date ending on",
+                                               date_of_data)),
       hr(style = "border-top: 1px solid #000000;"))
     )
     }
@@ -2314,9 +2316,9 @@ top_10_list_title <- function(theme, rank, tc, lad) {
         )
       )
     }
-  }
-  
-  else {
+  } 
+
+else {
     if(theme == 'Flooding') {
       # -- which list was wanted -- 
       if(rank$rank_wanted_flooding == 'Historical flood incidents per 10,000') {
@@ -2478,4 +2480,28 @@ top_10_list <- function(top10list, theme, rank, tc, lad) {
   }
   
 
+}
+
+
+in_the_press <- function() {
+
+  return(
+div(style='font-size:14px',
+    tags$li(tags$a(href="https://www.computerweekly.com/news/252500063/How-the-British-Red-Cross-harnessed-digital-mapping-honed-abroad-for-the-domestic-Covid-19-crisis", target="_blank", "Computer Weekly")),
+    tags$br(),
+    tags$li(tags$a(href="https://emergencyservicestimes.com/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid/", target="_blank", "Emergency Services Times")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.geoconnexion.com/news/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19", target="_blank", "Geoconnexion")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.charitytimes.com/ct/Digital-mapping-transforming-UK-charities-response-to-emergencies.php", target="_blank", "Charity Times (behind paywall)")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.agi.org.uk/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19/", target="_blank", "The Association for Geographic Information")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.directionsmag.com/pressrelease/10755", target="_blank", "Directions Magazine (U.S./global GIS publication)")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.geospatialworld.net/news/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19/", target="_blank", "Geospatial World (global GIS publication)")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.charitytoday.co.uk/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19/", target="_blank", "Charity Today")))
+
+)
 }
