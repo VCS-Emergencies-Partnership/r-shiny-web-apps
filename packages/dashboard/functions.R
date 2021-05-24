@@ -2362,7 +2362,7 @@ else {
 }
 
 top_10_list <- function(top10list, theme, rank, tc, lad) {
-  glimpse(top10list)
+  #glimpse(top10list)
   # how many to show - just lad selected or all of area 
   if(lad == 'All local authorities in region' || is.null(lad)) {
     top102show <- head(top10list , 10)
@@ -2409,7 +2409,7 @@ top_10_list <- function(top10list, theme, rank, tc, lad) {
      
       
       # what ranking was requested 
-      print(rank$rank_wanted_flooding)
+      #print(rank$rank_wanted_flooding)
       
       # -- which list was wanted -- 
       if(rank$rank_wanted_flooding == 'Historical flood incidents per 10,000') {

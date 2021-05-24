@@ -2703,7 +2703,7 @@ server = function(input, output, session) {
   
     # plot list
     output$top10list <- renderUI({
-      glimpse(filtered_areas2focus_list())
+      #glimpse(filtered_areas2focus_list())
       # function to plot list
       top_10_list(top10list=filtered_areas2focus_list(),
       theme=input$theme, 
