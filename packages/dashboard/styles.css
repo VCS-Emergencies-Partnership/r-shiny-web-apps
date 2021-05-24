@@ -91,19 +91,19 @@ h1, h2, h3, h4 { font-weight: 400; }
         
 
 /*.navbar-custom-menu {
-/*    float: left!important;
-/*} 
+    float: left!important;
+} */ 
 
 /*.navbar-static-top {
-/*  overflow: auto;
-/*}
+  overflow: auto;
+} */
 
-.my_style_1{ 
+/*.my_style_1{ 
     /* background-image: url('https://cdn.ons.gov.uk/assets/images/ons-logo/v2/ons-logo.svg'); */
     /* width:'100%'; */
-    background-image: url("ONS-logo.jpeg");
+/*    background-image: url("ONS-logo.jpeg");
     
-    }
+    } */
  
 
 .box-tools.pull-right {

@@ -51,7 +51,7 @@ source("./global.R")
 header <- dashboardHeader(title = "", titleWidth = "300px",
                           tags$li(class="dropdown",
                                   tags$li(class="dropdown",
-                                  p(style='padding-top:15px; padding-right:15px;color:white;font-size=12px', "Last updated at", last_updated_time_header, "on", last_updated_date), 
+                                  p(style='padding-top:15px; padding-right:15px;color:white;font-size=12px', "Last updated at", last_updated_time_header, "(BST) on", last_updated_date), 
                                   #icon=icon("fas fa-clock")
                                   )))
 
