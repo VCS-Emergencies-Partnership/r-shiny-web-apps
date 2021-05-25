@@ -2122,14 +2122,18 @@ names(orgs2logos) <- c(x_name,y_name)
 
 
 theme <- c("Covid", "Deprivation", "Children and Young People", " Voluntary Sector",
-           "General"," Winter Pressures")
+           "General"," Winter Pressures"," Income","Mental Health", " Vaccine")
 class_wanted <- c("<span class=\"badge badge-pill badge-primary\">Covid</span>",
                   "<span class=\"badge badge-pill badge-secondary\">Deprivation</span>",
                   "<span class=\"badge badge-pill badge-success\">Children and Young People</span>",
                   "<span class=\"badge badge-pill badge-danger\">Voluntary Sector</span>",
                   #"<span class=\"badge badge-pill badge-warning\">NHS</span>",
                   "<span class=\"badge badge-pill badge-warning\">General</span>",
-                  "<span class=\"badge badge-pill badge-info\">Winter Pressures</span>")
+                  "<span class=\"badge badge-pill badge-info\">Winter Pressures</span>",
+                  "<span class=\"badge badge-pill badge-light\">Income</span>",
+                  "<span class=\"badge badge-pill badge-dark\">Mental Health</span>",
+                  "<span class=\"badge badge-pill badge-dark\" id=\"Vaccine\">Vaccine</span>")
+
 
 theme_name <- 'Themes'
 theme_badge <- 'Badge'
@@ -2139,8 +2143,9 @@ names(theme2badge) <- c(theme_name, theme_badge)
 
 
 plot_resource_cat <- function(table) {
+  #glimpse(table)
   # how many resources - 
-  resources_info <- table[order(table$Title),]
+  resources_info <- table[order(table$Theme),]
   
   lapply(1:nrow(resources_info), function(a) {
     
@@ -2149,18 +2154,19 @@ plot_resource_cat <- function(table) {
     
     
     # split out themes
-    themes <- str_split(resource_wanted$Theme, ',')
+    themes <- unlist(str_split(resource_wanted$Theme, ','))
     badges2plot <- c()
-    
-    for (i in themes) {
-      
-      theme_recorded <- theme2badge %>% filter(Themes == i)
+    #print(themes)
+    #print(str(themes))
+    for (i in 1:length(themes)) {
+      #print(themes[[i]])
+      theme_recorded <- theme2badge %>% filter(Themes == themes[[i]])
       badges2plot <- c(badges2plot, theme_recorded$Badge)
       #badges2plot <- theme_recorded$Badge
       #glimpse(theme_recorded)
       
     }
-    
+    #print(badges2plot)
     badges <- paste(badges2plot, collapse="")
     
     return(

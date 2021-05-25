@@ -141,3 +141,16 @@ h1, h2, h3, h4 { font-weight: 400; }
 .badge.badge-pill.badge-info {
    background-color:#253494;
 }
+
+.badge.badge-pill.badge-light {
+   background-color:#f768a1;
+}
+
+.badge.badge-pill.badge-dark {
+   background-color:#7a0177;
+}
+
+#Vaccine {
+  background-color:#225ea8;
+}
+

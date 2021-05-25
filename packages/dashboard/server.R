@@ -263,7 +263,7 @@ server = function(input, output, session) {
     div(
       p(tags$strong(paste0(vac_second_dose_highest$prop_of_population, "%")),
         "of those aged", tags$strong(vac_second_dose_highest$age_range),
-        "have received both", tags$strong('dose 1', style='color:#5470c6'), "and", tags$strong("dose 2", style='color:#91cc75'), "of vaccine against COVID-19")
+        "have recieved both", tags$strong('dose 1', style='color:#5470c6'), "and", tags$strong("dose 2", style='color:#91cc75'), "of vaccine against COVID-19")
       )
     
   })
