@@ -3230,8 +3230,9 @@ server = function(input, output, session) {
           selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected='All local authorities in region')
         })
         
-        # search either whole tactical cell or all of engalnd
+        # search either whole tactical cell or all of england
         bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
+        
         # create search of charity database 
         output$search_needed <- renderUI({
           # search bar

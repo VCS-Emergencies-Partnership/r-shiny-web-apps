@@ -8,7 +8,7 @@ library(R.utils)
 #https://www.r-bloggers.com/2020/12/accessing-grahpql-from-r/
 #https://daattali.gitbooks.io/stat545-ubc-github-io/content/bit003_api-key-env-var.html
 findcharities <- function(curr_bbox, search_term) {
-  
+ 
   link <- 'https://charitybase.uk/api/graphql'
   
   #print(Sys.getenv("CHARITY_BASE_API_KEY"))
@@ -48,6 +48,7 @@ findcharities <- function(curr_bbox, search_term) {
 }'
 
   new <- Query$new()$query('link', query)
+  
 
   variable <- list(
     top = curr_bbox$ymax, bottom=curr_bbox$ymin, left=curr_bbox$xmin, right=curr_bbox$xmax, 
@@ -57,8 +58,12 @@ findcharities <- function(curr_bbox, search_term) {
   result <- conn$exec(new$link, variables=variable) %>%
     fromJSON(flatten = F)
   
+  #print(result)
+  
   emergency_charity_data <- result$data$CHC$getCharities$list %>%
     as_tibble() 
+  
+  #glimpse(emergency_charity_data)
   
   
   if(dim(emergency_charity_data)[1] == 0) {
