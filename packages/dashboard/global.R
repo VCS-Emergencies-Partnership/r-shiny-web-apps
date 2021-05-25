@@ -178,7 +178,8 @@ covid_area2focus <- covid_area2focus[, !(names(covid_area2focus) %in% remove)]
 # rename with suffix for time being. 
 covid_area2focus <- covid_area2focus %>%
   rename('covid cases per 100,000'=newCasesBySpecimenDateRollingRate) %>%
-  rename('Name' = areaName) %>%
+  rename('Name' = clean_areaNames) %>%
+  rename('to_show'= areaName) %>%
   rename('Total cases' = newCasesBySpecimenDateRollingSum) %>%
   rename('% change in covid cases' = newCasesBySpecimenDateChangePercentage) %>%
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
@@ -289,6 +290,7 @@ time <- str_split(as.POSIXct(Sys.time()), " ")[[1]][2]
 # for flood areas to focus
 time_and_date <- str_split(as.POSIXct(Sys.time()), " ")
 last_updated_time <- paste0(time_and_date[[1]][2],",")
+last_updated_time_header <- paste0(time_and_date[[1]][2])
 # for both
 last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%d"), "%d/%m/%Y"))
 

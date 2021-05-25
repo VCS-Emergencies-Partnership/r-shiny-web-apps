@@ -48,7 +48,12 @@ source("./global.R")
 #                                           actionLink("references", "References", icon=icon('fas fa-feather-alt')))
 #                           ))
 
-header <- dashboardHeader(title = "", titleWidth = "300px")
+header <- dashboardHeader(title = "", titleWidth = "300px",
+                          tags$li(class="dropdown",
+                                  tags$li(class="dropdown",
+                                  p(style='padding-top:15px; padding-right:15px;color:white;font-size=12px', "Last updated at", last_updated_time_header, "(BST) on", last_updated_date), 
+                                  #icon=icon("fas fa-clock")
+                                  )))
 
 # --- side bar --- #
 sidebar <- dashboardSidebar(
@@ -101,7 +106,7 @@ body <- dashboardBody(
                        # column 1
                        column(width = 9,
                               h1("Welcome to the Emergencies Partnership Toolkit"),
-                              h4("Sharing insight and resources amongst the VCS to help before, during and after an emergency."),
+                              h4("Sharing insight and resources amongst the Voluntary and Community Sector to help before, during and after an emergency.", style='margin-right:150px'),
                        ),
                        column(width = 3,
                               div(img(src = "vcsep_logo_line.jpg", width = 250, 
@@ -111,7 +116,7 @@ body <- dashboardBody(
             fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:0px",  
                      
                      column(width=4,
-                            box(title=actionLink("RI_tool_box","Risk Indicator Tool"), width=NULL,
+                            box(title=actionLink("RI_tool_box","Risk indicator tool"), width=NULL,
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-map-signs"),
                                 p("The Risk indicator tool shows you key statistics about an
@@ -150,9 +155,9 @@ body <- dashboardBody(
                                 icon = icon("fas fa-lock"),
                                 p("These are internal reports and insight for VCS EP members.
                           Current reports include:",
-                                  tags$li("The Request for support dashboard"),
-                                  tags$li("The pulse survey dashboard"),
-                                  tags$li("Vaccine uptake dashobard"),
+                                  tags$li("The request for support dashboard"),
+                                  tags$li("The pulse check survey dashboard"),
+                                  tags$li("Vaccine uptake dashboard"),
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
@@ -179,19 +184,21 @@ body <- dashboardBody(
             fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",
                      column(width=4,
                             box(title="Where we're working", width=NULL, #height='80vh',
-                                style='overflow-y: scroll;',
-                                uiOutput("home_map_headlines", height='40vh'),
-                                leafletOutput('home_map', height = "60vh"))),
+                                style='overflow-y: scroll;', 
+                                uiOutput("home_map_headlines", height='20vh'),
+                                withSpinner(leafletOutput('home_map', height = "70vh")),
+                                uiOutput("source_home_map", height='10vh'))),
                      column(width=4,
                             box(title="What our network is telling us", width=NULL,
-                                uiOutput("latest_concerns_headline", height='40vh', width=NULL),
-                                
-                                echarts4rOutput('concerns', height="60vh"))),
+                                uiOutput("latest_concerns_headline", height='20vh', width=NULL),
+                                withSpinner(echarts4rOutput('concerns', height="70vh")),
+                                uiOutput("source_concerns", height="10vh"))),
                      
                      column(width = 4,
                             box(title="Latest insight", width=NULL,
-                                uiOutput("latest_insight_headline", height='40vh'),
-                                echarts4rOutput("latest_insight", height="60vh"))
+                                uiOutput("latest_insight_headline", height='20vh'),
+                                withSpinner(echarts4rOutput("latest_insight", height="70vh")),
+                                uiOutput("source_insight_headline", height='10vh'))
                      )
             )
     ),
@@ -417,11 +424,7 @@ body <- dashboardBody(
                               
                               column(width=4, 
                                      box(title="In the press", width=NULL,
-                                         div(tags$li(tags$a(href="https://www.computerweekly.com/news/252500063/How-the-British-Red-Cross-harnessed-digital-mapping-honed-abroad-for-the-domestic-Covid-19-crisis", target="_blank", "Computer Weekly")),
-                                             tags$li(tags$a(href="https://emergencyservicestimes.com/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid/", target="_blank", "Emergency Services Times")),
-                                             tags$li(tags$a(href="https://www.geoconnexion.com/news/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19", target="_blank", "Geoconnexion")),
-                                             tags$li(tags$a(href="https://www.charitytimes.com/ct/Digital-mapping-transforming-UK-charities-response-to-emergencies.php", target="_blank", "Charity Times (behind paywall)"))
-                                             ))),
+                                         uiOutput('press_highlights', height='70vh'))),
                               column(width=4, 
                                      box(title="Coming up", width=NULL,
                                          div(

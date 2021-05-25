@@ -155,6 +155,16 @@ server = function(input, output, session) {
     requests_home_no_na <- requests_home %>%
       filter(!is.na(admin_district_code))
     
+    labels <- paste0(
+      "<strong>Status: </strong>",  requests_home_no_na$request_status, "</br>",
+      "<strong>Date of request: </strong>",  requests_home_no_na$formatted_date, "</br>",
+      "<strong>Request for: </strong>",  "coming soon", "</br>",
+      "<strong>Lead broker organisation: </strong>", requests_home_no_na$lead_broker_organisation
+    ) %>%
+      lapply(htmltools::HTML)
+    
+    #glimpse(requests_home_no_na)
+    
     leaflet(options = leafletOptions(minZoom = 5, maxZoom = 15, attributionControl = T)) %>%
       setView(lat = 54.00366, lng = -2.547855, zoom = 5) %>% # maybe could Fenny drayton to make map sclighly closer initially --> centre map on lat = 54.00366, lng = -2.547855 Whitendale Hanging Stones, the centre of GB: https://en.wikipedia.org/wiki/Centre_points_of_the_United_Kingdom
       addProviderTiles(providers$CartoDB.Positron) %>%
@@ -175,40 +185,65 @@ server = function(input, output, session) {
                        radius=4,
                        color='blue',
                        fillOpacity=0.6,
-                       stroke=F)
+                       stroke=F,
+                       label=labels)
     #clusterOptions = markerClusterOptions())
     
   })
   
+  output$source_home_map <- renderUI({
+    div(p(tags$br(),
+      tags$em(paste0("Source: Request for support service; see internal dashboards")
+              
+        ),
+      tags$br()
+      )
+    )
+  })
+  
   output$latest_concerns_headline <- renderUI({
+   
     max_in_need <- pulse %>% arrange(-desc(proportion_respondents))
-    max_in_need <- tail(max_in_need, 1)
+    max_in_need <- tail(max_in_need, 1) %>%
+      rename(`Proportion of respondents` = proportion_respondents)
+    
     
     div(
       p(style="font-size:14px;",
-        tags$strong(paste0(max_in_need$proportion_respondents,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
+        tags$strong(paste0(max_in_need$`Proportion of respondents`,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
                   reported", tags$strong(max_in_need$clean_names), "as a concern
-                  in the next 14 days.",
-        tags$em(paste0("(source latest pulse check survey)"))))
+                  in the next 14 days."))
     
+  })
+  
+  output$source_concerns <- renderUI({
+    div(p(tags$br(),
+      tags$em(paste0("Source: Latest pulse check survey; see internal dashboards")
+                  ),
+      tags$br()
+          )
+    )
   })
   
   # pulse major concerns
   output$concerns <- renderEcharts4r({
     
-    pulse <- pulse %>% arrange(-desc(proportion_respondents))
+    pulse <- pulse %>%
+      rename(`Proportion of respondents` = proportion_respondents) %>%
+      arrange(-desc(`Proportion of respondents`))
     
     concerns_pulse <- pulse %>%
       e_charts(x = clean_names) %>%
-      e_bar(proportion_respondents, bar_width=1, showBackground=T) %>%
+      e_bar(`Proportion of respondents`, bar_width=1, showBackground=T) %>%
       e_hide_grid_lines() %>%
       e_flip_coords() %>%
-      e_grid(containLabel = TRUE, left=30, right=30, top=20, bottom=5, height='90%') %>%
+      e_grid(containLabel = TRUE, left=20, right=30, top=20, bottom=5, height='90%') %>%
       e_x_axis(name='% respondents', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
       e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
       e_y_axis(show=T) %>%
       e_axis_labels(x="% respondents") %>%
-      e_legend(FALSE)
+      e_legend(FALSE) %>%
+      e_tooltip()
     
   })
   
@@ -223,14 +258,13 @@ server = function(input, output, session) {
       arrange(-desc(prop_of_population)) %>%
       tail(n=1)
     
-    #print(vac_second_dose_highest)
+    #glimpse(vac_second_dose_highest)
     
     div(
       p(tags$strong(paste0(vac_second_dose_highest$prop_of_population, "%")),
         "of those aged", tags$strong(vac_second_dose_highest$age_range),
-        "have received both doses of vaccine against COVID-19", 
-        tags$em(paste0("(vaccine uptake dashboard)"))
-      ))
+        "have received both", tags$strong('dose 1', style='color:#5470c6'), "and", tags$strong("dose 2", style='color:#91cc75'), "of vaccine against COVID-19")
+      )
     
   })
   
@@ -247,10 +281,25 @@ server = function(input, output, session) {
       #e_title("% population vaccinated", fontsize=12) %>%
       e_flip_coords() %>%
       e_grid(containLabel = TRUE, left=30, right=30, top=20, bottom=5, height='90%') %>%
-      e_x_axis(name='% populoation', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+      e_x_axis(name='% population', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
       e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
       e_y_axis(show=T) %>%
-      e_legend(show=F)
+      e_legend(show=F) %>%
+      e_tooltip()
+    
+  })
+  
+  output$source_insight_headline <- renderUI({
+    vac_meta <- vac_data %>%
+      tail(n=1)
+
+    
+    div(p(tags$em("See vaccine uptake dashboard in internal dashboards."),
+    tags$br(),
+    tags$em("Source:",vac_meta$source, style="font-size:10px"),
+    tags$br(), tags$em("Time-period:", vac_meta$time_span,
+            "published:", vac_meta$published,
+            style="font-size:10px")))
     
   })
   
@@ -1197,7 +1246,7 @@ server = function(input, output, session) {
         if (input$tactical_cell == '-- England --') {
           
           covid_lads_in_tc <- covid_area2focus %>% arrange(-`covid cases per 100,000`) %>%
-            select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+            select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
           
           covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
             select(-'LAD19CD') #%>% 
@@ -1208,7 +1257,7 @@ server = function(input, output, session) {
             
             covid_lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
               arrange(-`covid cases per 100,000`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
               select(-'LAD19CD') #%>% 
@@ -1218,7 +1267,7 @@ server = function(input, output, session) {
           else {
             covid_lads_in_tc <- covid_area2focus %>% filter(Name == input$lad_selected) %>%
               arrange(-`covid cases per 100,000`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`covid cases per 100,000`) %>%
               select(-'LAD19CD') #%>% 
@@ -1234,7 +1283,7 @@ server = function(input, output, session) {
         if (input$tactical_cell == '-- England --') {
           
           covid_lads_in_tc <- covid_area2focus %>% arrange(-`% change in covid cases`) %>%
-            select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+            select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
           
           covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
             select(-'LAD19CD') # %>% 
@@ -1245,7 +1294,7 @@ server = function(input, output, session) {
             
             covid_lads_in_tc <- covid_area2focus %>% filter(TacticalCell == input$tactical_cell) %>%
               arrange(-`% change in covid cases`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`,`% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`,`% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
               select(-'LAD19CD') #%>% 
@@ -1255,7 +1304,7 @@ server = function(input, output, session) {
           else {
             covid_lads_in_tc <- covid_area2focus %>% filter(Name == input$lad_selected) %>%
               arrange(-`% change in covid cases`) %>%
-              select('LAD19CD', 'Local Authority'= Name, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
+              select('LAD19CD', 'Local Authority'= to_show, 'Region'='TacticalCell', `covid cases per 100,000`, `Total cases`, `% change in covid cases`)
             
             covid_cases4list <- covid_lads_in_tc %>% arrange(-`% change in covid cases`) %>%
               select(-'LAD19CD') #%>% 
@@ -2648,11 +2697,13 @@ server = function(input, output, session) {
     top_10_list_title(theme=input$theme, 
                       rank=store_rank_wanted, 
                       tc=input$tactical_cell, 
-                      lad=input$lad_selected)
+                      lad=input$lad_selected,
+                      date_of_data=covid_data_date)
     })
   
     # plot list
     output$top10list <- renderUI({
+      glimpse(filtered_areas2focus_list())
       # function to plot list
       top_10_list(top10list=filtered_areas2focus_list(),
       theme=input$theme, 
@@ -3768,6 +3819,13 @@ server = function(input, output, session) {
       }
     }
     
+  })
+  
+  #latest news press releases
+  observeEvent(req(input$sidebar_id == 'latest_news_tab'), {
+    output$press_highlights <- renderUI({
+      in_the_press()
+    })
   })
   
 

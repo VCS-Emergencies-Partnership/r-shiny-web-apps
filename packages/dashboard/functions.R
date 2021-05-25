@@ -420,20 +420,21 @@ create_data_license_help <- function() {
       tags$li(tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", "BRC vulnerability index data:")), "this data is licensed under", tags$a(href="https://creativecommons.org/licenses/by/4.0/legalcode", target="_blank", "Creative Commons By Attribution 4.0")),
       tags$li(tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", "Code to generate the BRC vulnerability index:")),  "this is licensed under", tags$a(href="https://www.gnu.org/licenses/gpl-3.0.html", target="_blank", "GNU General Public License version 3")),
       tags$li(tags$strong(tags$a(href="https://coronavirus.data.gov.uk/", target="_blank", "Coronavirus data:")), 
-              "This data contains Public Health England data © Crown copyright and database right 2020 and is available under the",
+              "this data contains Public Health England data © Crown copyright and database right 2020 and is available under the",
               tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", " Open Government Licence v3.0.")),
       tags$li(tags$strong(tags$a(href="https://environment.data.gov.uk/flood-monitoring/doc/reference#data", target="_blank","Environment Agency flood warnings and alerts:")),"this contains public sector information licensed under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0"), "and uses Environment Agency flood and river level data from the real-time data API (Beta)"),
-      tags$li(tags$strong(tags$a(href="", target="_blank","Environment Agency number of people living in flood risk areas:")), "this contains public sector information licensed under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0")),
+      tags$li(tags$strong(tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank","Environment Agency number of people living in flood risk areas:")), "this contains public sector information licensed under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0."), "In this instance the data was taken from the", tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "BRC resilience index.")),
       tags$li(tags$strong(tags$a(href="https://digital.nhs.uk/data-and-information/publications/statistical/mi-english-coronavirus-covid-19-shielded-patient-list-summary-totals/latest",target="_blank", "Clinically extremely vulnerable people data:")), "this contains public sector information licensed under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0")),
       tags$li(tags$strong(tags$a(href="https://www.gov.uk/government/collections/universal-credit-statistics#latest-monthly-release",target="_blank", "Unemployed on universal credit:")), "this contains public sector information licensed under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0")),
-      tags$li(tags$strong(tags$a(href="https://www.nomisweb.co.uk/datasets/apsnew",target="_blank", "Ethinicity data:")), "This data is from the ONS Annual Population survey contains public sector information licensed under the",tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0")),
-      tags$li(tags$strong(tags$a(href="https://www.gov.uk/government/statistics/english-indices-of-deprivation-2019",target="_blank", "Homelessness data:")), "This data is from the English indices of multiple deprivation which is licensed under the",tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0"), "In this instance it was taken from the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", "BRC Vulnerability Index")),
+      tags$li(tags$strong(tags$a(href="https://www.nomisweb.co.uk/datasets/apsnew",target="_blank", "Ethinicity data:")), "this data is from the ONS Annual Population survey contains public sector information licensed under the",tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0")),
+      tags$li(tags$strong(tags$a(href="https://www.gov.uk/government/statistics/english-indices-of-deprivation-2019",target="_blank", "Homelessness data:")), "this data is from the English indices of multiple deprivation which is licensed under the",tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0."), "In this instance it was taken from the", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", "BRC Vulnerability Index")),
       tags$li(tags$strong(tags$a(href="https://www.gov.uk/government/statistical-data-sets/asylum-and-resettlement-datasets",target="_blank", "People receiving support whilst seeking asylum data:")), "this is licensed under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0")),
       tags$li(tags$strong(tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability",target="_blank", "Digital exclusion data:")), "this is a bespoke indicator created by and used in the",tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", "BRC Vulnerability Index"), "which is licensed under",tags$a(href="https://creativecommons.org/licenses/by/4.0/legalcode", target="_blank", "Creative Commons By Attribution 4.0")),
       tags$li(tags$strong(tags$a(href="https://www.gov.uk/government/statistics/sub-regional-fuel-poverty-data-2020",target="_blank", "Fuel poverty data:")), "this contains public sector information licensed under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0")),
       tags$li(tags$strong(tags$a(href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/middlesuperoutputareamidyearpopulationestimates",target="_blank", "ONS Population statistics Mid-2019:")), "this is from the Office for National Statistics and licesenced under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0")),
       tags$li(tags$strong(tags$a(href="https://geoportal.statistics.gov.uk/datasets/local-authority-districts-december-2019-boundaries-uk-bfc/data?geometry=-33.636%2C51.101%2C28.767%2C59.782", target="_blank", "Local authority district 2019 boundaries")), "this is from the Office for National Statistics licesenced under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0")),
-      
+      tags$li(tags$strong(tags$a(href="https://charitybase.uk/", target="_blank", 'CharityBase data:')), "this is a publicly available database of registered charities in the UK. The website states it is 'Open source & free to use.'"),
+      tags$li(tags$strong(tags$a(href="https://www.england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations/", target="_blank", "NHS weekly vaccination statistics:")), "this is based upon data from the National Immunisation Management Service (NIMS), Public Health England and is released under the", tags$a(href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", target="_blank", "Open Government Licence v3.0"))
     )
 
   ))
@@ -2057,8 +2058,8 @@ rfs_highlights <- function(dataset, which_highlight) {
 
     return(div(p("We have responded to", tags$strong(no_requests, 
                                           "requests for support"),
-              'during our response to the COVID-19 pandemic.',
-              tags$em("(source: requests for support data)"))))
+              'during our response to the COVID-19 pandemic.'
+              )))
   }
   else {
     if(which_highlight == 2) {
@@ -2116,13 +2117,13 @@ names(orgs2logos) <- c(x_name,y_name)
 
 
 theme <- c("Covid", "Deprivation", "Children and Young People", " Voluntary Sector",
-           "NHS"," Winter Pressures")
+           "General"," Winter Pressures")
 class_wanted <- c("<span class=\"badge badge-pill badge-primary\">Covid</span>",
                   "<span class=\"badge badge-pill badge-secondary\">Deprivation</span>",
                   "<span class=\"badge badge-pill badge-success\">Children and Young People</span>",
                   "<span class=\"badge badge-pill badge-danger\">Voluntary Sector</span>",
                   #"<span class=\"badge badge-pill badge-warning\">NHS</span>",
-                  "",
+                  "<span class=\"badge badge-pill badge-warning\">General</span>",
                   "<span class=\"badge badge-pill badge-info\">Winter Pressures</span>")
 
 theme_name <- 'Themes'
@@ -2151,6 +2152,7 @@ plot_resource_cat <- function(table) {
       theme_recorded <- theme2badge %>% filter(Themes == i)
       badges2plot <- c(badges2plot, theme_recorded$Badge)
       #badges2plot <- theme_recorded$Badge
+      #glimpse(theme_recorded)
       
     }
     
@@ -2282,24 +2284,26 @@ top10_options <- function(theme) {
 }
 
 
-top_10_list_title <- function(theme, rank, tc, lad) {
+top_10_list_title <- function(theme, rank, tc, lad, date_of_data) {
   if(theme == 'Covid-19') {
     
     # -- change title based on what's selected --- 
     if (rank$rank_wanted_covid == 'cases per 100,000  ') {
-      title_wanted <- "- Top 10 areas with highest number of covid cases per 100,000"
+      title_wanted <- paste0("- Top 10 areas with highest number of covid cases per 100,000.")
     }
     
     else {
-      title_wanted <- "- Top 10 areas with highest % change in covid cases"
+      title_wanted <- paste0("- Top 10 areas with highest % change in covid cases.")
     }
+    
     
     # what area's been chosen
     # whole tactical cell or england
     if (lad == 'All local authorities in region' || is.null(lad)) {
     
     return(div(
-      p(tags$strong(tc), title_wanted),
+      p(tags$strong(tc), title_wanted, tags$em(style="font-size:10px", "7 day rolling avg by specimen date ending on",
+                                               date_of_data)),
       hr(style = "border-top: 1px solid #000000;"))
     )
     }
@@ -2307,14 +2311,16 @@ top_10_list_title <- function(theme, rank, tc, lad) {
     # just lad
     else {
       return( div(
-        p(tags$strong(lad), '- number of covid cases per 100,000, Total cases and % change in covid cases,'),
+        p(tags$strong(lad), '- number of covid cases per 100,000, Total cases and % change in covid cases.',
+          tags$em(style="font-size:10px", "7 day rolling avg by specimen date ending on",
+                  date_of_data)),
         hr(style = "border-top: 1px solid #000000;")
         )
       )
     }
-  }
-  
-  else {
+  } 
+
+else {
     if(theme == 'Flooding') {
       # -- which list was wanted -- 
       if(rank$rank_wanted_flooding == 'Historical flood incidents per 10,000') {
@@ -2356,14 +2362,14 @@ top_10_list_title <- function(theme, rank, tc, lad) {
 }
 
 top_10_list <- function(top10list, theme, rank, tc, lad) {
-  
+  glimpse(top10list)
   # how many to show - just lad selected or all of area 
   if(lad == 'All local authorities in region' || is.null(lad)) {
     top102show <- head(top10list , 10)
   }
   
   else {
-    top102show <- top10list %>% filter(`Local Authority` == lad)
+    top102show <- top10list #%>% filter(`Local Authority` == lad)
     
   }
 
@@ -2476,4 +2482,28 @@ top_10_list <- function(top10list, theme, rank, tc, lad) {
   }
   
 
+}
+
+
+in_the_press <- function() {
+
+  return(
+div(style='font-size:14px',
+    tags$li(tags$a(href="https://www.computerweekly.com/news/252500063/How-the-British-Red-Cross-harnessed-digital-mapping-honed-abroad-for-the-domestic-Covid-19-crisis", target="_blank", "Computer Weekly")),
+    tags$br(),
+    tags$li(tags$a(href="https://emergencyservicestimes.com/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid/", target="_blank", "Emergency Services Times")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.geoconnexion.com/news/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19", target="_blank", "Geoconnexion")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.charitytimes.com/ct/Digital-mapping-transforming-UK-charities-response-to-emergencies.php", target="_blank", "Charity Times (behind paywall)")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.agi.org.uk/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19/", target="_blank", "The Association for Geographic Information")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.directionsmag.com/pressrelease/10755", target="_blank", "Directions Magazine (U.S./global GIS publication)")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.geospatialworld.net/news/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19/", target="_blank", "Geospatial World (global GIS publication)")),
+    tags$br(),
+    tags$li(tags$a(href="https://www.charitytoday.co.uk/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19/", target="_blank", "Charity Today")))
+
+)
 }
