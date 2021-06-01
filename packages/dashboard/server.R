@@ -3050,7 +3050,7 @@ server = function(input, output, session) {
       formatStyle('Local Authority',
                   target='row',
                   backgroundColor = styleEqual(c(input$lad_selected), c('yellow')))
-  })
+  }, server = FALSE)
   
   
   #data table proxy
@@ -3370,7 +3370,7 @@ server = function(input, output, session) {
                                          "function(settings, json) {",
                                          paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                          "}")
-                        )) }, escape=F)
+                        )) }, escape=F, server=FALSE)
         
         # now renderUI
         output$local_orgs_ui <- renderUI({
@@ -3591,7 +3591,7 @@ server = function(input, output, session) {
                                            "function(settings, json) {",
                                            paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                            "}")
-                          )) }, escape=F)
+                          )) }, escape=F, server=FALSE)
           
           output$local_orgs_ui <- renderUI({
             DT::dataTableOutput('local_orgs')
@@ -3743,7 +3743,7 @@ server = function(input, output, session) {
                                          "function(settings, json) {",
                                          paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                          "}")
-                        )) }, escape=F)
+                        )) }, escape=F, server=FALSE)
         
         output$local_orgs_ui <- renderUI({
           DT::dataTableOutput('local_orgs')
