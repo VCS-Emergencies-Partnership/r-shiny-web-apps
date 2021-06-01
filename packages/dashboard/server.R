@@ -3487,6 +3487,7 @@ server = function(input, output, session) {
                                          scrollX=T,
                                          scrollY='300px',
                                          autoWidth = T,
+                                         server=FALSE,
                                          escape=FALSE,
                                          columnDefs = list(list(width='400px',targets=c(3))),
                                          initComplete = htmlwidgets::JS(
