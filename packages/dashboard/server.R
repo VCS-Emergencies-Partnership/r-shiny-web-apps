@@ -3040,6 +3040,7 @@ server = function(input, output, session) {
                                  scrollX=T,
                                  scrollY='350px',
                                  autoWidth = T,
+                                 server = FALSE,
                                  #columnDefs = list(list(width = '0px', targets = c(3,4))#,
                                  #                  ),
                                  initComplete = htmlwidgets::JS(
@@ -3050,7 +3051,7 @@ server = function(input, output, session) {
       formatStyle('Local Authority',
                   target='row',
                   backgroundColor = styleEqual(c(input$lad_selected), c('yellow')))
-  }, server = FALSE)
+  })
   
   
   #data table proxy
@@ -3366,11 +3367,13 @@ server = function(input, output, session) {
                                        scrollY='300px',
                                        autoWidth = T,
                                        columnDefs = list(list(width='400px',targets=c(3))),
+                                       escape=FALSE,
+                                       server=FALSE,
                                        initComplete = htmlwidgets::JS(
                                          "function(settings, json) {",
                                          paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                          "}")
-                        )) }, escape=F, server=FALSE)
+                        )) })
         
         # now renderUI
         output$local_orgs_ui <- renderUI({
@@ -3475,7 +3478,7 @@ server = function(input, output, session) {
         else{
           output$local_orgs <- DT::renderDataTable({
             #Sys.sleep(1.5)
-            DT::datatable(charities_found, filter=list(position='top'), escape=F,
+            DT::datatable(charities_found, filter=list(position='top'),
                           selection =c('single'),
                           options = list(dom='tp', #should remove top search box the p includes paging
                                          paging = T,
@@ -3484,12 +3487,13 @@ server = function(input, output, session) {
                                          scrollX=T,
                                          scrollY='300px',
                                          autoWidth = T,
+                                         escape=FALSE,
                                          columnDefs = list(list(width='400px',targets=c(3))),
                                          initComplete = htmlwidgets::JS(
                                            "function(settings, json) {",
                                            paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                            "}")
-                          )) }, escape=F)
+                          )) })
           
           output$local_orgs_ui <- renderUI({
             DT::dataTableOutput('local_orgs')
@@ -3577,7 +3581,7 @@ server = function(input, output, session) {
         else{
           output$local_orgs <- DT::renderDataTable({
             #Sys.sleep(1.5)
-            DT::datatable(charities_found, filter=list(position='top'), escape=F,
+            DT::datatable(charities_found, filter=list(position='top'),
                           selection =c('single'),
                           options = list(dom='tp', #should remove top search box the p includes paging
                                          paging = T,
@@ -3586,12 +3590,14 @@ server = function(input, output, session) {
                                          scrollX=T,
                                          scrollY='300px',
                                          autoWidth = T,
+                                         escape=FALSE,
+                                         server=FALSE,
                                          columnDefs = list(list(width='400px',targets=c(3))),
                                          initComplete = htmlwidgets::JS(
                                            "function(settings, json) {",
                                            paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                            "}")
-                          )) }, escape=F, server=FALSE)
+                          )) })
           
           output$local_orgs_ui <- renderUI({
             DT::dataTableOutput('local_orgs')
@@ -3729,7 +3735,7 @@ server = function(input, output, session) {
       else{
         output$local_orgs <- DT::renderDataTable({
           #Sys.sleep(1.5)
-          DT::datatable(charities_found, filter=list(position='top'), escape=F,
+          DT::datatable(charities_found, filter=list(position='top'),
                         selection =c('single'),
                         options = list(dom='tp', #should remove top search box the p includes paging
                                        paging = T,
@@ -3738,12 +3744,14 @@ server = function(input, output, session) {
                                        scrollX=T,
                                        scrollY='300px',
                                        autoWidth = T,
+                                       escape=FALSE,
+                                       server=FALSE,
                                        columnDefs = list(list(width='400px',targets=c(3))),
                                        initComplete = htmlwidgets::JS(
                                          "function(settings, json) {",
                                          paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                          "}")
-                        )) }, escape=F, server=FALSE)
+                        )) })
         
         output$local_orgs_ui <- renderUI({
           DT::dataTableOutput('local_orgs')
