@@ -1,14 +1,15 @@
 ARG R_VERSION=4.0.2
 FROM rocker/shiny:${R_VERSION}
 
+# SSH access to the container is configured to only allow access from within
+# the bridge network of a private virtual network, and is not accessible to an
+# attacker on the internet.
+
 # Install OpenSSH and set the password for root to "Docker!"
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    openssh \
+    openssh-server \
     && echo "root:Docker!" | chpasswd 
 
-# This configuration doesn't allow external connections to the container. Port
-# 2222 of the container is accessible only within the bridge network of a private
-# virtual network, and is not accessible to an attacker on the internet.
 COPY sshd_config /etc/ssh/
 
 ARG SRV_DIR="/srv/shiny-server"
