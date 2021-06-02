@@ -1,0 +1,321 @@
+library(shiny) # - not in Docker 
+library(shinydashboard) # - Docker
+library(httr) # - Docker
+library(sf) # - Docker
+library(tidyverse) # Docker
+library(jsonlite) # - Docker
+library(shinydashboardPlus) # Docker
+library(leaflet) # Docker
+library(viridis) # Docker
+library(DT) # Docker
+library(echarts4r) # Docker 
+library(feather) # Docker
+library(scales) # Docker
+library(htmlwidgets) # Docker
+library(shinyjs) # Docker
+library(shinycssloaders) # docker
+library(shinyWidgets) #-- ADD TO DOCKER
+library(R.utils) # -- ADD TO DOCKER 
+library('ghql') # -- ADD TO DOCKER
+
+
+# --- read in vulnerablity indices ---
+# # --- local authority level ---
+LA_vi <- read_feather('./data/vulnerability_index/vulnerability-LA.feather')
+LA_vi <- LA_vi %>% rename('LAD19CD'=Code)
+
+
+# -- Area lookup table ---
+area_lookup <- read_feather('./data/vulnerability_index/lookup_msoa11_to_lad19_to_tactical_cell.feather')
+area_lookup_tc2lad <- area_lookup %>% select('LAD19CD', 'TacticalCell') %>% 
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
+
+
+# ---- Read in the resilience index ----
+LA_res <- read_feather('data/resilience_index_bivar.feather')
+
+
+# --- read in shape files with minimal metadata ---
+# --- Local authorities ---
+lad_uk <- read_sf('data/reduced_boundaries/lad19_eng_wales_sc_ni.geojson')
+lad_uk <- lad_uk %>% rename('LAD19CD'=lad19cd)
+
+
+# -- tactical cell boundaries --
+tc_shp <- read_sf('data/reduced_boundaries/vcsep_multiagencycells_wo-iom-ci_BFE.shp') %>%
+  st_transform('+proj=longlat +datum=WGS84')
+
+tc_shp <- tc_shp %>% mutate("TacticalCell"=case_when(lookup_loc == 'Midlands and the East' ~ 'Midlands & East',
+                                                     lookup_loc == 'South and the Channel Islands' ~ 'South West',
+                                                     TRUE ~ as.character(.$lookup_loc)))
+
+
+
+# --- join lookup table ---
+# --- to la shapefile  ---
+lad_uk2areas <- left_join(lad_uk, area_lookup_tc2lad, by='LAD19CD', keep=F)
+
+# --- join vulnerability index to shapefiles ---
+# --- local authority level ---
+lad_uk2areas2vulnerability_full <- left_join(unique(lad_uk2areas), LA_vi, by="LAD19CD", keep=F)
+lad_uk2areas2vulnerability <- lad_uk2areas2vulnerability_full %>% select('LAD19CD', 'Name', 'Country', `Clinical Vulnerability quintile`, `Health/Wellbeing Vulnerability quintile`,`Economic Vulnerability quintile`,`Social Vulnerability quintile`,`Socioeconomic Vulnerability quintile`,`Vulnerability quintile`,'TacticalCell')
+
+
+# res shapefile
+lad_uk2vuln_resilience <- left_join(unique(lad_uk2areas), LA_res, by='LAD19CD', keep=F)
+
+lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>% filter(!is.na(fill))  %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
+
+
+# for mapping click add in id column
+lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>%
+  mutate('res_id' = paste0('covidres_',LAD19CD)) %>%
+  mutate('econ_id' = paste0('econ_',LAD19CD)) %>%
+  mutate('soc_id' = paste0('soc_',LAD19CD)) %>%
+  mutate('socecon_id' = paste0('socecon_',LAD19CD)) %>%
+  mutate('clin_id' = paste0('clin_',LAD19CD)) %>%
+  mutate('health_id' = paste0('health_',LAD19CD)) %>%
+  mutate('floodres_id' = paste0('floodres_',LAD19CD)) %>%
+  mutate('incd_id' = paste0('incd_',LAD19CD)) %>%
+  mutate('risk_id' = paste0('risk_',LAD19CD)) 
+
+
+# tactical cells
+tactical_cells <- area_lookup_tc2lad %>% filter(TacticalCell != 'Wales' & TacticalCell != 'Northern Ireland and the Isle of Man' & TacticalCell != 'Scotland')
+tactical_cells <- unique(tactical_cells$TacticalCell)
+tactical_cells <- c('-- England --', tactical_cells)
+
+# --- Metadata ----
+# --- people at risk data ---
+par_table <- read_feather('data/people_at_risk/people-at-risk.feather')
+
+# temp fix of typo 
+par_table <- par_table %>% rename('lad_prop_recieving_section_95_support'=lad_prop_receving_section95_support,
+                                  'lad_prop_unemployed_on_ucred' = 'lad_prop_upemployed_on_ucred') %>% 
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
+
+
+# just working with engalnd for now
+england_regions = c("North", "Midlands & East", "London", "South West", "South East")
+
+
+# just working with engalnd for now
+england_regions = c("North", 'Midlands & East', "London", "South West", "South East")
+
+
+# calculate averages for all local authorities across england - to me this is the avg across england
+# need to select 
+par_table_lad_avg <- par_table %>%
+  select(
+    'Proportion of neighbourhoods in 20% most digitally excluded',
+    'percent_digitally_excluded',
+    'People receiving Section 95 support',
+    'lad_prop_recieving_section_95_support',
+    `Percentage of population who are ethnic minority`,
+    `Number of households in fuel poverty1`,
+    `Proportion of households fuel poor (%)`,
+    `Homelessness (rate per 1000)`,
+    `Not in employment`,
+    'lad_prop_unemployed_on_ucred',
+    `Clinically extremely vulnerable`,
+    `Proportion Clinically extremely vulnerable`
+  ) %>%
+  summarise_all(., list('mean' = mean, 'stdev'=sd), na.rm=T) %>%
+  mutate('LAD19CD'='lad_avg', 'TacticalCell'='lad_avg') %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) %>%
+  select('LAD19CD', 'TacticalCell', everything())
+
+# calculate the tactical cell average.
+par_table_tc_avg <- par_table %>% 
+  select(
+    `tc_Proportion of neighbourhoods in 20% most digitally excluded`,
+    `tc_percent_digitally_excluded`,
+    `tc_People receiving Section 95 support`,
+    `tc_prop_people_recieving_section_95_support`,
+    `tc_proportion`,
+    #`tc_cases_per_10000_for_current_week`,
+    `tc_Number of households in fuel poverty1`,
+    'tc_prop_households_fuel_poor',
+    `tc_Homelessness (rate per 1000)`,
+    `tc_Not in employment`,
+    `tc_prop_unemployed_on_universal_credit`,
+    `tc_Clinically extremely vulnerable`,
+    `tc_Clinically vulnerable proportion of population`
+  ) %>%
+  unique() %>%
+  summarise_all(., list('mean'=mean, 'stdev'=sd), na.rm=T) %>%
+  summarise_all(., list(round), 2) %>%
+  mutate('LAD19CD'='tc_avg', 'TacticalCell'='tc_avg') %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) %>%
+  select('LAD19CD', 'TacticalCell', everything())
+
+# --- areas to focus ---
+# --- Covid ----
+covid_area2focus <- read_feather('data/areas_to_focus/areas2focus_covid.feather')
+
+# covid prefix for name for table
+covid_data_date = format(covid_area2focus$date[1], '%d/%m/%Y')
+# possible weird repetitive unknown unititialised column error work around. 
+remove <- c("date")
+covid_area2focus <- covid_area2focus[, !(names(covid_area2focus) %in% remove)]
+
+# rename with suffix for time being. 
+covid_area2focus <- covid_area2focus %>%
+  rename('covid cases per 100,000'=newCasesBySpecimenDateRollingRate) %>%
+  rename('Name' = clean_areaNames) %>%
+  rename('to_show'= areaName) %>%
+  rename('Total cases' = newCasesBySpecimenDateRollingSum) %>%
+  rename('% change in covid cases' = newCasesBySpecimenDateChangePercentage) %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell', -'areaType', -'newCasesBySpecimenDate') %>%
+  rename("TacticalCell"=TacticalCell_update)
+
+
+
+
+# ---- Flooding ---
+# flooding stats within resilience index
+flooding_area2focus <- lad_uk2vuln_resilience %>% st_drop_geometry() %>%
+  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                         TacticalCell == 'Central' ~ 'Midlands & East',
+                                         TRUE ~ as.character(.$TacticalCell))) %>%
+  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) %>%
+  select('LAD19CD','LAD19NM','TacticalCell',`Vulnerability quintile`, `Total people in flood risk areas`, 
+         `% people in flood risk areas`, `Flood risk quintile`,
+         `Total historical flooding incidents`, `Flooding incidents per 10,000 people`,
+         `Flood incidents quintile`)
+
+
+# flood outlines metoffice warnings 
+flood_warning_polygons <- read_sf('./data/areas_to_focus/current_live_warnings_polygons.geojson')
+flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_points.geojson')
+flood_warning_meta <- read_feather('./data/areas_to_focus/current_live_warnings_metadata.feather')
+
+# are there any warnings 
+if (dim(flood_warning_meta)[1]==0) {
+  # ensure always have columns for all alerts
+  # if column not there
+  if(!"Total live severe Flood warning" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood warning' = 0)
+  }
+  
+  if(!"Total live Flood warning" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood warning' = 0)
+  }
+  
+  if(!"Total live Flood alert" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood alert' = 0)
+  }
+  
+  # ensure order is consistent
+  flooding_area2focus <- flooding_area2focus %>% relocate(`Total live severe Flood warning`, `Total live Flood warning`, -`Total live Flood alert`, .after=`Flood incidents quintile`) %>%
+    mutate(`Total live severe Flood warning`=replace_na(`Total live severe Flood warning`,0)) %>%
+    mutate(`Total live Flood warning`=replace_na(`Total live Flood warning`,0)) %>%
+    mutate(`Total live Flood alert`=replace_na(`Total live Flood alert`,0))
+  
+} else {
+  # for areas to focus list 
+  total_type_of_warning_per_authority <- flood_warning_meta %>% group_by(lad19nm, severity) %>%
+    count() 
+  # how many of each type of alert
+  total_type_of_warning_per_aurthority_trans <- pivot_wider(total_type_of_warning_per_authority, names_from=severity, values_from=n, names_prefix = 'Total live ') %>%
+    rename('LAD19NM'=lad19nm) %>% replace(is.na(.), 0)
+  
+  # join to flooding areas to focus 
+  flooding_area2focus <- left_join(flooding_area2focus, total_type_of_warning_per_aurthority_trans, by='LAD19NM', keep=F)
+  
+  
+  # ensure always have columns for all alerts
+  # if column not there
+  if(!"Total live severe Flood warning" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood warning' = 0)
+  }
+  
+  if(!"Total live Flood warning" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood warning' = 0)
+  }
+  
+  if(!"Total live Flood alert" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood alert' = 0)
+  }
+  
+  
+  # ensure order is consistent
+  flooding_area2focus <- flooding_area2focus %>% relocate(`Total live severe Flood warning`, `Total live Flood warning`, -`Total live Flood alert`, .after=`Flood incidents quintile`) %>%
+    mutate(`Total live severe Flood warning`=replace_na(`Total live severe Flood warning`,0)) %>%
+    mutate(`Total live Flood warning`=replace_na(`Total live Flood warning`,0)) %>%
+    mutate(`Total live Flood alert`=replace_na(`Total live Flood alert`,0))
+  
+  
+  # join dfs for mapping
+  flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) %>%
+    mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                           TacticalCell == 'Central' ~ 'Midlands & East',
+                                           TRUE ~ as.character(.$TacticalCell))) %>%
+    select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
+  
+  flood_warning_points <- left_join(flood_warning_points,flood_warning_meta, by='floodAreaID', keep=F) %>%
+    mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                           TacticalCell == 'Central' ~ 'Midlands & East',
+                                           TRUE ~ as.character(.$TacticalCell))) %>%
+    select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
+  
+  flood_warning_meta <- flood_warning_meta %>%
+    mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                           TacticalCell == 'Central' ~ 'Midlands & East',
+                                           TRUE ~ as.character(.$TacticalCell))) %>%
+    select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
+  
+}
+
+
+# # -- vcs indicators
+# requests <- read_feather('data/vcs_indicators/requests_this_week_and_last.feather')
+# requests <- requests %>%
+#   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+#                                          TacticalCell == 'Central' ~ 'Midlands & East',
+#                                          TRUE ~ as.character(.$TacticalCell))) %>%
+#   select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update)
+
+
+# -- for home page maybe replacing initial requests --
+requests_home <- read_feather("data/vcs_indicators/all_requests.feather")
+pulse <- read_feather("data/vcs_indicators/pulse_check_summary.feather")
+
+# --- resource bank ---
+resources_info <- read_feather("./data/resource_bank/resource_bank.feather")
+
+# latest insight
+vac_data <- read_feather("data/areas_to_focus/vaccination_rate.feather")
+
+### --- update time --- 
+Sys.setenv(TZ = "Europe/London")
+#for help section
+time <- str_split(as.POSIXct(Sys.time()), " ")[[1]][2]
+
+# for flood areas to focus
+time_and_date <- str_split(as.POSIXct(Sys.time()), " ")
+last_updated_time <- paste0(time_and_date[[1]][2],",")
+last_updated_time_header <- paste0(time_and_date[[1]][2])
+# for both
+last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%d"), "%d/%m/%Y"))
+
+

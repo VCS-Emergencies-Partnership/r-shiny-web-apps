@@ -79,3 +79,8 @@ terraform.rc
 Thumbs.db
 .envrc*
 tmp
+
+# Packrat libraries
+packages/*/packrat/lib*
+packages/*/packrat/src
+packages/*/packrat/init.R
