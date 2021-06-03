@@ -183,19 +183,19 @@ body <- dashboardBody(
             # row three 
             fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",
                      column(width=4,
-                            box(title="Where we're working", width=NULL, #height='80vh',
+                            box(title=tags$strong("Where we're working", style='font-size:2.5vh'), width=NULL, #height='80vh',
                                 style='overflow-y: scroll;', 
                                 uiOutput("home_map_headlines", height='20vh'),
                                 withSpinner(leafletOutput('home_map', height = "70vh")),
                                 uiOutput("source_home_map", height='10vh'))),
                      column(width=4,
-                            box(title="What our network is telling us", width=NULL,
+                            box(title=tags$strong("What our network is telling us",style='font-size:2.5vh'), width=NULL,
                                 uiOutput("latest_concerns_headline", height='20vh', width=NULL),
                                 withSpinner(echarts4rOutput('concerns', height="70vh")),
                                 uiOutput("source_concerns", height="10vh"))),
                      
                      column(width = 4,
-                            box(title="Latest insight", width=NULL,
+                            box(title=tags$strong("Latest insight", style='font-size:2.5vh'), width=NULL,
                                 uiOutput("latest_insight_headline", height='20vh'),
                                 withSpinner(echarts4rOutput("latest_insight", height="70vh")),
                                 uiOutput("source_insight_headline", height='10vh'))

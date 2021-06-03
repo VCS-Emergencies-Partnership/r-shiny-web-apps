@@ -2058,8 +2058,8 @@ rfs_highlights <- function(dataset, which_highlight) {
 
     return(div(p("We have responded to", tags$strong(no_requests, 
                                           "requests for support"),
-              'during our response to the COVID-19 pandemic.'
-              )))
+              'during our response to the COVID-19 pandemic.',
+              style='font-size:2.25vh')))
   }
   else {
     if(which_highlight == 2) {
@@ -2082,7 +2082,8 @@ rfs_highlights <- function(dataset, which_highlight) {
         p("The highest proportion of requests,",
         tags$strong(paste0(most_common_request$prop_requests, "%")),
         paste0("(",most_common_request$total,")"),
-        "have been for", tags$strong(paste0(most_common_request$requests_for, "."))
+        "have been for", tags$strong(paste0(most_common_request$requests_for, ".", 
+                                            style='font-size:2.5vh'))
       )))
         
     }
