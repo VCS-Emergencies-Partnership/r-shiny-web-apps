@@ -209,7 +209,7 @@ server = function(input, output, session) {
     
     
     div(
-      p(style="font-size:14px;",
+      p(style='font-size:2.25vh',
         tags$strong(paste0(max_in_need$`Proportion of respondents`,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
                   reported", tags$strong(max_in_need$clean_names), "as a concern
                   in the next 14 days."))
@@ -263,7 +263,8 @@ server = function(input, output, session) {
     div(
       p(tags$strong(paste0(vac_second_dose_highest$prop_of_population, "%")),
         "of those aged", tags$strong(vac_second_dose_highest$age_range),
-        "have received their", tags$strong("second dose", style='color:#91cc75'), "of vaccine against COVID-19")
+        "have received their", tags$strong("second dose", style='color:#91cc75'), "of vaccine against COVID-19",
+        style='font-size:2.25vh')
       )
     
   })
