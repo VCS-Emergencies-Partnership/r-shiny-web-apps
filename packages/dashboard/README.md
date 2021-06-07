@@ -6,10 +6,13 @@ The toolkit uses open data, the sources and license for which can be found on th
 
 
 <h3> Links: </h3>
-The tool can be found at: [https://insight.vcsep.org.uk/](https://insight.vcsep.org.uk/) <br>
+
+The tool can be found at: [https://insight.vcsep.org.uk/](https://insight.vcsep.org.uk/)
+
 The partnerships website: [https://vcsep.org.uk/](https://vcsep.org.uk/)
 
 
 <h3> Contributing: </h3>
+
 To contribute to this project, please follow [GitHub Flow](https://githubflow.github.io/) when submitting changes.
 
