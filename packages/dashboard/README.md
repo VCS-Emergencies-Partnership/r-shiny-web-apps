@@ -7,8 +7,7 @@ The toolkit uses open data, the sources and license for which can be found on th
 
 ## Links:
 
-The tool can be found at: [https://insight.vcsep.org.uk/](https://insight.vcsep.org.uk/)
-
+The tool can be found at: [https://insight.vcsep.org.uk/](https://insight.vcsep.org.uk/) \
 The partnerships website: [https://vcsep.org.uk/](https://vcsep.org.uk/)
 
 
