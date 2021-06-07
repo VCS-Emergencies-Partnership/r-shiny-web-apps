@@ -403,10 +403,11 @@ create_data_license_help <- function() {
               and we do not guarantee the accuracy of this information. 
               See references section for each dashboard for more information."),
     tags$br(),
-    h4(tags$strong("License for Risk Indicator Tool Kit")),
-    p("We are preparing to share our tool with others using the GPL3 license, following on 
+    h4(tags$strong("License for the Emergencies Toolkit")),
+    p("The code for this app is released under the the GPL3 license, following on 
             from the BRC Vulnerability and Resilience indices being released under the same license. 
-            The benefit is that analysts and engineers can review what we’re doing to help make it
+            The code for the tool can be found", tags$a(href='https://github.com/VCS-Emergencies-Partnership/r-shiny-web-apps/tree/main/packages/dashboard', target='_blank','here.'),
+            "The benefit is that analysts and engineers can review what we’re doing to help make it
             better. We’re taking a collaborative approach and working closely with those who want 
             to be involved. The requirements is that this tool cannot be used for  monetary gain 
             and if the development code is used the source must be referenced, including this tool
