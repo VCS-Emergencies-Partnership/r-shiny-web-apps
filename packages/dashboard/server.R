@@ -207,12 +207,22 @@ server = function(input, output, session) {
     max_in_need <- tail(max_in_need, 1) %>%
       rename(`Proportion of respondents` = proportion_respondents)
     
+    max_increase <- pulse %>% arrange(-desc(greatest_diff)) 
+    max_increase <- tail(max_increase, 1) %>%
+      rename(`Greatest increase in concern` = greatest_diff)
+    
+    #div(
+    #  p(style='font-size:2.25vh',
+    #    tags$strong(paste0(max_in_need$`Proportion of respondents`,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
+    #              reported", tags$strong(max_in_need$clean_names), "as a concern
+    #              in the next 14 days."))
     
     div(
       p(style='font-size:2.25vh',
-        tags$strong(paste0(max_in_need$`Proportion of respondents`,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
-                  reported", tags$strong(max_in_need$clean_names), "as a concern
-                  in the next 14 days."))
+        "The greatest", tags$strong("increase"), "in concern,", tags$strong(paste0(max_increase$`Greatest increase in concern`,"%")), paste0("(",max_increase$group_total, "),"), "was reported for", tags$strong(max_increase$clean_names)
+    ))
+    
+    
     
   })
   
@@ -229,22 +239,22 @@ server = function(input, output, session) {
   output$concerns <- renderEcharts4r({
     
     pulse <- pulse %>%
-      rename(`Proportion of respondents` = proportion_respondents) %>%
-      arrange(-desc(`Proportion of respondents`))
+      rename(`Proportion of respondents reporting concern` = proportion_respondents, `% change in respondents reporting concern`=`greatest_diff`) %>%
+      arrange(-desc(`Proportion of respondents reporting concern`))
     
     concerns_pulse <- pulse %>%
       e_charts(x = clean_names) %>%
-      e_bar(`Proportion of respondents`, bar_width=1, showBackground=T) %>%
+      e_bar(`Proportion of respondents reporting concern`, bar_width=1, showBackground=T) %>%
+      e_line(`% change in respondents reporting concern`) %>%
       e_hide_grid_lines() %>%
       e_flip_coords() %>%
-      e_grid(containLabel = TRUE, left=20, right=30, top=20, bottom=5, height='90%') %>%
-      e_x_axis(name='% respondents', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-      e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
-      e_y_axis(show=T) %>%
-      e_axis_labels(x="% respondents") %>%
-      e_legend(FALSE) %>%
+      e_grid(containLabel = TRUE, left=20, right=30, top=60, bottom=5, height='85%') %>%
+      e_x_axis( position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=T, fontWeight='bold', margin=2),min=-20, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=20) %>%
+      e_y_axis(axisLabel = list(interval = 0, show = T), splitLine = list(show = FALSE)) %>%
+      #e_axis_labels(x="% respondents") %>%
+      e_legend() %>%
       e_tooltip()
-    
+    #name='% respondents', nameLocation="middle",
   })
   
   
@@ -281,11 +291,11 @@ server = function(input, output, session) {
       e_hide_grid_lines() %>%
       #e_title("% population vaccinated", fontsize=12) %>%
       e_flip_coords() %>%
-      e_grid(containLabel = TRUE, left=30, right=30, top=20, bottom=5, height='90%') %>%
-      e_x_axis(name='% population', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+      e_grid(containLabel = TRUE, left=30, right=30, top=40, bottom=5, height='85%') %>%
+      e_x_axis(name='% population', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=10),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
       e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
       e_y_axis(show=T) %>%
-      e_legend(show=F) %>%
+      e_legend(show=T) %>%
       e_tooltip()
     
   })
