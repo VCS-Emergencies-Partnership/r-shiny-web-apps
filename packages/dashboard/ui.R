@@ -387,13 +387,14 @@ body <- dashboardBody(
             fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
                      column(width=12,
                             panel(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
-                                  column(width=6, p(h2("Public resources"), "This is a collection of useful publicly available 
-                                            resources that could be useful to the Voluntary Community Sector.", 
-                                                    tags$a(href="https://vcsep.org.uk/", target="_blank", "Contact us"), 
-                                                    "if you know of any further resources that may be of use.",
+                                  column(width=6, p(h2("Public Resources"), 
+                                            "This is a collection of useful publicly available 
+                                            resources that could be useful to people working in the Voluntary and Community Sector.", "Please",
+                                                    tags$a(href="https://vcsep.org.uk/", target="_blank", "contact us"), 
+                                                    "if you would like to share any further resources that we could signpost to.",
                                             tags$br(), 
-                                            "The VCS EP does not have responsibility 
-                                            for these resources.")),
+                                            tags$em("Please note: The Emergencies Partnership does not have responsibility 
+                                            for these resources.", style='font-size:10px'))),
                                   column(width=6, style='padding-top:30px', searchInput(
                                     inputId = "resource_search",
                                     label = "Search for resources with a particular theme:", 
