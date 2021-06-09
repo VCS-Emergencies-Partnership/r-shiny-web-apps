@@ -387,6 +387,7 @@ create_data_license_help <- function() {
     "and the British Red Cross Vulnerability and Resilience indices are available under the same license. 
     The code for the toolkit can be found", tags$a(href="https://github.com/VCS-Emergencies-Partnership/r-shiny-web-apps/tree/main/packages/dashboard", target="_blank","here."),
     "Before reporducing or adapting this tool, please ensure you are adhering to the terms of the license."),
+
     tags$br(),
     h4(tags$strong("Privacy and Cookies Policy")),
     p("We use Google Analytics to collect information on visits and behaviour on the site, 
