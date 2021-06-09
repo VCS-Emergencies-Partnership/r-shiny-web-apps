@@ -141,3 +141,7 @@ h1, h2, h3, h4 { font-weight: 400; }
 .badge.badge-pill.badge-info {
    background-color:#253494;
 }
+
+#insight {
+  background-color: #003c30
+}
