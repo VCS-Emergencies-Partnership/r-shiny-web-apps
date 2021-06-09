@@ -19,8 +19,8 @@
 
   $(document).on('shiny:inputchanged', function(event) {
     if(event.value == 'unmetneed') {
-    gtag('event', 'which_page_visited', {
-      'event_category': 'page_visit',
+    gtag('event', 'ri_tool_visited', {
+      'event_category': 'ri_tool_visited',
       'event_label': event.name,
       'value': event.value
     }); 
@@ -30,8 +30,8 @@
     
     else {
       if(event.value == 'Help') {
-        gtag('event', 'which_page_visited', {
-      'event_category': 'which_page_visited',
+        gtag('event', 'help_visited', {
+      'event_category': 'help_visited',
       'event_label': event.name,
       'value': event.value
     }); 
@@ -42,8 +42,8 @@
         
         else {
           if(event.value == 'references') {
-        gtag('event', 'which_page_visited', {
-      'event_category': 'which_page_visited',
+        gtag('event', 'refs_visited', {
+      'event_category': 'refs_visited',
       'event_label': event.name,
       'value': event.value
     }); 
@@ -53,8 +53,8 @@
           }
           else {
             if(event.value == 'home') {
-              gtag('event', 'which_page_visited', {
-              'event_category': 'which_page_visited',
+              gtag('event', 'home_visited', {
+              'event_category': 'home_visited',
               'event_label': event.name,
               'value': event.value
             }); 
@@ -65,8 +65,8 @@
           
           else {
             if(event.value == 'latest_news_tab') {
-              gtag('event', 'which_page_visited', {
-              'event_category': 'which_page_visited',
+              gtag('event', 'news_visited', {
+              'event_category': 'news_visited',
               'event_label': event.name,
               'value': event.value
             }); 
@@ -76,8 +76,8 @@
           } 
           else {
             if(event.value == 'resource_catalogue') {
-              gtag('event', 'which_page_visited', {
-              'event_category': 'which_page_visited',
+              gtag('event', 'resources_visited', {
+              'event_category': 'resources_visited',
               'event_label': event.name,
               'value': event.value
             }); 
@@ -88,8 +88,8 @@
           
           else {
             if(event.value == 'vcs_report_sidebar') {
-              gtag('event', 'which_page_visited', {
-              'event_category': 'which_page_visited',
+              gtag('event', 'reports_visited', {
+              'event_category': 'reports_visited',
               'event_label': event.name,
               'value': event.value
             }); 
@@ -100,8 +100,8 @@
           
           else {
             if(event.value == 'internal_reports_from_sidebar') {
-              gtag('event', 'which_page_visited', {
-              'event_category': 'which_page_visited',
+              gtag('event', 'internal_dashboards_visited', {
+              'event_category': 'internal_dashboards_visited',
               'event_label': event.name,
               'value': event.value
             }); 
@@ -110,8 +110,8 @@
             
           } else {
              if(event.value == 'community_assets_sidebar') {
-              gtag('event', 'which_page_visited', {
-              'event_category': 'which_page_visited',
+              gtag('event', 'community_assets_visited', {
+              'event_category': 'community_assets_visited',
               'event_label': event.name,
               'value': event.value
             }); 
@@ -139,9 +139,9 @@
 $(document).on('click', 'a#vcs_reports_box.action-button.shiny-bound-input', function(e) {
     console.log("box click partner insight reports")
     console.log(e)
-    gtag('event', 'clicked_box_to_external', {
-      'event_category': 'clicked_box_to_external',
-      'event_label': 'partner_reports_selected',
+    gtag('event', 'clicked_through_to_partner_reports', {
+      'event_category': 'clicked_through_to_partner_reports',
+      'event_label': 'clicked_through_to_partner_reports',
       'value': $(e.currentTarget).val()
     });
     //console.log($(e.currentTarget).val())
@@ -151,9 +151,9 @@ $(document).on('click', 'a#vcs_reports_box.action-button.shiny-bound-input', fun
 $(document).on('click', 'a#internal_reports_from_box.action-button.shiny-bound-input', function(e) {
     console.log("box click dashboards")
     console.log(e)
-    gtag('event', 'clicked_box_to_external', {
-      'event_category': 'clicked_box_to_external',
-      'event_label': 'internal_dashboards_selected',
+    gtag('event', 'clicked_through_to_internal_dashboards', {
+      'event_category': 'clicked_through_to_internal_dashboards',
+      'event_label': 'clicked_through_to_internal_dashboards',
       'value': $(e.currentTarget).val()
     });
     //console.log($(e.currentTarget).val())
@@ -163,9 +163,9 @@ $(document).on('click', 'a#internal_reports_from_box.action-button.shiny-bound-i
 $(document).on('click', 'a#community_assets_box.action-button.shiny-bound-input', function(e) {
     console.log("box click community")
     console.log(e)
-    gtag('event', 'clicked_box_to_external', {
-      'event_category': 'clicked_box_to_external',
-      'event_label': 'community_assets_selected',
+    gtag('event', 'clicked_through_to_community_assets', {
+      'event_category': 'clicked_through_to_community_assets',
+      'event_label': 'clicked_through_to_community_assets',
       'value': $(e.currentTarget).val()
     });
     //console.log($(e.currentTarget).val())
