@@ -210,57 +210,82 @@ flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_poi
 flood_warning_meta <- read_feather('./data/areas_to_focus/current_live_warnings_metadata.feather')
 
 
-# for areas to focus list 
-total_type_of_warning_per_authority <- flood_warning_meta %>% group_by(lad19nm, severity) %>%
-  count() 
-# how many of each type of alert
-total_type_of_warning_per_aurthority_trans <- pivot_wider(total_type_of_warning_per_authority, names_from=severity, values_from=n, names_prefix = 'Total live ') %>%
-  rename('LAD19NM'=lad19nm) %>% replace(is.na(.), 0)
-
-# join to flooding areas to focus 
-flooding_area2focus <- left_join(flooding_area2focus, total_type_of_warning_per_aurthority_trans, by='LAD19NM', keep=F)
-
-
-# ensure always have columns for all alerts
-# if column not there
-if(!"Total live severe Flood warning" %in% colnames(flooding_area2focus)) {
-  flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood warning' = 0)
+# are there any warnings 
+if (dim(flood_warning_meta)[1]==0) {
+  # ensure always have columns for all alerts
+  # if column not there
+  if(!"Total live severe Flood warning" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood warning' = 0)
+  }
+  
+  if(!"Total live Flood warning" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood warning' = 0)
+  }
+  
+  if(!"Total live Flood alert" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood alert' = 0)
+  }
+  
+  # ensure order is consistent
+  flooding_area2focus <- flooding_area2focus %>% relocate(`Total live severe Flood warning`, `Total live Flood warning`, -`Total live Flood alert`, .after=`Flood incidents quintile`) %>%
+    mutate(`Total live severe Flood warning`=replace_na(`Total live severe Flood warning`,0)) %>%
+    mutate(`Total live Flood warning`=replace_na(`Total live Flood warning`,0)) %>%
+    mutate(`Total live Flood alert`=replace_na(`Total live Flood alert`,0))
+  
+} else {
+  # for areas to focus list 
+  total_type_of_warning_per_authority <- flood_warning_meta %>% group_by(lad19nm, severity) %>%
+    count() 
+  # how many of each type of alert
+  total_type_of_warning_per_aurthority_trans <- pivot_wider(total_type_of_warning_per_authority, names_from=severity, values_from=n, names_prefix = 'Total live ') %>%
+    rename('LAD19NM'=lad19nm) %>% replace(is.na(.), 0)
+  
+  # join to flooding areas to focus 
+  flooding_area2focus <- left_join(flooding_area2focus, total_type_of_warning_per_aurthority_trans, by='LAD19NM', keep=F)
+  
+  
+  # ensure always have columns for all alerts
+  # if column not there
+  if(!"Total live severe Flood warning" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood warning' = 0)
+  }
+  
+  if(!"Total live Flood warning" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood warning' = 0)
+  }
+  
+  if(!"Total live Flood alert" %in% colnames(flooding_area2focus)) {
+    flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood alert' = 0)
+  }
+  
+  
+  # ensure order is consistent
+  flooding_area2focus <- flooding_area2focus %>% relocate(`Total live severe Flood warning`, `Total live Flood warning`, -`Total live Flood alert`, .after=`Flood incidents quintile`) %>%
+    mutate(`Total live severe Flood warning`=replace_na(`Total live severe Flood warning`,0)) %>%
+    mutate(`Total live Flood warning`=replace_na(`Total live Flood warning`,0)) %>%
+    mutate(`Total live Flood alert`=replace_na(`Total live Flood alert`,0))
+  
+  
+  # join dfs for mapping
+  flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) %>%
+    mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                           TacticalCell == 'Central' ~ 'Midlands & East',
+                                           TRUE ~ as.character(.$TacticalCell))) %>%
+    select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
+  
+  flood_warning_points <- left_join(flood_warning_points,flood_warning_meta, by='floodAreaID', keep=F) %>%
+    mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                           TacticalCell == 'Central' ~ 'Midlands & East',
+                                           TRUE ~ as.character(.$TacticalCell))) %>%
+    select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
+  
+  flood_warning_meta <- flood_warning_meta %>%
+    mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
+                                           TacticalCell == 'Central' ~ 'Midlands & East',
+                                           TRUE ~ as.character(.$TacticalCell))) %>%
+    select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
+  
 }
-
-if(!"Total live Flood warning" %in% colnames(flooding_area2focus)) {
-  flooding_area2focus <- flooding_area2focus %>% mutate('Total live Flood warning' = 0)
-}
-
-if(!"Total live Flood alert" %in% colnames(flooding_area2focus)) {
-  flooding_area2focus <- flooding_area2focus %>% mutate('Total live severe Flood alert' = 0)
-}
-
-# ensure order is consistent
-flooding_area2focus <- flooding_area2focus %>% relocate(`Total live severe Flood warning`, `Total live Flood warning`, -`Total live Flood alert`, .after=`Flood incidents quintile`) %>%
-  mutate(`Total live severe Flood warning`=replace_na(`Total live severe Flood warning`,0)) %>%
-  mutate(`Total live Flood warning`=replace_na(`Total live Flood warning`,0)) %>%
-  mutate(`Total live Flood alert`=replace_na(`Total live Flood alert`,0))
-
-
-
-# join dfs for mapping
-flood_warning_polygons <- left_join(flood_warning_meta, flood_warning_polygons, by='floodAreaID', keep=F) %>%
-  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
-                                         TacticalCell == 'Central' ~ 'Midlands & East',
-                                         TRUE ~ as.character(.$TacticalCell))) %>%
-  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
-
-flood_warning_points <- left_join(flood_warning_points,flood_warning_meta, by='floodAreaID', keep=F) %>%
-  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
-                                         TacticalCell == 'Central' ~ 'Midlands & East',
-                                         TRUE ~ as.character(.$TacticalCell))) %>%
-  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
-
-flood_warning_meta <- flood_warning_meta %>%
-  mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
-                                         TacticalCell == 'Central' ~ 'Midlands & East',
-                                         TRUE ~ as.character(.$TacticalCell))) %>%
-  select(-'TacticalCell') %>% rename("TacticalCell"=TacticalCell_update) 
 
 
 # # -- vcs indicators

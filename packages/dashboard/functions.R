@@ -2299,7 +2299,7 @@ top10_options <- function(theme) {
 }
 
 
-top_10_list_title <- function(theme, rank, tc, lad, date_of_data) {
+top_10_list_title <- function(theme, rank, tc, lad, date_of_data, flood_points) {
   if(theme == 'Covid-19') {
     
     # -- change title based on what's selected --- 
@@ -2343,7 +2343,15 @@ else {
       }
       else{
         if(rank$rank_wanted_flooding == 'Flood warnings/alerts') {
-          title_wanted <- paste("number of flood warnings and alerts as of", last_updated_time, last_updated_date)
+          
+          if (dim(flood_points)[1] == 0) {
+            title_wanted <- paste("- No active flood warnings and alerts as of", last_updated_time, last_updated_date)
+          }
+          else {
+            title_wanted <- paste("number of flood warnings and alerts as of", last_updated_time, last_updated_date)
+          }
+          
+          #title_wanted <- paste("number of flood warnings and alerts as of", last_updated_time, last_updated_date)
           
         }
         else {
@@ -2355,12 +2363,33 @@ else {
       }
       
       # return title based on area
-      if (lad == 'All local authorities in region' || is.null(lad)) {
+      #if (lad == 'All local authorities in region' || is.null(lad)) {
+        
+      if (dim(flood_points)[1] == 0) {
+          if(lad == 'All local authorities in region' || is.null(lad)) {
+          return(div(
+            p(tags$strong(tc), paste(title_wanted)),
+            hr(style = "border-top: 1px solid #000000;"))
+          )
+          }
+        
+          else {
+            return(div(
+              p(tags$strong(lad), paste(title_wanted)),
+              hr(style = "border-top: 1px solid #000000;"))
+            )
+          }
+          
+        }
+      
+        else {
+          if(lad == 'All local authorities in region' || is.null(lad)) {
+        # for other ranks with higher level it's fine 
         return(div(
           p(tags$strong(tc), paste('Top 10 areas with highest', title_wanted)),
           hr(style = "border-top: 1px solid #000000;"))
         )
-      }
+          }
       
       else {
         return(div(
@@ -2368,12 +2397,11 @@ else {
           hr(style = "border-top: 1px solid #000000;"))
         )
     
-      }
-      
+          #}
+          }
+        }
     }
-    
   }
-  
 }
 
 top_10_list <- function(top10list, theme, rank, tc, lad) {
