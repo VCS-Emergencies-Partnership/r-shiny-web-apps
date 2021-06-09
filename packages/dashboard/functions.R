@@ -2169,7 +2169,8 @@ plot_resource_cat <- function(table) {
                  #       img(src=logo_wanted$logos, width=100)),
                  
                  column(width=12,
-                        p(resource_wanted$`Description / Usage`)))
+                        p(resource_wanted$`Description / Usage`,
+                          style="font-size:1.9")))
       )
     )
   })
@@ -2231,7 +2232,8 @@ search_resources <- function(table, search_this) {
                  #       img(src=logo_wanted$logos, width=100)),
                  
                  column(width=12,
-                        p(resource_wanted$`Description / Usage`)))
+                        p(resource_wanted$`Description / Usage`,
+                          style="font-size:1.9",)))
       )
     )
   })
@@ -2517,22 +2519,69 @@ top_10_list <- function(top10list, theme, rank, tc, lad) {
 in_the_press <- function() {
 
   return(
-div(style='font-size:14px',
+div(
+    
+    p(tags$strong("In The Press",  style='font-size:2.25vh')," - A selection of press reports about British Red Cross and
+                   Emergencies Partnership use of mapping technology", style='font-size:1.9vh'),
+    p(style='font-size:1.9vh',
     tags$li(tags$a(href="https://www.computerweekly.com/news/252500063/How-the-British-Red-Cross-harnessed-digital-mapping-honed-abroad-for-the-domestic-Covid-19-crisis", target="_blank", "Computer Weekly")),
-    tags$br(),
+   tags$br(),
     tags$li(tags$a(href="https://emergencyservicestimes.com/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid/", target="_blank", "Emergency Services Times")),
-    tags$br(),
+   tags$br(),
     tags$li(tags$a(href="https://www.geoconnexion.com/news/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19", target="_blank", "Geoconnexion")),
-    tags$br(),
+   tags$br(),
     tags$li(tags$a(href="https://www.charitytimes.com/ct/Digital-mapping-transforming-UK-charities-response-to-emergencies.php", target="_blank", "Charity Times (behind paywall)")),
-    tags$br(),
+   tags$br(),
     tags$li(tags$a(href="https://www.agi.org.uk/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19/", target="_blank", "The Association for Geographic Information")),
-    tags$br(),
+   tags$br(),
     tags$li(tags$a(href="https://www.directionsmag.com/pressrelease/10755", target="_blank", "Directions Magazine (U.S./global GIS publication)")),
-    tags$br(),
+   tags$br(),
     tags$li(tags$a(href="https://www.geospatialworld.net/news/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19/", target="_blank", "Geospatial World (global GIS publication)")),
-    tags$br(),
-    tags$li(tags$a(href="https://www.charitytoday.co.uk/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19/", target="_blank", "Charity Today")))
-
-)
+   tags$br(),
+    tags$li(tags$a(href="https://www.charitytoday.co.uk/british-red-cross-turns-to-digital-mapping-to-help-meet-increased-demand-for-support-due-to-covid-19/", target="_blank", "Charity Today"))),
+  
+   
+      tags$br(),
+     p(tags$strong("Success Stories:"), style='font-size:2.25vh'),
+      p(style='font-size:1.9vh',
+      tags$li(tags$a(href="https://vcsep.org.uk/success-stories/working-with-hm-prison-and-probation-service-to-support-those-at-risk-of-loneliness-and-isolation", target="_blank", "Working with HM Prison and Probation Service to support those at risk of loneliness and isolation")),
+      tags$br(),
+      tags$li(tags$a(href="https://vcsep.org.uk/success-stories/bringing-our-partners-together-to-support-a-local-service", target="_blank","Bringing our partners together to support a local service")),
+      tags$br(),
+      tags$li(tags$a(href="https://vcsep.org.uk/success-stories/daearwgbblwjnjkvbntklwyrm7cyx3", target="_blank", "Vaccinating the nation - how the sector got involved")),
+      tags$br(),
+      tags$li(tags$a(href="https://vcsep.org.uk/success-stories/bexley-cvs-response-to-vaccine-rollout-the-role-of-local", target="_blank", "Bexley CVS response to the vaccine rollout: the role of local"))
+      )
+    )
+  )
 }
+
+coming_up_text <- function() {
+  return(
+    div(
+      p(tags$strong("We are moving into a new phase of the development of the tech 
+        platform at the Emergencies Partnership.", style="font-size:2.25vh")),
+      #tags$br(),
+      p(style="font-size:1.9vh",tags$li("This will involve a discovery exercise using a newly-adopted technology called",
+        tags$a(href="https://ckan.org/",target="_blank","CKAN"), "a data management 
+        system where we can enable partners to share data with us easily, 
+        as well as serve specific emergency responses with data from our platform at the 
+        point of need.")),
+    
+      p(style="font-size:1.9vh",tags$li("We will undertake a project to increase the accessibility of our 
+        systems in accordance with government accessibility requirements under 
+        the", tags$a(href="https://www.gov.uk/service-manual/helping-people-to-use-your-service/understanding-wcag",
+                     target="_blank", "Web Content Accessibility Guidelines (WCAG)"),
+        "AA standard.")),
+   
+      p(style="font-size:1.9vh",tags$li("We will define our post-COVID Insight Strategy and feed that into 
+        a wider prioritisation exercise of the technology roadmap for the 
+        Emergencies Partnership.")),
+      
+      p(style="font-size:1.9vh",tags$li("We will continue to engage with our partners and build relationships 
+        across the sector and beyond in order to maximise the value of our 
+        technology platform in enabling effective emergency response."))
+    )
+  )
+}
+
