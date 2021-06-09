@@ -3872,7 +3872,13 @@ server = function(input, output, session) {
     })
   })
   
-
+  observeEvent(req(input$sidebar_id == 'latest_news_tab'), {
+    
+    output$coming_up <- renderUI({
+      coming_up_text()
+    })
+  })
+  
   
 }
 
