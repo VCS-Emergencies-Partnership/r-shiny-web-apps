@@ -209,6 +209,7 @@ flood_warning_polygons <- read_sf('./data/areas_to_focus/current_live_warnings_p
 flood_warning_points <- read_sf('./data/areas_to_focus/current_live_warnings_points.geojson')
 flood_warning_meta <- read_feather('./data/areas_to_focus/current_live_warnings_metadata.feather')
 
+
 # are there any warnings 
 if (dim(flood_warning_meta)[1]==0) {
   # ensure always have columns for all alerts

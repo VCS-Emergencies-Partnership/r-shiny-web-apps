@@ -50,6 +50,9 @@ population_by_age <- function(bracket, age_start, age_end) {
   
 }
 
+# population by region
+
+
 
 
 # --- vaccination data ---
@@ -90,15 +93,16 @@ population_by_age <- function(bracket, age_start, age_end) {
   vaccination_data_raw <- read_excel(file_name,
                                      sheet = "LTLA", skip = 12)
   
+  
   # for homepage remove first geog data
    vaccination_data_summary <- head(vaccination_data_raw , 1)
   
-
   # remove first 6 cols which are geog data
-   vaccination_data_summary  <- vaccination_data_summary  %>% select(7:ncol(.))
+  vaccination_data_summary  <- vaccination_data_summary  %>% select(7:ncol(.))
   
    if (startsWith(colnames(vaccination_data_summary)[1], '.')==T) {
      stop("Vaccination columns changed")
+     
    } else {
    
 
@@ -196,4 +200,9 @@ population_by_age <- function(bracket, age_start, age_end) {
   }
 }
 
-  
+
+# # calculate 
+# vaccination_data_raw <- read_excel(file_name,
+#                                    sheet = "LTLA", skip = 12)
+# 
+#   

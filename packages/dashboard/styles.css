@@ -117,40 +117,70 @@ h1, h2, h3, h4 { font-weight: 400; }
 }
 
 
-.badge.badge-pill.badge-primary {
+/*.badge.badge-pill.badge-primary {
   background-color:#41b6c4;
-}
-
-.badge.badge-pill.badge-secondary {
-   background-color:#2c7fb8;
-}
-
-.badge.badge-pill.badge-success {
-   background-color:#9ebcda;
-}
-
-.badge.badge-pill.badge-danger {
-   background-color:#8c96c6;
-}
+} */
 
 
-.badge.badge-pill.badge-warning {
-   background-color:#8856a7;
+#covid {
+  background-color: #313695
 }
 
-.badge.badge-pill.badge-info {
-   background-color:#253494;
+#deprivation {
+  background-color: #4575b4
 }
 
-.badge.badge-pill.badge-light {
-   background-color:#f768a1;
+#children {
+  background-color: #2d004b
 }
 
-.badge.badge-pill.badge-dark {
-   background-color:#7a0177;
+#voluntary {
+  background-color: #542788
 }
 
-#Vaccine {
-  background-color:#225ea8;
+#general {
+  background-color: #8073ac
 }
+
+#winter {
+  background-color: #b2abd2
+}
+
+#insight {
+  background-color: #d8daeb
+}
+
+#national {
+  background-color: #fee0b6
+}
+
+#local {
+  background-color: #fdb863
+}
+
+#services {
+  background-color: #e08214
+}
+
+#abuse {
+  background-color: #b35806
+}
+
+#food {
+  background-color: #7f3b08
+}
+
+#mental {
+  background-color: #74add1
+}
+
+#vaccine {
+  background-color: #abd9e9
+}
+
+#LGTB {
+  background-color: #f46d43
+}
+
+
 

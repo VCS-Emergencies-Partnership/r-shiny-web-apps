@@ -39,7 +39,7 @@ source("./global.R")
 #                                           actionLink("vcs_reports_header", "Partner reports", icon=icon("fas fa-file"))),
 #                                                      
 #                                   tags$li(class="dropdown",
-#                                           actionLink("internal_reports", "Internal dashboards", icon=icon("fas fa-lock"))),
+#                                           actionLink("internal_reports", "Internal Dashboards", icon=icon("fas fa-lock"))),
 #                                   tags$li(class="dropdown",
 #                                           actionLink("community_assets_header", "Community assets map", icon=icon("fas fa-map-marked"))),
 #                                   tags$li(class="dropdown",
@@ -70,10 +70,10 @@ sidebar <- dashboardSidebar(
               
               # -- trying conditional panel ---
               
-              menuItem(HTML("Public resources"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
-              menuItem(HTML("Partner reports"), tabName="vcs_report_sidebar", icon=icon("fas fa-file")),
-              menuItem(HTML("Internal dashboards"), tabName="internal_reports_from_sidebar", icon=icon("fas fa-lock")),
-              menuItem(HTML("Community assets web map"), tabName="community_assets_sidebar", icon=icon("fas fa-map-marked")),
+              menuItem(HTML("Public Resources"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
+              menuItem(HTML("Partner Reports"), tabName="vcs_report_sidebar", icon=icon("fas fa-file")),
+              menuItem(HTML("Internal Dashboards"), tabName="internal_reports_from_sidebar", icon=icon("fas fa-lock")),
+              menuItem(HTML("Community Assets Map"), tabName="community_assets_sidebar", icon=icon("fas fa-map-marked")),
               menuItem(HTML("Latest News"), tabName="latest_news_tab", icon=icon("fas fa-newspaper")),
               menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
               menuItem("References", tabName='references', icon=icon('fas fa-feather-alt'))
@@ -90,7 +90,7 @@ body <- dashboardBody(
   tags$style(type = "text/css", "html, body {width:100%;height:100%}",),
   tags$head(
     includeCSS("styles.css"), includeHTML("cookie_consent_v2.html"),
-    includeHTML("google-analytics.html"),
+    #includeHTML("google-analytics.html"),
             tags$link(rel="icon", sizes="32X32", href="img/favicon-32x32.png"),
             tags$link(rel="icon",  sizes="16X16", href="img/favicon-16x16.png"),
             tags$link(rel="apple-touch-icon", sizes="180x180", href="img/img/apple-touch-icon.png"),
@@ -116,10 +116,10 @@ body <- dashboardBody(
             fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:0px",  
                      
                      column(width=4,
-                            box(title=actionLink("RI_tool_box","Risk indicator tool"), width=NULL,
+                            box(title=actionLink("RI_tool_box","Risk Indicator Tool"), width=NULL,
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-map-signs"),
-                                p("The Risk indicator tool shows you key statistics about an
+                                p("The Risk Indicator Tool shows you key statistics about an
                                 emergency along with the BRC Vulnerability and Resilience
                                 indices and key area demographics to aide the planning and
                                 response to an emergency.",tags$br(),
@@ -127,7 +127,7 @@ body <- dashboardBody(
                                   tags$em(tags$strong("click on the title to go to the tool"))))),
                      
                      column(width=4,
-                            box(title=actionLink("e_catalogue_box","Public resources"),width=NULL, 
+                            box(title=actionLink("e_catalogue_box","Public Resources"),width=NULL, 
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-book-open"),
                                 p("A collection of useful
@@ -137,7 +137,7 @@ body <- dashboardBody(
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
                      column(width=4,
-                            box(title=actionLink("vcs_reports_box","Partner reports"),
+                            box(title=actionLink("vcs_reports_box","Partner Reports"),
                                 width=NULL, 
                                 collapsible = T, collapsed=T,
                                 icon = icon("fas fa-file"),
@@ -148,7 +148,7 @@ body <- dashboardBody(
                      fluidRow(width=NULL, style="padding-right:20px; padding-left:20px; padding-bottom:20px; padding-top:0px",
                               
                         column(width=4,
-                            box(title=actionLink("internal_reports_from_box", "Internal dashboards"),
+                            box(title=actionLink("internal_reports_from_box", "Internal Dashboards"),
                                 width=NULL,
                                 collapsible = T, 
                                 collapsed=T,
@@ -162,16 +162,16 @@ body <- dashboardBody(
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      
                      column(width=4,
-                            box(title=actionLink("community_assets_box", "Community assets map"),
+                            box(title=actionLink("community_assets_box", "Community Assets Map"),
                                 width=NULL,
                                 collapsible = T, collapsed=T,
                                 icon=icon("fas fa-map-marked"),
-                                p("Community assets map allows you to explore and understand 
+                                p("Community Assets Map allows you to explore and understand 
                                     assets in your area.", tags$br(),
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the tool"))))),
                      column(width=4,
-                            box(title=actionLink("latest_news_box", "Latest news"),
+                            box(title=actionLink("latest_news_box", "Latest News"),
                                 width=NULL,
                                 collapsible = T, collapsed=T,
                                 icon=icon("fas fa-newspaper"),
@@ -183,21 +183,21 @@ body <- dashboardBody(
             # row three 
             fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",
                      column(width=4,
-                            box(title="Where we're working", width=NULL, #height='80vh',
+                            box(title=tags$strong("Where We're Working", style='font-size:2.5vh'), width=NULL, #height='80vh',
                                 style='overflow-y: scroll;', 
                                 uiOutput("home_map_headlines", height='20vh'),
-                                withSpinner(leafletOutput('home_map', height = "70vh")),
+                                withSpinner(leafletOutput('home_map', height = "60vh")),
                                 uiOutput("source_home_map", height='10vh'))),
                      column(width=4,
-                            box(title="What our network is telling us", width=NULL,
+                            box(title=tags$strong("What Our Network is Telling Us",style='font-size:2.5vh'), width=NULL,
                                 uiOutput("latest_concerns_headline", height='20vh', width=NULL),
-                                withSpinner(echarts4rOutput('concerns', height="70vh")),
+                                withSpinner(echarts4rOutput('concerns', height="60vh")),
                                 uiOutput("source_concerns", height="10vh"))),
                      
                      column(width = 4,
-                            box(title="Latest insight", width=NULL,
+                            box(title=tags$strong("Latest Insight", style='font-size:2.5vh'), width=NULL,
                                 uiOutput("latest_insight_headline", height='20vh'),
-                                withSpinner(echarts4rOutput("latest_insight", height="70vh")),
+                                withSpinner(echarts4rOutput("latest_insight", height="60vh")),
                                 uiOutput("source_insight_headline", height='10vh'))
                      )
             )
@@ -215,7 +215,7 @@ body <- dashboardBody(
                               height='30px',
                               fluidRow(
                                 column(width = 3,
-                                       div(h4(tags$strong("Risk indicator tool")),
+                                       div(h4(tags$strong("Risk Indicator Tool")),
                                            p("This tool is to help answer the question of what",
                                              tags$strong("areas and people"), "would be/are at risk should the",
                                              tags$strong("emergency"), "scenario selected occur"))),
@@ -248,7 +248,7 @@ body <- dashboardBody(
                                        width = NULL, #collapsible = T, collapsed=F,#solidHeader = TRUE, status='primary',
                                        title = "", 
                                        id = 'people_focus',
-                                       tabPanel('Areas to focus',
+                                       tabPanel('Areas to Focus',
                                                 fluidRow(width=NULL, 
                                                          column(width=12,style='margin-bottom:-5px;padding-bottom:-5px;',
                                                                 uiOutput("title_focus_list", height='30px'))),
@@ -266,7 +266,7 @@ body <- dashboardBody(
                                                          ))
                                                 
                                        ),
-                                       tabPanel("Area demographics", 
+                                       tabPanel("Area Demographics", 
                                                 # multi columned box - bame row
                                                 # -- shielding row ---
                                                 fluidRow(style = "border-top: 1px solid #D3D3D3;",
@@ -359,9 +359,9 @@ body <- dashboardBody(
                                title = "",
                                width = NULL, height = "610px", #solidHeader = TRUE, status='primary',
                                #closable = F,
-                               tabPanel('Areas at risk', 
+                               tabPanel('Areas at Risk', 
                                         withSpinner(leafletOutput("map", height = "550px"))),
-                               tabPanel("Find local resources",
+                               tabPanel("Find Local Resources",
                                         fluidRow( 
                                           column(width=8,
                                                  uiOutput("search_needed", height='50px')),
@@ -375,7 +375,7 @@ body <- dashboardBody(
                                         
                                         style = "height:550px; overflow-y: scroll;overflow-x: scroll;"
                                ),
-                               tabPanel('Areas to focus table', 
+                               tabPanel('Areas To Focus Table', 
                                         withSpinner(DT::dataTableOutput('areas2focus', height='350px')),
                                         style = "height:550px; overflow-y: scroll;overflow-x: scroll;")
                              )
@@ -387,13 +387,14 @@ body <- dashboardBody(
             fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
                      column(width=12,
                             panel(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
-                                  column(width=6, p(h2("Public resources"), "This is a collection of useful publicly available 
-                                            resources that could be useful to the Voluntary Community Sector.", 
-                                                    tags$a(href="https://vcsep.org.uk/", target="_blank", "Contact us"), 
-                                                    "if you know of any further resources that may be of use.",
+                                  column(width=6, p(h2("Public Resources"), style="font-size:1.9",
+                                            "This is a collection of useful publicly available 
+                                            resources that could be useful to people working in the Voluntary and Community Sector.", "Please",
+                                                    tags$a(href="https://vcsep.org.uk/", target="_blank", "contact us"), 
+                                                    "if you would like to share any further resources that we could signpost to.",
                                             tags$br(), 
-                                            "The VCS EP does not have responsibility 
-                                            for these resources.")),
+                                            tags$em("Please note: The Emergencies Partnership does not have responsibility 
+                                            for these resources.", style='font-size:1.5vh'))),
                                   column(width=6, style='padding-top:30px', searchInput(
                                     inputId = "resource_search",
                                     label = "Search for resources with a particular theme:", 
@@ -414,7 +415,7 @@ body <- dashboardBody(
     tabItem(tabName="latest_news_tab", 
             fluidRow(width=NULL,style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
                      column(width=12,
-                            panel(h2("Latest news from the Emergencies Partnership")))),
+                            panel(h2("Latest News From the Emergencies Partnership")))),
                      fluidRow(width=NULL,style="padding-right:30px; padding-left:30px;",
                               column(width=4, tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
                                     box(width=NULL, height='750px',
@@ -423,18 +424,16 @@ body <- dashboardBody(
                                         style = "height:100vh; overflow-y: scroll;overflow-x: scroll;margin-top:-40px;padding-top:-40px")),
                               
                               column(width=4, 
-                                     box(title="In the press", width=NULL,
-                                         uiOutput('press_highlights', height='70vh'))),
+                                     box(title="In The Press/Success Stories", width=NULL,
+                                         uiOutput('press_highlights', height='100vh'))),
                               column(width=4, 
-                                     box(title="Coming up", width=NULL,
-                                         div(
-                                           tags$li(tags$strong("CKAN"))
-                                         ))))),
+                                     box(title="Coming Up", width=NULL, #height='750px',
+                                         uiOutput("coming_up", height='100vh'))))),
     
     tabItem(tabName='Help',
             column(width = 12, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
                    tabBox(id='information about dashboards', width=NULL,
-                          tabPanel("About us",
+                          tabPanel("About Us",
                                    uiOutput('about_us'),
                                    style = "height:600px; overflow-y: scroll;overflow-x: scroll;"),
                           tabPanel("Risk Indicator Tool",
@@ -443,7 +442,7 @@ body <- dashboardBody(
                                                    uiOutput('about_needs'),
                                                    style = "height:600px; overflow-y: scroll;overflow-x: scroll;"
                                           ),
-                                          tabPanel("Understanding the map",
+                                          tabPanel("Understanding the Map",
                                                    uiOutput("understand_map_top"),
                                                    uiOutput("understand_map_middle"),
                                                    uiOutput("understand_map_bottom"),

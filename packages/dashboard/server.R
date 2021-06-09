@@ -207,12 +207,22 @@ server = function(input, output, session) {
     max_in_need <- tail(max_in_need, 1) %>%
       rename(`Proportion of respondents` = proportion_respondents)
     
+    max_increase <- pulse %>% arrange(-desc(greatest_diff)) 
+    max_increase <- tail(max_increase, 1) %>%
+      rename(`Greatest increase in concern` = greatest_diff)
+    
+    #div(
+    #  p(style='font-size:2.25vh',
+    #    tags$strong(paste0(max_in_need$`Proportion of respondents`,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
+    #              reported", tags$strong(max_in_need$clean_names), "as a concern
+    #              in the next 14 days."))
     
     div(
-      p(style="font-size:14px;",
-        tags$strong(paste0(max_in_need$`Proportion of respondents`,"%")), paste0("(",max_in_need$group_total, ")"), "of respondents
-                  reported", tags$strong(max_in_need$clean_names), "as a concern
-                  in the next 14 days."))
+      p(style='font-size:2.25vh',
+        "The greatest", tags$strong("increase"), "in concern,", tags$strong(paste0(max_increase$`Greatest increase in concern`,"%")), paste0("(",max_increase$group_total, "),"), "was reported for", tags$strong(max_increase$clean_names)
+    ))
+    
+    
     
   })
   
@@ -229,22 +239,22 @@ server = function(input, output, session) {
   output$concerns <- renderEcharts4r({
     
     pulse <- pulse %>%
-      rename(`Proportion of respondents` = proportion_respondents) %>%
-      arrange(-desc(`Proportion of respondents`))
+      rename(`Proportion of respondents reporting concern` = proportion_respondents, `% change in respondents reporting concern`=`greatest_diff`) %>%
+      arrange(-desc(`Proportion of respondents reporting concern`))
     
     concerns_pulse <- pulse %>%
       e_charts(x = clean_names) %>%
-      e_bar(`Proportion of respondents`, bar_width=1, showBackground=T) %>%
+      e_bar(`Proportion of respondents reporting concern`, bar_width=1, showBackground=T) %>%
+      e_line(`% change in respondents reporting concern`) %>%
       e_hide_grid_lines() %>%
       e_flip_coords() %>%
-      e_grid(containLabel = TRUE, left=20, right=30, top=20, bottom=5, height='90%') %>%
-      e_x_axis(name='% respondents', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
-      e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
-      e_y_axis(show=T) %>%
-      e_axis_labels(x="% respondents") %>%
-      e_legend(FALSE) %>%
+      e_grid(containLabel = TRUE, left=20, right=30, top=60, bottom=5, height='85%') %>%
+      e_x_axis( position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=T, fontWeight='bold', margin=2),min=-20, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=20) %>%
+      e_y_axis(axisLabel = list(interval = 0, show = T), splitLine = list(show = FALSE)) %>%
+      #e_axis_labels(x="% respondents") %>%
+      e_legend() %>%
       e_tooltip()
-    
+    #name='% respondents', nameLocation="middle",
   })
   
   
@@ -263,7 +273,8 @@ server = function(input, output, session) {
     div(
       p(tags$strong(paste0(vac_second_dose_highest$prop_of_population, "%")),
         "of those aged", tags$strong(vac_second_dose_highest$age_range),
-        "have received their", tags$strong("second dose", style='color:#91cc75'), "of vaccine against COVID-19")
+        "have received their", tags$strong("second dose", style='color:#91cc75'), "of vaccine against COVID-19",
+        style='font-size:2.25vh')
       )
     
   })
@@ -280,11 +291,11 @@ server = function(input, output, session) {
       e_hide_grid_lines() %>%
       #e_title("% population vaccinated", fontsize=12) %>%
       e_flip_coords() %>%
-      e_grid(containLabel = TRUE, left=30, right=30, top=20, bottom=5, height='90%') %>%
-      e_x_axis(name='% population', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=2),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
+      e_grid(containLabel = TRUE, left=30, right=30, top=40, bottom=5, height='85%') %>%
+      e_x_axis(name='% population', nameLocation="middle", position='top', axisLabel=list(formatter = "{value}%", show=T, fontSize=12, showMinLabel=F, fontWeight='bold', margin=10),min=0, max=100, axisLine=list(show=F), axisTick=list(show=F, length=0), minInterval=100) %>%
       e_y_axis(axisLabel = list(interval = 0, show = T)) %>%
       e_y_axis(show=T) %>%
-      e_legend(show=F) %>%
+      e_legend(show=T) %>%
       e_tooltip()
     
   })
@@ -979,7 +990,6 @@ server = function(input, output, session) {
         }
         else {
         
-        
         if (input$tactical_cell == '-- England --') {
           
           flood_warnigns2show <- flood_warning_points %>% 
@@ -1026,6 +1036,7 @@ server = function(input, output, session) {
     if (input$sidebar_id == 'unmetneed') {
       
       if (input$theme == 'Flooding') {
+        
         if (dim(flood_warning_polygons)[1]==0) {
           flood_warnings2show <- data.frame()
         }
@@ -1063,8 +1074,8 @@ server = function(input, output, session) {
               mutate('warning_col'=case_when(severityLevel==3 ~ 'orange',
                                              severityLevel == 2 ~ 'red',
                                              severityLevel == 1 ~ 'red'))
-            }
           }
+        }
         }
       }
     }
@@ -1143,7 +1154,6 @@ server = function(input, output, session) {
     if (dim(flood_warning_points)[1]==0) {
       flood_warning_labels <- paste0('no flood warnings')
     }
-    
     else {
     
     flood_warning_labels <- paste0(
@@ -1151,7 +1161,6 @@ server = function(input, output, session) {
       filteredFlood_warnings_points()$severity, ": ", filteredFlood_warnings_points()$alertlevelmeaning, "<br/>",
       "last updated (at time dashboard refreshed): ",  filteredFlood_warnings_points()$lastupdateday, " ", filteredFlood_warnings_points()$lastupdatetime) %>%
       lapply(htmltools::HTML)
-    
     }
     
   })
@@ -2050,12 +2059,6 @@ server = function(input, output, session) {
       else {
         if (input$theme == 'Flooding') {
           
-          #flood_incd <- filtered_areas_at_risk_flooding_incd()
-          #flood_risk <- filtered_areas_at_risk_flooding_risk()
-          #flood_all <- filtered_areas_at_risk_flooding_resilience()
-          #plot_flood_warning_polygon <- st_as_sf(filteredFlood_warnings_polygons())
-          #plot_flood_warning_points <- filteredFlood_warnings_points()
-          
           flood_all <- filtered_areas_at_risk_flooding_resilience()
           
           plot_flood_warning_polygon <- tryCatch(
@@ -2068,6 +2071,7 @@ server = function(input, output, session) {
           )
           
           plot_flood_warning_points <- filteredFlood_warnings_points()
+          
           
           
           # -- if no flood warnigns -- 
@@ -2733,12 +2737,13 @@ server = function(input, output, session) {
                       rank=store_rank_wanted, 
                       tc=input$tactical_cell, 
                       lad=input$lad_selected,
-                      date_of_data=covid_data_date)
+                      date_of_data=covid_data_date,
+                      flood_points=flood_warning_points)
     })
   
     # plot list
     output$top10list <- renderUI({
-      #glimpse(filtered_areas2focus_list())
+      glimpse(filtered_areas2focus_list())
       # function to plot list
       top_10_list(top10list=filtered_areas2focus_list(),
       theme=input$theme, 
@@ -3265,9 +3270,8 @@ server = function(input, output, session) {
           selectInput("lad_selected", "3. Local authority district", choices = lads2select, selected='All local authorities in region')
         })
         
-        # search either whole tactical cell or all of england
+        # search either whole tactical cell or all of engalnd
         bounding_wanted <- st_bbox(filtered_areas_at_risk_covid())
-        
         # create search of charity database 
         output$search_needed <- renderUI({
           # search bar
@@ -3392,7 +3396,7 @@ server = function(input, output, session) {
         # UI for table... render table
         output$local_orgs <- DT::renderDataTable({
           #Sys.sleep(1.5)
-          DT::datatable(charities_found, filter=list(position='top'), escape=F,
+          DT::datatable(charities_found, filter=list(position='top'),
                         selection =c('single'),
                         options = list(dom='tp', #should remove top search box the p includes paging
                                        paging = T,
@@ -3402,11 +3406,12 @@ server = function(input, output, session) {
                                        scrollY='300px',
                                        autoWidth = T,
                                        columnDefs = list(list(width='400px',targets=c(3))),
+                                       escape=FALSE,
                                        initComplete = htmlwidgets::JS(
                                          "function(settings, json) {",
                                          paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                          "}")
-                        )) }, escape=F)
+                        )) })
         
         # now renderUI
         output$local_orgs_ui <- renderUI({
@@ -3511,7 +3516,7 @@ server = function(input, output, session) {
         else{
           output$local_orgs <- DT::renderDataTable({
             #Sys.sleep(1.5)
-            DT::datatable(charities_found, filter=list(position='top'), escape=F,
+            DT::datatable(charities_found, filter=list(position='top'),
                           selection =c('single'),
                           options = list(dom='tp', #should remove top search box the p includes paging
                                          paging = T,
@@ -3520,12 +3525,13 @@ server = function(input, output, session) {
                                          scrollX=T,
                                          scrollY='300px',
                                          autoWidth = T,
+                                         escape=FALSE,
                                          columnDefs = list(list(width='400px',targets=c(3))),
                                          initComplete = htmlwidgets::JS(
                                            "function(settings, json) {",
                                            paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                            "}")
-                          )) }, escape=F)
+                          )) })
           
           output$local_orgs_ui <- renderUI({
             DT::dataTableOutput('local_orgs')
@@ -3613,7 +3619,7 @@ server = function(input, output, session) {
         else{
           output$local_orgs <- DT::renderDataTable({
             #Sys.sleep(1.5)
-            DT::datatable(charities_found, filter=list(position='top'), escape=F,
+            DT::datatable(charities_found, filter=list(position='top'),
                           selection =c('single'),
                           options = list(dom='tp', #should remove top search box the p includes paging
                                          paging = T,
@@ -3622,12 +3628,13 @@ server = function(input, output, session) {
                                          scrollX=T,
                                          scrollY='300px',
                                          autoWidth = T,
+                                         escape=FALSE,
                                          columnDefs = list(list(width='400px',targets=c(3))),
                                          initComplete = htmlwidgets::JS(
                                            "function(settings, json) {",
                                            paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                            "}")
-                          )) }, escape=F)
+                          )) })
           
           output$local_orgs_ui <- renderUI({
             DT::dataTableOutput('local_orgs')
@@ -3765,7 +3772,7 @@ server = function(input, output, session) {
       else{
         output$local_orgs <- DT::renderDataTable({
           #Sys.sleep(1.5)
-          DT::datatable(charities_found, filter=list(position='top'), escape=F,
+          DT::datatable(charities_found, filter=list(position='top'),
                         selection =c('single'),
                         options = list(dom='tp', #should remove top search box the p includes paging
                                        paging = T,
@@ -3774,12 +3781,13 @@ server = function(input, output, session) {
                                        scrollX=T,
                                        scrollY='300px',
                                        autoWidth = T,
+                                       escape=FALSE,
                                        columnDefs = list(list(width='400px',targets=c(3))),
                                        initComplete = htmlwidgets::JS(
                                          "function(settings, json) {",
                                          paste0("$(this.api().table().container()).css({'font-size':'12px'});"),
                                          "}")
-                        )) }, escape=F)
+                        )) })
         
         output$local_orgs_ui <- renderUI({
           DT::dataTableOutput('local_orgs')
@@ -3864,7 +3872,13 @@ server = function(input, output, session) {
     })
   })
   
-
+  observeEvent(req(input$sidebar_id == 'latest_news_tab'), {
+    
+    output$coming_up <- renderUI({
+      coming_up_text()
+    })
+  })
+  
   
 }
 
