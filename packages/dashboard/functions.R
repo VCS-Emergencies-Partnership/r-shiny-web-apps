@@ -2117,28 +2117,30 @@ orgs2logos <- data.frame(organisations,logos)
 names(orgs2logos) <- c(x_name,y_name)
 
 
-theme <- c("Covid", "Deprivation", "Children and Young People", " Voluntary Sector",
-           "General"," Winter Pressures", " Insight", " National", " Local", " Services", "Domestic Abuse", "Food")
-class_wanted <- c("<span class=\"badge badge-pill badge-primary\">Covid</span>",
-                  "<span class=\"badge badge-pill badge-secondary\">Deprivation</span>",
-                  "<span class=\"badge badge-pill badge-success\">Children and Young People</span>",
-                  "<span class=\"badge badge-pill badge-danger\">Voluntary Sector</span>",
-                  #"<span class=\"badge badge-pill badge-warning\">NHS</span>",
-                  "<span class=\"badge badge-pill badge-warning\">General</span>",
-                  "<span class=\"badge badge-pill badge-info\">Winter Pressures</span>",
+theme <- c("Covid", "Deprivation", "Children", "Voluntary Sector", "Mental Health", "Vaccine",
+           "General","Winter Pressures", "Insight", "National", "Local", "Services", "Domestic Abuse", "Food", "LGTB+")
+class_wanted <- c("<span id=\"covid\" class=\"badge badge-pill badge-primary\">Covid</span>",
+                  "<span id=\"deprivation\" class=\"badge badge-pill badge-secondary\">Deprivation</span>",
+                  "<span id=\"children\" class=\"badge badge-pill badge-success\">Children and Young People</span>",
+                  "<span id=\"voluntary\" class=\"badge badge-pill badge-danger\">Voluntary Sector</span>",
+                  "<span id=\"mental\" class=\"badge badge-pill badge-warning\">Mental health</span>",
+                  "<span id=\"vaccine\" class=\"badge badge-pill badge-warning\">Vaccine</span>",
+                  "<span id=\"general\" class=\"badge badge-pill badge-warning\">General</span>",
+                  "<span id=\"winter\" class=\"badge badge-pill badge-info\">Winter Pressures</span>",
                   "<span id=\"insight\" class=\"badge badge-pill badge-info\">Insight</span>",
-                  "<span class=\"badge badge-pill badge-warning\">General</span>",
-                  "<span class=\"badge badge-pill badge-info\">Winter Pressures</span>",
-                  "<span id=\"insight\" class=\"badge badge-pill badge-info\">Insight</span>",
-                  "<span id=\"insight\" class=\"badge badge-pill badge-info\">Insight</span>",
-                  "<span id=\"insight\" class=\"badge badge-pill badge-info\">Insight</span>")
+                  "<span id=\"national\" class=\"badge badge-pill badge-warning\">National</span>",
+                  "<span id=\"local\" class=\"badge badge-pill badge-info\">Local</span>",
+                  "<span id=\"services\" class=\"badge badge-pill badge-info\">Services</span>",
+                  "<span id=\"absue\" class=\"badge badge-pill badge-info\">Domestic abuse</span>",
+                  "<span id=\"food\" class=\"badge badge-pill badge-info\">Food</span>",
+                  "<span id=\"LGTB\" class=\"badge badge-pill badge-info\">LGTB+</span>")
 
 theme_name <- 'Themes'
 theme_badge <- 'Badge'
 
 theme2badge <- data.frame(theme, class_wanted)
 names(theme2badge) <- c(theme_name, theme_badge)
-
+#glimpse(theme2badge)
 
 plot_resource_cat <- function(table) {
   # how many resources - 
@@ -2146,24 +2148,29 @@ plot_resource_cat <- function(table) {
   
   lapply(1:nrow(resources_info), function(a) {
     
+    
     # do something with resource info
     resource_wanted <- resources_info[a,]
-    
+    #glimpse(resource_wanted)
     
     # split out themes
-    themes <- str_split(resource_wanted$Theme, ',')
-    badges2plot <- c()
+    themes <- str_split(resource_wanted$Theme, ', ')
+    themes <- unlist(themes)
     
+    badges2plot <- c()
+   
     for (i in themes) {
-      
+      #clean_i <- gsub(" ", "", i)
       theme_recorded <- theme2badge %>% filter(Themes == i)
       badges2plot <- c(badges2plot, theme_recorded$Badge)
+      #print(badges2plot)
       #badges2plot <- theme_recorded$Badge
       #glimpse(theme_recorded)
       
     }
     
     badges <- paste(badges2plot, collapse="")
+
     
     return(
       box( title = div(
@@ -2188,7 +2195,7 @@ plot_resource_cat <- function(table) {
 
 
 search_resources <- function(table, search_this) {
-  
+  #print(search_this)
   # filter df if 
   search_results <- table %>% 
     filter_all(any_vars(grepl(search_this, ., ignore.case=T))) #%>%
@@ -2213,11 +2220,12 @@ search_resources <- function(table, search_this) {
     resource_wanted <- resources_info[a,]
     
     # split out themes
-    themes <- str_split(resource_wanted$Theme, ',')
+    themes <- str_split(resource_wanted$Theme, ', ')
+    themes <- unlist(themes)
     badges2plot <- c()
     
     for (i in themes) {
-      print(i)
+      #clean_i <- gsub(" ", "", i)
       theme_recorded <- theme2badge %>% filter(Themes == i)
       badges2plot <- c(badges2plot, theme_recorded$Badge)
       #badges2plot <- theme_recorded$Badge
