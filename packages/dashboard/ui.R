@@ -90,7 +90,7 @@ body <- dashboardBody(
   tags$style(type = "text/css", "html, body {width:100%;height:100%}",),
   tags$head(
     includeCSS("styles.css"), includeHTML("cookie_consent_v2.html"),
-    #includeHTML("google-analytics.html"),
+    includeHTML("google-analytics.html"),
             tags$link(rel="icon", sizes="32X32", href="img/favicon-32x32.png"),
             tags$link(rel="icon",  sizes="16X16", href="img/favicon-16x16.png"),
             tags$link(rel="apple-touch-icon", sizes="180x180", href="img/img/apple-touch-icon.png"),
