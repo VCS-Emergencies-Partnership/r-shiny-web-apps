@@ -23,7 +23,7 @@ proportion_responded <- function(survey_file) {
   } else {
   
 # filter by column number to get concerns in next 14 days other relating to this is col 404 - not needed as this is counted but column on what was required is provided which is other:
-pulse_needed <- pulse_needed %>% select(438,6,7, contains("following sectors are the top three priority concerns in your area in the next 14 days?/"))
+pulse_needed <- pulse_needed %>% select(`_index`,`What is your Multi-Agency Cell area?`,`In which county/unitary authority does your organisation operate?`, contains("following sectors are the top three priority concerns in your area in the next 14 days?/"))
 
 # how many respondents
 respondents <- nrow(pulse_needed)
@@ -77,7 +77,8 @@ if (!file.exists(latest_file_name) || !file.exists(last_but_one_file_name)) {
   latest_survey <- proportion_responded(latest_file_name)
   previous_survey <- proportion_responded(last_but_one_file_name)
   #print('latest')
-  #glimpse(latest_survey)
+  glimpse(previous_survey)
+  glimpse(latest_survey)
   
   #glimpse(previous_survey)
   #print('previous')

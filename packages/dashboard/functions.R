@@ -138,8 +138,8 @@ create_about_us <- function(time, date) {
     tags$li("What type of support do they need?"),
     tags$li("How are those people and areas being supported?"),
     tags$br(),
-    p("If you have questions or feedback about the tool, please", tags$a(href="https://vcsep.org.uk/", target="_blank","contact us.")
-     
+    p("If you have questions or feedback about the tool, please", tags$a(href="mailto:itsupport@vcsep.org.uk", target="_blank","contact us.")
+      
   )
   ))
 }
@@ -177,7 +177,7 @@ create_about_areas_at_risk <- function(time, date) {
     ),
     tags$br(),
       p("If you have questions or feedback about the tool, please",
-      tags$a(href="https://vcsep.org.uk/", target="_blank", "contact us"))
+       tags$a(href="mailto:itsupport@vcsep.org.uk", target="_blank","contact us."))
     
   )
   )
@@ -361,7 +361,7 @@ create_data_license_help <- function() {
             seeking asylum or homelessness rate per 1000 people. We will add to this 
             list as new information becomes available and are working on user-friendly way of displaying this 
             information for each dataset. In the meantime, see the help sections on the individual emergency types 
-            or", tags$a(href="https://vcsep.org.uk/",target="_blank",'contact us'), "if you have a question."),
+            or", tags$a(href="mailto:itsupport@vcsep.org.uk", target="_blank","contact us"), "if you have a question."),
     
     p("The", tags$a(href="https://github.com/britishredcrosssociety/resilience-index", target="_blank", "British Red Cross Resilience Index (RI)"), "and", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability", target="_blank", "British Red Cross Vulnerability Index (VI)"),
     "ranks areas based on a range of factors against an areas ability to cope and are 
