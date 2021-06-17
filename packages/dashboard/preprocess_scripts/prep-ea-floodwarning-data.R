@@ -193,7 +193,7 @@ if (is.null(output_flood_data)) {
 
 
 # write to file 
-write_sf(final_flood_warning_info_of_interest, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_metoffice_floodwarnings.geojson')
+#write_sf(final_flood_warning_info_of_interest, '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_metoffice_floodwarnings.geojson')
 
 # try three smaller output files:
 # 1). # flood area id and polygon
