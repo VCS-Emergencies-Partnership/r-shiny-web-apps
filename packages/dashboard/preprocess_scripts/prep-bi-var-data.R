@@ -90,7 +90,7 @@ if (isTRUE(on_databricks)) {
   AzureStor::storage_upload(out_cont,
                             src = feather_path,
                             dest = fname)
-# Otherwise, write locally
+  # Otherwise, write locally
 } else {
   feather::write_feather(LA_res, file.path("..", "data", fname))
 }
@@ -174,17 +174,21 @@ fname = "bivar-legend_v2"
 # If running on databricks write to blob storage
 if (isTRUE(on_databricks)) {
   leg_path = glue::glue("{tempfile()}.png")
-  dev.print(png, leg_path,
+  dev.print(png,
+            leg_path,
             bg = "transparent",
             width = 800,
             height = 600)
   AzureStor::storage_upload(out_cont,
                             src = leg_path,
                             dest = fname)
-# Otherwise, write locally
+  # Otherwise, write locally
 } else {
-  dev.print(png, file.path("..", "www", glue::glue("{fname}.png")),
-            bg = "transparent",
-            width = 800,
-            height = 600)
+  dev.print(
+    png,
+    file.path("..", "www", glue::glue("{fname}.png")),
+    bg = "transparent",
+    width = 800,
+    height = 600
+  )
 }
