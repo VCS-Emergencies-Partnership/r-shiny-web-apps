@@ -1,16 +1,16 @@
-library(tidyverse)
-library(feather)
+library("tidyverse")
+library("feather")
 
 # look in raw section
 covid_dirs <-
-  list.dirs(path = '/data/data-lake/raw/coronavirus-cases/', full.names =
+  list.dirs(path = "/data/data-lake/raw/coronavirus-cases/", full.names =
               TRUE)
 covid_file <-
-  paste0(tail(covid_dirs, n = 1), '/coronavirus_cases.csv')
+  paste0(tail(covid_dirs, n = 1), "/coronavirus_cases.csv")
 
 # Does the file exist
 if (!file.exists(covid_file)) {
-  message <- paste('Problem:', covid_file, "doesn't exist")
+  message <- paste("Problem:", covid_file, "doesn't exist")
   stop(message)
 
 } else {
@@ -20,12 +20,12 @@ if (!file.exists(covid_file)) {
   # CHECK - ARE THE COLUMNS I NEED IN THERE? -->
   cols_needed <-
     c(
-      'areaCode',
-      'areaName',
-      'date',
-      'newCasesBySpecimenDate',
-      'newCasesBySpecimenDateChangePercentage',
-      'newCasesBySpecimenDateRollingRate'
+      "areaCode",
+      "areaName",
+      "date",
+      "newCasesBySpecimenDate",
+      "newCasesBySpecimenDateChangePercentage",
+      "newCasesBySpecimenDateRollingRate"
     )
   # are all the columns i use with easy names there?
   cols_still_present <-
@@ -56,32 +56,32 @@ if (!file.exists(covid_file)) {
         "https://github.com/britishredcrosssociety/covid-19-vulnerability/raw/master/data/lookup%20mosa11%20to%20lad17%20to%20lad19%20to%20tactical%20cell.csv"
       )
     area_lookup_tc2lad <-
-      area_lookup %>% select('LAD19CD', 'TacticalCell') %>% unique()
+      area_lookup %>% select("LAD19CD", "TacticalCell") %>% unique()
 
 
     # align with tactical cells
     latest_covid_data2tactical_cell <-
-      left_join(area_lookup_tc2lad, latest_covid_data, by = 'LAD19CD') %>%
+      left_join(area_lookup_tc2lad, latest_covid_data, by = "LAD19CD") %>%
       filter(
-        TacticalCell != 'Scotland' &
-          TacticalCell != 'Wales' &
-          TacticalCell != 'Northern Ireland and the Isle of Man'
+        TacticalCell != "Scotland" &
+          TacticalCell != "Wales" &
+          TacticalCell != "Northern Ireland and the Isle of Man"
       )
 
     # CHECK are HACKNEY AND LONDON AND CORNWALL AND ISLEs OF SCILLY COMBINED
     combined_authorities <-
-      c('Hackney and City of London', 'Cornwall and Isles of Scilly')
-    #combined_authorities <- c('test')
+      c("Hackney and City of London", "Cornwall and Isles of Scilly")
+    #combined_authorities <- c("test")
     test_combined_auth_present <-
       latest_covid_data2tactical_cell %>% filter(areaName %in% combined_authorities)
 
     if (dim(test_combined_auth_present)[1] == 0) {
       # do not need to correct for combined authorities
-      #print('No need to correct for combined auhtorities')
+      #print("No need to correct for combined auhtorities")
       #glimpse(latest_covid_data2tactical_cell)
       write_feather(
         latest_covid_data2tactical_cell,
-        '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather'
+        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather"
       )
 
     } else {
@@ -89,23 +89,23 @@ if (!file.exists(covid_file)) {
       #print("correct for combined authorities")
       # Correct Hackney and city of london combined
       duplicate_hackney <- latest_covid_data2tactical_cell %>%
-        filter(areaName == 'Hackney and City of London') %>%
+        filter(areaName == "Hackney and City of London") %>%
         mutate("clean_areaNames" = "Hackney") %>%
         mutate("clean_LAD19CD" = "E09000012")
 
       duplicate_city <- latest_covid_data2tactical_cell %>%
-        filter(areaName == 'Hackney and City of London') %>%
+        filter(areaName == "Hackney and City of London") %>%
         mutate("clean_areaNames" = "City of London") %>%
         mutate("clean_LAD19CD" = "E09000001")
 
       #Correct Cornwall and Isle of Scilly
       duplicate_cornwall <- latest_covid_data2tactical_cell %>%
-        filter(areaName == 'Cornwall and Isles of Scilly') %>%
+        filter(areaName == "Cornwall and Isles of Scilly") %>%
         mutate("clean_areaNames" = "Cornwall") %>%
         mutate("clean_LAD19CD" = "E06000052")
 
       duplicate_isle_scilly <- latest_covid_data2tactical_cell %>%
-        filter(areaName == 'Cornwall and Isles of Scilly') %>%
+        filter(areaName == "Cornwall and Isles of Scilly") %>%
         mutate("clean_areaNames" = "Isles of Scilly") %>%
         mutate("clean_LAD19CD" = "E06000053")
 
@@ -128,7 +128,7 @@ if (!file.exists(covid_file)) {
         )
       latest_covid_data2tactical_cell <-
         latest_covid_data2tactical_cell %>%
-        select(-LAD19CD) %>% rename(LAD19CD = 'clean_LAD19CD') %>%
+        select(-LAD19CD) %>% rename(LAD19CD = "clean_LAD19CD") %>%
         # remove NAs that have been introduced by cleaning stuff up.
         filter(!is.na(areaName))
 
@@ -137,7 +137,7 @@ if (!file.exists(covid_file)) {
       # --- local file ---
       write_feather(
         latest_covid_data2tactical_cell,
-        '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather'
+        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/areas2focus_covid.feather"
       )
 
     }

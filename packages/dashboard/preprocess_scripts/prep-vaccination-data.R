@@ -1,19 +1,19 @@
-library(tidyverse)
-library(readxl)
-library(httr)
+library("tidyverse")
+library("readxl")
+library("httr")
 library("feather")
-library(purrr)
+library("purrr")
 
 # CHECK Population data still exists
 pop_data <-
-  '/data/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx'
+  "/data/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx"
 
 if (!file.exists(pop_data)) {
   stop("Population data missing")
 } else {
   pop_eng_2019 <-
     read_excel(
-      '/data/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx',
+      "/data/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx",
       sheet = "Mid-2019 Persons",
       skip = 4
     )
@@ -24,7 +24,7 @@ if (!file.exists(pop_data)) {
   # function to sum populations by age rage
   population_by_age <- function(bracket, age_start, age_end) {
     # cols to select
-    if (age_end == 'over') {
+    if (age_end == "over") {
       #because age zero is in and R is 1 indexed, the index of the column containing the right age is age plus 1
       age_start <- as.integer(age_start) + 1
 
@@ -32,7 +32,7 @@ if (!file.exists(pop_data)) {
         ages %>% select(age_start:ncol(.)) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
         mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
         select(total_pop_age_range) %>%
-        mutate('age_range' = bracket) %>%
+        mutate("age_range" = bracket) %>%
         head(n = 1)
 
 
@@ -47,7 +47,7 @@ if (!file.exists(pop_data)) {
         ages %>% select(age_start:age_end) %>%  mutate(total_pop_by_area = rowSums(across(where(is.numeric)))) %>%
         mutate(total_pop_age_range = sum(total_pop_by_area)) %>%
         select(total_pop_age_range) %>%
-        mutate('age_range' = bracket) %>%
+        mutate("age_range" = bracket) %>%
         head(n = 1)
 
     }
@@ -63,16 +63,16 @@ if (!file.exists(pop_data)) {
 
   # --- vaccination data ---
   # --- now retrieving from raw section ---
-  if (!dir.exists('/data/data-lake/raw/nhs-weekly-vaccination-data/')) {
+  if (!dir.exists("/data/data-lake/raw/nhs-weekly-vaccination-data/")) {
     stop("Vaccination data has moved")
   } else {
     get_requests <-
-      list.dirs('/data/data-lake/raw/nhs-weekly-vaccination-data/')
+      list.dirs("/data/data-lake/raw/nhs-weekly-vaccination-data/")
 
     file_name <-
       paste(tail(get_requests, n = 1),
-            'nhs_weekly_vaccination_data.xlsx',
-            sep = '/')
+            "nhs_weekly_vaccination_data.xlsx",
+            sep = "/")
 
     if (!file.exists(file_name)) {
       stop("Vaccination file name has changed")
@@ -104,7 +104,7 @@ if (!file.exists(pop_data)) {
       vaccination_data_summary  <-
         vaccination_data_summary  %>% select(7:ncol(.))
 
-      if (startsWith(colnames(vaccination_data_summary)[1], '.') == T) {
+      if (startsWith(colnames(vaccination_data_summary)[1], ".") == T) {
         stop("Vaccination columns changed")
 
       } else {
@@ -123,12 +123,12 @@ if (!file.exists(pop_data)) {
 
         age_bracket_populations <- data.frame(matrix(ncol = 2, nrow = 0))
         colnames(age_bracket_populations) <-
-          c('total_pop_age_range', 'age_range')
+          c("total_pop_age_range", "age_range")
 
         # calculate population
         for (x in age_brackets) {
           if (startsWith(x, "Under") == T) {
-            top_age <- str_split(x, ' ')
+            top_age <- str_split(x, " ")
             # because it is under this age needs to be -1
             top_age <- as.integer(top_age[[1]][2]) - 1
             top_age <- as.character(top_age)
@@ -140,7 +140,7 @@ if (!file.exists(pop_data)) {
               bottom_age <- bottom_age[[1]][1]
               #print(bottom_age)
 
-              top_age <- 'over'
+              top_age <- "over"
             }
             else {
               age_range <- str_split(x, "-")
@@ -181,8 +181,8 @@ if (!file.exists(pop_data)) {
           colnames(second_doses) <- age_brackets
 
           # add which doses are which
-          first_doses <- first_doses %>% mutate('dose' = 'First dose')
-          second_doses <- second_doses %>% mutate('dose' = 'Second dose')
+          first_doses <- first_doses %>% mutate("dose" = "First dose")
+          second_doses <- second_doses %>% mutate("dose" = "Second dose")
 
           #combine doses
           both_doses <- rbind(first_doses, second_doses)
@@ -192,13 +192,13 @@ if (!file.exists(pop_data)) {
             pivot_longer(
               both_doses,
               cols = 1:as.integer(length(age_brackets)),
-              names_to = 'age_range',
-              values_to = 'number_of_doses'
+              names_to = "age_range",
+              values_to = "number_of_doses"
             )
 
           # join data sets
           doses_by_population <-
-            left_join(both_doses_tr, age_bracket_populations, by = 'age_range')
+            left_join(both_doses_tr, age_bracket_populations, by = "age_range")
 
           final_doses_by_population <- doses_by_population %>%
             mutate(prop_of_population = round((
@@ -207,11 +207,11 @@ if (!file.exists(pop_data)) {
             mutate(source = vaccination_source$Value) %>%
             mutate(published = vaccination_publish_date$Value) %>%
             mutate(time_span = vaccination_time_period$Value)
-          #write_feather(final_doses_by_population, '~/vaccination_rate.feather')
+          #write_feather(final_doses_by_population, "~/vaccination_rate.feather")
           #glimpse(final_doses_by_population)
           write_feather(
             final_doses_by_population,
-            '~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/vaccination_rate.feather'
+            "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/vaccination_rate.feather"
           )
 
 

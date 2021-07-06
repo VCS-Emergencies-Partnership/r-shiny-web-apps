@@ -1,10 +1,10 @@
 # DATABRICKS TEST
 
 # - prep bivariate data fro map --
-library('dplyr')
-library('tidyverse')
-library('magrittr')
-library('pals')
+library("dplyr")
+library("tidyverse")
+library("magrittr")
+library("pals")
 
 # https://timogrossenbacher.ch/2019/04/bivariate-maps-with-ggplot2-and-sf/#create-a-bivariate-choropleth
 
@@ -15,7 +15,7 @@ data_repo = "https://github.com/britishredcrosssociety"
 # # --- local authority level ---
 LA_vi_path = "covid-19-vulnerability/raw/master/output/vulnerability-LA.csv"
 LA_vi = readr::read_csv(paste(data_repo, LA_vi_path, sep = "/"))
-LA_vi %<>% rename('LAD19CD' = Code)
+LA_vi %<>% rename("LAD19CD" = Code)
 
 # --- read in resilience indices ---
 # # --- local authority level ---
@@ -75,12 +75,12 @@ LA_res %<>%
   left_join(bivariate_color_scale, by = "group")
 
 # write resilience index with appropriate fill
-feather::write_feather(LA_res, '../data/resilience_index_bivar.feather')
+feather::write_feather(LA_res, "../data/resilience_index_bivar.feather")
 
 # separate the groups
 forlegend = bivariate_color_scale %>%
   separate(group,
-           into = c('vuln_quantiles', 'res_quantiles'),
+           into = c("vuln_quantiles", "res_quantiles"),
            sep = " - ") %>%
   mutate(vuln = as.integer(vuln_quantiles),
          res = as.integer(res_quantiles))
@@ -153,7 +153,7 @@ par()
 g.legend
 dev.print(
   png,
-  '../www/bivar-legend_v2.png',
+  "../www/bivar-legend_v2.png",
   bg = "transparent",
   width = 800,
   height = 600
