@@ -1,10 +1,10 @@
-library("sf")
-library("tidyverse")
+library("feather")
+library("geojsonio")
 library("httr")
 library("jsonlite")
 library("rmapshaper")
-library("geojsonio")
-library("feather")
+library("sf")
+library("tidyverse")
 
 
 LAD_boundaries = st_read("~/r-shiny-web-apps/packages/dashboard/data/reduced_boundaries/lad19_eng_wales_sc_ni.geojson")

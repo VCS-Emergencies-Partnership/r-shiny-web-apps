@@ -1,5 +1,5 @@
-library("tidyverse")
 library("feather")
+library("tidyverse")
 
 # look in raw section
 covid_dirs = list.dirs(path = "/data/data-lake/raw/coronavirus-cases/",

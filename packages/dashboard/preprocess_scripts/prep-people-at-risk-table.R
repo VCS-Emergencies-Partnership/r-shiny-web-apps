@@ -1,9 +1,8 @@
 # --- pre process data for vcsep-shiny-dashboard ---
-library("tidyverse")
-library("readxl")
-library("httr")
 library("feather")
-
+library("httr")
+library("readxl")
+library("tidyverse")
 
 # --- get look up table ----
 not_using_other_countries = c("Wales",

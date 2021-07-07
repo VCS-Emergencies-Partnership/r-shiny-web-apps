@@ -1,8 +1,8 @@
-library("tidyverse")
-library("readxl")
-library("httr")
 library("feather")
+library("httr")
 library("purrr")
+library("readxl")
+library("tidyverse")
 
 # CHECK Population data still exists
 pop_data = "/data/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx"

@@ -1,7 +1,8 @@
-library("tidyverse")
+library("feather")
 library("lubridate")
 library("PostcodesioR")
-library("feather")
+library("tidyverse")
+
 
 # -- lookup table ---
 lookup =

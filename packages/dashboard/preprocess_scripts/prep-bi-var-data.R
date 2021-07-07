@@ -1,8 +1,8 @@
 # - prep bivariate data fro map --
 library("dplyr")
-library("tidyverse")
 library("magrittr")
 library("pals")
+library("tidyverse")
 
 
 # https://timogrossenbacher.ch/2019/04/bivariate-maps-with-ggplot2-and-sf/#create-a-bivariate-choropleth

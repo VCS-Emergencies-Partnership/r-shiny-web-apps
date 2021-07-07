@@ -1,5 +1,5 @@
-library("tidyverse")
 library("feather")
+library("tidyverse")
 
 resources = read_csv("~/vcs-indicators/resource_bank_8june.csv")
 
