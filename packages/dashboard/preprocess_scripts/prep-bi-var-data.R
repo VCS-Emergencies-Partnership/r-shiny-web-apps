@@ -33,7 +33,7 @@ quantiles_res = LA_res %>%
   quantile(probs = seq(0, 1, length.out = 4))
 
 # https://nowosad.github.io/post/cbc-bp2/ --> using brewer.seseq2
-bivariate_color_scale <- tibble(
+bivariate_color_scale = tibble(
   "3 - 3" = "#000000",
   # high inequality, high income
   "2 - 3" = "#b36600",
