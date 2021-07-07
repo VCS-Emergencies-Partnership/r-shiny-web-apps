@@ -104,7 +104,7 @@ if (!file.exists(pop_data)) {
       vaccination_data_summary  =
         vaccination_data_summary  %>% select(7:ncol(.))
 
-      if (startsWith(colnames(vaccination_data_summary)[1], ".") == T) {
+      if (startsWith(colnames(vaccination_data_summary)[1], ".") == TRUE) {
         stop("Vaccination columns changed")
 
       } else {
@@ -127,7 +127,7 @@ if (!file.exists(pop_data)) {
 
         # calculate population
         for (x in age_brackets) {
-          if (startsWith(x, "Under") == T) {
+          if (startsWith(x, "Under") == TRUE) {
             top_age = str_split(x, " ")
             # because it is under this age needs to be -1
             top_age = as.integer(top_age[[1]][2]) - 1

@@ -24,7 +24,7 @@ LAD_boundaries_with_tc =
   left_join(area_lookup_tc2lad,
             LAD_boundaries,
             by = "LAD19CD",
-            keep = F)  %>% unique()
+            keep = FALSE)  %>% unique()
 LAD_boundaries_with_tc = st_as_sf(LAD_boundaries_with_tc)
 
 # call to see if any flood warnings
@@ -127,7 +127,7 @@ if (dim(flood_warning_df)[1] == 0) {
         flood_boundary_simp_comp,
         lads_with_flood_risk,
         by = "polygon",
-        keep = F
+        keep = FALSE
       )
 
     #flood_warning2lad2tc = ms_simplify(flood_warning2lad2tc, keep=0.001, keep_shapes=T)
@@ -170,7 +170,7 @@ if (dim(flood_warning_df)[1] == 0) {
     flood_reduced = tryCatch({
       ms_simplify(flood_area_of_interest,
                   keep = 0.01,
-                  keep_shapes = T)
+                  keep_shapes = TRUE)
     },
     # catch unable to simplify error
     error = function(e) {
@@ -274,7 +274,7 @@ if (dim(flood_warning_df)[1] == 0) {
         left_join(flood_warning_information,
                   format_dates,
                   by = "polygon",
-                  keep = F)
+                  keep = FALSE)
 
       # add url for message
       flood_warning_information = flood_warning_information %>%
@@ -291,7 +291,7 @@ if (dim(flood_warning_df)[1] == 0) {
         left_join(output_flood_data,
                   flood_warning_information,
                   by = "polygon",
-                  keep = F) %>% unique() %>%
+                  keep = FALSE) %>% unique() %>%
         select(
           -"QDIAL",
           -"FWS_TACODE",

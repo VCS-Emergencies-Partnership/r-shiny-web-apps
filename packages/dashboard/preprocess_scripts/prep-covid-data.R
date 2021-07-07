@@ -33,7 +33,7 @@ if (!file.exists(covid_file)) {
 
   # if logical vector is not all T - there's a missing column name
 
-  if (all(cols_still_present) == F) {
+  if (all(cols_still_present) == FALSE) {
     stop("Problem - column names changed")
 
   } else {

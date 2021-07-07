@@ -63,7 +63,7 @@ if (!file.exists(file_name)) {
     are_cols_present = (cols_needed %in% columns_in_raw_data)
 
     # are_cols_present not all T means missing names
-    if (all(are_cols_present) == F) {
+    if (all(are_cols_present) == FALSE) {
       print("broken - columns changed")
 
     } else {
@@ -71,7 +71,7 @@ if (!file.exists(file_name)) {
       requests = requests %>% filter(!is.na(request_date)) %>%
         separate(request_date,
                  c("clean_date", NA),
-                 remove = F,
+                 remove = FALSE,
                  sep = " ") %>%
         mutate("formatted_date" = ymd(clean_date)) %>%
         mutate("postcode" = case_when(postcode == "NW65HE" ~ "NW6 5HE",

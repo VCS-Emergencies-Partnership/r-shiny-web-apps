@@ -26,7 +26,7 @@ proportion_responded = function(survey_file) {
 
   # if logical vector is not all T - there's a missing column name
   # of if theres no columns containing the following sectors comment the question has changed
-  if (all(area_names_still_present) == F ||
+  if (all(area_names_still_present) == FALSE ||
       dim(question_still_present_cols)[2] == 0) {
     stop("Couldn't find required columns in pulse check survey")
 

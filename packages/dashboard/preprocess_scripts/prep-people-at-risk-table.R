@@ -35,7 +35,7 @@ pop_eng = pop_eng_2019 %>%
   filter(str_detect(LAD19CD, "^E"))
 
 pop_eng_tc =
-  left_join(pop_eng, area_lookup_tc2lad, by = "LAD19CD", keep = F)
+  left_join(pop_eng, area_lookup_tc2lad, by = "LAD19CD", keep = FALSE)
 
 # i think there are 317 lads in England with local authority 2019
 # Calculate population of tactical cells
@@ -44,7 +44,7 @@ pop_tc = pop_eng_tc %>% group_by(TacticalCell) %>%
   mutate("eng_pop" = sum(`All Ages`))
 
 pop_eng_lad_tc =
-  left_join(pop_eng_tc, pop_tc, by = "TacticalCell", keep = F) %>%
+  left_join(pop_eng_tc, pop_tc, by = "TacticalCell", keep = FALSE) %>%
   rename("lad_pop" = `All Ages.x`, "tc_pop" = `All Ages.y`)
 
 # store eng pop seperately
@@ -92,7 +92,7 @@ correct_columns = function(columns_expected, data_read) {
   # are cols in data
   # are all the columns i use with easy names there?
   cols_still_present = (columns_expected %in% colnames(data_read))
-  if (all(cols_still_present) == F) {
+  if (all(cols_still_present) == FALSE) {
     col_message = paste0("Columns not found")
     stop(col_message)
     #break
@@ -120,7 +120,7 @@ bame_cols =
 bame = correct_columns(bame_cols, bame)
 # add in tactical cell
 bame_data =
-  left_join(bame, area_lookup_tc2lad, by = "LAD19CD", keep = F) %>%
+  left_join(bame, area_lookup_tc2lad, by = "LAD19CD", keep = FALSE) %>%
   filter(TacticalCell != "Wales" &
            TacticalCell != "Scotland") %>% unique()
 
@@ -128,9 +128,9 @@ bame_data =
 # -- data for 200 local
 england_proportion_bame =
   ((
-    sum(bame_data$`numerator-bame-not-uk-born`, na.rm = T) + sum(bame_data$`numerator-bame-uk-born`, na.rm =
-                                                                   T)
-  ) / sum(bame_data$Denominator, na.rm = T)) * 100
+    sum(bame_data$`numerator-bame-not-uk-born`, na.rm = TRUE) + sum(bame_data$`numerator-bame-uk-born`, na.rm =
+                                                                   TRUE)
+  ) / sum(bame_data$Denominator, na.rm = TRUE)) * 100
 # according to the annual population survey
 bame_data =
   bame_data %>% mutate(england_proportion_bame = round(england_proportion_bame, 1))
@@ -141,7 +141,7 @@ dataColumns = c("numerator-bame-not-uk-born",
                 "numerator-bame-uk-born",
                 "Denominator")
 bame_lad_values2tc_total = plyr::ddply(bame_data, groupColumns, function(x)
-  colSums(x[dataColumns], na.rm = T))
+  colSums(x[dataColumns], na.rm = TRUE))
 bame_lad_values2tc_total_final = bame_lad_values2tc_total %>% mutate(total_bame_in_tc = `numerator-bame-not-uk-born` +
                                                                        `numerator-bame-uk-born`) %>%
   mutate(tc_proportion = round((total_bame_in_tc / Denominator) * 100, 1)) %>%
@@ -153,7 +153,7 @@ bame_data =
   left_join(bame_data,
             bame_lad_values2tc_total_final,
             by = "TacticalCell",
-            keep = F)
+            keep = FALSE)
 
 
 # --- asylum data ---
@@ -171,7 +171,7 @@ asylum = correct_columns(asylum_cols, asylum)
 # --- calculate proportion receiving support ---
 # --- join to areas2uk ---
 asylum_data =
-  left_join(area_lookup_tc2lad, asylum, by = "LAD19CD", keep = F) %>%
+  left_join(area_lookup_tc2lad, asylum, by = "LAD19CD", keep = FALSE) %>%
   unique() %>%
   left_join(., pop_eng_lad_tc, by = c("LAD19CD", "TacticalCell"))
 # Currently we are just aggregating England
@@ -220,7 +220,7 @@ asylum_data =
     asylum_data,
     asylum_data_tc,
     by = c("TacticalCell", "tc_pop"),
-    keep = F
+    keep = FALSE
   )
 
 asylum_data = asylum_data %>%
@@ -255,7 +255,7 @@ digital_exclusion_data =
   left_join(area_lookup_tc2lad,
             digital_exclusion_lad,
             by = "LAD19CD",
-            keep = F) %>%
+            keep = FALSE) %>%
   unique() %>% select("LAD19CD", "TacticalCell", everything()) %>%
   # remove wales/scotland/NI for now
   filter(
@@ -308,7 +308,7 @@ digital_exclusion_data =
     `tc_Proportion of neighbourhoods in 20% most digitally excluded`,
     "tc_percent_digitally_excluded"
   ) %>%
-  left_join(digital_exclusion_data, ., by = "TacticalCell", keep = F)
+  left_join(digital_exclusion_data, ., by = "TacticalCell", keep = FALSE)
 
 
 #write_csv(digital_exclusion_data, "./people_at_risk_table/digital-exclusion-indicator.csv")
@@ -328,7 +328,7 @@ shielding = correct_columns(shielding_cols, shielding)
 
 # join lad population
 shielding_data =
-  left_join(area_lookup_tc2lad, shielding, by = "LAD19CD", keep = F) %>%
+  left_join(area_lookup_tc2lad, shielding, by = "LAD19CD", keep = FALSE) %>%
   unique() %>% filter(
     TacticalCell != "Northern Ireland and the Isle of Man",
     TacticalCell != "Scotland",
@@ -340,7 +340,7 @@ shielding_data =
   left_join(pop_eng_lad_tc,
             shielding,
             by = c("LAD19CD"),
-            keep = F)
+            keep = FALSE)
 
 # calculate number per tactical cell per 1000
 shielding_data_tc =
@@ -359,7 +359,7 @@ shielding_data =
     shielding_data,
     shielding_data_tc,
     by = c("TacticalCell", "tc_pop"),
-    keep = F
+    keep = FALSE
   )
 
 # shielding in england
@@ -379,12 +379,12 @@ homelessness_data =
   left_join(area_lookup_tc2lad,
             homelessness,
             by = "LAD19CD",
-            keep = F) %>%
+            keep = FALSE) %>%
   unique() %>%
   left_join(.,
             pop_eng_lad_tc,
             by = c("LAD19CD", "TacticalCell"),
-            keep = F) %>%
+            keep = FALSE) %>%
   filter(
     TacticalCell != "Northern Ireland and the Isle of Man",
     TacticalCell != "Scotland",
@@ -403,7 +403,7 @@ homelessness_data =
     homelessness_data,
     homelessness_data_tc,
     by = c("TacticalCell"),
-    keep = F
+    keep = FALSE
   )
 
 homelessness_data = homelessness_data %>%
@@ -431,12 +431,12 @@ ucred = correct_columns(unem_cols, ucred)
 # for both local authority, tactical cell and england
 # need to determine the proportion of the population unemployed on universal credit
 ucred_data =
-  left_join(area_lookup_tc2lad, ucred, by = "LAD19CD", keep = F) %>%
+  left_join(area_lookup_tc2lad, ucred, by = "LAD19CD", keep = FALSE) %>%
   unique() %>%
   left_join(.,
             pop_eng_lad_tc,
             by = c("LAD19CD", "TacticalCell"),
-            keep = F) %>%
+            keep = FALSE) %>%
   # remove wales/scotland/NI for now
   filter(
     TacticalCell != "Northern Ireland and the Isle of Man",
@@ -452,7 +452,7 @@ ucred_data = ucred_data %>%
 # tc and eng level total and proportion unemployed on universal credit
 ucred_data_tc = ucred_data %>%
   group_by(TacticalCell, tc_pop) %>%
-  summarise_at(vars(`Not in employment`), list(sum), na.rm = T) %>%
+  summarise_at(vars(`Not in employment`), list(sum), na.rm = TRUE) %>%
   rename(`tc_Not in employment` = `Not in employment`) %>%
   mutate("tc_prop_unemployed_on_universal_credit" = round((`tc_Not in employment` /
                                                              tc_pop) * 100, 1)) #%>%
@@ -463,7 +463,7 @@ ucred_data =
     ucred_data,
     ucred_data_tc,
     by = c("TacticalCell", "tc_pop"),
-    keep = F
+    keep = FALSE
   ) %>%
   unique()
 
@@ -488,7 +488,7 @@ fuelp = correct_columns(fuelp_cols, fuelp)
 
 # join tactical cells (this is households so don't need population)
 fuelp_data =
-  left_join(area_lookup_tc2lad, fuelp, by = "LAD19CD", keep = F) %>%
+  left_join(area_lookup_tc2lad, fuelp, by = "LAD19CD", keep = FALSE) %>%
   unique()  %>%
   # remove wales/scotland/NI for now
   filter(
@@ -524,7 +524,7 @@ fuelp_data_tc_eng = fuelp_data %>%
 
 
 fuelp_data =
-  left_join(fuelp_data, fuelp_data_tc_eng, by = "TacticalCell", keep = F)
+  left_join(fuelp_data, fuelp_data_tc_eng, by = "TacticalCell", keep = FALSE)
 
 
 # ---- do we want to join them all together ----
@@ -534,40 +534,40 @@ all_data =
     digital_exclusion_data,
     asylum_data,
     by = c("LAD19CD", "TacticalCell"),
-    keep = F
+    keep = FALSE
   ) %>%
   # add bame
   left_join(.,
             bame_data,
             by = c("LAD19CD", "TacticalCell"),
-            keep = F) %>%
+            keep = FALSE) %>%
   # add covid
   #left_join(., covid_data, by=c("LAD19CD","TacticalCell","lad_pop","tc_pop","eng_pop"), keep=F) %>%
   # add fuel poverty
   left_join(.,
             fuelp_data,
             by = c("LAD19CD", "TacticalCell"),
-            keep = F) %>%
+            keep = FALSE) %>%
   # add homelessness
   left_join(
     .,
     homelessness_data,
     by = c("LAD19CD", "TacticalCell", "lad_pop", "tc_pop", "eng_pop"),
-    keep = F
+    keep = FALSE
   )  %>%
   # add ucred
   left_join(
     .,
     ucred_data,
     by = c("LAD19CD", "TacticalCell", "lad_pop", "tc_pop", "eng_pop"),
-    keep = F
+    keep = FALSE
   ) %>%
   # clinically shielding
   left_join(
     .,
     shielding_data,
     by = c("LAD19CD", "TacticalCell", "lad_pop", "tc_pop", "eng_pop"),
-    keep = F
+    keep = FALSE
   )
 
 
