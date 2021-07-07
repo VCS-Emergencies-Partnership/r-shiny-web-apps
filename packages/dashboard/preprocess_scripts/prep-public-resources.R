@@ -1,6 +1,5 @@
-library(tidyverse)
-library(feather)
-
+library("tidyverse")
+library("feather")
 
 resources = read_csv("~/vcs-indicators/resource_bank_8june.csv")
 
@@ -8,8 +7,8 @@ resources$`Relevance/Include?`
 
 wanted = c("YES", "Yes", "yes")
 # filter out no
-to_include = resources %>% filter(`Relevance/Include?` %in% wanted)
-
+to_include = resources %>%
+  filter(`Relevance/Include?` %in% wanted)
 
 # write to feather
 write_feather(

@@ -6,36 +6,34 @@ library("rmapshaper")
 library("geojsonio")
 library("feather")
 
-LAD_boundaries =
-  st_read(
-    "~/r-shiny-web-apps/packages/dashboard/data/reduced_boundaries/lad19_eng_wales_sc_ni.geojson"
-  )
-LAD_boundaries = LAD_boundaries %>% rename("LAD19CD" = lad19cd)
+
+LAD_boundaries = st_read("~/r-shiny-web-apps/packages/dashboard/data/reduced_boundaries/lad19_eng_wales_sc_ni.geojson")
+LAD_boundaries = LAD_boundaries %>%
+  rename("LAD19CD" = lad19cd)
 
 # join tactical cell
-area_lookup =
-  read_csv(
-    "https://github.com/britishredcrosssociety/covid-19-vulnerability/raw/master/data/lookup%20mosa11%20to%20lad17%20to%20lad19%20to%20tactical%20cell.csv"
-  )
+area_lookup = read_csv("https://github.com/britishredcrosssociety/covid-19-vulnerability/raw/master/data/lookup%20mosa11%20to%20lad17%20to%20lad19%20to%20tactical%20cell.csv")
 area_lookup_tc2lad =
-  area_lookup %>% select("LAD19CD", "TacticalCell")
+  area_lookup %>%
+  select("LAD19CD", "TacticalCell")
 
 LAD_boundaries_with_tc =
   left_join(area_lookup_tc2lad,
             LAD_boundaries,
             by = "LAD19CD",
-            keep = FALSE)  %>% unique()
+            keep = FALSE)  %>%
+  unique()
 LAD_boundaries_with_tc = st_as_sf(LAD_boundaries_with_tc)
 
 # call to see if any flood warnings
-query =
-  paste0("http://environment.data.gov.uk/flood-monitoring/id/floods/")
+query = paste0("http://environment.data.gov.uk/flood-monitoring/id/floods/")
 flood_warning = GET(query)
-flood_warning_content =
-  content(flood_warning, type = "text", encoding = "UTF-8")
+flood_warning_content = content(flood_warning,
+                                type = "text",
+                                encoding = "UTF-8")
 flood_warning_data = fromJSON(flood_warning_content)
-flood_warning_df =
-  as_tibble(flood_warning_data$items, .name_repair = "minimal")
+flood_warning_df = as_tibble(flood_warning_data$items,
+                             .name_repair = "minimal")
 flood_warning_df = do.call(data.frame, flood_warning_df)
 
 if (dim(flood_warning_df)[1] == 0) {
@@ -79,34 +77,35 @@ if (dim(flood_warning_df)[1] == 0) {
     flood_warning_points,
     "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_points.geojson"
   )
-
-
 } else {
   # only intested in severity level level 4 means reduced
   flood_warnings_of_interest =
-    flood_warning_df %>% filter(severityLevel <= 3)
+    flood_warning_df %>%
+    filter(severityLevel <= 3)
   #flood_warnings_of_interest = flood_warning_df
   flood_warnings_of_interest =
-    flood_warnings_of_interest %>% rename(polygon = floodArea.polygon)
+    flood_warnings_of_interest %>%
+    rename(polygon = floodArea.polygon)
   #get list of unique polygos
   polygons_of_interest = unique(flood_warnings_of_interest$polygon)
 
   #write_csv(flood_warnings_of_interest, "test_flood_data.csv")
   # #loop through each flood and find which msoas it overlaps:
-  flood_overlap = function (x) {
+  flood_overlap = function(x) {
     #retrieve flood warning polygon
     get_poly = URLencode(x)
     flood_boundary = st_read(get_poly)
     #which msoas does this overlap in which local authority
-    row_in_df_intersect =
-      st_intersects(flood_boundary, LAD_boundaries_with_tc)
+    row_in_df_intersect = st_intersects(flood_boundary, LAD_boundaries_with_tc)
     row_in_df_intersect = as.vector(row_in_df_intersect[[1]])
     lads_with_flood_risk =
-      LAD_boundaries_with_tc %>% filter(row_number() %in% row_in_df_intersect)
+      LAD_boundaries_with_tc %>%
+      filter(row_number() %in% row_in_df_intersect)
     #print(lads_with_flood_risk)
     #extract just msoa, lad and vulnerability decile
     lads_with_flood_risk =
-      lads_with_flood_risk %>% select("LAD19CD", "TacticalCell", "lad19nm")
+      lads_with_flood_risk %>%
+      select("LAD19CD", "TacticalCell", "lad19nm")
     #remove msoa geometry
     st_geometry(lads_with_flood_risk) = NULL
 
@@ -117,9 +116,11 @@ if (dim(flood_warning_df)[1] == 0) {
 
     #add polygon to each of the dataframes
     flood_boundary_simp_comp =
-      flood_boundary %>% mutate("polygon" = x)
+      flood_boundary %>%
+      mutate("polygon" = x)
     lads_with_flood_risk =
-      lads_with_flood_risk %>% mutate("polygon" = x)
+      lads_with_flood_risk %>%
+      mutate("polygon" = x)
 
     #merge flood geometry with overlapping msoa and lads
     flood_warning2lad2tc =
@@ -133,7 +134,8 @@ if (dim(flood_warning_df)[1] == 0) {
     #flood_warning2lad2tc = ms_simplify(flood_warning2lad2tc, keep=0.001, keep_shapes=T)
     # deal with odd number of columsn
     flood_warning2lad2tc =
-      flood_warning2lad2tc %>% select(
+      flood_warning2lad2tc %>%
+      select(
         "AREA",
         "FWS_TACODE",
         "TA_NAME",
@@ -150,9 +152,7 @@ if (dim(flood_warning_df)[1] == 0) {
 
     #return dataframes
     return(flood_warning2lad2tc)
-
   }
-
 
   # #create output dataframe
   output_flood_data = NULL
@@ -161,7 +161,6 @@ if (dim(flood_warning_df)[1] == 0) {
   #test_url = URLencode(test)
   #test_poly = st_read(test_url)
   #test_simplify = ms_simplify(test_poly, keep=0.01, keep_shapes=T)
-
 
   # #for each polygon
   for (i in polygons_of_interest) {
@@ -208,17 +207,15 @@ if (dim(flood_warning_df)[1] == 0) {
 
   # format flood alert date and time
   format_dates =
-    flood_warning_information %>% select("polygon", "timeMessageChanged") %>%
+    flood_warning_information %>%
+    select("polygon", "timeMessageChanged") %>%
     separate(timeMessageChanged,
              c("lastupdateday", "lastupdatetime"),
              sep = "T")
 
-
-
   # if no flood warnings
   if (is.null(output_flood_data)) {
-    flood_warning_information =
-      left_join(flood_warning_information, format_dates)
+    flood_warning_information = left_join(flood_warning_information, format_dates)
 
     flood_warning_information = flood_warning_information %>%
       mutate(
@@ -259,7 +256,6 @@ if (dim(flood_warning_df)[1] == 0) {
     # 3) # add centroids to data
     # transform to utm because st_centroid doesn't work with lng lat - or won't be accurate specifically i think
 
-
     centroids = flood_warning_information
 
     write_sf(
@@ -267,9 +263,7 @@ if (dim(flood_warning_df)[1] == 0) {
       "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_points.geojson"
     )
 
-
-  } else
-    if (!is.null(output_flood_data)) {
+  } else if (!is.null(output_flood_data)) {
       flood_warning_information =
         left_join(flood_warning_information,
                   format_dates,
@@ -291,7 +285,8 @@ if (dim(flood_warning_df)[1] == 0) {
         left_join(output_flood_data,
                   flood_warning_information,
                   by = "polygon",
-                  keep = FALSE) %>% unique() %>%
+                  keep = FALSE) %>%
+        unique() %>%
         select(
           -"QDIAL",
           -"FWS_TACODE",
@@ -306,8 +301,6 @@ if (dim(flood_warning_df)[1] == 0) {
           -"timeRaised",
           -"timeSeverityChanged"
         )
-
-
 
       # write to file
       #write_sf(final_flood_warning_info_of_interest, "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_metoffice_floodwarnings.geojson")
@@ -348,9 +341,7 @@ if (dim(flood_warning_df)[1] == 0) {
         "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_points.geojson"
       )
 
-
     }
-
 }
 
 #

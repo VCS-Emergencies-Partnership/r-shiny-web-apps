@@ -1,10 +1,9 @@
-# DATABRICKS TEST
-
 # - prep bivariate data fro map --
 library("dplyr")
 library("tidyverse")
 library("magrittr")
 library("pals")
+
 
 # https://timogrossenbacher.ch/2019/04/bivariate-maps-with-ggplot2-and-sf/#create-a-bivariate-choropleth
 
@@ -50,7 +49,6 @@ bivariate_color_scale = tibble(
 ) %>%
   gather("group", "fill")
 
-
 # cut into groups defined above and join fill
 LA_res %<>%
   mutate(
@@ -80,7 +78,8 @@ feather::write_feather(LA_res, "../data/resilience_index_bivar.feather")
 # separate the groups
 forlegend = bivariate_color_scale %>%
   separate(group,
-           into = c("vuln_quantiles", "res_quantiles"),
+           into = c("vuln_quantiles",
+                    "res_quantiles"),
            sep = " - ") %>%
   mutate(vuln = as.integer(vuln_quantiles),
          res = as.integer(res_quantiles))

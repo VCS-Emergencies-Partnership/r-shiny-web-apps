@@ -1,7 +1,7 @@
-library(tidyverse)
-library(lubridate)
-library(PostcodesioR)
-library(feather)
+library("tidyverse")
+library("lubridate")
+library("PostcodesioR")
+library("feather")
 
 # -- lookup table ---
 lookup =
@@ -23,7 +23,6 @@ lookup =
   ) %>%
   unique()
 
-
 # # -- todays date --
 # # need to know current date to append to request for support
 date_time = Sys.time()
@@ -31,12 +30,10 @@ date_time = str_split(date_time, " ")
 date = format(as.Date(date_time[[1]][1]), "%d-%m-%Y")
 
 # --- now retrieving from raw section ---
-get_requests =
-  list.dirs("/data/data-lake/raw/vcsep-requests-for-support/")
-file_name =
-  paste(tail(get_requests, n = 1),
-        "vcsep-requests-for-support.csv",
-        sep = "/")
+get_requests = list.dirs("/data/data-lake/raw/vcsep-requests-for-support/")
+file_name = paste(tail(get_requests, n = 1),
+                  "vcsep-requests-for-support.csv",
+                  sep = "/")
 
 if (!file.exists(file_name)) {
   # break send warning
@@ -53,22 +50,23 @@ if (!file.exists(file_name)) {
     paste0(date_format[[1]][3], "-", date_format[[1]][2], "-", date_format[[1]][1])
 
   if (date != date_of_last_update) {
-    stop("problem - NOT TODAYS DATA")
-
+    stop("problem - NOT TODAY'S DATA")
   } else {
     # do the columns i need exist
     columns_in_raw_data = colnames(requests)
-    cols_needed =
-      c("status", "request_date", "multi_agency_cell", "postcode")
+    cols_needed = c("status",
+                    "request_date",
+                    "multi_agency_cell",
+                    "postcode")
     are_cols_present = (cols_needed %in% columns_in_raw_data)
 
     # are_cols_present not all T means missing names
     if (all(are_cols_present) == FALSE) {
       print("broken - columns changed")
-
     } else {
       # -- filtering for current live requests --
-      requests = requests %>% filter(!is.na(request_date)) %>%
+      requests = requests %>%
+        filter(!is.na(request_date)) %>%
         separate(request_date,
                  c("clean_date", NA),
                  remove = FALSE,
@@ -83,7 +81,6 @@ if (!file.exists(file_name)) {
             TRUE ~ (as.character(.$multi_agency_cell))
           )
         )
-
 
       # extract postcodes
       open_postcodes = requests$postcode
@@ -102,10 +99,11 @@ if (!file.exists(file_name)) {
 
         if (!is.na(df) && !is.null(df)) {
           wanted =
-            df %>% select("postcode",
-                          "admin_district_code",
-                          "longitude",
-                          "latitude")
+            df %>%
+            select("postcode",
+                   "admin_district_code",
+                   "longitude",
+                   "latitude")
           wanted_data[[i]] = wanted
         }
 
@@ -119,9 +117,10 @@ if (!file.exists(file_name)) {
         left_join(requests, postcode2lad, by = "postcode")
 
       all_requests =
-        requests_geocoded %>% mutate("request_status" = case_when(
-          !grepl("Closed", status) ~ "Active",
-          TRUE ~ (as.character("Closed"))
+        requests_geocoded %>%
+        mutate("request_status" =
+                 case_when(!grepl("Closed", status) ~ "Active",
+                           TRUE ~ (as.character("Closed"))
         )) %>%
         mutate("request_status_col" = case_when(!grepl("Closed", status) ~ "red",
                                                 TRUE ~ (as.character("blue")))) %>%

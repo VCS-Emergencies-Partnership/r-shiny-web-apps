@@ -56,7 +56,6 @@ proportion_responded = function(survey_file) {
       ),
       starts_with("In your"))
 
-
     # group_by
     concerns =
       pivot_longer(pulse_needed_clean,
@@ -65,8 +64,10 @@ proportion_responded = function(survey_file) {
                    values_to = "total")
 
     concerns_by_type =
-      concerns %>% group_by(`Concerns`) %>% summarise(group_total = sum(total, na.rm =
-                                                                          T)) %>%
+      concerns %>%
+      group_by(`Concerns`) %>%
+      summarise(group_total = sum(total,
+                                  na.rm = TRUE)) %>%
       mutate(proportion_respondents = round((group_total / respondents) * 100, 1))
 
     concerns_by_type$clean_groups =
@@ -75,7 +76,8 @@ proportion_responded = function(survey_file) {
     # remove pulse none and other data and clean group names
     not_wanted = c("None", "Not sure")
     concerns_by_type =
-      concerns_by_type %>% filter(!clean_groups %in% not_wanted) %>% #, Concerns != "?/Other") %>%
+      concerns_by_type %>%
+      filter(!clean_groups %in% not_wanted) %>% #, Concerns != "?/Other") %>%
       mutate(
         "clean_names" = case_when(
           clean_groups == "Employment advice  support" ~ "Employment",
@@ -98,10 +100,12 @@ proportion_responded = function(survey_file) {
 
 # --- Retrieving from raw section ---
 get_pulse = list.dirs("/data/data-lake/raw/pulse_check_raw/")
-latest_file_name =
-  paste(tail(get_pulse, n = 1), "pulse_check_raw.csv", sep = "/")
-last_but_one_file_name =
-  paste(tail(get_pulse, n = 2), "pulse_check_raw.csv", sep = "/")
+latest_file_name = paste(tail(get_pulse, n = 1),
+                         "pulse_check_raw.csv",
+                         sep = "/")
+last_but_one_file_name = paste(tail(get_pulse, n = 2),
+                               "pulse_check_raw.csv",
+                               sep = "/")
 last_but_one_file_name = last_but_one_file_name[1]
 
 # Does file exist
@@ -129,12 +133,10 @@ if (!file.exists(latest_file_name) ||
 
   glimpse(greatest_change)
 
-
   # -- write to file ---
   write_feather(
     greatest_change,
     "~/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/pulse_check_summary.feather"
   )
-
 
 }
