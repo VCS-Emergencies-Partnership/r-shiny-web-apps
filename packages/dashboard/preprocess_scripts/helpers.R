@@ -3,7 +3,7 @@
 #'
 #' @export
 is_databricks = function() {
-  is.environment("DATABRICKS_RUNTIME_VERSION")
+  Sys.getenv("DATABRICKS_RUNTIME_VERSION") != ""
 }
 
 #' The datalake is mounted onto /mnt/ on Databricks, and /data/ on the DSVM
