@@ -1,21 +1,24 @@
 library("feather")
 library("tidyverse")
 
-# proportion respondends reporting need function
+box::use(./helpers)
+
+
+# Proportion respondents reporting need function
 proportion_responded = function(survey_file) {
   pulse_needed = read_csv(survey_file)
 
-  # CHECK - ARE THE COLUMNS I NEED IN THERE? -->
+  # CHECK - ARE THE COLUMNS I NEED IN THERE?
   cols_needed =
     c(
       "_index",
       "What is your Multi-Agency Cell area?",
       "In which county/unitary authority does your organisation operate?"
     )
-  # are all the columns i use with easy names there?
+  # Are all the columns i use with easy names there?
   area_names_still_present =
     (cols_needed %in% colnames(pulse_needed))
-  # is there still a question containing this string:
+  # Is there still a question containing this string:
   question_still_present =
     grepl(
       "following sectors are the top three priority concerns in your area in the next 14 days",
@@ -24,14 +27,13 @@ proportion_responded = function(survey_file) {
   question_still_present_cols =
     pulse_needed[question_still_present]
 
-  # if logical vector is not all T - there's a missing column name
-  # of if theres no columns containing the following sectors comment the question has changed
+  # If logical vector is not all T - there's a missing column name
+  # or if there's no columns containing the following sectors comment the question has changed
   if (all(area_names_still_present) == FALSE ||
       dim(question_still_present_cols)[2] == 0) {
     stop("Couldn't find required columns in pulse check survey")
-
   } else {
-    # filter by column number to get concerns in next 14 days other relating to this is col 404 - not needed as this is counted but column on what was required is provided which is other:
+    # Filter by column number to get concerns in next 14 days other relating to this is col 404 - not needed as this is counted but column on what was required is provided which is other:
     pulse_needed =
       pulse_needed %>% select(
         `_index`,
@@ -42,10 +44,10 @@ proportion_responded = function(survey_file) {
         )
       )
 
-    # how many respondents
+    # How many respondents
     respondents = nrow(pulse_needed)
 
-    # try remove ridiculous long names
+    # Try remove ridiculous long names
     pulse_needed_clean = pulse_needed %>%
       rename_with( ~ paste0(
         sub(
@@ -73,7 +75,7 @@ proportion_responded = function(survey_file) {
     concerns_by_type$clean_groups =
       gsub("[[:punct:]]", "", concerns_by_type$Concerns)
 
-    # remove pulse none and other data and clean group names
+    # Remove pulse none and other data and clean group names
     not_wanted = c("None", "Not sure")
     concerns_by_type =
       concerns_by_type %>%
@@ -96,10 +98,8 @@ proportion_responded = function(survey_file) {
 
 }
 
-
-
-# --- Retrieving from raw section ---
-get_pulse = list.dirs("/data/data-lake/raw/pulse_check_raw/")
+# Retrieving from raw section
+get_pulse = list.dirs(glue::glue("/{helpers$get_mount_point()}/data-lake/raw/pulse_check_raw/"))
 latest_file_name = paste(tail(get_pulse, n = 1),
                          "pulse_check_raw.csv",
                          sep = "/")
@@ -111,32 +111,30 @@ last_but_one_file_name = last_but_one_file_name[1]
 # Does file exist
 if (!file.exists(latest_file_name) ||
     !file.exists(last_but_one_file_name)) {
-  # break send warning
   message = paste0("Problem: a file is missing")
   stop(message)
 } else {
   latest_survey = proportion_responded(latest_file_name)
   previous_survey = proportion_responded(last_but_one_file_name)
-  #print("latest")
+
   glimpse(previous_survey)
   glimpse(latest_survey)
-
-  #glimpse(previous_survey)
-  #print("previous")
 
   joined_surveys =
     left_join(latest_survey, previous_survey, by = "clean_names")
   #glimpse(joined_surveys)
   greatest_change =
-    joined_surveys %>% mutate("greatest_diff" = proportion_respondents.x - proportion_respondents.y) %>%
-    select(1:6, 12) %>% rename_with( ~ str_remove(., ".x"))
+    joined_surveys %>%
+    mutate("greatest_diff" = proportion_respondents.x - proportion_respondents.y) %>%
+    select(1:6, 12) %>%
+    rename_with( ~ str_remove(., ".x"))
 
   glimpse(greatest_change)
 
-  # -- write to file ---
-  write_feather(
-    greatest_change,
-    "~/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/pulse_check_summary.feather"
+  helpers$write_data(
+    feather::write_feather,
+    greatest_changes,
+    "pulse_check_summary.feather",
+    local_dir = "~/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/"
   )
-
 }
