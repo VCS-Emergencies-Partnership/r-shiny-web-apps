@@ -1,3 +1,4 @@
+library("box")
 library("feather")
 library("geojsonio")
 library("httr")
@@ -6,12 +7,73 @@ library("rmapshaper")
 library("sf")
 library("tidyverse")
 
+box::use(./helpers)
+
+# Loop through each flood and find which msoas it overlaps:
+flood_overlap = function(x) {
+  # Retrieve flood warning polygon
+  get_poly = URLencode(x)
+  flood_boundary = st_read(get_poly)
+  # Which msoas does this overlap in which local authority
+  row_in_df_intersect = st_intersects(flood_boundary, LAD_boundaries_with_tc)
+  row_in_df_intersect = as.vector(row_in_df_intersect[[1]])
+  lads_with_flood_risk =
+    LAD_boundaries_with_tc %>%
+    filter(row_number() %in% row_in_df_intersect)
+  # Extract just msoa, lad and vulnerability decile
+  lads_with_flood_risk =
+    lads_with_flood_risk %>%
+    select("LAD19CD", "TacticalCell", "lad19nm")
+  # Remove msoa geometry
+  st_geometry(lads_with_flood_risk) = NULL
+
+  # Simplify flood boundary
+  #flood_boundary_simp = ms_simplify(flood_boundary, keep=0.01, keep_shapes=T)
+
+  # Add polygon to each of the dataframes
+  flood_boundary_simp_comp =
+    flood_boundary %>%
+    mutate("polygon" = x)
+  lads_with_flood_risk =
+    lads_with_flood_risk %>%
+    mutate("polygon" = x)
+
+  # Merge flood geometry with overlapping msoa and lads
+  flood_warning2lad2tc =
+    left_join(
+      flood_boundary_simp_comp,
+      lads_with_flood_risk,
+      by = "polygon",
+      keep = FALSE
+    )
+
+  #flood_warning2lad2tc = ms_simplify(flood_warning2lad2tc, keep=0.001, keep_shapes=T)
+  # Deal with odd number of columns
+  flood_warning2lad2tc =
+    flood_warning2lad2tc %>%
+    select(
+      "AREA",
+      "FWS_TACODE",
+      "TA_NAME",
+      "DESCRIP",
+      "LA_NAME",
+      "QDIAL",
+      "RIVER_SEA",
+      "polygon",
+      "TacticalCell",
+      "LAD19CD",
+      "lad19nm",
+      "geometry"
+    )
+
+  return(flood_warning2lad2tc)
+}
 
 LAD_boundaries = st_read("~/r-shiny-web-apps/packages/dashboard/data/reduced_boundaries/lad19_eng_wales_sc_ni.geojson")
 LAD_boundaries = LAD_boundaries %>%
   rename("LAD19CD" = lad19cd)
 
-# join tactical cell
+# Join tactical cell
 area_lookup = read_csv("https://github.com/britishredcrosssociety/covid-19-vulnerability/raw/master/data/lookup%20mosa11%20to%20lad17%20to%20lad19%20to%20tactical%20cell.csv")
 area_lookup_tc2lad =
   area_lookup %>%
@@ -25,8 +87,8 @@ LAD_boundaries_with_tc =
   unique()
 LAD_boundaries_with_tc = st_as_sf(LAD_boundaries_with_tc)
 
-# call to see if any flood warnings
-query = paste0("http://environment.data.gov.uk/flood-monitoring/id/floods/")
+# Call to see if any flood warnings
+query = "http://environment.data.gov.uk/flood-monitoring/id/floods/"
 flood_warning = GET(query)
 flood_warning_content = content(flood_warning,
                                 type = "text",
@@ -65,96 +127,42 @@ if (dim(flood_warning_df)[1] == 0) {
 
   #write_sf(flood_warning_information, "./flooding_metoffice_data/current_live_metoffice_floodwarnings.geojson")
 
-  write_sf(
+  helpers$write_data(
+    sf::write_sf,
     flood_warning_polygons,
-    "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_polygons.geojson"
+    "current_live_warnings_polygons.geojson",
+    local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
   )
-  write_feather(
+
+  helpers$write_data(
+    feather::write_feather,
     flood_warning_meta,
-    "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_metadata.feather"
+    "current_live_warnings_metadata.feather",
+    local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
   )
-  write_sf(
+
+  helpers$write_data(
+    sf::write_sf,
     flood_warning_points,
-    "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_points.geojson"
+    "current_live_warnings_points.geojson",
+    local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
   )
+
 } else {
-  # only intested in severity level level 4 means reduced
+  # Only interested in severity level level 4 means reduced
   flood_warnings_of_interest =
     flood_warning_df %>%
     filter(severityLevel <= 3)
-  #flood_warnings_of_interest = flood_warning_df
+  # flood_warnings_of_interest = flood_warning_df
   flood_warnings_of_interest =
     flood_warnings_of_interest %>%
     rename(polygon = floodArea.polygon)
-  #get list of unique polygos
+  # Get list of unique polygons
   polygons_of_interest = unique(flood_warnings_of_interest$polygon)
 
   #write_csv(flood_warnings_of_interest, "test_flood_data.csv")
-  # #loop through each flood and find which msoas it overlaps:
-  flood_overlap = function(x) {
-    #retrieve flood warning polygon
-    get_poly = URLencode(x)
-    flood_boundary = st_read(get_poly)
-    #which msoas does this overlap in which local authority
-    row_in_df_intersect = st_intersects(flood_boundary, LAD_boundaries_with_tc)
-    row_in_df_intersect = as.vector(row_in_df_intersect[[1]])
-    lads_with_flood_risk =
-      LAD_boundaries_with_tc %>%
-      filter(row_number() %in% row_in_df_intersect)
-    #print(lads_with_flood_risk)
-    #extract just msoa, lad and vulnerability decile
-    lads_with_flood_risk =
-      lads_with_flood_risk %>%
-      select("LAD19CD", "TacticalCell", "lad19nm")
-    #remove msoa geometry
-    st_geometry(lads_with_flood_risk) = NULL
 
-    # simplify flood boundary
-    #flood_boundary_simp = ms_simplify(flood_boundary, keep=0.01, keep_shapes=T)
-    #print("worked")
-    #print(flood_boundary_simp)
-
-    #add polygon to each of the dataframes
-    flood_boundary_simp_comp =
-      flood_boundary %>%
-      mutate("polygon" = x)
-    lads_with_flood_risk =
-      lads_with_flood_risk %>%
-      mutate("polygon" = x)
-
-    #merge flood geometry with overlapping msoa and lads
-    flood_warning2lad2tc =
-      left_join(
-        flood_boundary_simp_comp,
-        lads_with_flood_risk,
-        by = "polygon",
-        keep = FALSE
-      )
-
-    #flood_warning2lad2tc = ms_simplify(flood_warning2lad2tc, keep=0.001, keep_shapes=T)
-    # deal with odd number of columsn
-    flood_warning2lad2tc =
-      flood_warning2lad2tc %>%
-      select(
-        "AREA",
-        "FWS_TACODE",
-        "TA_NAME",
-        "DESCRIP",
-        "LA_NAME",
-        "QDIAL",
-        "RIVER_SEA",
-        "polygon",
-        "TacticalCell",
-        "LAD19CD",
-        "lad19nm",
-        "geometry"
-      )
-
-    #return dataframes
-    return(flood_warning2lad2tc)
-  }
-
-  # #create output dataframe
+  # Create output dataframe
   output_flood_data = NULL
 
   #test = polygons_of_interest[[24]]
@@ -162,27 +170,25 @@ if (dim(flood_warning_df)[1] == 0) {
   #test_poly = st_read(test_url)
   #test_simplify = ms_simplify(test_poly, keep=0.01, keep_shapes=T)
 
-  # #for each polygon
+  # For each polygon
   for (i in polygons_of_interest) {
-    #retrieve msoas it overlaps with - only returns msoas where flood is predicted at msoa as vulnerability decile of >=9
+    # Retrieve msoas it overlaps with - only returns msoas where flood is predicted at msoa as vulnerability decile of >=9
     flood_area_of_interest = flood_overlap(i)
     flood_reduced = tryCatch({
       ms_simplify(flood_area_of_interest,
                   keep = 0.01,
                   keep_shapes = TRUE)
     },
-    # catch unable to simplify error
+    # Catch unable to simplify error
     error = function(e) {
       flood_area_of_interest
     })
 
-    #print(flood_reduced)
-    #add polygon to join back to final df
+    # Add polygon to join back to final df
     output_flood_data = rbind(output_flood_data, flood_reduced)
   }
 
-  #
-  # #select data from flood warning df to join to flood polygon df
+  # Select data from flood warning df to join to flood polygon df
   flood_warning_information = flood_warnings_of_interest %>%
     select(
       "polygon",
@@ -196,7 +202,7 @@ if (dim(flood_warning_df)[1] == 0) {
       "timeRaised",
       "timeSeverityChanged"
     ) %>%
-    # alert level meaning
+    # Alert level meaning
     mutate(
       "alertlevelmeaning" = case_when(
         severityLevel == 3 ~ "flooding is possible, be prepared",
@@ -205,7 +211,7 @@ if (dim(flood_warning_df)[1] == 0) {
       )
     )
 
-  # format flood alert date and time
+  # Format flood alert date and time
   format_dates =
     flood_warning_information %>%
     select("polygon", "timeMessageChanged") %>%
@@ -213,54 +219,58 @@ if (dim(flood_warning_df)[1] == 0) {
              c("lastupdateday", "lastupdatetime"),
              sep = "T")
 
-  # if no flood warnings
+  # If no flood warnings
   if (is.null(output_flood_data)) {
     flood_warning_information = left_join(flood_warning_information, format_dates)
 
     flood_warning_information = flood_warning_information %>%
       mutate(
-        "messageurl" = paste(
+        "messageurl" = paste0(
           "https://flood-warning-information.service.gov.uk/target-area/",
-          floodAreaID,
-          sep = ""
-        )
+          floodAreaID)
       )
-    #
-    # #join the data
+
+    # Join the data
     #final_flood_warning_info_of_interest = left_join(output_flood_data, flood_warning_information) %>% unique() %>%
     #  select(-"QDIAL", -"FWS_TACODE", -"AREA", -"TA_NAME",-"DESCRIP",-"LA_NAME",-"RIVER_SEA",-"polygon",-"floodArea.riverOrSea",-"timeMessageChanged",-"timeRaised",-"timeSeverityChanged")
 
-    # write to file
+    # Write to file
     #write_sf(flood_warning_information, "./flooding_metoffice_data/current_live_metoffice_floodwarnings.geojson")
 
-    # try three smaller output files:
+    # Try three smaller output files:
     # 1). # flood area id and polygon
     flood_areaid2polygon = flood_warning_information %>%
       select("floodAreaID") %>%
       unique()
 
-    # write to file
-    write_sf(
+    # Write to file
+    helpers$write_data(
+      sf::write_sf,
       flood_areaid2polygon,
-      "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_polygons.geojson"
+      "current_live_warnings_polygons.geojson",
+      local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
     )
 
     # 2). .feather with metadata - but no warnings
     flood_areaid2lad2metadata = flood_warning_information
 
-    write_feather(
+    helpers$write_data(
+      feather::write_feather,
       flood_areaid2lad2metadata,
-      "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_metadata.feather"
+      "current_live_warnings_metadata.feather",
+      "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
     )
 
     # 3) # add centroids to data
-    # transform to utm because st_centroid doesn't work with lng lat - or won't be accurate specifically i think
+    # Transform to utm because st_centroid doesn't work with lng lat - or won't be accurate specifically i think
 
     centroids = flood_warning_information
 
-    write_sf(
+    helpers$write_data(
+      sf::write_sf,
       centroids,
-      "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_points.geojson"
+      "current_live_warnings_points.geojson",
+      "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
     )
 
   } else if (!is.null(output_flood_data)) {
@@ -273,10 +283,9 @@ if (dim(flood_warning_df)[1] == 0) {
       # add url for message
       flood_warning_information = flood_warning_information %>%
         mutate(
-          "messageurl" = paste(
+          "messageurl" = paste0(
             "https://flood-warning-information.service.gov.uk/target-area/",
-            floodAreaID,
-            sep = ""
+            floodAreaID
           )
         )
       #
@@ -311,10 +320,11 @@ if (dim(flood_warning_df)[1] == 0) {
         select("floodAreaID") %>%
         unique()
 
-      # write to file
-      write_sf(
+      helpers$write_data(
+        sf::write_sf,
         flood_areaid2polygon,
-        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_polygons.geojson"
+        "current_live_warnings_polygons.geojson",
+        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
       )
 
       # 2). .feather with metadata
@@ -322,9 +332,11 @@ if (dim(flood_warning_df)[1] == 0) {
         final_flood_warning_info_of_interest %>%
         st_drop_geometry()
 
-      write_feather(
+      helpers$write_data(
+        feather::write_feather,
         flood_areaid2lad2metadata,
-        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_metadata.feather"
+        "current_live_warnings_metadata.feather",
+        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
       )
 
       # 3) # add centroids to data
@@ -336,11 +348,12 @@ if (dim(flood_warning_df)[1] == 0) {
         # select lad19CD and geometry
         st_transform(4326)
 
-      write_sf(
+      helpers$write_data(
+        sf::write_sf,
         centroids,
-        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/current_live_warnings_points.geojson"
+        "current_live_warnings_points.geojson",
+        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
       )
-
     }
 }
 
