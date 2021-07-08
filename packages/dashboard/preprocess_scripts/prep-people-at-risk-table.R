@@ -8,6 +8,8 @@ library("tidyverse")
 box::use(./helpers)
 
 
+mnt = helpers$get_mount_point()
+
 # Get look up table
 not_using_other_countries = c("Wales",
                               "Scotland",
@@ -22,12 +24,12 @@ area_lookup_tc2lad =
 # Population level data
 pop_eng_2019 =
   read_excel(
-    glue::glue("/{helpers$get_mount_point}/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx"),
+    glue::glue("/{mnt}/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx"),
     sheet = "Mid-2019 Persons",
     skip = 4
   )
 
-# select LA Code (2019 boundaries) and All Ages
+# Select LA Code (2019 boundaries) and All Ages
 pop_eng = pop_eng_2019 %>%
   select(LAD19CD = `LA Code (2019 boundaries)`,
          la_name = `LA name (2019 boundaries)`,
@@ -40,7 +42,7 @@ pop_eng_tc = left_join(pop_eng, area_lookup_tc2lad,
                        by = "LAD19CD",
                        keep = FALSE)
 
-# i think there are 317 lads in England with local authority 2019
+# I think there are 317 lads in England with local authority 2019
 # Calculate population of tactical cells
 pop_tc = pop_eng_tc %>%
   group_by(TacticalCell) %>%
@@ -54,17 +56,15 @@ pop_eng_lad_tc =
             keep = FALSE) %>%
   rename("lad_pop" = `All Ages.x`, "tc_pop" = `All Ages.y`)
 
-# store eng pop seperately
+# Store eng pop seperately
 eng_pop = unique(pop_eng_lad_tc$eng_pop)
 
-# --- INDICATOR DATA ---
-# read in data - check each exists
+# INDICATOR DATA
+# Read in data - check each exists
 does_file_exist = function(input_file) {
   if (!file.exists(input_file)) {
     message = paste0("could not find file", input_file)
     stop(message)
-    #break script
-
   } else {
     data = read_csv(input_file)
     return(data)
@@ -72,32 +72,31 @@ does_file_exist = function(input_file) {
 
 }
 
-bame = does_file_exist("/data/data-lake/curated/annual-population-survey-ethnicity-data/bame-ethnicity-lad19.csv")
-asylum = does_file_exist("/data/data-lake/curated/asylum-section-95-support/asylum-lad19.csv")
-digital_exclusion_tc = does_file_exist("/data/data-lake/curated/digital-exclusion/digital-exclusion-tc.csv")
-digital_exclusion_lad = does_file_exist("/data/data-lake/curated/digital-exclusion/digital-exclusion-lad19.csv")
-fuelp = does_file_exist("/data/data-lake/curated/fuel-poverty-eng/fuel-poverty-lad19.csv")
-homelessness = does_file_exist("/data/data-lake/curated/homelessness-eng/homelessness-lad19.csv")
-shielding = does_file_exist("/data/data-lake/curated/shielding-patients-list-eng/shielding-lad19.csv")
-ucred = does_file_exist("/data/data-lake/curated/stat-xplore-people-on-universal-credit/universal-credit-lad19.csv")
+bame = does_file_exist(glue::glue("/{mnt}/data-lake/curated/annual-population-survey-ethnicity-data/bame-ethnicity-lad19.csv"))
+asylum = does_file_exist(glue::glue("/{mnt}/data-lake/curated/asylum-section-95-support/asylum-lad19.csv"))
+digital_exclusion_tc = does_file_exist(glue::glue("/{mnt}/data-lake/curated/digital-exclusion/digital-exclusion-tc.csv"))
+digital_exclusion_lad = does_file_exist(glue::glue("/{mnt}/data-lake/curated/digital-exclusion/digital-exclusion-lad19.csv"))
+fuelp = does_file_exist(glue::glue("/{mnt}/data-lake/curated/fuel-poverty-eng/fuel-poverty-lad19.csv"))
+homelessness = does_file_exist(glue::glue("/{mnt}/data-lake/curated/homelessness-eng/homelessness-lad19.csv"))
+shielding = does_file_exist(glue::glue("/{mnt}/data-lake/curated/shielding-patients-list-eng/shielding-lad19.csv"))
+ucred = does_file_exist(glue::glue("/{mnt}/data-lake/curated/stat-xplore-people-on-universal-credit/universal-credit-lad19.csv"))
 
 # Function to check columns i expected are present
 correct_columns = function(columns_expected, data_read) {
-  # are cols in data
-  # are all the columns i use with easy names there?
+  # Are cols in data
+  # Are all the columns i use with easy names there?
   cols_still_present = (columns_expected %in% colnames(data_read))
   if (all(cols_still_present) == FALSE) {
     col_message = paste0("Columns not found")
     stop(col_message)
-    #break
   }
   else {
     return(data_read)
   }
 }
 
-# -- BAME population in LAD ---
-# --> already calculated % of lad population which is bame
+# BAME population in LAD
+# Already calculated % of lad population which is bame
 # only have bame data for 133 out of the 317 LADs in England
 # CHECK COLUMNS EXPECTED EXIST
 bame_cols =
@@ -109,7 +108,7 @@ bame_cols =
     "Percentage of population who are ethnic minority"
   )
 bame = correct_columns(bame_cols, bame)
-# add in tactical cell
+# Add in tactical cell
 bame_data =
   left_join(bame,
             area_lookup_tc2lad,
@@ -119,14 +118,14 @@ bame_data =
            TacticalCell != "Scotland") %>%
   unique()
 
-# -- BAME population in England (based upon annual population survey - obviously some data missing)
-# -- data for 200 local
+# BAME population in England (based upon annual population survey - obviously some data missing)
+# data for 200 local
 england_proportion_bame =
   ((
     sum(bame_data$`numerator-bame-not-uk-born`, na.rm = TRUE) +
       sum(bame_data$`numerator-bame-uk-born`, na.rm = TRUE)
   ) / sum(bame_data$Denominator, na.rm = TRUE)) * 100
-# according to the annual population survey
+# According to the annual population survey
 bame_data =
   bame_data %>%
   mutate(england_proportion_bame = round(england_proportion_bame, 1))
@@ -136,22 +135,27 @@ groupColumns = c("TacticalCell")
 dataColumns = c("numerator-bame-not-uk-born",
                 "numerator-bame-uk-born",
                 "Denominator")
-bame_lad_values2tc_total = plyr::ddply(bame_data, groupColumns, function(x)
-  colSums(x[dataColumns], na.rm = TRUE))
-bame_lad_values2tc_total_final = bame_lad_values2tc_total %>%
+
+bame_lad_values2tc_total =
+  plyr::ddply(bame_data,
+              groupColumns,
+              function(x) colSums(x[dataColumns], na.rm = TRUE))
+
+bame_lad_values2tc_total_final =
+  bame_lad_values2tc_total %>%
   mutate(total_bame_in_tc = `numerator-bame-not-uk-born` + `numerator-bame-uk-born`) %>%
   mutate(tc_proportion = round((total_bame_in_tc / Denominator) * 100, 1)) %>%
   rename("tc_denominator" = Denominator) %>%
   select(-`numerator-bame-not-uk-born`,-`numerator-bame-uk-born`)
 
-# join to LAD data
+# Join to LAD data
 bame_data =
   left_join(bame_data,
             bame_lad_values2tc_total_final,
             by = "TacticalCell",
             keep = FALSE)
 
-# --- asylum data ---
+# Asylum data
 # CHECK COLUMNS I WAS EXPECTING
 asylum_cols =
   c(
@@ -163,12 +167,16 @@ asylum_cols =
   )
 asylum = correct_columns(asylum_cols, asylum)
 
-# --- calculate proportion receiving support ---
-# --- join to areas2uk ---
+# Calculate proportion receiving support
+# Join to areas2uk
 asylum_data =
-  left_join(area_lookup_tc2lad, asylum, by = "LAD19CD", keep = FALSE) %>%
+  left_join(area_lookup_tc2lad,
+            asylum,
+            by = "LAD19CD",
+            keep = FALSE) %>%
   unique() %>%
   left_join(., pop_eng_lad_tc, by = c("LAD19CD", "TacticalCell"))
+
 # Currently we are just aggregating England
 asylum_data =
   asylum_data %>% filter(
@@ -187,11 +195,11 @@ asylum_data = asylum_data %>%
 
 
 # Do they want to know what proprtion of the population that is
-#or geographically where the highest proportion of section95s
+# or geographically where the highest proportion of section95s
 # one divides the number receiving support by population of LAD
-#the other by total receiving support
+# the other by total receiving support
 # based on how small the proportions would be if i did of the total population i'm going for of the people recieving section 95 support
-#what proprotion are receving support in each tactical cell and lad
+# what proprotion are receving support in each tactical cell and lad
 # however having discussed with Mike P going to do proportion of the population - the numbers will be small
 
 # also note when calculation proportions of populations am using consistent figures across all.
@@ -308,8 +316,8 @@ digital_exclusion_data =
 
 #write_csv(digital_exclusion_data, "./people_at_risk_table/digital-exclusion-indicator.csv")
 
-# --- shielding ---
-# -- check cols --
+# Shielding
+# Check cols
 shielding_cols =
   c(
     "LAD19CD",
@@ -321,7 +329,7 @@ shielding_cols =
 
 shielding = correct_columns(shielding_cols, shielding)
 
-# join lad population
+# Join lad population
 shielding_data =
   left_join(area_lookup_tc2lad, shielding, by = "LAD19CD", keep = FALSE) %>%
   unique() %>%
@@ -331,21 +339,21 @@ shielding_data =
     TacticalCell != "Wales"
   )
 
-# join population data
+# Join population data
 shielding_data =
   left_join(pop_eng_lad_tc,
             shielding,
             by = c("LAD19CD"),
             keep = FALSE)
 
-# calculate number per tactical cell per 1000
+# Calculate number per tactical cell per 1000
 shielding_data_tc =
   shielding_data %>%
   group_by(TacticalCell, tc_pop) %>%
   summarise_at(vars(`Clinically extremely vulnerable`),
                list(sum),
                na.rm = TRUE) %>%
-  # calculate number of people shielding per 1000
+  # Calculate number of people shielding per 1000
   mutate(`tc_Clinically vulnerable per 1000` = round((`Clinically extremely vulnerable` /
                                                         tc_pop) * 1000, 1)) %>%
   mutate(`tc_Clinically vulnerable proportion of population` = round((`Clinically extremely vulnerable` /
@@ -360,7 +368,7 @@ shielding_data =
     keep = FALSE
   )
 
-# shielding in england
+# Shielding in England
 shielding_data = shielding_data %>%
   mutate("total_shielding_eng" = sum(`Clinically extremely vulnerable`,
                                      na.rm = TRUE)) %>%
@@ -369,7 +377,7 @@ shielding_data = shielding_data %>%
 
 #write_csv(shielding_data, "./people_at_risk_table/shielding-indicator.csv")
 
-# --- Homelessness ---
+# Homelessness
 homeless_cols = c("LAD19CD", "Homelessness (rate per 1000)")
 homelessness = correct_columns(homeless_cols, homelessness)
 
@@ -410,8 +418,8 @@ homelessness_data = homelessness_data %>%
 
 #write_csv(homelessness_data, "./people_at_risk_table/homelessness-indicator.csv")
 
-# ---- universal credit ---
-# check columns
+# Universal credit
+# Check columns
 unem_cols =
   c(
     "Month Year",
@@ -425,7 +433,7 @@ unem_cols =
 
 ucred = correct_columns(unem_cols, ucred)
 
-# for both local authority, tactical cell and england
+# For both local authority, tactical cell and England
 # need to determine the proportion of the population unemployed on universal credit
 ucred_data =
   left_join(area_lookup_tc2lad, ucred, by = "LAD19CD", keep = FALSE) %>%
@@ -434,14 +442,14 @@ ucred_data =
             pop_eng_lad_tc,
             by = c("LAD19CD", "TacticalCell"),
             keep = FALSE) %>%
-  # remove wales/scotland/NI for now
+  # Remove Wales/Scotland/NI for now
   filter(
     TacticalCell != "Northern Ireland and the Isle of Man",
     TacticalCell != "Scotland",
     TacticalCell != "Wales"
   )
 
-# local authority proportion of population unemployed on universal credit
+# Local authority proportion of population unemployed on universal credit
 ucred_data = ucred_data %>%
   mutate("lad_prop_upemployed_on_ucred" = round((`Not in employment` / lad_pop) *
                                                   100, 0))
@@ -470,7 +478,7 @@ ucred_data = ucred_data %>%
   mutate("prop_eng_pop_unemployed_on_ucred" = round((eng_total_unemployed_on_ucred /
                                                        eng_pop) * 100, 1))
 
-# --- fuel poverty ---
+# Fuel poverty
 # CHECK COLS
 fuelp_cols =
   c(
@@ -482,11 +490,11 @@ fuelp_cols =
 
 fuelp = correct_columns(fuelp_cols, fuelp)
 
-# join tactical cells (this is households so don't need population)
+# Join tactical cells (this is households so don't need population)
 fuelp_data =
   left_join(area_lookup_tc2lad, fuelp, by = "LAD19CD", keep = FALSE) %>%
   unique()  %>%
-  # remove wales/scotland/NI for now
+  # remove Wales/Scotland/NI for now
   filter(
     TacticalCell != "Northern Ireland and the Isle of Man",
     TacticalCell != "Scotland",
@@ -494,7 +502,7 @@ fuelp_data =
   )
 
 
-# caclulate proprotion of households fuel poor tactical
+# Calculate proportion of households fuel poor tactical
 fuelp_data_tc_eng = fuelp_data %>%
   group_by(TacticalCell) %>%
   summarise_at(
@@ -523,8 +531,8 @@ fuelp_data =
   left_join(fuelp_data, fuelp_data_tc_eng, by = "TacticalCell", keep = FALSE)
 
 
-# ---- do we want to join them all together ----
-# join altogether
+# Do we want to join them all together
+# Join altogether
 all_data =
   left_join(
     digital_exclusion_data,
@@ -532,33 +540,33 @@ all_data =
     by = c("LAD19CD", "TacticalCell"),
     keep = FALSE
   ) %>%
-  # add bame
+  # Add bame
   left_join(.,
             bame_data,
             by = c("LAD19CD", "TacticalCell"),
             keep = FALSE) %>%
-  # add covid
+  # Add covid
   #left_join(., covid_data, by=c("LAD19CD","TacticalCell","lad_pop","tc_pop","eng_pop"), keep=F) %>%
-  # add fuel poverty
+  # Add fuel poverty
   left_join(.,
             fuelp_data,
             by = c("LAD19CD", "TacticalCell"),
             keep = FALSE) %>%
-  # add homelessness
+  # Add homelessness
   left_join(
     .,
     homelessness_data,
     by = c("LAD19CD", "TacticalCell", "lad_pop", "tc_pop", "eng_pop"),
     keep = FALSE
   )  %>%
-  # add ucred
+  # Add ucred
   left_join(
     .,
     ucred_data,
     by = c("LAD19CD", "TacticalCell", "lad_pop", "tc_pop", "eng_pop"),
     keep = FALSE
   ) %>%
-  # clinically shielding
+  # Clinically shielding
   left_join(
     .,
     shielding_data,
@@ -566,18 +574,16 @@ all_data =
     keep = FALSE
   )
 
-# has something bizarre happened
+# Has something bizarre happened
 any_columns_of_just_NA = all_data %>% select(where(~ !all(is.na(.x))))
 
 if (dim(any_columns_of_just_NA)[2] != dim(all_data)[2]) {
   stop("Something wrong - a column with just NAs is present")
 } else {
-  #glimpse(all_data)
-  # --- save all data as a .feather file ---
-  write_feather(
+  helpers$write_data(
+    feather::write_feather,
     all_data,
-    "~/r-shiny-web-apps/packages/dashboard/data/people_at_risk/people-at-risk.feather"
+    "people-at-risk.feather",
+    local_dir = "~/r-shiny-web-apps/packages/dashboard/data/people_at_risk/"
   )
 }
-
-#glimpse(all_data)
