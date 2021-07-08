@@ -1,10 +1,14 @@
-# --- pre process data for vcsep-shiny-dashboard ---
+# pre process data for vcsep-shiny-dashboard
+
 library("feather")
 library("httr")
 library("readxl")
 library("tidyverse")
 
-# --- get look up table ----
+box::use(./helpers)
+
+
+# Get look up table
 not_using_other_countries = c("Wales",
                               "Scotland",
                               "Northern Ireland and the Isle of Man")
@@ -15,10 +19,10 @@ area_lookup_tc2lad =
   filter(!TacticalCell %in% not_using_other_countries) %>%
   unique()
 
-# --- Population level data ---
+# Population level data
 pop_eng_2019 =
   read_excel(
-    "/data/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx",
+    glue::glue("/{helpers$get_mount_point}/data-lake/raw/ons-populstion-estimates-mid-year-2019/2021-04-12-10-30-27/ons-populstion-estimates-mid-year-2019.xlsx"),
     sheet = "Mid-2019 Persons",
     skip = 4
   )

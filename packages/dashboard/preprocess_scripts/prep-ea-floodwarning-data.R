@@ -1,4 +1,4 @@
-library("box")
+
 library("feather")
 library("geojsonio")
 library("httr")
