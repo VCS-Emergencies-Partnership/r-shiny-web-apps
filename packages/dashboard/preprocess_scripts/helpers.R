@@ -33,13 +33,13 @@ get_container = function() {
 write_data = function(writer,
                       data,
                       filename,
-                      local_dir = NULL) {
+                      local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/") {
   # If a container is passed write to it
   if (isTRUE(is_databricks())) {
     # Get extension of file from filename
     file_ext = strsplit(filename, "\\.")[[1]][2]
     # Create path to temporary file
-    tmp_path = glue::glue("{tempfile()}.{ext}")
+    tmp_path = glue::glue("{tempfile()}.{file_ext}")
     # Write data to temporary file
     writer(data, tmp_path)
     AzureStor::storage_upload(get_container(),
@@ -50,4 +50,3 @@ write_data = function(writer,
     writer(data, file.path(local_dir, filename))
   }
 }
-

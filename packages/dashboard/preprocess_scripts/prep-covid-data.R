@@ -127,5 +127,4 @@ if (dim(test_combined_auth_present)[1] != 0) {
 
 helpers$write_data(feather::write_feather,
                    latest_covid_data2tactical_cell,
-                   "areas2focus_covid.feather",
-                   "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/")
+                   "areas2focus_covid.feather")

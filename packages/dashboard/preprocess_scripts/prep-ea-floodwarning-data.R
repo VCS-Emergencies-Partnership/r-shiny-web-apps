@@ -130,22 +130,19 @@ if (dim(flood_warning_df)[1] == 0) {
   helpers$write_data(
     sf::write_sf,
     flood_warning_polygons,
-    "current_live_warnings_polygons.geojson",
-    local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
+    "current_live_warnings_polygons.geojson"
   )
 
   helpers$write_data(
     feather::write_feather,
     flood_warning_meta,
-    "current_live_warnings_metadata.feather",
-    local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
+    "current_live_warnings_metadata.feather"
   )
 
   helpers$write_data(
     sf::write_sf,
     flood_warning_points,
-    "current_live_warnings_points.geojson",
-    local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
+    "current_live_warnings_points.geojson"
   )
 
 } else {
@@ -247,8 +244,7 @@ if (dim(flood_warning_df)[1] == 0) {
     helpers$write_data(
       sf::write_sf,
       flood_areaid2polygon,
-      "current_live_warnings_polygons.geojson",
-      local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
+      "current_live_warnings_polygons.geojson"
     )
 
     # 2). .feather with metadata - but no warnings
@@ -257,8 +253,7 @@ if (dim(flood_warning_df)[1] == 0) {
     helpers$write_data(
       feather::write_feather,
       flood_areaid2lad2metadata,
-      "current_live_warnings_metadata.feather",
-      "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
+      "current_live_warnings_metadata.feather"
     )
 
     # 3) # add centroids to data
@@ -269,8 +264,7 @@ if (dim(flood_warning_df)[1] == 0) {
     helpers$write_data(
       sf::write_sf,
       centroids,
-      "current_live_warnings_points.geojson",
-      "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
+      "current_live_warnings_points.geojson"
     )
 
   } else if (!is.null(output_flood_data)) {
@@ -323,8 +317,7 @@ if (dim(flood_warning_df)[1] == 0) {
       helpers$write_data(
         sf::write_sf,
         flood_areaid2polygon,
-        "current_live_warnings_polygons.geojson",
-        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
+        "current_live_warnings_polygons.geojson"
       )
 
       # 2). .feather with metadata
@@ -335,8 +328,7 @@ if (dim(flood_warning_df)[1] == 0) {
       helpers$write_data(
         feather::write_feather,
         flood_areaid2lad2metadata,
-        "current_live_warnings_metadata.feather",
-        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
+        "current_live_warnings_metadata.feather"
       )
 
       # 3) # add centroids to data
@@ -351,8 +343,7 @@ if (dim(flood_warning_df)[1] == 0) {
       helpers$write_data(
         sf::write_sf,
         centroids,
-        "current_live_warnings_points.geojson",
-        "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/"
+        "current_live_warnings_points.geojson"
       )
     }
 }
