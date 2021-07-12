@@ -13,7 +13,7 @@ is_databricks = function() {
 #'
 #' @export
 get_mount_point = function() {
-  ifelse(isTRUE(on_databricks), "/mnt/", "/data/")
+  ifelse(isTRUE(is_databricks()), "/mnt/", "/data/")
 }
 
 #' Establish connection with blob storage
