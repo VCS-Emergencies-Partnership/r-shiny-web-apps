@@ -7,8 +7,58 @@ library("magrittr")
 library("pals")
 library("tidyverse")
 
-box::use(./helpers)
+#' Use existence of environment variable to determine whether we're on
+#' databricks
+#'
+#' @export
+is_databricks = function() {
+  Sys.getenv("DATABRICKS_RUNTIME_VERSION") != ""
+}
 
+#' The datalake is mounted onto /mnt/ on Databricks, and /data/ on the DSVM
+#'
+#' @export
+get_mount_point = function() {
+  ifelse(isTRUE(on_databricks), "/mnt/", "/data/")
+}
+
+#' Establish connection with blob storage
+#'
+#' @export
+get_container = function() {
+  blob = AzureStor::storage_endpoint(Sys.getenv("BLOB_ENDPOINT"),
+                                     sas = Sys.getenv("BLOB_SAS"))
+  AzureStor::storage_container(blob, "processed")
+}
+
+#' Write data to blob or local storage
+#'
+#' @param writer The function to use to write data, eg. feather::write_feather
+#' @param data The data to write
+#' @param filename The name of the file to write to (this should not be a path)
+#' @param local_dir Optional: Directory to write data to (for non-databricks runs)
+#' @param cont Optional: connection to an Azure blob container
+#' @export
+write_data = function(writer,
+                      data,
+                      filename,
+                      local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/") {
+  # If a container is passed write to it
+  if (isTRUE(is_databricks())) {
+    # Get extension of file from filename
+    file_ext = strsplit(filename, "\\.")[[1]][2]
+    # Create path to temporary file
+    tmp_path = glue::glue("{tempfile()}.{file_ext}")
+    # Write data to temporary file
+    writer(data, tmp_path)
+    AzureStor::storage_upload(get_container(),
+                              src = tmp_path,
+                              dest = filename)
+    # Otherwise, write locally
+  } else {
+    writer(data, file.path(local_dir, filename))
+  }
+}
 
 data_repo = "https://github.com/britishredcrosssociety"
 LA_vi_path = "covid-19-vulnerability/raw/master/output/vulnerability-LA.csv"
@@ -76,7 +126,7 @@ LA_res %<>%
   left_join(bivariate_color_scale, by = "group")
 
 # Write resilience index with appropriate fill
-helpers$write_data(feather::write_feather,
+write_data(feather::write_feather,
                    LA_res,
                    "resilience_index_bivar.feather",
                    local_dir = "../data/")
@@ -156,7 +206,7 @@ g.legend
 par()
 g.legend
 
-if (isTRUE(helpers$is_databricks())) {
+if (isTRUE(is_databricks())) {
   fpath = glue::glue("{tempfile()}.png")
 } else {
   fpath = "../www/bivar-legend_v2.png"
@@ -170,8 +220,8 @@ dev.print(
   height = 600
 )
 
-if (isTRUE(helpers$is_databricks())) {
-  AzureStor::storage_upload(helpers$get_container(),
+if (isTRUE(is_databricks())) {
+  AzureStor::storage_upload(get_container(),
                             src = fpath,
                             dest = "bivar-legend_v2.png")
 }

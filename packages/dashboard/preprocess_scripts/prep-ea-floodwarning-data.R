@@ -1,4 +1,3 @@
-
 library("feather")
 library("geojsonio")
 library("httr")
@@ -7,7 +6,58 @@ library("rmapshaper")
 library("sf")
 library("tidyverse")
 
-box::use(./helpers)
+#' Use existence of environment variable to determine whether we're on
+#' databricks
+#'
+#' @export
+is_databricks = function() {
+  Sys.getenv("DATABRICKS_RUNTIME_VERSION") != ""
+}
+
+#' The datalake is mounted onto /mnt/ on Databricks, and /data/ on the DSVM
+#'
+#' @export
+get_mount_point = function() {
+  ifelse(isTRUE(on_databricks), "/mnt/", "/data/")
+}
+
+#' Establish connection with blob storage
+#'
+#' @export
+get_container = function() {
+  blob = AzureStor::storage_endpoint(Sys.getenv("BLOB_ENDPOINT"),
+                                     sas = Sys.getenv("BLOB_SAS"))
+  AzureStor::storage_container(blob, "processed")
+}
+
+#' Write data to blob or local storage
+#'
+#' @param writer The function to use to write data, eg. feather::write_feather
+#' @param data The data to write
+#' @param filename The name of the file to write to (this should not be a path)
+#' @param local_dir Optional: Directory to write data to (for non-databricks runs)
+#' @param cont Optional: connection to an Azure blob container
+#' @export
+write_data = function(writer,
+                      data,
+                      filename,
+                      local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/") {
+  # If a container is passed write to it
+  if (isTRUE(is_databricks())) {
+    # Get extension of file from filename
+    file_ext = strsplit(filename, "\\.")[[1]][2]
+    # Create path to temporary file
+    tmp_path = glue::glue("{tempfile()}.{file_ext}")
+    # Write data to temporary file
+    writer(data, tmp_path)
+    AzureStor::storage_upload(get_container(),
+                              src = tmp_path,
+                              dest = filename)
+    # Otherwise, write locally
+  } else {
+    writer(data, file.path(local_dir, filename))
+  }
+}
 
 # Loop through each flood and find which msoas it overlaps:
 flood_overlap = function(x) {
@@ -127,19 +177,19 @@ if (dim(flood_warning_df)[1] == 0) {
 
   #write_sf(flood_warning_information, "./flooding_metoffice_data/current_live_metoffice_floodwarnings.geojson")
 
-  helpers$write_data(
+  write_data(
     sf::write_sf,
     flood_warning_polygons,
     "current_live_warnings_polygons.geojson"
   )
 
-  helpers$write_data(
+  write_data(
     feather::write_feather,
     flood_warning_meta,
     "current_live_warnings_metadata.feather"
   )
 
-  helpers$write_data(
+  write_data(
     sf::write_sf,
     flood_warning_points,
     "current_live_warnings_points.geojson"
@@ -241,7 +291,7 @@ if (dim(flood_warning_df)[1] == 0) {
       unique()
 
     # Write to file
-    helpers$write_data(
+    write_data(
       sf::write_sf,
       flood_areaid2polygon,
       "current_live_warnings_polygons.geojson"
@@ -250,7 +300,7 @@ if (dim(flood_warning_df)[1] == 0) {
     # 2). .feather with metadata - but no warnings
     flood_areaid2lad2metadata = flood_warning_information
 
-    helpers$write_data(
+    write_data(
       feather::write_feather,
       flood_areaid2lad2metadata,
       "current_live_warnings_metadata.feather"
@@ -261,7 +311,7 @@ if (dim(flood_warning_df)[1] == 0) {
 
     centroids = flood_warning_information
 
-    helpers$write_data(
+    write_data(
       sf::write_sf,
       centroids,
       "current_live_warnings_points.geojson"
@@ -314,7 +364,7 @@ if (dim(flood_warning_df)[1] == 0) {
         select("floodAreaID") %>%
         unique()
 
-      helpers$write_data(
+      write_data(
         sf::write_sf,
         flood_areaid2polygon,
         "current_live_warnings_polygons.geojson"
@@ -325,7 +375,7 @@ if (dim(flood_warning_df)[1] == 0) {
         final_flood_warning_info_of_interest %>%
         st_drop_geometry()
 
-      helpers$write_data(
+      write_data(
         feather::write_feather,
         flood_areaid2lad2metadata,
         "current_live_warnings_metadata.feather"
@@ -340,7 +390,7 @@ if (dim(flood_warning_df)[1] == 0) {
         # select lad19CD and geometry
         st_transform(4326)
 
-      helpers$write_data(
+      write_data(
         sf::write_sf,
         centroids,
         "current_live_warnings_points.geojson"
