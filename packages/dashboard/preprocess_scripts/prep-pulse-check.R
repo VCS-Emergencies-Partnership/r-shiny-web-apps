@@ -183,7 +183,7 @@ if (!file.exists(latest_file_name) ||
 
   write_data(
     feather::write_feather,
-    greatest_changes,
+    greatest_change,
     "pulse_check_summary.feather",
     local_dir = "~/r-shiny-web-apps/packages/dashboard/data/vcs_indicators/"
   )
