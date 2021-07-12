@@ -149,7 +149,7 @@ proportion_responded = function(survey_file) {
 }
 
 # Retrieving from raw section
-get_pulse = list.dirs(glue::glue("/{get_mount_point()}/data-lake/raw/pulse_check_raw/"))
+get_pulse = list.dirs(glue::glue("{get_mount_point()}/data-lake/raw/pulse_check_raw/"))
 latest_file_name = paste(tail(get_pulse, n = 1),
                          "pulse_check_raw.csv",
                          sep = "/")

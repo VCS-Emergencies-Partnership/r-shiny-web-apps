@@ -56,7 +56,7 @@ write_data = function(writer,
 }
 
 # Look in raw section
-covid_dirs = list.dirs(path = glue::glue("/{get_mount_point()}/data-lake/raw/coronavirus-cases/"),
+covid_dirs = list.dirs(path = glue::glue("{get_mount_point()}/data-lake/raw/coronavirus-cases/"),
                        full.names = TRUE)
 covid_file = paste0(tail(covid_dirs, n = 1), "/coronavirus_cases.csv")
 

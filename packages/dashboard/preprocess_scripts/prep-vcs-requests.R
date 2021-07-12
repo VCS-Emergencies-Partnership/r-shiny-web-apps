@@ -83,7 +83,7 @@ date_time = str_split(date_time, " ")
 date = format(as.Date(date_time[[1]][1]), "%d-%m-%Y")
 
 # Now retrieving from raw section
-get_requests = list.dirs(glue::glue("/{get_mount_point()}/data-lake/raw/vcsep-requests-for-support/"))
+get_requests = list.dirs(glue::glue("{get_mount_point()}/data-lake/raw/vcsep-requests-for-support/"))
 file_name = paste(tail(get_requests, n = 1),
                   "vcsep-requests-for-support.csv",
                   sep = "/")
