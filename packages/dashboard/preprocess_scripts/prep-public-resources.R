@@ -4,21 +4,18 @@ library("tidyverse")
 #' Use existence of environment variable to determine whether we're on
 #' databricks
 #'
-#' @export
 is_databricks = function() {
   Sys.getenv("DATABRICKS_RUNTIME_VERSION") != ""
 }
 
 #' The datalake is mounted onto /mnt/ on Databricks, and /data/ on the DSVM
 #'
-#' @export
 get_mount_point = function() {
   ifelse(isTRUE(is_databricks()), "/dbfs/mnt/", "/data/")
 }
 
 #' Establish connection with blob storage
 #'
-#' @export
 get_container = function() {
   blob = AzureStor::storage_endpoint(Sys.getenv("BLOB_ENDPOINT"),
                                      sas = Sys.getenv("BLOB_SAS"))
@@ -32,7 +29,6 @@ get_container = function() {
 #' @param filename The name of the file to write to (this should not be a path)
 #' @param local_dir Optional: Directory to write data to (for non-databricks runs)
 #' @param cont Optional: connection to an Azure blob container
-#' @export
 write_data = function(writer,
                       data,
                       filename,
