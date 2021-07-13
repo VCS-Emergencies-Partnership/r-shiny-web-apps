@@ -73,12 +73,11 @@ read_data = function(reader,
                                 tmp_path)
     # Load data into session
     reader(data, tmp_path)
-    # Otherwise, write locally
+    # Otherwise, read locally
   } else {
     reader(file.path(local_dir, filename))
   }
 }
-
 
 # Loop through each flood and find which msoas it overlaps:
 flood_overlap = function(x) {
@@ -140,7 +139,10 @@ flood_overlap = function(x) {
   return(flood_warning2lad2tc)
 }
 
-LAD_boundaries = st_read("~/r-shiny-web-apps/packages/dashboard/data/reduced_boundaries/lad19_eng_wales_sc_ni.geojson")
+LAD_boundaries = read_data(st_read,
+                           "lad19_eng_wales_sc_ni.geojson",
+                           "~/r-shiny-web-apps/packages/dashboard/data/reduced_boundaries/")
+
 LAD_boundaries = LAD_boundaries %>%
   rename("LAD19CD" = lad19cd)
 
