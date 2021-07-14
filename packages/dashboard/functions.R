@@ -1,8 +1,24 @@
-library(tidyverse)
-library(httr)
-library(jsonlite)
-library('ghql')
-library(R.utils)
+library("tidyverse")
+library("httr")
+library("jsonlite")
+library("ghql")
+library("R.utils")
+
+#' Establish connection with blob storage
+#'
+#' @importFrom AzureStor storage_endpoint storage_container
+get_container = function() {
+  blob = AzureStor::storage_endpoint(Sys.getenv("BLOB_ENDPOINT"),
+                                     sas = Sys.getenv("BLOB_SAS"))
+  AzureStor::storage_container(blob, "processed")
+}
+
+download_all = function() {
+  get_container() %>%
+    AzureStor::multidownload_blob(src = "*",
+                                  dest = "./data/",
+                                  overwrite = TRUE)
+}
 
 # query charitybase
 #https://www.r-bloggers.com/2020/12/accessing-grahpql-from-r/
