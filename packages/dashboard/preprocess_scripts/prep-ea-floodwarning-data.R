@@ -73,11 +73,12 @@ read_data = function(reader,
                                 src = filename,
                                 dest = tmp_path)
     # Load data into session
-    reader(tmp_path)
+    data = reader(tmp_path)
     # Otherwise, read locally
   } else {
-    reader(file.path(local_dir, filename))
+    data = reader(file.path(local_dir, filename))
   }
+  return(data)
 }
 
 # Loop through each flood and find which msoas it overlaps:
