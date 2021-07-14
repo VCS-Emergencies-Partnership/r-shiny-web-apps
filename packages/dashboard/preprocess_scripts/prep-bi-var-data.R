@@ -208,12 +208,12 @@ if (isTRUE(is_databricks())) {
   fpath = "../www/bivar-legend_v2.png"
 }
 
-dev.print(
-  png,
+ggplot2::ggsave(
   fpath,
   bg = "transparent",
   width = 800,
-  height = 600
+  height = 600,
+  units = "mm"
 )
 
 if (isTRUE(is_databricks())) {
@@ -221,5 +221,3 @@ if (isTRUE(is_databricks())) {
                             src = fpath,
                             dest = "bivar-legend_v2.png")
 }
-
-dev.off()
