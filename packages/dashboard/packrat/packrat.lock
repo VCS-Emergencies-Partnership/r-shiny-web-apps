@@ -1,8 +1,9 @@
 PackratFormat: 1.4
 PackratVersion: 0.6.0
 RVersion: 4.0.2
-Repos: CRAN=https://cloud.r-project.org/,
-    RSPM=https://packagemanager.rstudio.com/all/latest
+Repos:
+    RSPM=https://packagemanager.rstudio.com/all/__linux__/focal/latest,
+    CRAN=https://cloud.r-project.org/
 
 Package: AzureAuth
 Source: CRAN
@@ -38,11 +39,6 @@ Version: 0.18
 Requires: jsonlite, crosstalk, htmltools, htmlwidgets, magrittr,
     promises
 
-Package: PostcodesioR
-Source: CRAN
-Version: 0.3.0
-Requires: httr
-
 Package: R.methodsS3
 Source: CRAN
 Version: 1.8.1
@@ -68,11 +64,6 @@ Version: 1.1-2
 Package: Rcpp
 Source: CRAN
 Version: 1.0.7
-
-Package: V8
-Source: CRAN
-Version: 3.4.2
-Requires: Rcpp, curl, jsonlite
 
 Package: askpass
 Source: CRAN
@@ -184,10 +175,6 @@ Version: 2.1.1
 Requires: DBI, R6, assertthat, blob, dplyr, ellipsis, glue, lifecycle,
     magrittr, purrr, rlang, tibble, tidyselect, vctrs, withr
 
-Package: dichromat
-Source: CRAN
-Version: 2.0-0
-
 Package: digest
 Source: CRAN
 Version: 0.6.27
@@ -265,32 +252,6 @@ Package: generics
 Source: CRAN
 Version: 0.1.0
 
-Package: geojson
-Source: CRAN
-Version: 0.3.4
-Requires: jsonlite, lazyeval, magrittr, jqr, protolite, sp
-
-Package: geojsonio
-Source: CRAN
-Version: 0.9.4
-Requires: V8, crul, geojson, jqr, jsonlite, magrittr, sp, geojsonsf,
-    maptools, readr, rgeos, sf
-
-Package: geojsonlint
-Source: CRAN
-Version: 0.4.0
-Requires: V8, crul, jsonlite, jsonvalidate
-
-Package: geojsonsf
-Source: CRAN
-Version: 2.0.1
-Requires: Rcpp, geometries, jsonify, rapidjsonr, sfheaders
-
-Package: geometries
-Source: CRAN
-Version: 0.2.0
-Requires: Rcpp
-
 Package: ggplot2
 Source: CRAN
 Version: 3.3.5
@@ -334,7 +295,7 @@ Version: 0.3.0
 Package: haven
 Source: CRAN
 Version: 2.4.1
-Requires: cpp11, forcats, hms, readr, rlang, tibble, tidyselect, vctrs
+Requires: cpp11, forcats, hms, rlang, tibble, tidyselect, vctrs, readr
 
 Package: highr
 Source: CRAN
@@ -384,29 +345,14 @@ Source: CRAN
 Version: 1.1.0
 Requires: jsonlite, openssl
 
-Package: jqr
-Source: CRAN
-Version: 1.2.1
-Requires: lazyeval, magrittr
-
 Package: jquerylib
 Source: CRAN
 Version: 0.1.4
 Requires: htmltools
 
-Package: jsonify
-Source: CRAN
-Version: 1.2.1
-Requires: Rcpp, rapidjsonr
-
 Package: jsonlite
 Source: CRAN
 Version: 1.7.2
-
-Package: jsonvalidate
-Source: CRAN
-Version: 1.1.0
-Requires: V8
 
 Package: knitr
 Source: CRAN
@@ -430,7 +376,7 @@ Package: leaflet
 Source: CRAN
 Version: 2.0.4.1
 Requires: RColorBrewer, base64enc, crosstalk, htmltools, htmlwidgets,
-    magrittr, markdown, scales, sp, leaflet.providers, png, raster,
+    magrittr, markdown, scales, leaflet.providers, png, raster, sp,
     viridis
 
 Package: leaflet.providers
@@ -450,20 +396,6 @@ Requires: Rcpp, generics
 Package: magrittr
 Source: CRAN
 Version: 2.0.1
-
-Package: mapproj
-Source: CRAN
-Version: 1.2.7
-Requires: maps
-
-Package: maps
-Source: CRAN
-Version: 3.3.0
-
-Package: maptools
-Source: CRAN
-Version: 1.1-1
-Requires: sp
 
 Package: markdown
 Source: CRAN
@@ -495,11 +427,6 @@ Source: CRAN
 Version: 0.6.0
 Hash: 62fd532b7524f498caa3cf4cc5f15490
 
-Package: pals
-Source: CRAN
-Version: 1.7
-Requires: colorspace, dichromat, mapproj, maps
-
 Package: pillar
 Source: CRAN
 Version: 1.6.1
@@ -508,11 +435,6 @@ Requires: ellipsis, lifecycle, rlang, vctrs, cli, crayon, fansi, utf8
 Package: pkgconfig
 Source: CRAN
 Version: 2.0.3
-
-Package: plyr
-Source: CRAN
-Version: 1.8.6
-Requires: Rcpp
 
 Package: png
 Source: CRAN
@@ -537,11 +459,6 @@ Source: CRAN
 Version: 1.2.0.1
 Requires: R6, magrittr, rlang, Rcpp, later
 
-Package: protolite
-Source: CRAN
-Version: 2.1
-Requires: Rcpp, jsonlite
-
 Package: proxy
 Source: CRAN
 Version: 0.4-26
@@ -554,10 +471,6 @@ Package: purrr
 Source: CRAN
 Version: 0.3.4
 Requires: magrittr, rlang
-
-Package: rapidjsonr
-Source: CRAN
-Version: 1.2.0
 
 Package: rappdirs
 Source: CRAN
@@ -594,19 +507,9 @@ Version: 2.0.0
 Requires: callr, cli, clipr, fs, glue, knitr, rlang, rstudioapi, withr,
     rmarkdown
 
-Package: rgeos
-Source: CRAN
-Version: 0.5-5
-Requires: sp
-
 Package: rlang
 Source: CRAN
 Version: 0.4.11
-
-Package: rmapshaper
-Source: CRAN
-Version: 0.4.5
-Requires: V8, geojsonio, geojsonlint, jsonlite, readr, sf, sp
 
 Package: rmarkdown
 Source: CRAN
@@ -648,11 +551,6 @@ Package: sf
 Source: CRAN
 Version: 1.0-1
 Requires: DBI, Rcpp, classInt, magrittr, s2, units
-
-Package: sfheaders
-Source: CRAN
-Version: 0.4.0
-Requires: Rcpp, geometries
 
 Package: shiny
 Source: CRAN
