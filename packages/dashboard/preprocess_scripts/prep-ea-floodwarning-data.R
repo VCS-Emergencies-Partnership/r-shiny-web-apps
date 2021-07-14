@@ -70,9 +70,10 @@ read_data = function(reader,
     tmp_path = glue::glue("{tempfile()}.{file_ext}")
     # Write data to temporary file
     AzureStor::storage_download(get_container(),
-                                tmp_path)
+                                src = filename,
+                                dest = tmp_path)
     # Load data into session
-    reader(data, tmp_path)
+    reader(tmp_path)
     # Otherwise, read locally
   } else {
     reader(file.path(local_dir, filename))
