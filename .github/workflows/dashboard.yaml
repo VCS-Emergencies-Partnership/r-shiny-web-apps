@@ -40,8 +40,8 @@ jobs:
       - name: Infuse with secrets
         run: |
           echo "CHARITY_BASE_API_KEY=${{ secrets.CHARITY_BASE_API_KEY }}
-                BLOB_SAS=${{ secrets.BLOB_SAS }}
-                BLOB_ENDPOINT=${{ secrets.BLOB_ENDPOINT }}" >> .Renviron
+          BLOB_SAS=${{ secrets.BLOB_SAS }}
+          BLOB_ENDPOINT=${{ secrets.BLOB_ENDPOINT }}" >> .Renviron
 
       - name: Generate image tag
         id: tag
