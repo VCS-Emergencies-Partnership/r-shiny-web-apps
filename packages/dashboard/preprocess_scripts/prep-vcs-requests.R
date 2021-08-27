@@ -72,12 +72,6 @@ lookup =
   ) %>%
   unique()
 
-# Today's date
-# Need to know current date to append to request for support
-date_time = Sys.time()
-date_time = str_split(date_time, " ")
-date = format(as.Date(date_time[[1]][1]), "%d-%m-%Y")
-
 # Now retrieving from raw section
 get_requests = list.dirs(glue::glue("{get_mount_point()}/data-lake/raw/vcsep-requests-for-support/"))
 file_name = paste(tail(get_requests, n = 1),
@@ -91,15 +85,16 @@ if (!file.exists(file_name)) {
 
 requests = read_csv(file_name)
 
-# CHECK IS THIS IS TODAYS DATA EXTRACT
-date_of_last_update = str_split(tail(get_requests, n = 1), "/")
-date_of_last_update = tail(date_of_last_update[[1]], n = 1)
-date_format = str_split(date_of_last_update, "-")
-date_of_last_update =
-  paste0(date_format[[1]][3], "-", date_format[[1]][2], "-", date_format[[1]][1])
+# Get date from filename
+date_of_last_update = get_requests %>%
+  last() %>%
+  stringr::str_split("/", simplify = TRUE) %>%
+  last() %>%
+  lubridate::date()
 
-if (date != date_of_last_update) {
-  stop("problem - NOT TODAY'S DATA")
+# Ensure data is no older than yesterday
+if (date_of_last_update < (lubridate::today() - 1)) {
+  stop("Data older than yesterday")
 }
 
 # Do the columns i need exist
