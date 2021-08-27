@@ -139,10 +139,19 @@ vaccination_source = vaccination_metadata[2, ]
 vaccination_time_period = vaccination_metadata[1, ]
 vaccination_publish_date = vaccination_metadata[4, ]
 
-# Read in table of data
+vaccination_data_raw = read_excel(file_name, sheet = "LTLA")
+
+# Find row number in which data starts
+title_row = vaccination_data_raw %>%
+  apply(1, function(x) any(stringr::str_detect(x, "Under 18"))) %>%
+  Position(isTRUE, .)
+
+# JW: It is inefficient to read the data in a second time (rather than
+# manipulating the existing data), but this dataset is small and work is being
+# charged at a day rate: fix now; optimise later.
 vaccination_data_raw = read_excel(file_name,
                                   sheet = "LTLA",
-                                  skip = 12)
+                                  skip = title_row + 1)
 
 # For homepage remove first geog data
 vaccination_data_summary = head(vaccination_data_raw , 1)
