@@ -51,8 +51,8 @@ source("./global.R")
 header <- dashboardHeader(title = "", titleWidth = "300px",
                           tags$li(class="dropdown",
                                   tags$li(class="dropdown",
-                                  p(style='padding-top:15px; padding-right:15px;color:white;font-size=12px', "Last updated at", last_updated_time_header, "(BST) on", last_updated_date), 
-                                  #icon=icon("fas fa-clock")
+                                          p(style='padding-top:15px; padding-right:15px;color:white;font-size=12px', "Last updated at", last_updated_time_header, "(BST) on", last_updated_date), 
+                                          #icon=icon("fas fa-clock")
                                   )))
 
 # --- side bar --- #
@@ -91,25 +91,13 @@ body <- dashboardBody(
   tags$head(
     includeCSS("styles.css"), includeHTML("cookie_consent_v2.html"),
     includeHTML("google-analytics.html"),
-            tags$link(rel="icon", sizes="32X32", href="img/favicon-32x32.png"),
-            tags$link(rel="icon",  sizes="16X16", href="img/favicon-16x16.png"),
-            tags$link(rel="apple-touch-icon", sizes="180x180", href="img/img/apple-touch-icon.png"),
-            tags$link(rel="manifest", href="img/site.webmanifest")),
+    tags$link(rel="icon", sizes="32X32", href="img/favicon-32x32.png"),
+    tags$link(rel="icon",  sizes="16X16", href="img/favicon-16x16.png"),
+    tags$link(rel="apple-touch-icon", sizes="180x180", href="img/img/apple-touch-icon.png"),
+    tags$link(rel="manifest", href="img/site.webmanifest")),
   tabItems(
     # --- Home page ---
     tabItem(tabName="home", selected=T,
-            
-            # - TEMPORARY BANNER - TO BE DELETED -
-            fluidRow(
-              style="padding-right:30px; padding-left:30px; padding-bottom:1px;padding-top:10px;",
-              panel(
-                style = "background-color: #feb400;",
-                column(
-                  width = 12,
-                  h3("Some data on the site is currently down (e.g., floods). We appreciate your patience while we resolve this.")
-                )
-              )
-            ),
             
             # - row 1 -
             fluidRow(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
@@ -157,9 +145,9 @@ body <- dashboardBody(
                                   our parnters have written for the voluntary and community sector.", tags$br(),
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the reports")))))),
-                     fluidRow(width=NULL, style="padding-right:20px; padding-left:20px; padding-bottom:20px; padding-top:0px",
-                              
-                        column(width=4,
+            fluidRow(width=NULL, style="padding-right:20px; padding-left:20px; padding-bottom:20px; padding-top:0px",
+                     
+                     column(width=4,
                             box(title=actionLink("internal_reports_from_box", "Internal Dashboards"),
                                 width=NULL,
                                 collapsible = T, 
@@ -190,7 +178,7 @@ body <- dashboardBody(
                                 p("Latest News from the partnership.", tags$br(),
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to find out more")))))
-                     ),
+            ),
             
             # row three 
             fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",
@@ -400,12 +388,12 @@ body <- dashboardBody(
                      column(width=12,
                             panel(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
                                   column(width=6, p(h2("Public Resources"), style="font-size:1.9",
-                                            "This is a collection of useful publicly available 
+                                                    "This is a collection of useful publicly available 
                                             resources that could be useful to people working in the Voluntary and Community Sector.", "Please",
                                                     tags$a(href="https://vcsep.org.uk/", target="_blank", "contact us"), 
                                                     "if you would like to share any further resources that we could signpost to.",
-                                            tags$br(), 
-                                            tags$em("Please note: The Emergencies Partnership does not have responsibility 
+                                                    tags$br(), 
+                                                    tags$em("Please note: The Emergencies Partnership does not have responsibility 
                                             for these resources.", style='font-size:1.5vh'))),
                                   column(width=6, style='padding-top:30px', searchInput(
                                     inputId = "resource_search",
@@ -419,8 +407,8 @@ body <- dashboardBody(
                      column(width=12,
                             uiOutput("dynamic_boxes")
                             #bubblesOutput('dynamic_bubbles')
-                     #)
-                )
+                            #)
+                     )
             )
             
     ),
@@ -428,19 +416,19 @@ body <- dashboardBody(
             fluidRow(width=NULL,style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
                      column(width=12,
                             panel(h2("Latest News From the Emergencies Partnership")))),
-                     fluidRow(width=NULL,style="padding-right:30px; padding-left:30px;",
-                              column(width=4, tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
-                                    box(width=NULL, height='750px',
-                                        headerBorder=F,
-                                        a(class="twitter-timeline", href="https://twitter.com/vcsep"),
-                                        style = "height:100vh; overflow-y: scroll;overflow-x: scroll;margin-top:-40px;padding-top:-40px")),
-                              
-                              column(width=4, 
-                                     box(title="In The Press/Success Stories", width=NULL,
-                                         uiOutput('press_highlights', height='100vh'))),
-                              column(width=4, 
-                                     box(title="Coming Up", width=NULL, #height='750px',
-                                         uiOutput("coming_up", height='100vh'))))),
+            fluidRow(width=NULL,style="padding-right:30px; padding-left:30px;",
+                     column(width=4, tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");')),
+                            box(width=NULL, height='750px',
+                                headerBorder=F,
+                                a(class="twitter-timeline", href="https://twitter.com/vcsep"),
+                                style = "height:100vh; overflow-y: scroll;overflow-x: scroll;margin-top:-40px;padding-top:-40px")),
+                     
+                     column(width=4, 
+                            box(title="In The Press/Success Stories", width=NULL,
+                                uiOutput('press_highlights', height='100vh'))),
+                     column(width=4, 
+                            box(title="Coming Up", width=NULL, #height='750px',
+                                uiOutput("coming_up", height='100vh'))))),
     
     tabItem(tabName='Help',
             column(width = 12, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
