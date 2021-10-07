@@ -99,6 +99,18 @@ body <- dashboardBody(
     # --- Home page ---
     tabItem(tabName="home", selected=T,
             
+            # - TEMPORARY BANNER - TO BE DELETED -
+            fluidRow(
+              style="padding-right:30px; padding-left:30px; padding-bottom:1px;padding-top:10px;",
+              panel(
+                style = "background-color: #feb400;",
+                column(
+                  width = 12,
+                  h3("Some data on the site is currently down (e.g., floods). We appreciate your patience while we resolve this.")
+                )
+              )
+            ),
+            
             # - row 1 -
             fluidRow(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:20px;",
                      panel(
