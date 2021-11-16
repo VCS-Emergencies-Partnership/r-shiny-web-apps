@@ -1,5 +1,6 @@
 library("feather")
 library("tidyverse")
+library("readxl")
 
 #' Use existence of environment variable to determine whether we're on
 #' databricks
@@ -50,9 +51,14 @@ write_data = function(writer,
   }
 }
 
-resources = read_csv("~/vcs-indicators/resource_bank_8june.csv")
+# Look in raw section
+resources_dirs = list.dirs(path = glue::glue("{get_mount_point()}/data-lake/raw/collection-of-public-resources-links-2021/"),
+                           full.names = TRUE)
+resources_file = paste0(tail(resources_dirs, n = 1), "/collection-of-public-resources-links-2021.xlsx")
 
-resources$`Relevance/Include?`
+resources = read_excel(resources_file)
+
+
 
 wanted = c("YES", "Yes", "yes")
 # Filter out no
