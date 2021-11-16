@@ -27,7 +27,7 @@ download_all()
 
 # --- read in vulnerability indices ---
 # # --- local authority level ---
-LA_vi <- read_feather('./data/vulnerability-LA.feather')
+LA_vi <- read_feather('./data/vulnerability_index/vulnerability-LA.feather')
 LA_vi <- LA_vi %>% rename('LAD19CD'=Code)
 
 
