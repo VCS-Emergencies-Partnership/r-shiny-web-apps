@@ -2121,7 +2121,7 @@ names(orgs2logos) <- c(x_name,y_name)
 
 
 theme <- c("Covid", "Deprivation", "Children", "Voluntary Sector", "Mental Health", "Vaccine",
-           "General","Winter Pressures", "Insight", "National", "Local", "Services", "Domestic Abuse", "Food", "LGTB+")
+           "General","Winter Pressures", "Insight", "National", "Local", "Services", "Domestic Abuse", "Food", "LGTB+", "Food Insecurity")
 class_wanted <- c("<span id=\"covid\" class=\"badge badge-pill badge-primary\">Covid</span>",
                   "<span id=\"deprivation\" class=\"badge badge-pill badge-secondary\">Deprivation</span>",
                   "<span id=\"children\" class=\"badge badge-pill badge-success\">Children and Young People</span>",
@@ -2136,7 +2136,8 @@ class_wanted <- c("<span id=\"covid\" class=\"badge badge-pill badge-primary\">C
                   "<span id=\"services\" class=\"badge badge-pill badge-info\">Services</span>",
                   "<span id=\"absue\" class=\"badge badge-pill badge-info\">Domestic abuse</span>",
                   "<span id=\"food\" class=\"badge badge-pill badge-info\">Food</span>",
-                  "<span id=\"LGTB\" class=\"badge badge-pill badge-info\">LGTB+</span>")
+                  "<span id=\"LGTB\" class=\"badge badge-pill badge-info\">LGTB+</span>",
+                  "<span id=\"LGTB\" class=\"badge badge-pill badge-info\">Food Insecurity</span>")
 
 theme_name <- 'Themes'
 theme_badge <- 'Badge'
