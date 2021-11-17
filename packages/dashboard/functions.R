@@ -1,8 +1,24 @@
-library(tidyverse)
-library(httr)
-library(jsonlite)
-library('ghql')
-library(R.utils)
+library("tidyverse")
+library("httr")
+library("jsonlite")
+library("ghql")
+library("R.utils")
+
+#' Establish connection with blob storage
+#'
+#' @importFrom AzureStor storage_endpoint storage_container
+get_container = function() {
+  blob = AzureStor::storage_endpoint(Sys.getenv("BLOB_ENDPOINT"),
+                                     sas = Sys.getenv("BLOB_SAS"))
+  AzureStor::storage_container(blob, "processed")
+}
+
+download_all = function() {
+  get_container() %>%
+    AzureStor::multidownload_blob(src = "*",
+                                  dest = "./data/",
+                                  overwrite = TRUE)
+}
 
 # query charitybase
 #https://www.r-bloggers.com/2020/12/accessing-grahpql-from-r/
@@ -387,6 +403,7 @@ create_data_license_help <- function() {
     "and the British Red Cross Vulnerability and Resilience indices are available under the same license. 
     The code for the toolkit can be found", tags$a(href="https://github.com/VCS-Emergencies-Partnership/r-shiny-web-apps/tree/main/packages/dashboard", target="_blank","here."),
     "Before reporducing or adapting this tool, please ensure you are adhering to the terms of the license."),
+
     tags$br(),
     h4(tags$strong("Privacy and Cookies Policy")),
     p("We use Google Analytics to collect information on visits and behaviour on the site, 
@@ -2104,7 +2121,7 @@ names(orgs2logos) <- c(x_name,y_name)
 
 
 theme <- c("Covid", "Deprivation", "Children", "Voluntary Sector", "Mental Health", "Vaccine",
-           "General","Winter Pressures", "Insight", "National", "Local", "Services", "Domestic Abuse", "Food", "LGTB+")
+           "General","Winter Pressures", "Insight", "National", "Local", "Services", "Domestic Abuse", "Food", "LGTB+", "Food Insecurity")
 class_wanted <- c("<span id=\"covid\" class=\"badge badge-pill badge-primary\">Covid</span>",
                   "<span id=\"deprivation\" class=\"badge badge-pill badge-secondary\">Deprivation</span>",
                   "<span id=\"children\" class=\"badge badge-pill badge-success\">Children and Young People</span>",
@@ -2119,7 +2136,8 @@ class_wanted <- c("<span id=\"covid\" class=\"badge badge-pill badge-primary\">C
                   "<span id=\"services\" class=\"badge badge-pill badge-info\">Services</span>",
                   "<span id=\"absue\" class=\"badge badge-pill badge-info\">Domestic abuse</span>",
                   "<span id=\"food\" class=\"badge badge-pill badge-info\">Food</span>",
-                  "<span id=\"LGTB\" class=\"badge badge-pill badge-info\">LGTB+</span>")
+                  "<span id=\"LGTB\" class=\"badge badge-pill badge-info\">LGTB+</span>",
+                  "<span id=\"LGTB\" class=\"badge badge-pill badge-info\">Food Insecurity</span>")
 
 theme_name <- 'Themes'
 theme_badge <- 'Badge'
