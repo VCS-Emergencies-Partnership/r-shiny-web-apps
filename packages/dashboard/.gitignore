@@ -84,3 +84,5 @@ tmp
 packages/*/packrat/lib*
 packages/*/packrat/src
 packages/*/packrat/init.R
+packrat/lib*/
+
