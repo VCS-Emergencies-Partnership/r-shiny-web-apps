@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
     libudunits2-dev \
     libxml2-dev \
+    libv8-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
