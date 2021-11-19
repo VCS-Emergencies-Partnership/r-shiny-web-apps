@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libudunits2-dev \
     libxml2-dev \
     libv8-dev \
+    libprotobuf-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
