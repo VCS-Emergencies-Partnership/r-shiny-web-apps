@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libv8-dev \
     libprotobuf-dev \
     protobuf-compiler \
+    libjq-dev \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
