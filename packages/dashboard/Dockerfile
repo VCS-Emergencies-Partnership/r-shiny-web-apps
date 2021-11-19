@@ -20,14 +20,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 
 # Adding empty folder to allow AuthAzure package to run without start up message
-RUN mkdir -p ${SRV_DIR}/.local/share/AzureR
+WORKDIR ${SRV_DIR}
+RUN mkdir -p ./.local/share/AzureR
 
 # Install {packrat} for managing our R environment
 RUN install2.r --error packrat
 
 # Move to srv directory to ensure packrat
 # libs are created in the correct location
-WORKDIR $
+WORKDIR ${SRV_DIR}
 COPY packrat/packrat.lock ./packrat/
 # Install dependencies as specified by the packrat.lock file
 RUN Rscript -e "packrat::init(infer.dependencies = FALSE, \
