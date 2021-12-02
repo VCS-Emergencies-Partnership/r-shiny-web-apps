@@ -2175,6 +2175,8 @@ server = function(input, output, session) {
           # flood warnign has occurred..   
           else {
             
+            browser()
+            
             icons = awesomeIcons(
               icon = "glyphicon glyphicon-warning-sign", 
               iconColor = "black",

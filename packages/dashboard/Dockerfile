@@ -19,10 +19,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Adding empty folder to allow AuthAzure package to run without start up message
-WORKDIR ${SRV_DIR}
-RUN mkdir -p ./.local/share/AzureR
-
 # Install {packrat} for managing our R environment
 RUN install2.r --error packrat
 
@@ -35,6 +31,9 @@ RUN Rscript -e "packrat::init(infer.dependencies = FALSE, \
                               enter = TRUE, \
                               restart = FALSE); \
                 packrat::restore()"
+                
+# Adding empty folder to allow AuthAzure package to run without start up message
+RUN mkdir -p /root/.local/share/AzureR
 
 # Use custom shiny-server config
 COPY ./shiny-customized.config /etc/shiny-server/shiny-server.conf
