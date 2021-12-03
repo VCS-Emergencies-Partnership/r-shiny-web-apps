@@ -50,6 +50,6 @@ COPY cookie_consent_v2.html \
 
 # Copy data into container (in the future to be loaded at runtime)
 COPY data ${SRV_DIR}/data
-RUN chown shiny:shiny ${SRV_DIR}/data
+RUN chown -R shiny:shiny ${SRV_DIR}/data
 # Copy styling and images thr
 COPY www ${SRV_DIR}/www
