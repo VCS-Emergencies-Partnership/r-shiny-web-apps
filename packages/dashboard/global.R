@@ -27,12 +27,12 @@ download_all()
 
 # --- read in vulnerability indices ---
 # # --- local authority level ---
-LA_vi <- read_feather('./data/vulnerability_index/vulnerability-LA.feather')
+LA_vi <- read_feather('./data_not_from_azure/vulnerability_index/vulnerability-LA.feather')
 LA_vi <- LA_vi %>% rename('LAD19CD'=Code)
 
 
 # -- Area lookup table ---
-area_lookup <- read_feather('./data/vulnerability_index/lookup_msoa11_to_lad19_to_tactical_cell.feather')
+area_lookup <- read_feather('./data_not_from_azure/vulnerability_index/lookup_msoa11_to_lad19_to_tactical_cell.feather')
 area_lookup_tc2lad <- area_lookup %>% select('LAD19CD', 'TacticalCell') %>% 
   mutate('TacticalCell_update'=case_when(TacticalCell == 'South and the Channel Islands' ~ 'South West',
                                          TacticalCell == 'Central' ~ 'Midlands & East',
@@ -55,7 +55,7 @@ lad_uk <- lad_uk %>% rename('LAD19CD'=lad19cd)
 
 
 # -- tactical cell boundaries --
-tc_shp <- read_sf('data/reduced_boundaries/vcsep_multiagencycells_wo-iom-ci_BFE.shp') %>%
+tc_shp <- read_sf('data_not_from_azure/reduced_boundaries/vcsep_multiagencycells_wo-iom-ci_BFE.shp') %>%
   st_transform('+proj=longlat +datum=WGS84')
 
 tc_shp <- tc_shp %>% mutate("TacticalCell"=case_when(lookup_loc == 'Midlands and the East' ~ 'Midlands & East',
