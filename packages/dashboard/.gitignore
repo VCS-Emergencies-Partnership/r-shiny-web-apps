@@ -4,7 +4,8 @@
 .Renviron
 
 # Data files downloaded from Azure (these are downloaded during build)
-data/
+data/*
+!data/data_not_from_azure
 
 # Session Data files
 .RData
@@ -52,3 +53,4 @@ packrat/src
 packrat/init.R
 
 
+packrat/lib*/
