@@ -254,7 +254,7 @@ if (dim(flood_warning_meta)[1]==0) {
     count() 
   # how many of each type of alert
   total_type_of_warning_per_aurthority_trans <- pivot_wider(total_type_of_warning_per_authority, names_from=severity, values_from=n, names_prefix = 'Total live ') %>%
-    rename('LAD19NM'=lad19nm) %>% replace(is.na(.), 0)
+    rename('LAD19NM'=lad19nm) %>% mutate_if(is.numeric , replace_na, replace = 0)
   
   # join to flooding areas to focus 
   flooding_area2focus <- left_join(flooding_area2focus, total_type_of_warning_per_aurthority_trans, by='LAD19NM', keep=F)
