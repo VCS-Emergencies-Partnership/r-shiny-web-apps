@@ -1725,7 +1725,7 @@ server = function(input, output, session) {
                         lng2 = as.numeric(curr_bbox["xmax"]),
                         lat2 = as.numeric(curr_bbox["ymax"])) %>%
             addLayersControl(baseGroups = c("Resilience: vulnerability vs capacity to cope","Economic vulnerability","Socioeconomic vulnerability","Social vulnerability","Health/Wellbeing vulnerability","Clinical vulnerability"),
-                             options= layersControlOptions(collapsed=T))
+                             options= layersControlOptions(collapsed=F))
           
         }
         
@@ -1888,7 +1888,7 @@ server = function(input, output, session) {
                           lng2 = as.numeric(curr_bbox["xmax"]),
                           lat2 = as.numeric(curr_bbox["ymax"])) %>%
               addLayersControl(baseGroups = c("Resilience: vulnerability vs capacity to cope","Economic vulnerability","Socioeconomic vulnerability","Social vulnerability","Health/Wellbeing vulnerability","Clinical vulnerability"),
-                               options= layersControlOptions(collapsed=T))
+                               options= layersControlOptions(collapsed=F))
             
           }
           
@@ -2050,7 +2050,7 @@ server = function(input, output, session) {
                           lng2 = as.numeric(curr_bbox["xmax"]),
                           lat2 = as.numeric(curr_bbox["ymax"])) %>%
               addLayersControl(baseGroups = c("Resilience: vulnerability vs capacity to cope","Economic vulnerability","Socioeconomic vulnerability","Social vulnerability","Health/Wellbeing vulnerability","Clinical vulnerability"),
-                               options= layersControlOptions(collapsed=T))
+                               options= layersControlOptions(collapsed=F))
           }
         }
         
