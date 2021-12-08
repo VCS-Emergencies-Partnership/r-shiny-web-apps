@@ -2351,10 +2351,10 @@ else {
         if(rank$rank_wanted_flooding == 'Flood warnings/alerts') {
           
           if (dim(flood_points)[1] == 0) {
-            title_wanted <- paste("- No active flood warnings and alerts as of", last_updated_time, last_updated_date)
+            title_wanted <- paste("- No active flood warnings and alerts as of", automated_data_processing_time, last_updated_date)
           }
           else {
-            title_wanted <- paste("number of flood warnings and alerts as of", last_updated_time, last_updated_date)
+            title_wanted <- paste("number of flood warnings and alerts as of", automated_data_processing_time, last_updated_date)
           }
           
           #title_wanted <- paste("number of flood warnings and alerts as of", last_updated_time, last_updated_date)
