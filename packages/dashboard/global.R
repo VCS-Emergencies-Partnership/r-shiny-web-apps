@@ -336,6 +336,8 @@ time <- str_split(as.POSIXct(Sys.time()), " ")[[1]][2]
 time_and_date <- str_split(as.POSIXct(Sys.time()), " ")
 last_updated_time <- paste0(time_and_date[[1]][2],",")
 last_updated_time_header <- paste0(time_and_date[[1]][2])
+automated_data_processing_time <- paste0("02:00:00", ",")
+
 # for both
 last_updated_date <- paste(format(as.Date(time_and_date[[1]][1], format="%Y-%m-%d"), "%d/%m/%Y"))
 
