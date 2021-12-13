@@ -219,7 +219,7 @@ body <- dashboardBody(
                                            p("This tool is to help answer the question of what",
                                              tags$strong("areas and people"), "would be/are at risk should the",
                                              tags$strong("emergency"), "scenario selected occur.", tags$br(), 
-                                             "Please visit the", tags$strong("Help"), "page for information on how to use the tool and the data sources."))),
+                                             "Please visit the", tags$strong("Help"), "page for information on how to use the tool."))),
                                 column(width=3, style='padding-top:20px',
                                        selectInput("theme",
                                                    label="1. Select an emergency",
