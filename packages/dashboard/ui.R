@@ -181,25 +181,14 @@ body <- dashboardBody(
             ),
             
             # row three 
-            fluidRow(style="padding-right:20px; padding-left:20px; padding-bottom:40px",
-                     column(width=4,
-                            box(title=tags$strong("Where We're Working", style='font-size:2.5vh'), width=NULL, #height='80vh',
-                                style='overflow-y: scroll;', 
-                                uiOutput("home_map_headlines", height='20vh'),
-                                withSpinner(leafletOutput('home_map', height = "60vh")),
-                                uiOutput("source_home_map", height='10vh'))),
-                     column(width=4,
-                            box(title=tags$strong("What Our Network is Telling Us",style='font-size:2.5vh'), width=NULL,
-                                uiOutput("latest_concerns_headline", height='20vh', width=NULL),
-                                withSpinner(echarts4rOutput('concerns', height="60vh")),
-                                uiOutput("source_concerns", height="10vh"))),
-                     
-                     column(width = 4,
-                            box(title=tags$strong("Latest Insight", style='font-size:2.5vh'), width=NULL,
-                                uiOutput("latest_insight_headline", height='20vh'),
-                                withSpinner(echarts4rOutput("latest_insight", height="60vh")),
-                                uiOutput("source_insight_headline", height='10vh'))
-                     )
+            fluidRow(
+                     column(12, align="center",
+                      p("This toolkit is currently under development. Please use the links above for the current resources and insights available."))
+                     ),
+            fluidRow(
+                    column(12, align="center",
+                     p("For data on COVID-19 cases and vaccination rates please visit the UK government COVID-19 dashboard ",
+                       tags$a(href="https://coronavirus.data.gov.uk/", "here.")))
             )
     ),
     
