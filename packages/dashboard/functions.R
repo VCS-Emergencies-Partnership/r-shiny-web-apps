@@ -2603,3 +2603,42 @@ coming_up_text <- function() {
   )
 }
 
+
+#' Function to add themes to colors in a DT DataTable
+#'
+#' @param data The dataset
+#' @param column_to_colour The coloumn want to add colour tags
+#'
+#' @return The dataset with html colour tags round the themes
+#'
+#'
+adding_datatable_colours <- function(data, column_to_colour) {
+  
+  distinct_topics <- data %>%
+    select({{ column_to_colour }}) %>%
+    separate_rows({{ column_to_colour }}, sep = ",") %>%
+    distinct() %>%
+    filter(!{{ column_to_colour }} == "") %>%
+    pull()
+  
+  distinct_topics_trim <- str_trim(distinct_topics, side = "both")
+  
+  # Extend the colour palette so enough colours
+  colours_pal <- colorRampPalette(brewer.pal(8, "Set2"))(length(distinct_topics))
+  
+  #  <- brewer.pal(length(distinct_topics),"Set3")
+  
+  word_highlight <- function(word, colour) {
+    paste0('<span style="background-color:', colour, '">', word, "</span>")
+  }
+  
+  colours_topics <- word_highlight(distinct_topics_trim, colours_pal)
+  
+  
+  # named vector can be input into str_replace_all https://stackoverflow.com/questions/52691966/replace-strings-in-variable-using-lookup-vector
+  data_colour <- data %>%
+    mutate(colour_column = str_replace_all({{ column_to_colour }}, setNames(colours_topics, distinct_topics_trim)))
+  
+  return(data_colour)
+}
+
