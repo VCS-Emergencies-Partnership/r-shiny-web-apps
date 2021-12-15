@@ -3837,11 +3837,24 @@ server = function(input, output, session) {
   # plot original 
   observeEvent(req(input$sidebar_id == 'resource_catalogue') ,{
     
-    output$dynamic_boxes <- renderUI({
-      plot_resource_cat(resources_info)
+    resources_reactive <- reactive({
+      themes_regex <- paste(input$chosen_theme, collapse = "|")
+      type_regex <- paste(input$chosen_type, collapse = "|")
+      
+      resources_info_colour %>%
+        filter(Geography %in% input$chosen_geography) %>% 
+        filter(str_detect(Theme, themes_regex), str_detect(`Resource Type`, type_regex)) %>%
+        select(-Theme) %>%
+        rename(Theme = colour_column)
     })
     
-  })
+    
+    output$public_resource_table <- DT::renderDataTable({
+        resources_reactive()
+      },
+      escape = FALSE)
+})
+  
   
  
   observeEvent(input$resource_search, {
