@@ -374,32 +374,54 @@ body <- dashboardBody(
     ),
     
     tabItem(tabName='resource_catalogue',
-            fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
-                     column(width=12,
+            fluidRow(width=NULL, 
+                     #style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
                             panel(style="padding-right:30px; padding-left:30px; padding-bottom:20px;padding-top:10px;",
-                                  column(width=6, p(h2("Public Resources"), style="font-size:1.9",
-                                                    "This is a collection of useful publicly available 
-                                            resources that could be useful to people working in the Voluntary and Community Sector.", "Please",
+                                 fluidRow(column(width=12, p(h2("Public Resources"), style="font-size:1.9",
+                                                    "This is a collection of useful publicly available resources that could be useful to people working in the Voluntary and Community Sector.", "Please",
                                                     tags$a(href="https://vcsep.org.uk/", target="_blank", "contact us"), 
                                                     "if you would like to share any further resources that we could signpost to.",
                                                     tags$br(), 
-                                                    tags$em("Please note: The Emergencies Partnership does not have responsibility 
-                                            for these resources.", style='font-size:1.5vh'))),
-                                  column(width=6, style='padding-top:30px', searchInput(
-                                    inputId = "resource_search",
-                                    label = "Search for resources with a particular theme:", 
-                                    placeholder = "i.e covid",
-                                    btnSearch = icon("search"), 
-                                    btnReset = icon("remove"),
-                                    width = "100%"
-                                  ))))),
-            fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;",
-                     column(width=12,
-                            uiOutput("dynamic_boxes")
-                            #bubblesOutput('dynamic_bubbles')
-                            #)
+                                                    tags$em("Please note: The Emergencies Partnership does not have responsibility for these resources.", style='font-size:1.5vh')))),
+                     fluidRow(
+                       column(
+                         3,
+                         pickerInput(
+                           inputId = "chosen_geography",
+                           label = "Geography:",
+                           choices = unique(resources_info_colour$Geography),
+                           selected = unique(resources_info_colour$Geography),
+                           options = list(`actions-box` = TRUE, title = "Please select geography"),
+                           multiple = T
+                         )
+                       ),
+                       column(
+                         3,
+                         pickerInput(
+                           inputId = "chosen_type",
+                           label = "Type:",
+                           choices = distinct_types,
+                           selected = distinct_types,
+                           options = list(`actions-box` = TRUE, title = "Please select type"),
+                           multiple = T
+                         )
+                       ),
+                       column(
+                         3,
+                         pickerInput(
+                           inputId = "chosen_theme",
+                           label = "Theme:",
+                           choices = distinct_themes,
+                           selected = distinct_themes,
+                           options = list(`actions-box` = TRUE, title = "Please select theme"),
+                           multiple = T
+                         )
+                       )
+                     ))),
+                     fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;",
+                       DT::dataTableOutput("public_resource_table")
                      )
-            )
+                     
             
     ),
     tabItem(tabName="latest_news_tab", 
