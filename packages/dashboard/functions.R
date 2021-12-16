@@ -2637,7 +2637,8 @@ adding_datatable_colours <- function(data, column_to_colour) {
   
   # named vector can be input into str_replace_all https://stackoverflow.com/questions/52691966/replace-strings-in-variable-using-lookup-vector
   data_colour <- data %>%
-    mutate(colour_column = str_replace_all({{ column_to_colour }}, setNames(colours_topics, distinct_topics_trim)))
+    mutate(colour_column = str_replace_all({{ column_to_colour }}, setNames(colours_topics, distinct_topics_trim))) %>%
+    mutate(colour_column = str_replace_all(colour_column, "</span>\\+", "</span>"))
   
   return(data_colour)
 }
