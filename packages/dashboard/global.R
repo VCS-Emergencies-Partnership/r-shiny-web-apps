@@ -325,7 +325,13 @@ resources_info <- read_feather("./data/resource_bank.feather")
 
 resources_columns <- resources_info %>%
   mutate(Title = ifelse(is.na(Link), Title, paste0("<a href='", Link, "' target='_blank'>", Title, "</a>"))) %>%
-  select(Title, Organisation, `Description / Usage`, Theme, `Resource Type`, Geography)
+  select(Title, Organisation, `Description / Usage`, Theme, `Resource Type`, Geography) %>%
+  mutate(`Resource Type` = str_to_title(`Resource Type`)) %>%
+  mutate(Organisation = case_when(
+    str_detect(Title, "Wirral Intelligence") ~ "Wirral Intelligence Service",
+    str_detect(Title, "Cambridgeshire Insight") ~ "Cambridgesgire Insight",
+    TRUE ~ Organisation
+         )) #manual fix for now - get Gen to fix datasheet
 
 resources_info_colour <- adding_datatable_colours(resources_columns, Theme)
 
@@ -339,13 +345,9 @@ distinct_themes <- resources_columns %>%
 
 distinct_types <- resources_columns %>%
   select(`Resource Type`) %>%
-  separate_rows(`Resource Type`, sep = "\\+") %>%
+  separate_rows(`Resource Type`, sep = ",") %>%
   mutate(`Resource Type` = str_trim(`Resource Type`, side = "both")) %>%
-  mutate(`Resource Type` = str_to_sentence(`Resource Type`)) %>%
   distinct() %>%
-  filter(!`Resource Type` == "") %>%
-  filter(!`Resource Type` == "?") %>%
-  mutate(`Resource Type` = ifelse(str_detect(`Resource Type`, "Survey Results"), "Survey Results", `Resource Type`)) %>%
   pull()
 
 # latest insight

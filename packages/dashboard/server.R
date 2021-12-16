@@ -3838,14 +3838,25 @@ server = function(input, output, session) {
   observeEvent(req(input$sidebar_id == 'resource_catalogue') ,{
     
     resources_reactive <- reactive({
+    
       themes_regex <- paste(input$chosen_theme, collapse = "|")
       type_regex <- paste(input$chosen_type, collapse = "|")
       
+      #ifelse used in case the user has none selected then none should show (but keep column headers)
+      if (length(input$chosen_theme) == 0 | length(input$chosen_type) == 0) {
+        
+        resources_info_colour %>%
+          slice(-c(1:nrow(resources_info_colour)))
+        
+      } else {
+        
       resources_info_colour %>%
         filter(Geography %in% input$chosen_geography) %>% 
         filter(str_detect(Theme, themes_regex), str_detect(`Resource Type`, type_regex)) %>%
         select(-Theme) %>%
         rename(Theme = colour_column)
+        
+      }
     })
     
     

@@ -389,8 +389,8 @@ body <- dashboardBody(
                          pickerInput(
                            inputId = "chosen_geography",
                            label = "Geography:",
-                           choices = unique(resources_info_colour$Geography),
-                           selected = unique(resources_info_colour$Geography),
+                           choices = sort(unique(resources_info_colour$Geography)),
+                           selected = sort(unique(resources_info_colour$Geography)),
                            options = list(`actions-box` = TRUE, title = "Please select geography"),
                            multiple = T
                          )
@@ -400,8 +400,8 @@ body <- dashboardBody(
                          pickerInput(
                            inputId = "chosen_type",
                            label = "Type:",
-                           choices = distinct_types,
-                           selected = distinct_types,
+                           choices = sort(distinct_types),
+                           selected = sort(distinct_types),
                            options = list(`actions-box` = TRUE, title = "Please select type"),
                            multiple = T
                          )
@@ -411,8 +411,8 @@ body <- dashboardBody(
                          pickerInput(
                            inputId = "chosen_theme",
                            label = "Theme:",
-                           choices = distinct_themes,
-                           selected = distinct_themes,
+                           choices = sort(distinct_themes),
+                           selected = sort(distinct_themes),
                            options = list(`actions-box` = TRUE, title = "Please select theme"),
                            multiple = T
                          )
