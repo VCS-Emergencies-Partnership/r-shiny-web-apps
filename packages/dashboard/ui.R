@@ -398,17 +398,6 @@ body <- dashboardBody(
                        column(
                          3,
                          pickerInput(
-                           inputId = "chosen_type",
-                           label = "Type:",
-                           choices = sort(distinct_types),
-                           selected = sort(distinct_types),
-                           options = list(`actions-box` = TRUE, title = "Please select type"),
-                           multiple = T
-                         )
-                       ),
-                       column(
-                         3,
-                         pickerInput(
                            inputId = "chosen_theme",
                            label = "Theme:",
                            choices = sort(distinct_themes),
@@ -416,8 +405,20 @@ body <- dashboardBody(
                            options = list(`actions-box` = TRUE, title = "Please select theme"),
                            multiple = T
                          )
+                       ),
+                       column(
+                         3,
+                         pickerInput(
+                           inputId = "chosen_type",
+                           label = "Type:",
+                           choices = sort(distinct_types),
+                           selected = sort(distinct_types),
+                           options = list(`actions-box` = TRUE, title = "Please select type"),
+                           multiple = T
+                         )
                        )
-                     ))),
+                       )
+                     )),
                      fluidRow(width=NULL, style="padding-right:30px; padding-left:30px; padding-bottom:20px;",
                        DT::dataTableOutput("public_resource_table")
                      )

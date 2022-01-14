@@ -143,7 +143,7 @@ flood_overlap = function(x) {
 
 LAD_boundaries = read_data(st_read,
                            "lad19_eng_wales_sc_ni.geojson",
-                           "~/r-shiny-web-apps/packages/dashboard/data_not_from_azure/reduced_boundaries/")
+                           "data")
 
 LAD_boundaries = LAD_boundaries %>%
   rename("LAD19CD" = lad19cd)
