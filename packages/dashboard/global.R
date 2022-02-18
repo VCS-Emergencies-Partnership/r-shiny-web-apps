@@ -19,6 +19,7 @@ library("R.utils")
 library("ghql")
 library("RColorBrewer")
 
+
 source("./functions.R")
 # Downloads all the data outputted by the pre-processing scripts as run from
 # databricks
