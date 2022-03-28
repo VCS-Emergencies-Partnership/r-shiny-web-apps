@@ -887,8 +887,8 @@ server = function(input, output, session) {
           # show all levels of resilience
           if (input$tactical_cell == '-- England --') {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
-              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
+              select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill_de`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
               mutate('opacity_val'=0.8) %>%
               mutate('weight_val'=0.7)
           }
@@ -898,8 +898,8 @@ server = function(input, output, session) {
             if (input$lad_selected == 'All local authorities in region') {
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(TacticalCell == input$tactical_cell) %>%
-                select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
+                select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total historical flooding incidents`, 
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill_de`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
                 mutate('opacity_val'=0.8) %>%
                 mutate('weight_val'=0.7)
               
@@ -913,8 +913,8 @@ server = function(input, output, session) {
                                                Name != input$lad_selected ~ 0.1)) %>%
                 mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
                                               Name != input$lad_selected ~ 0.7)) %>%
-                select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`,'TacticalCell',`opacity_val`,`weight_val`) 
+                select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total historical flooding incidents`, 
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill_de`, `floodres_id`, `incd_id`, `risk_id`,'TacticalCell',`opacity_val`,`weight_val`) 
             }
           }
         }
@@ -937,8 +937,8 @@ server = function(input, output, session) {
           
           if (input$tactical_cell == '-- England --') {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
-              select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
+              select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total historical flooding incidents`, 
+                     `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill_de`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
               mutate('opacity_val'=case_when(lad19nm %in% top_ten_cols ~ 0.8,
                                              !lad19nm %in% top_ten_cols ~ 0.1)) %>%
               mutate('weight_val'=case_when(lad19nm %in% top_ten_cols ~ 2,
@@ -954,8 +954,8 @@ server = function(input, output, session) {
                                                !lad19nm %in% top_ten_cols ~ 0.1)) %>%
                 mutate('weight_val'=case_when(lad19nm %in% top_ten_cols ~ 2,
                                               !lad19nm %in% top_ten_cols ~ 0.7)) %>%
-                select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`, `weight_val`)
+                select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total historical flooding incidents`, 
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill_de`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`, `weight_val`)
               
             }
             
@@ -967,8 +967,8 @@ server = function(input, output, session) {
                                                Name != input$lad_selected ~ 0.1)) %>%
                 mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
                                               Name != input$lad_selected ~ 0.7)) %>%
-                select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total historical flooding incidents`, 
-                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`, `weight_val`)
+                select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total historical flooding incidents`, 
+                       `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill_de`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell', `opacity_val`, `weight_val`)
             }
           }
           
@@ -1087,7 +1087,7 @@ server = function(input, output, session) {
     
     if (input$tactical_cell == '-- England --') {
       fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
-        select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
+        select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total people in flood risk areas`, 
                `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
                `Flooding incidents per 10,000 people`) %>%
         st_drop_geometry() %>%
@@ -1104,7 +1104,7 @@ server = function(input, output, session) {
       if (input$tactical_cell != '-- England --' & input$lad_selected=='All local authorities in region') {
         fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
           filter(TacticalCell == input$tactical_cell) %>%
-          select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
+          select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total people in flood risk areas`, 
                  `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
                  `Flooding incidents per 10,000 people`) %>%
           st_drop_geometry() %>%
@@ -1121,7 +1121,7 @@ server = function(input, output, session) {
       else {
         fl_resilience_lad_uk_most_vuln_for_labels <- filtered_areas_at_risk_flooding_resilience() %>%
           #filter(lad19nm == input$lad_selected) %>%
-          select('lad19nm', `Vulnerability quintile`, `Capacity quintile`, `Total people in flood risk areas`, 
+          select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total people in flood risk areas`, 
                  `% people in flood risk areas`, `Flood risk quintile`, `Total historical flooding incidents`, 
                  `Flooding incidents per 10,000 people`) %>%
           st_drop_geometry() %>%
@@ -1137,8 +1137,8 @@ server = function(input, output, session) {
     
     fl_risk_labels <- paste0(
       sprintf("<strong>%s</strong><br/>",  fl_resilience_lad_uk_most_vuln_for_labels$lad19nm),
-      "Vulnerability (5 = highest vulnerability): ",  fl_resilience_lad_uk_most_vuln_for_labels$`Vulnerability quintile`, "<br/>",
-      "Capacity (5 = lowest capacity): ",  fl_resilience_lad_uk_most_vuln_for_labels$`Capacity quintile`, "<br/>",
+      "DE Vulnerability (5 = highest vulnerability): ",  fl_resilience_lad_uk_most_vuln_for_labels$`DE Vulnerability quintile`, "<br/>",
+      "DE Capacity (5 = lowest capacity): ",  fl_resilience_lad_uk_most_vuln_for_labels$`DE Capacity quintile`, "<br/>",
       "Flood Risk (5 = most risk): ", fl_resilience_lad_uk_most_vuln_for_labels$`Flood risk quintile`, "<br/>",
       "Total people in flood risk areas: ", fl_resilience_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
       "% people in flood risk areas: ", fl_resilience_lad_uk_most_vuln_for_labels$`% people in flood risk areas`, "<br/>",
@@ -2087,7 +2087,7 @@ server = function(input, output, session) {
                 clearMarkers() %>%
                 clearMarkerClusters() %>%
                 addPolygons(data=flood_all, layerId = ~floodres_id,
-                            group="Resilience of local authority", fillColor = ~`fill`,
+                            group="Resilience of local authority", fillColor = ~`fill_de`,
                             weight = ~weight_val,
                             opacity = 0.8,
                             color = "black",
@@ -2134,7 +2134,7 @@ server = function(input, output, session) {
                 clearMarkerClusters() %>%
                 
                 addPolygons(data=flood_all, layerId = ~floodres_id,
-                            group="Resilience of all local authorities", fillColor = ~`fill`,
+                            group="Resilience of all local authorities", fillColor = ~`fill_de`,
                             weight = ~weight_val,
                             opacity = 0.8,
                             color = "black",
@@ -2193,7 +2193,7 @@ server = function(input, output, session) {
                 clearMarkers() %>%
                 clearMarkerClusters() %>%
                 addPolygons(data=flood_all, layerId = ~floodres_id,
-                            group="Resilience of all local authorities", fillColor = ~fill,
+                            group="Resilience of all local authorities", fillColor = ~fill_de,
                             weight = ~weight_val,
                             opacity = 0.8,
                             color = "black",
@@ -2255,7 +2255,7 @@ server = function(input, output, session) {
                   clearMarkers() %>%
                   clearMarkerClusters() %>%
                   addPolygons(data=flood_all, layerId = ~floodres_id,
-                              group="Resilience of all local authorities", fillColor = ~fill,
+                              group="Resilience of all local authorities", fillColor = ~fill_de,
                               weight = ~weight_val,
                               opacity = 0.8,
                               color = "black",
@@ -2315,7 +2315,7 @@ server = function(input, output, session) {
                   clearMarkers() %>%
                   clearMarkerClusters() %>%
                   addPolygons(data=flood_all, layerId = ~floodres_id,
-                              group="Resilience of all local authorities", fillColor = ~fill,
+                              group="Resilience of all local authorities", fillColor = ~fill_de,
                               weight = ~weight_val,
                               opacity = 0.8,
                               color = "black",

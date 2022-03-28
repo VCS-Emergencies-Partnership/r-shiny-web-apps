@@ -31,6 +31,8 @@ download_all()
 LA_vi <- read_feather('./data/data_not_from_azure/vulnerability_index/vulnerability-LA.feather')
 LA_vi <- LA_vi %>% rename('LAD19CD'=Code)
 
+# Read in D&E specific vulnerability & capacity
+de_ri <- read_feather('./data/de_ri.feather')
 
 # -- Area lookup table ---
 area_lookup <- read_feather('./data/data_not_from_azure/vulnerability_index/lookup_msoa11_to_lad19_to_tactical_cell.feather')
@@ -97,6 +99,9 @@ lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>%
   mutate('incd_id' = paste0('incd_',LAD19CD)) %>%
   mutate('risk_id' = paste0('risk_',LAD19CD)) 
 
+# Join on D&E speicifc RI 
+lad_uk2vuln_resilience <- lad_uk2vuln_resilience %>%
+  left_join(de_ri, by = "LAD19CD")
 
 # tactical cells
 tactical_cells <- area_lookup_tc2lad %>% filter(TacticalCell != 'Wales' & TacticalCell != 'Northern Ireland and the Isle of Man' & TacticalCell != 'Scotland')
