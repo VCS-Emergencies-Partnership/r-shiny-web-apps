@@ -59,7 +59,6 @@ write_data = function(writer,
 
 capac_path <- "https://raw.githubusercontent.com/britishredcrosssociety/resilience-index/de_2019_lads/data/capacity/disasters-emergencies/england/de-index-quint.csv"
 vuln_path <- "https://raw.githubusercontent.com/britishredcrosssociety/resilience-index/de_2019_lads/data/vulnerability/disasters-emergencies/england/de-index-quint.csv"
-#old_ri_path <- "https://github.com/britishredcrosssociety/resilience-index/raw/main/depreciated/data/processed/resilience%20index.csv"
 
 # Read in D&E capacity and vulnerability
 capac <- read_csv(capac_path) %>%
@@ -68,20 +67,12 @@ capac <- read_csv(capac_path) %>%
 vuln <- read_csv(vuln_path) %>%
   rename("LAD19CD" = lad_code, `DE Vulnerability quintile` = de_domain_quantiles)
 
-# Read in flooding data from the old RI
-# old_ri <- read_csv(old_ri_path) %>%
-#   select(LAD19CD, `Total people in flood risk areas`:`Flood incidents quintile`)
-
 de_ri <- capac %>%
   left_join(vuln, by = "LAD19CD") 
 
 # Check missings
 de_ri %>%
   filter_at(vars(everything()), any_vars(is.na(.)))
-# Some missing historical flooding data 
-
-de_ri %>%
-  filter_at(vars(c(`DE Vulnerability quintile`, `DE Capacity quintile`)), any_vars(is.na(.)))
 
 # Create 3 buckets for vulnerability
 quantiles_vuln = de_ri %>%
