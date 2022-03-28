@@ -1137,8 +1137,8 @@ server = function(input, output, session) {
     
     fl_risk_labels <- paste0(
       sprintf("<strong>%s</strong><br/>",  fl_resilience_lad_uk_most_vuln_for_labels$lad19nm),
-      "DE Vulnerability (5 = highest vulnerability): ",  fl_resilience_lad_uk_most_vuln_for_labels$`DE Vulnerability quintile`, "<br/>",
-      "DE Capacity (5 = lowest capacity): ",  fl_resilience_lad_uk_most_vuln_for_labels$`DE Capacity quintile`, "<br/>",
+      "D&E Vulnerability (5 = highest vulnerability): ",  fl_resilience_lad_uk_most_vuln_for_labels$`DE Vulnerability quintile`, "<br/>",
+      "D&E Capacity (5 = lowest capacity): ",  fl_resilience_lad_uk_most_vuln_for_labels$`DE Capacity quintile`, "<br/>",
       "Flood Risk (5 = most risk): ", fl_resilience_lad_uk_most_vuln_for_labels$`Flood risk quintile`, "<br/>",
       "Total people in flood risk areas: ", fl_resilience_lad_uk_most_vuln_for_labels$`Total people in flood risk areas`, "<br/>",
       "% people in flood risk areas: ", fl_resilience_lad_uk_most_vuln_for_labels$`% people in flood risk areas`, "<br/>",
