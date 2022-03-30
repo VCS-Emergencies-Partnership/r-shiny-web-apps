@@ -204,10 +204,11 @@ create_map_help_top <- function() {
     div(h4(tags$strong("What the map shows")),
         p("The British Red Cross developed a series of", 
           tags$a(href="https://britishredcrosssociety.github.io/covid-19-vulnerability/",target="_blank","indices"), "to identify UK areas vulnerable 
-            to the effects of COVID-19, and a resilience index which overlays capacity to cope.
+            to the effects of COVID-19 or to Disasters and Emergencies, and a resilience index which overlays capacity to cope.
             Using statistical modelling of data from a range of", tags$a(href="https://github.com/britishredcrosssociety/covid-19-vulnerability/blob/master/output/metadata_vi.csv", target="_blank", "(mostly open) sources,"), "the indices
-            provide an area rating, which is then used to map areas of need.", tags$br(),
-          "Over time, we will also used the",tags$a(href="https://www.gov.uk/government/collections/english-indices-of-deprivation",target="_blank", "Indices of Multiple Deprivation"), "and continue to develop bespoke maps."),
+            provide an area rating, which is then used to map areas of need.", tags$br(), 
+          p("When a user selects 'COVID-19' as the emergency they see the Resilience Index for COVID-19 and when they select 'Flooding' are shown the Resilience Index for Disasters and Emergencies. The data underlying both of these
+          differ as the elements that make someone more vulnerable to COVID-19 may differ to those for in other Disasters, such as floods")),
         tags$br())
   )
 }
