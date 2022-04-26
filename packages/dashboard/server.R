@@ -889,7 +889,7 @@ server = function(input, output, session) {
             fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>% 
               select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total historical flooding incidents`, 
                      `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill_de`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
-              mutate('opacity_val'=0.8) %>%
+              mutate('opacity_val'=if_else(fill_de == "", 0, 0.8)) %>%
               mutate('weight_val'=0.7)
           }
           
@@ -900,7 +900,7 @@ server = function(input, output, session) {
                 filter(TacticalCell == input$tactical_cell) %>%
                 select('lad19nm', `DE Vulnerability quintile`, `DE Capacity quintile`, `Total historical flooding incidents`, 
                        `Flooding incidents per 10,000 people`, `Flood risk quintile`, `Total people in flood risk areas`, `% people in flood risk areas`, `fill_de`, `floodres_id`, `incd_id`, `risk_id`, 'TacticalCell') %>%
-                mutate('opacity_val'=0.8) %>%
+                mutate('opacity_val'=if_else(fill_de == "", 0, 0.8)) %>%
                 mutate('weight_val'=0.7)
               
             }
@@ -909,7 +909,8 @@ server = function(input, output, session) {
               # Filter to local authority
               fl_incd_lad_uk_most_vuln <- lad_uk2vuln_resilience %>%
                 filter(TacticalCell == input$tactical_cell) %>%
-                mutate('opacity_val'=case_when(Name == input$lad_selected ~ 0.8,
+                mutate('opacity_val'=case_when(fill_de == "" ~ 0, 
+                                               Name == input$lad_selected ~ 0.8,
                                                Name != input$lad_selected ~ 0.1)) %>%
                 mutate('weight_val'=case_when(Name == input$lad_selected ~ 2,
                                               Name != input$lad_selected ~ 0.7)) %>%
@@ -2081,7 +2082,6 @@ server = function(input, output, session) {
               lad_bbox <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
               curr_bbox <- st_bbox(lad_bbox)
               
-              
               leafletProxy("map") %>%
                 clearShapes() %>%
                 clearMarkers() %>%
@@ -2126,6 +2126,7 @@ server = function(input, output, session) {
             }
             
             else {
+              
               curr_bbox <- st_bbox(filtered_tc())
               
               leafletProxy("map") %>%
@@ -2306,6 +2307,7 @@ server = function(input, output, session) {
               } 
               
               else {
+                
                 
                 lad_bbox <- lad_uk2vuln_resilience %>% filter(Name == input$lad_selected)
                 curr_bbox <- st_bbox(lad_bbox)
@@ -3806,9 +3808,7 @@ server = function(input, output, session) {
     internal_report_link()
   })
   
-  observeEvent(req(input$sidebar_id == 'internal_reports_from_sidebar'), {
-    internal_report_link()
-  })
+
   
   
   

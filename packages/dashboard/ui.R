@@ -72,7 +72,6 @@ sidebar <- dashboardSidebar(
               
               menuItem(HTML("Public Resources"), tabName="resource_catalogue", icon=icon("fas fa-book-open")),
               menuItem(HTML("Partner Reports"), tabName="vcs_report_sidebar", icon=icon("fas fa-file")),
-              menuItem(HTML("Internal Dashboards"), tabName="internal_reports_from_sidebar", icon=icon("fas fa-lock")),
               menuItem(HTML("Community Assets Map"), tabName="community_assets_sidebar", icon=icon("fas fa-map-marked")),
               menuItem(HTML("Latest News"), tabName="latest_news_tab", icon=icon("fas fa-newspaper")),
               menuItem("Help", tabName="Help", icon=icon("far fa-question-circle")),
@@ -146,21 +145,6 @@ body <- dashboardBody(
                                   tags$br(),
                                   tags$strong(tags$em("click on the title to go to the reports")))))),
             fluidRow(width=NULL, style="padding-right:20px; padding-left:20px; padding-bottom:20px; padding-top:0px",
-                     
-                     column(width=4,
-                            box(title=actionLink("internal_reports_from_box", "Internal Dashboards"),
-                                width=NULL,
-                                collapsible = T, 
-                                collapsed=T,
-                                icon = icon("fas fa-lock"),
-                                p("These are internal reports and insight for VCS EP members.
-                          Current reports include:",
-                                  tags$li("The request for support dashboard"),
-                                  tags$li("The pulse check survey dashboard"),
-                                  tags$li("Vaccine uptake dashboard"),
-                                  tags$br(),
-                                  tags$strong(tags$em("click on the title to go to the tool"))))),
-                     
                      column(width=4,
                             box(title=actionLink("community_assets_box", "Community Assets Map"),
                                 width=NULL,
