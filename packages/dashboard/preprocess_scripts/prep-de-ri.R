@@ -64,8 +64,8 @@ capac <- read_csv(capac_path) %>%
 vuln <- read_csv(vuln_path) %>%
   rename("LAD19CD" = lad_code, `DE Vulnerability quintile` = de_domain_quantiles)
 
-de_ri <- capac %>%
-  left_join(vuln, by = "LAD19CD") 
+de_ri <- vuln %>%
+  left_join(capac, by = "LAD19CD") 
 
 # Check missings
 de_ri %>%
@@ -79,7 +79,7 @@ quantiles_vuln = de_ri %>%
 # Create 3 buckets for resilience
 quantiles_res = de_ri %>%
   pull(`DE Capacity quintile`) %>%
-  quantile(probs = seq(0, 1, length.out = 4))
+  quantile(probs = seq(0, 1, length.out = 4), na.rm = TRUE)
 
 # https://nowosad.github.io/post/cbc-bp2/ --> using brewer.seseq2
 bivariate_color_scale = tibble(
@@ -96,7 +96,11 @@ bivariate_color_scale = tibble(
   "3 - 1" = "#509dc2",
   "2 - 1" = "#b4d3e1",
   # Low inequality, low income "#f3f3f3"
-  "1 - 1" = "#d9d9d9"
+  "1 - 1" = "#d9d9d9",
+  # For areas with no capacity info leave with no colour
+  "1 - NA" = "",
+  "2 - NA" = "",
+  "3 - NA" = ""
 ) %>%
   gather("group", "fill")
 
