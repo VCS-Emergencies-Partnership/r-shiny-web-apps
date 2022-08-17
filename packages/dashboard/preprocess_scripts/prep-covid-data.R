@@ -33,7 +33,7 @@ get_container = function() {
 write_data = function(writer,
                       data,
                       filename,
-                      local_dir = "~/r-shiny-web-apps/packages/dashboard/data/areas_to_focus/") {
+                      local_dir = "~/r-shiny-web-apps/packages/dashboard/data") {
   # If a container is passed write to it
   if (isTRUE(is_databricks())) {
     # Get extension of file from filename
@@ -83,9 +83,12 @@ if (all(cols_still_present) == FALSE) {
   stop("Problem - column names changed")
 }
 
-# Rolling seven day average data based on covid specimen date is only complete for up to 5 days before current date
-# so need to filter on 5 days before current day - but it is updated late in the day we really need 6 days prior
-latest_specimen_date = as.Date(Sys.Date()) - 6
+# Change in code as now data only updated weekly so use max date in data (not todays date)
+latest_specimen_date <- retrieve_covid_data %>%
+  filter(!is.na(newCasesBySpecimenDateChangePercentage)) %>%
+  slice_max(date) %>%
+  distinct(date) %>%
+  pull()
 
 # Retrieve latest 7 day rolling cases per 100,000 and percentage change in cases
 latest_covid_data =
